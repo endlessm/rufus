@@ -1,0 +1,2871 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="Docutils 0.12: http://docutils.sourceforge.net/" />
+<title>libtorrent API Documentation</title>
+<meta name="author" content="Arvid Norberg, arvid&#64;libtorrent.org" />
+<meta name=viewport content="width=device-width, initial-scale=1">
+<script type="text/javascript">
+/* <![CDATA[ */
+    (function() {
+        var s = document.createElement('script'), t = document.getElementsByTagName('script')[0];
+        s.type = 'text/javascript';
+        s.async = true;
+        s.src = 'http://api.flattr.com/js/0.6/load.js?mode=auto';
+        t.parentNode.insertBefore(s, t);
+    })();
+/* ]]> */
+</script>
+<link rel="stylesheet" href="style.css" type="text/css" />
+<link rel="stylesheet" type="text/css" href="rst.css" />
+<style type="text/css">
+/* Hides from IE-mac \*/
+* html pre { height: 1%; }
+/* End hide from IE-mac */
+</style>
+</head>
+<body>
+<div class="document" id="libtorrent-api-documentation">
+    <div id="container">
+    <table id="header">
+    <tr><td id="orange"></td>
+    <td id="logo">libtorrent</td></tr>
+    </table>
+    <div id="main">
+<h1 class="title">libtorrent API Documentation</h1>
+<table class="docinfo" frame="void" rules="none">
+<col class="docinfo-name" />
+<col class="docinfo-content" />
+<tbody valign="top">
+<tr><th class="docinfo-name">Author:</th>
+<td>Arvid Norberg, <a class="last reference external" href="mailto:arvid&#64;libtorrent.org">arvid&#64;libtorrent.org</a></td></tr>
+<tr><th class="docinfo-name">Version:</th>
+<td>1.1.0</td></tr>
+</tbody>
+</table>
+<div class="contents topic" id="table-of-contents">
+<p class="topic-title first">Table of contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#overview" id="id81">overview</a></li>
+<li><a class="reference internal" href="#things-to-keep-in-mind" id="id82">things to keep in mind</a></li>
+<li><a class="reference internal" href="#network-primitives" id="id83">network primitives</a></li>
+<li><a class="reference internal" href="#exceptions" id="id84">exceptions</a></li>
+<li><a class="reference internal" href="#magnet-links" id="id85">magnet links</a></li>
+<li><a class="reference internal" href="#queuing" id="id86">queuing</a></li>
+<li><a class="reference internal" href="#fast-resume" id="id87">fast resume</a></li>
+<li><a class="reference internal" href="#storage-allocation" id="id88">storage allocation</a></li>
+<li><a class="reference internal" href="#http-seeding" id="id89">HTTP seeding</a></li>
+<li><a class="reference internal" href="#dynamic-loading-of-torrent-files" id="id90">dynamic loading of torrent files</a></li>
+<li><a class="reference internal" href="#piece-picker" id="id91">piece picker</a></li>
+<li><a class="reference internal" href="#predictive-piece-announce" id="id92">predictive piece announce</a></li>
+<li><a class="reference internal" href="#peer-classes" id="id93">peer classes</a></li>
+<li><a class="reference internal" href="#ssl-torrents" id="id94">SSL torrents</a></li>
+<li><a class="reference internal" href="#session-statistics" id="id95">session statistics</a></li>
+</ul>
+</div>
+<div class="section" id="overview">
+<h1>overview</h1>
+<p>The interface of libtorrent consists of a few classes. The main class is
+the <tt class="docutils literal">session</tt>, it contains the main loop that serves all torrents.</p>
+<p>The basic usage is as follows:</p>
+<ul>
+<li><p class="first">construct a <a class="reference external" href="reference-Core.html#session">session</a></p>
+</li>
+<li><p class="first">load <a class="reference external" href="reference-Core.html#session">session</a> state from settings file (see <a class="reference external" href="reference-Core.html#load_state()">load_state()</a>)</p>
+</li>
+<li><p class="first">start extensions (see <a class="reference external" href="reference-Core.html#add_extension()">add_extension()</a>).</p>
+</li>
+<li><p class="first">start DHT, LSD, UPnP, NAT-PMP etc (see start_dht(), start_lsd(), start_upnp()
+and start_natpmp()).</p>
+</li>
+<li><p class="first">parse .torrent-files and add them to the <a class="reference external" href="reference-Core.html#session">session</a> (see <a class="reference external" href="reference-Core.html#torrent_info">torrent_info</a>,
+<a class="reference external" href="reference-Core.html#async_add_torrent()">async_add_torrent()</a> and <a class="reference external" href="reference-Core.html#add_torrent()">add_torrent()</a>)</p>
+</li>
+<li><p class="first">main loop (see <a class="reference external" href="reference-Core.html#session">session</a>)</p>
+<blockquote>
+<ul class="simple">
+<li>poll for alerts (see <a class="reference external" href="reference-Core.html#wait_for_alert()">wait_for_alert()</a>, <a class="reference external" href="reference-Core.html#pop_alerts()">pop_alerts()</a>)</li>
+<li>handle updates to torrents, (see <a class="reference external" href="reference-Alerts.html#state_update_alert">state_update_alert</a>).</li>
+<li>handle other alerts, (see <a class="reference external" href="reference-Alerts.html#alert">alert</a>).</li>
+<li>query the <a class="reference external" href="reference-Core.html#session">session</a> for information (see session::status()).</li>
+<li>add and remove torrents from the <a class="reference external" href="reference-Core.html#session">session</a> (<a class="reference external" href="reference-Core.html#remove_torrent()">remove_torrent()</a>)</li>
+</ul>
+</blockquote>
+</li>
+<li><p class="first">save resume data for all torrent_handles (optional, see
+<a class="reference external" href="reference-Core.html#save_resume_data()">save_resume_data()</a>)</p>
+</li>
+<li><p class="first">save <a class="reference external" href="reference-Core.html#session">session</a> state (see <a class="reference external" href="reference-Core.html#save_state()">save_state()</a>)</p>
+</li>
+<li><p class="first">destruct <a class="reference external" href="reference-Core.html#session">session</a> object</p>
+</li>
+</ul>
+<p>Each class and function is described in this manual, you may want to have a
+look at the <a class="reference external" href="tutorial.html">tutorial</a> as well.</p>
+<p>For a description on how to create torrent files, see <a class="reference external" href="reference-Create_Torrents.html#create_torrent">create_torrent</a>.</p>
+</div>
+<div class="section" id="things-to-keep-in-mind">
+<h1>things to keep in mind</h1>
+<p>A common problem developers are facing is torrents stopping without explanation.
+Here is a description on which conditions libtorrent will stop your torrents,
+how to find out about it and what to do about it.</p>
+<p>Make sure to keep track of the paused state, the error state and the upload
+mode of your torrents. By default, torrents are auto-managed, which means
+libtorrent will pause them, unpause them, scrape them and take them out
+of upload-mode automatically.</p>
+<p>Whenever a torrent encounters a fatal error, it will be stopped, and the
+<tt class="docutils literal"><span class="pre">torrent_status::error</span></tt> will describe the error that caused it. If a torrent
+is auto managed, it is scraped periodically and paused or resumed based on
+the number of downloaders per seed. This will effectively seed torrents that
+are in the greatest need of seeds.</p>
+<p>If a torrent hits a disk write error, it will be put into upload mode. This
+means it will not download anything, but only upload. The assumption is that
+the write error is caused by a full disk or write permission errors. If the
+torrent is auto-managed, it will periodically be taken out of the upload
+mode, trying to write things to the disk again. This means torrent will recover
+from certain disk errors if the problem is resolved. If the torrent is not
+auto managed, you have to call <a class="reference external" href="reference-Core.html#set_upload_mode()">set_upload_mode()</a> to turn
+downloading back on again.</p>
+</div>
+<div class="section" id="network-primitives">
+<h1>network primitives</h1>
+<p>There are a few typedefs in the <tt class="docutils literal">libtorrent</tt> namespace which pulls
+in network types from the <tt class="docutils literal"><span class="pre">boost::asio</span></tt> namespace. These are:</p>
+<pre class="literal-block">
+typedef boost::asio::ip::address address;
+typedef boost::asio::ip::address_v4 address_v4;
+typedef boost::asio::ip::address_v6 address_v6;
+using boost::asio::ip::tcp;
+using boost::asio::ip::udp;
+</pre>
+<p>These are declared in the <tt class="docutils literal">&lt;libtorrent/socket.hpp&gt;</tt> header.</p>
+<p>The <tt class="docutils literal">using</tt> statements will give easy access to:</p>
+<pre class="literal-block">
+tcp::endpoint
+udp::endpoint
+</pre>
+<p>Which are the endpoint types used in libtorrent. An endpoint is an address
+with an associated port.</p>
+<p>For documentation on these types, please refer to the <a class="reference external" href="http://asio.sourceforge.net/asio-0.3.8/doc/asio/reference.html">asio documentation</a>.</p>
+</div>
+<div class="section" id="exceptions">
+<h1>exceptions</h1>
+<p>Many functions in libtorrent have two versions, one that throws exceptions on
+errors and one that takes an <tt class="docutils literal">error_code</tt> reference which is filled with the
+error code on errors.</p>
+<p>There is one exception class that is used for errors in libtorrent, it is based
+on boost.system's <tt class="docutils literal">error_code</tt> class to carry the error code.</p>
+<p>For more information, see <a class="reference external" href="reference-Error_Codes.html#libtorrent_exception">libtorrent_exception</a> and <a class="reference external" href="reference-Error_Codes.html#error_code_enum">error_code_enum</a>.</p>
+<div class="section" id="translating-error-codes">
+<h2>translating error codes</h2>
+<p>The error_code::message() function will typically return a localized error string,
+for system errors. That is, errors that belong to the generic or system category.</p>
+<p>Errors that belong to the libtorrent error category are not localized however, they
+are only available in english. In order to translate libtorrent errors, compare the
+error category of the <tt class="docutils literal">error_code</tt> object against <tt class="docutils literal"><span class="pre">libtorrent::get_libtorrent_category()</span></tt>,
+and if matches, you know the error code refers to the list above. You can provide
+your own mapping from error code to string, which is localized. In this case, you
+cannot rely on <tt class="docutils literal"><span class="pre">error_code::message()</span></tt> to generate your strings.</p>
+<p>The numeric values of the errors are part of the API and will stay the same, although
+new error codes may be appended at the end.</p>
+<p>Here's a simple example of how to translate error codes:</p>
+<pre class="code c++ literal-block">
+<span class="name">std</span><span class="operator">::</span><span class="name">string</span> <span class="name">error_code_to_string</span><span class="punctuation">(</span><span class="name">boost</span><span class="operator">::</span><span class="name">system</span><span class="operator">::</span><span class="name">error_code</span> <span class="keyword">const</span><span class="operator">&amp;</span> <span class="name">ec</span><span class="punctuation">)</span>
+<span class="punctuation">{</span>
+        <span class="keyword">if</span> <span class="punctuation">(</span><span class="name">ec</span><span class="punctuation">.</span><span class="name">category</span><span class="punctuation">()</span> <span class="operator">!=</span> <span class="name">libtorrent</span><span class="operator">::</span><span class="name">get_libtorrent_category</span><span class="punctuation">())</span>
+        <span class="punctuation">{</span>
+                <span class="keyword">return</span> <span class="name">ec</span><span class="punctuation">.</span><span class="name">message</span><span class="punctuation">();</span>
+        <span class="punctuation">}</span>
+        <span class="comment single">// the error is a libtorrent error
+</span>
+        <span class="keyword type">int</span> <span class="name">code</span> <span class="operator">=</span> <span class="name">ec</span><span class="punctuation">.</span><span class="name">value</span><span class="punctuation">();</span>
+        <span class="keyword">static</span> <span class="keyword">const</span> <span class="keyword type">char</span> <span class="keyword">const</span><span class="operator">*</span> <span class="name">swedish</span><span class="punctuation">[]</span> <span class="operator">=</span>
+        <span class="punctuation">{</span>
+                <span class="literal string">&quot;inget fel&quot;</span><span class="punctuation">,</span>
+                <span class="literal string">&quot;en fil i torrenten kolliderar med en fil fran en annan torrent&quot;</span><span class="punctuation">,</span>
+                <span class="literal string">&quot;hash check misslyckades&quot;</span><span class="punctuation">,</span>
+                <span class="literal string">&quot;torrentfilen ar inte en dictionary&quot;</span><span class="punctuation">,</span>
+                <span class="literal string">&quot;'info'-nyckeln saknas eller ar korrupt i torrentfilen&quot;</span><span class="punctuation">,</span>
+                <span class="literal string">&quot;'info'-faltet ar inte en dictionary&quot;</span><span class="punctuation">,</span>
+                <span class="literal string">&quot;'piece length' faltet saknas eller ar korrupt i torrentfilen&quot;</span><span class="punctuation">,</span>
+                <span class="literal string">&quot;torrentfilen saknar namnfaltet&quot;</span><span class="punctuation">,</span>
+                <span class="literal string">&quot;ogiltigt namn i torrentfilen (kan vara en attack)&quot;</span><span class="punctuation">,</span>
+                <span class="comment single">// ... more strings here
+</span>        <span class="punctuation">};</span>
+
+        <span class="comment single">// use the default error string in case we don't have it
+</span>        <span class="comment single">// in our translated list
+</span>        <span class="keyword">if</span> <span class="punctuation">(</span><span class="name">code</span> <span class="operator">&lt;</span> <span class="literal number integer">0</span> <span class="operator">||</span> <span class="name">code</span> <span class="operator">&gt;=</span> <span class="keyword">sizeof</span><span class="punctuation">(</span><span class="name">swedish</span><span class="punctuation">)</span><span class="operator">/</span><span class="keyword">sizeof</span><span class="punctuation">(</span><span class="name">swedish</span><span class="punctuation">[</span><span class="literal number integer">0</span><span class="punctuation">]))</span>
+                <span class="keyword">return</span> <span class="name">ec</span><span class="punctuation">.</span><span class="name">message</span><span class="punctuation">();</span>
+
+        <span class="keyword">return</span> <span class="name">swedish</span><span class="punctuation">[</span><span class="name">code</span><span class="punctuation">];</span>
+<span class="punctuation">}</span>
+</pre>
+</div>
+</div>
+<div class="section" id="magnet-links">
+<h1>magnet links</h1>
+<p>Magnet links are URIs that includes an info-hash, a display name and optionally
+a tracker url. The idea behind magnet links is that an end user can click on a
+link in a browser and have it handled by a bittorrent application, to start a
+download, without any .torrent file.</p>
+<p>The format of the magnet URI is:</p>
+<p><strong>magnet:?xt=urn:btih:</strong> <em>Base16 encoded info-hash</em> [ <strong>&amp;dn=</strong> <em>name of download</em> ] [ <strong>&amp;tr=</strong> <em>tracker URL</em> ]*</p>
+</div>
+<div class="section" id="queuing">
+<h1>queuing</h1>
+<p>libtorrent supports <em>queuing</em>. Queuing is a mechanism to automatically pause and
+resume torrents based on certain criteria. The criteria depends on the overall
+state the torrent is in (checking, downloading or seeding).</p>
+<p>To opt-out of the queuing logic, make sure your torrents are added with the
+<a class="reference external" href="reference-Core.html#flag_auto_managed">add_torrent_params::flag_auto_managed</a> bit <em>cleared</em>. Or call
+<tt class="docutils literal"><span class="pre">torrent_handle::auto_managed(false)</span></tt> on the torrent handle.</p>
+<p>The overall purpose of the queuing logic is to improve performance under arbitrary
+torrent downloading and seeding load. For example, if you want to download 100
+torrents on a limited home connection, you improve performance by downloading
+them one at a time (or maybe two at a time), over downloading them all in
+parallel. The benefits are:</p>
+<ul class="simple">
+<li>the average completion time of a torrent is half of what it would be if all
+downloaded in parallel.</li>
+<li>The amount of upload capacity is more likely to reach the <em>reciprocation rate</em>
+of your peers, and is likely to improve your <em>return on investment</em> (download
+to upload ratio)</li>
+<li>your disk I/O load is likely to be more local which may improve I/O
+performance and decrease fragmentation.</li>
+</ul>
+<p>There are fundamentally 3 seaparate queues:</p>
+<ul class="simple">
+<li>checking torrents</li>
+<li>downloading torrents</li>
+<li>seeding torrents</li>
+</ul>
+<p>Every torrent that is not seeding has a queue number associated with it, this is
+its place in line to be started. See <a class="reference external" href="reference-Core.html#queue_position">torrent_status::queue_position</a>.</p>
+<p>On top of the limits of each queue, there is an over arching limit, set in
+<a class="reference external" href="reference-Settings.html#active_limit">settings_pack::active_limit</a>. The auto manager will never start more than this
+number of torrents (with one exception described below). Non-auto-managed
+torrents are exempt from this logic, and not counted.</p>
+<p>At a regular interval, torrents are checked if there needs to be any
+re-ordering of which torrents are active and which are queued. This interval
+can be controlled via <a class="reference external" href="reference-Settings.html#auto_manage_interval">settings_pack::auto_manage_interval</a>.</p>
+<p>For queuing to work, resume data needs to be saved and restored for all
+torrents. See <a class="reference external" href="reference-Core.html#save_resume_data()">torrent_handle::save_resume_data()</a>.</p>
+<div class="section" id="queue-position">
+<h2>queue position</h2>
+<p>The torrents in the front of the queue are started and the rest are ordered by
+their queue position. Any newly added torrent is placed at the end of the queue.
+Once a torrent is removed or turns into a seed, its queue position is -1 and all
+torrents that used to be after it in the queue, decreases their position in
+order to fill the gap.</p>
+<p>The queue positions are always contiguous, in a sequence without any gaps.</p>
+<p>Lower queue position means closer to the front of the queue, and will be
+started sooner than torrents with higher queue positions.</p>
+<p>To query a torrent for its position in the queue, or change its position, see:
+<a class="reference external" href="reference-Core.html#queue_position()">torrent_handle::queue_position()</a>, <a class="reference external" href="reference-Core.html#queue_position_up()">torrent_handle::queue_position_up()</a>,
+<a class="reference external" href="reference-Core.html#queue_position_down()">torrent_handle::queue_position_down()</a>, <a class="reference external" href="reference-Core.html#queue_position_top()">torrent_handle::queue_position_top()</a>
+and <a class="reference external" href="reference-Core.html#queue_position_bottom()">torrent_handle::queue_position_bottom()</a>.</p>
+</div>
+<div class="section" id="checking-queue">
+<h2>checking queue</h2>
+<p>The checking queue affects torrents in the torrent_status::checking or
+<a class="reference external" href="reference-Core.html#allocating">torrent_status::allocating</a> state that are auto-managed.</p>
+<p>The checking queue will make sure that (of the torrents in its queue) no more than
+settings_pack::active_checking_limit torrents are started at any given time.
+Once a torrent completes checking and moves into a diffferent state, the next in
+line will be started for checking.</p>
+<p>Any torrent added force-started or force-stopped (i.e. the auto managed flag is
+_not_ set), will not be subject to this limit and they will all check
+independently and in parallel.</p>
+</div>
+<div class="section" id="downloading-queue">
+<h2>downloading queue</h2>
+<p>Similarly to the checking queue, the downloading queue will make sure that no
+more than <a class="reference external" href="reference-Settings.html#active_downloads">settings_pack::active_downloads</a> torrents are in the downloading
+state at any given time.</p>
+<p>The <a class="reference external" href="reference-Core.html#queue_position">torrent_status::queue_position</a> is used again here to determine who is next
+in line to be started once a downloading torrent completes or is stopped/removed.</p>
+</div>
+<div class="section" id="seeding-queue">
+<h2>seeding queue</h2>
+<p>The seeding queue does not use <a class="reference external" href="reference-Core.html#queue_position">torrent_status::queue_position</a> to determine which
+torrent to seed. Instead, it estimates the <em>demand</em> for the torrent to be
+seeded. A torrent with few other seeds and many downloaders is assumed to have a
+higher demand of more seeds than one with many seeds and few downloaders.</p>
+<p>It limits the number of started seeds to <a class="reference external" href="reference-Settings.html#active_seeds">settings_pack::active_seeds</a>.</p>
+<p>On top of this basic bias, <em>seed priority</em> can be controller by specifying a
+seed ratio (the upload to download ratio), a seed-time ratio (the download
+time to seeding time ratio) and a seed-time (the abosulte time to be seeding a
+torrent). Until all those targets are hit, the torrent will be prioritized for
+seeding.</p>
+<p>Among torrents that have met their seed target, torrents where we don't know of
+any other seed take strict priority.</p>
+<p>In order to avoid flapping, torrents that were started less than 30 minutes ago
+also have priority to keep seeding.</p>
+<p>Finally, for torrents where none of the above apply, they are prioritized based
+on the download to seed ratio.</p>
+<p>The relevant settings to control these limits are
+<a class="reference external" href="reference-Settings.html#share_ratio_limit">settings_pack::share_ratio_limit</a>, <a class="reference external" href="reference-Settings.html#seed_time_ratio_limit">settings_pack::seed_time_ratio_limit</a> and
+<a class="reference external" href="reference-Settings.html#seed_time_limit">settings_pack::seed_time_limit</a>.</p>
+</div>
+<div class="section" id="queuing-options">
+<h2>queuing options</h2>
+<p>In addition to simply starting and stopping torrents, the queuing mechanism can
+have more fine grained control of the resources used by torrents.</p>
+<div class="section" id="half-started-torrents">
+<h3>half-started torrents</h3>
+<p>In addition to the downloading and seeding limits, there are limits on <em>actions</em>
+torrents perform. The downloading and seeding limits control whether peers are
+allowed at all, and if peers are not allowed, torrents are stopped and don't do
+anything. If peers are allowed, torrents may:</p>
+<ol class="arabic simple">
+<li>announce to trackers</li>
+<li>announce to the DHT</li>
+<li>announce to local peer discovery (local service discovery)</li>
+</ol>
+<p>Each of those actions are associated with a cost and hence may need a seprarate
+limit. These limits are controlled by <a class="reference external" href="reference-Settings.html#active_tracker_limit">settings_pack::active_tracker_limit</a>,
+<a class="reference external" href="reference-Settings.html#active_dht_limit">settings_pack::active_dht_limit</a> and <a class="reference external" href="reference-Settings.html#active_lsd_limit">settings_pack::active_lsd_limit</a>
+respectively.</p>
+<p>Specifically, announcing to a tracker is typically cheaper than
+announcing to the DHT. <tt class="docutils literal">active_dht_limit</tt> will limit the number of
+torrents that are allowed to announce to the DHT. The highest priority ones
+will, and the lower priority ones won't. The will still be considered started
+though, and any incoming peers will still be accepted.</p>
+<p>If you do not wish to impose such limits (basically, if you do not wish to have
+half-started torrents) make sure to set these limits to -1 (infinite).</p>
+</div>
+<div class="section" id="prefer-seeds">
+<h3>prefer seeds</h3>
+<p>In the case where <tt class="docutils literal">active_downloads</tt> + <tt class="docutils literal">active_seeds</tt> &gt; <tt class="docutils literal">active_limit</tt>,
+there's an ambiguity whether the downloads should be satisfied first or the
+seeds. To disambiguate this case, the <a class="reference external" href="reference-Settings.html#auto_manage_prefer_seeds">settings_pack::auto_manage_prefer_seeds</a>
+determines whether seeds are preferred or not.</p>
+</div>
+<div class="section" id="inactive-torrents">
+<h3>inactive torrents</h3>
+<p>Torrents that are not transferring any bytes (downloading or uploading) have a
+relatively low cost to be started. It's possible to exempt such torrents from
+the download and seed queues by setting <a class="reference external" href="reference-Settings.html#dont_count_slow_torrents">settings_pack::dont_count_slow_torrents</a>
+to true.</p>
+<p>Since it sometimes may take a few minutes for a newly started torrent to find
+peers and be unchoked, or find peers that are interested in requesting data,
+torrents are not considered inactive immadiately. There must be an extended
+period of no transfers before it is considered inactive and exempt from the
+queuing limits.</p>
+</div>
+</div>
+</div>
+<div class="section" id="fast-resume">
+<h1>fast resume</h1>
+<p>The fast resume mechanism is a way to remember which pieces are downloaded
+and where they are put between sessions. You can generate fast resume data by
+calling <a class="reference external" href="reference-Core.html#save_resume_data()">save_resume_data()</a> on <a class="reference external" href="reference-Core.html#torrent_handle">torrent_handle</a>. You can
+then save this data to disk and use it when resuming the torrent. libtorrent
+will not check the piece hashes then, and rely on the information given in the
+fast-resume data. The fast-resume data also contains information about which
+blocks, in the unfinished pieces, were downloaded, so it will not have to
+start from scratch on the partially downloaded pieces.</p>
+<p>To use the fast-resume data you simply give it to <a class="reference external" href="reference-Core.html#async_add_torrent()">async_add_torrent()</a> and
+<a class="reference external" href="reference-Core.html#add_torrent()">add_torrent()</a>, and it will skip the time consuming checks. It may have to do
+the checking anyway, if the fast-resume data is corrupt or doesn't fit the
+storage for that torrent, then it will not trust the fast-resume data and just
+do the checking.</p>
+<div class="section" id="file-format">
+<h2>file format</h2>
+<p>The file format is a bencoded dictionary containing the following fields:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="30%" />
+<col width="70%" />
+</colgroup>
+<tbody valign="top">
+<tr><td><tt class="docutils literal"><span class="pre">file-format</span></tt></td>
+<td>string: &quot;libtorrent resume file&quot;</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">file-version</span></tt></td>
+<td>integer: 1</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">info-hash</span></tt></td>
+<td>string, the info hash of the torrent this data is saved for.</td>
+</tr>
+<tr><td><tt class="docutils literal">blocks per piece</tt></td>
+<td>integer, the number of blocks per piece. Must be: piece_size
+/ (16 * 1024). Clamped to be within the range [1, 256]. It
+is the number of blocks per (normal sized) piece. Usually
+each block is 16 * 1024 bytes in size. But if piece size is
+greater than 4 megabytes, the block size will increase.</td>
+</tr>
+<tr><td><tt class="docutils literal">pieces</tt></td>
+<td>A string with piece flags, one character per piece.
+Bit 1 means we have that piece.
+Bit 2 means we have verified that this piece is correct.
+This only applies when the torrent is in seed_mode.</td>
+</tr>
+<tr><td><tt class="docutils literal">slots</tt></td>
+<td>list of integers. The list maps slots to piece indices. It
+tells which piece is on which slot. If piece index is -2 it
+means it is free, that there's no piece there. If it is -1,
+means the slot isn't allocated on disk yet. The pieces have
+to meet the following requirement:</td>
+</tr>
+<tr><td><tt class="docutils literal">total_uploaded</tt></td>
+<td>integer. The number of bytes that have been uploaded in
+total for this torrent.</td>
+</tr>
+<tr><td><tt class="docutils literal">total_downloaded</tt></td>
+<td>integer. The number of bytes that have been downloaded in
+total for this torrent.</td>
+</tr>
+<tr><td><tt class="docutils literal">active_time</tt></td>
+<td>integer. The number of seconds this torrent has been active.
+i.e. not paused.</td>
+</tr>
+<tr><td><tt class="docutils literal">seeding_time</tt></td>
+<td>integer. The number of seconds this torrent has been active
+and seeding.</td>
+</tr>
+<tr><td><tt class="docutils literal">num_seeds</tt></td>
+<td>integer. An estimate of the number of seeds on this torrent
+when the resume data was saved. This is scrape data or based
+on the peer list if scrape data is unavailable.</td>
+</tr>
+<tr><td><tt class="docutils literal">num_downloaders</tt></td>
+<td>integer. An estimate of the number of downloaders on this
+torrent when the resume data was last saved. This is used as
+an initial estimate until we acquire up-to-date scrape info.</td>
+</tr>
+<tr><td><tt class="docutils literal">upload_rate_limit</tt></td>
+<td>integer. In case this torrent has a per-torrent upload rate
+limit, this is that limit. In bytes per second.</td>
+</tr>
+<tr><td><tt class="docutils literal">download_rate_limit</tt></td>
+<td>integer. The download rate limit for this torrent in case
+one is set, in bytes per second.</td>
+</tr>
+<tr><td><tt class="docutils literal">max_connections</tt></td>
+<td>integer. The max number of peer connections this torrent
+may have, if a limit is set.</td>
+</tr>
+<tr><td><tt class="docutils literal">max_uploads</tt></td>
+<td>integer. The max number of unchoked peers this torrent may
+have, if a limit is set.</td>
+</tr>
+<tr><td><tt class="docutils literal">seed_mode</tt></td>
+<td>integer. 1 if the torrent is in seed mode, 0 otherwise.</td>
+</tr>
+<tr><td><tt class="docutils literal">file_priority</tt></td>
+<td>list of integers. One entry per file in the torrent. Each
+entry is the priority of the file with the same index.</td>
+</tr>
+<tr><td><tt class="docutils literal">piece_priority</tt></td>
+<td>string of bytes. Each byte is interpreted as an integer and
+is the priority of that piece.</td>
+</tr>
+<tr><td><tt class="docutils literal">auto_managed</tt></td>
+<td>integer. 1 if the torrent is auto managed, otherwise 0.</td>
+</tr>
+<tr><td><tt class="docutils literal">sequential_download</tt></td>
+<td>integer. 1 if the torrent is in sequential download mode,
+0 otherwise.</td>
+</tr>
+<tr><td><tt class="docutils literal">paused</tt></td>
+<td>integer. 1 if the torrent is paused, 0 otherwise.</td>
+</tr>
+<tr><td><tt class="docutils literal">trackers</tt></td>
+<td>list of lists of strings. The top level list lists all
+tracker tiers. Each second level list is one tier of
+trackers.</td>
+</tr>
+<tr><td><tt class="docutils literal">mapped_files</tt></td>
+<td>list of strings. If any file in the torrent has been
+renamed, this entry contains a list of all the filenames.
+In the same order as in the torrent file.</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">url-list</span></tt></td>
+<td>list of strings. List of url-seed URLs used by this torrent.
+The urls are expected to be properly encoded and not contain
+any illegal url characters.</td>
+</tr>
+<tr><td><tt class="docutils literal">httpseeds</tt></td>
+<td>list of strings. List of httpseed URLs used by this torrent.
+The urls are expected to be properly encoded and not contain
+any illegal url characters.</td>
+</tr>
+<tr><td><tt class="docutils literal">merkle tree</tt></td>
+<td>string. In case this torrent is a merkle torrent, this is a
+string containing the entire merkle tree, all nodes,
+including the root and all leaves. The tree is not
+necessarily complete, but complete enough to be able to send
+any piece that we have, indicated by the have bitmask.</td>
+</tr>
+<tr><td><tt class="docutils literal">save_path</tt></td>
+<td>string. The save path where this torrent was saved. This is
+especially useful when moving torrents with move_storage()
+since this will be updated.</td>
+</tr>
+<tr><td><tt class="docutils literal">peers</tt></td>
+<td>string. This string contains IPv4 and port pairs of peers we
+were connected to last session. The endpoints are in compact
+representation. 4 bytes IPv4 address followed by 2 bytes
+port. Hence, the length of this string should be divisible
+by 6.</td>
+</tr>
+<tr><td><tt class="docutils literal">banned_peers</tt></td>
+<td>string. This string has the same format as <tt class="docutils literal">peers</tt> but
+instead represent IPv4 peers that we have banned.</td>
+</tr>
+<tr><td><tt class="docutils literal">peers6</tt></td>
+<td>string. This string contains IPv6 and port pairs of peers we
+were connected to last session. The endpoints are in compact
+representation. 16 bytes IPv6 address followed by 2 bytes
+port. The length of this string should be divisible by 18.</td>
+</tr>
+<tr><td><tt class="docutils literal">banned_peers6</tt></td>
+<td>string. This string has the same format as <tt class="docutils literal">peers6</tt> but
+instead represent IPv6 peers that we have banned.</td>
+</tr>
+<tr><td><tt class="docutils literal">info</tt></td>
+<td>If this field is present, it should be the info-dictionary
+of the torrent this resume data is for. Its SHA-1 hash must
+match the one in the <tt class="docutils literal"><span class="pre">info-hash</span></tt> field. When present,
+the torrent is loaded from here, meaning the torrent can be
+added purely from resume data (no need to load the .torrent
+file separately). This may have performance advantages.</td>
+</tr>
+<tr><td><tt class="docutils literal">unfinished</tt></td>
+<td><p class="first">list of dictionaries. Each dictionary represents an
+piece, and has the following layout:</p>
+<table border="1" class="last docutils">
+<colgroup>
+<col width="23%" />
+<col width="77%" />
+</colgroup>
+<tbody valign="top">
+<tr><td><tt class="docutils literal">piece</tt></td>
+<td>integer, the index of the piece this entry
+refers to.</td>
+</tr>
+<tr><td><tt class="docutils literal">bitmask</tt></td>
+<td>string, a binary bitmask representing the
+blocks that have been downloaded in this
+piece.</td>
+</tr>
+<tr><td><tt class="docutils literal">adler32</tt></td>
+<td>The adler32 checksum of the data in the
+blocks specified by <tt class="docutils literal">bitmask</tt>.</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<tr><td><tt class="docutils literal">file sizes</tt></td>
+<td>list where each entry corresponds to a file in the file list
+in the metadata. Each entry has a list of two values, the
+first value is the size of the file in bytes, the second
+is the time stamp when the last time someone wrote to it.
+This information is used to compare with the files on disk.
+All the files must match exactly this information in order
+to consider the resume data as current. Otherwise a full
+re-check is issued.</td>
+</tr>
+<tr><td><tt class="docutils literal">allocation</tt></td>
+<td>The allocation mode for the storage. Can be either <tt class="docutils literal">full</tt>
+or <tt class="docutils literal">sparse</tt>. If this is full, the file sizes and
+timestamps are disregarded. Pieces are assumed not to have
+moved around even if the files have been modified after the
+last resume data checkpoint.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="storage-allocation">
+<h1>storage allocation</h1>
+<p>There are two modes in which storage (files on disk) are allocated in libtorrent.</p>
+<ol class="arabic simple">
+<li>The traditional <em>full allocation</em> mode, where the entire files are filled up
+with zeros before anything is downloaded. Files are allocated on demand, the
+first time anything is written to them. The main benefit of this mode is that
+it avoids creating heavily fragmented files.</li>
+<li>The <em>sparse allocation</em>, sparse files are used, and pieces are downloaded
+directly to where they belong. This is the recommended (and default) mode.</li>
+</ol>
+<div class="section" id="sparse-allocation">
+<h2>sparse allocation</h2>
+<p>On filesystems that supports sparse files, this allocation mode will only use
+as much space as has been downloaded.</p>
+<p>The main drawback of this mode is that it may create heavily fragmented files.</p>
+<blockquote>
+<ul class="simple">
+<li>It does not require an allocation pass on startup.</li>
+</ul>
+</blockquote>
+</div>
+<div class="section" id="full-allocation">
+<h2>full allocation</h2>
+<p>When a torrent is started in full allocation mode, the disk-io thread
+will make sure that the entire storage is allocated, and fill any gaps with zeros.
+It will of course still check for existing pieces and fast resume data. The main
+drawbacks of this mode are:</p>
+<blockquote>
+<ul class="simple">
+<li>It may take longer to start the torrent, since it will need to fill the files
+with zeroes. This delay is linear to the size of the download.</li>
+<li>The download may occupy unnecessary disk space between download sessions.</li>
+<li>Disk caches usually perform poorly with random access to large files
+and may slow down the download some.</li>
+</ul>
+</blockquote>
+<p>The benefits of this mode are:</p>
+<blockquote>
+<ul class="simple">
+<li>Downloaded pieces are written directly to their final place in the files and
+the total number of disk operations will be fewer and may also play nicer to
+filesystems' file allocation, and reduce fragmentation.</li>
+<li>No risk of a download failing because of a full disk during download, once
+all files have been created.</li>
+</ul>
+</blockquote>
+</div>
+</div>
+<div class="section" id="http-seeding">
+<h1>HTTP seeding</h1>
+<p>There are two kinds of HTTP seeding. One with that assumes a smart (and polite)
+client and one that assumes a smart server. These are specified in <a class="reference external" href="http://bittorrent.org/beps/bep_0019.html">BEP 19</a>
+and <a class="reference external" href="http://bittorrent.org/beps/bep_0017.html">BEP 17</a> respectively.</p>
+<p>libtorrent supports both. In the libtorrent source code and API, BEP 19 urls
+are typically referred to as <em>url seeds</em> and BEP 17 urls are typically referred
+to as <em>HTTP seeds</em>.</p>
+<p>The libtorrent implementation of <a class="reference external" href="http://bittorrent.org/beps/bep_0019.html">BEP 19</a> assumes that, if the URL ends with a
+slash ('/'), the filename should be appended to it in order to request pieces
+from that file. The way this works is that if the torrent is a single-file
+torrent, only that filename is appended. If the torrent is a multi-file
+torrent, the torrent's name '/' the file name is appended. This is the same
+directory structure that libtorrent will download torrents into.</p>
+</div>
+<div class="section" id="dynamic-loading-of-torrent-files">
+<h1>dynamic loading of torrent files</h1>
+<p>libtorrent has a feature that can unload idle torrents from memory. The purpose
+of this is to support being active on many more torrents than the RAM permits.
+This is useful for both embedded devices that have limited RAM and servers
+seeding tens of thousands of torrents.</p>
+<p>The most significant parts of loaded torrents that use RAM are the piece
+hashes (20 bytes per piece) and the file list. The entire info-dictionary
+of the .torrent file is kept in RAM.</p>
+<p>In order to activate the dynamic loading of torrent files, set the load
+function on the <a class="reference external" href="reference-Core.html#session">session</a>. See <a class="reference external" href="reference-Core.html#set_load_function()">set_load_function()</a>.</p>
+<p>When a load function is set on the <a class="reference external" href="reference-Core.html#session">session</a>, the dynamic load/unload
+feature is enabled. Torrents are kept in an LRU. Every time an operation
+is performed, on a torrent or from a peer, that requires the metadata of
+the torrent to be loaded, the torrent is bumped up in the LRU. When a torrent
+is paused or queued, it is demoted to the least recently used torrent in
+the LRU, since it's a good candidate for eviction.</p>
+<p>To configure how many torrents are allowed to be loaded at the same time,
+set <a class="reference external" href="reference-Settings.html#active_loaded_limit">settings_pack::active_loaded_limit</a> on the <a class="reference external" href="reference-Core.html#session">session</a>.</p>
+<p>Torrents can be exempt from being unloaded by being <em>pinned</em>. Pinned torrents
+still count against the limit, but are never considered for eviction.
+You can either pin a torrent when adding it, in <tt class="docutils literal">add_torrent_params</tt>
+(see <a class="reference external" href="reference-Core.html#async_add_torrent()">async_add_torrent()</a> and <a class="reference external" href="reference-Core.html#add_torrent()">add_torrent()</a>), or after ading it with the
+<a class="reference external" href="reference-Core.html#set_pinned()">set_pinned()</a> function on <a class="reference external" href="reference-Core.html#torrent_handle">torrent_handle</a>.</p>
+<p>Torrents that start out without metadata (e.g. magnet links or http downloads)
+are automatically pinned. This is important in order to give the client a
+chance to save the metadata to disk once it's received (see <a class="reference external" href="reference-Alerts.html#metadata_received_alert">metadata_received_alert</a>).</p>
+<p>Once the metadata is saved to disk, it might make sense to unpin the torrent.</p>
+</div>
+<div class="section" id="piece-picker">
+<h1>piece picker</h1>
+<p>The piece picker in libtorrent has the following features:</p>
+<ul class="simple">
+<li>rarest first</li>
+<li>sequential download</li>
+<li>random pick</li>
+<li>reverse order picking</li>
+<li>parole mode</li>
+<li>prioritize partial pieces</li>
+<li>prefer whole pieces</li>
+<li>piece affinity by speed category</li>
+<li>piece priorities</li>
+</ul>
+<div class="section" id="internal-representation">
+<h2>internal representation</h2>
+<p>It is optimized by, at all times, keeping a list of pieces ordered by rarity,
+randomly shuffled within each rarity class. This list is organized as a single
+vector of contigous memory in RAM, for optimal memory locality and to eliminate
+heap allocations and frees when updating rarity of pieces.</p>
+<p>Expensive events, like a peer joining or leaving, are evaluated lazily, since
+it's cheaper to rebuild the whole list rather than updating every single piece
+in it. This means as long as no blocks are picked, peers joining and leaving is
+no more costly than a single peer joining or leaving. Of course the special
+cases of peers that have all or no pieces are optimized to not require
+rebuilding the list.</p>
+</div>
+<div class="section" id="picker-strategy">
+<h2>picker strategy</h2>
+<p>The normal mode of the picker is of course <em>rarest first</em>, meaning pieces that
+few peers have are preferred to be downloaded over pieces that more peers have.
+This is a fundamental algorithm that is the basis of the performance of
+bittorrent. However, the user may set the piece picker into sequential download
+mode. This mode simply picks pieces sequentially, always preferring lower piece
+indices.</p>
+<p>When a torrent starts out, picking the rarest pieces means increased risk that
+pieces won't be completed early (since there are only a few peers they can be
+downloaded from), leading to a delay of having any piece to offer to other
+peers. This lack of pieces to trade, delays the client from getting started
+into the normal tit-for-tat mode of bittorrent, and will result in a long
+ramp-up time. The heuristic to mitigate this problem is to, for the first few
+pieces, pick random pieces rather than rare pieces. The threshold for when to
+leave this initial picker mode is determined by
+<a class="reference external" href="reference-Settings.html#initial_picker_threshold">settings_pack::initial_picker_threshold</a>.</p>
+</div>
+<div class="section" id="reverse-order">
+<h2>reverse order</h2>
+<p>An orthogonal setting is <em>reverse order</em>, which is used for <em>snubbed</em> peers.
+Snubbed peers are peers that appear very slow, and might have timed out a piece
+request. The idea behind this is to make all snubbed peers more likely to be
+able to do download blocks from the same piece, concentrating slow peers on as
+few pieces as possible. The reverse order means that the most common pieces are
+picked, instead of the rarest pieces (or in the case of sequential download,
+the last pieces, intead of the first).</p>
+</div>
+<div class="section" id="parole-mode">
+<h2>parole mode</h2>
+<p>Peers that have participated in a piece that failed the hash check, may be put
+in <em>parole mode</em>. This means we prefer downloading a full piece  from this
+peer, in order to distinguish which peer is sending corrupt data. Whether to do
+this is or not is controlled by <a class="reference external" href="reference-Settings.html#use_parole_mode">settings_pack::use_parole_mode</a>.</p>
+<p>In parole mode, the piece picker prefers picking one whole piece at a time for
+a given peer, avoiding picking any blocks from a piece any other peer has
+contributed to (since that would defeat the purpose of parole mode).</p>
+</div>
+<div class="section" id="prioritize-partial-pieces">
+<h2>prioritize partial pieces</h2>
+<p>This setting determines if partially downloaded or requested pieces should
+always be preferred over other pieces. The benefit of doing this is that the
+number of partial pieces is minimized (and hence the turn-around time for
+downloading a block until it can be uploaded to others is minimized). It also
+puts less stress on the disk cache, since fewer partial pieces need to be kept
+in the cache. Whether or not to enable this is controlled by
+setting_pack::prioritize_partial_pieces.</p>
+<p>The main benefit of not prioritizing partial pieces is that the rarest first
+algorithm gets to have more influence on which pieces are picked. The picker is
+more likely to truly pick the rarest piece, and hence improving the performance
+of the swarm.</p>
+<p>This setting is turned on automatically whenever the number of partial pieces
+in the piece picker exceeds the number of peers we're connected to times 1.5.
+This is in order to keep the waste of partial pieces to a minimum, but still
+prefer rarest pieces.</p>
+</div>
+<div class="section" id="prefer-whole-pieces">
+<h2>prefer whole pieces</h2>
+<p>The <em>prefer whole pieces</em> setting makes the piece picker prefer picking entire
+pieces at a time. This is used by web connections (both http seeding
+standards), in order to be able to coalesce the small bittorrent requests to
+larger HTTP requests. This significantly improves performance when downloading
+over HTTP.</p>
+<p>It is also used by peers that are downloading faster than a certain threshold.
+The main advantage is that these peers will better utilize the other peer's
+disk cache, by requesting all blocks in a single piece, from the same peer.</p>
+<p>This threshold is controlled by the <a class="reference external" href="reference-Settings.html#whole_pieces_threshold">settings_pack::whole_pieces_threshold</a>
+setting.</p>
+<p><em>TODO: piece priorities</em></p>
+</div>
+</div>
+<div class="section" id="predictive-piece-announce">
+<h1>predictive piece announce</h1>
+<p>In order to improve performance, libtorrent supports a feature called
+<tt class="docutils literal">predictive piece announce</tt>. When enabled, it will make libtorrent announce
+that we have pieces to peers, before we truly have them. The most important
+case is to announce a piece as soon as it has been downloaded and passed the
+hash check, but not yet been written to disk. In this case, there is a risk the
+piece will fail to be written to disk, in which case we won't have the piece
+anymore, even though we announced it to peers.</p>
+<p>The other case is when we're very close to completing the download of a piece
+and assume it will pass the hash check, we can announce it to peers to make it
+available one round-trip sooner than otherwise. This lets libtorrent start
+uploading the piece to interested peers immediately when the piece complete,
+instead of waiting one round-trip for the peers to request it.</p>
+<p>This makes for the implementation slightly more complicated, since piece will
+have more states and more complicated transitions. For instance, a piece could
+be:</p>
+<ol class="arabic simple">
+<li>hashed but not fully written to disk</li>
+<li>fully written to disk but not hashed</li>
+<li>not fully downloaded</li>
+<li>downloaded and hash checked</li>
+</ol>
+<p>Once a piece is fully downloaded, the hash check could complete before any of
+the write operations or it could complete after all write operations are
+complete.</p>
+</div>
+<div class="section" id="peer-classes">
+<h1>peer classes</h1>
+<p>The peer classes feature in libtorrent allows a client to define custom groups
+of peers and rate limit them individually. Each such group is called a <em>peer
+class</em>. There are a few default peer classes that are always created:</p>
+<ul class="simple">
+<li>global - all peers belong to this class, except peers on the local network</li>
+<li>local peers - all peers on the local network belongs to this class TCP peers</li>
+<li><ul class="first">
+<li>all peers connected over TCP belong to this class</li>
+</ul>
+</li>
+</ul>
+<p>The TCP peers class is used by the uTP/TCP balancing logic, if it's enabled, to
+throttle TCP peers. The global and local classes are used to adjust the global
+rate limits.</p>
+<p>When the rate limits are adjusted for a specific torrent, a class is created
+implicitly for that torrent.</p>
+<p>The default peer class IDs are defined as enums in the <tt class="docutils literal">session</tt> class:</p>
+<pre class="literal-block">
+enum {
+        global_peer_class_id,
+        tcp_peer_class_id,
+        local_peer_class_id
+};
+</pre>
+<p>A peer class can be considered a more general form of <em>lables</em> that some
+clients have. Peer classes however are not just applied to torrents, but
+ultimately the peers.</p>
+<p>Peer classes can be created with the <a class="reference external" href="reference-Core.html#create_peer_class()">create_peer_class()</a> call (on the <a class="reference external" href="reference-Core.html#session">session</a>
+object), and deleted with the <a class="reference external" href="reference-Core.html#delete_peer_class()">delete_peer_class()</a> call.</p>
+<p>Peer classes are configured with the <a class="reference external" href="reference-Core.html#set_peer_class()">set_peer_class()</a> <a class="reference external" href="reference-Core.html#get_peer_class()">get_peer_class()</a> calls.</p>
+<p>Custom peer classes can be assigned to torrents, with the ??? call, in which
+case all its peers will belong to the class. They can also be assigned based on
+the peer's IP address. See <a class="reference external" href="reference-Core.html#set_peer_class_filter()">set_peer_class_filter()</a> for more information.</p>
+</div>
+<div class="section" id="ssl-torrents">
+<h1>SSL torrents</h1>
+<p>Torrents may have an SSL root (CA) certificate embedded in them. Such torrents
+are called <em>SSL torrents</em>. An SSL torrent talks to all bittorrent peers over
+SSL. The protocols are layered like this:</p>
+<img alt="utp_stack.png" src="utp_stack.png" />
+<p>During the SSL handshake, both peers need to authenticate by providing a
+certificate that is signed by the CA certificate found in the .torrent file.
+These peer certificates are expected to be privided to peers through some other
+means than bittorrent. Typically by a peer generating a certificate request
+which is sent to the publisher of the torrent, and the publisher returning a
+signed certificate.</p>
+<p>In libtorrent, <a class="reference external" href="reference-Core.html#set_ssl_certificate()">set_ssl_certificate()</a> in <a class="reference external" href="reference-Core.html#torrent_handle">torrent_handle</a> is used to tell
+libtorrent where to find the peer certificate and the private key for it. When
+an SSL torrent is loaded, the <a class="reference external" href="reference-Alerts.html#torrent_need_cert_alert">torrent_need_cert_alert</a> is posted to remind the
+user to provide a certificate.</p>
+<p>A peer connecting to an SSL torrent MUST provide the <em>SNI</em> TLS extension
+(server name indication). The server name is the hex encoded info-hash of the
+torrent to connect to. This is required for the client accepting the connection
+to know which certificate to present.</p>
+<p>SSL connections are accepted on a separate socket from normal bittorrent
+connections. To pick which port the SSL socket should bind to, set
+<a class="reference external" href="reference-Settings.html#ssl_listen">settings_pack::ssl_listen</a> to a different port. It defaults to port 4433.
+This setting is only taken into account when the normal listen socket is opened
+(i.e. just changing this setting won't necessarily close and re-open the SSL
+socket). To not listen on an SSL socket at all, set <tt class="docutils literal">ssl_listen</tt> to 0.</p>
+<p>This feature is only available if libtorrent is build with openssl support
+(<tt class="docutils literal">TORRENT_USE_OPENSSL</tt>) and requires at least openSSL version 1.0, since it
+needs SNI support.</p>
+<p>Peer certificates must have at least one <em>SubjectAltName</em> field of type
+dNSName. At least one of the fields must <em>exactly</em> match the name of the
+torrent. This is a byte-by-byte comparison, the UTF-8 encoding must be
+identical (i.e. there's no unicode normalization going on). This is the
+recommended way of verifying certificates for HTTPS servers according to <a class="reference external" href="http://www.ietf.org/rfc/rfc2818.txt">RFC
+2818</a>. Note the difference that for torrents only <em>dNSName</em> fields are taken
+into account (not IP address fields). The most specific (i.e. last) <em>Common
+Name</em> field is also taken into account if no <em>SubjectAltName</em> did not match.</p>
+<p>If any of these fields contain a single asterisk (&quot;*&quot;), the certificate is
+considered covering any torrent, allowing it to be reused for any torrent.</p>
+<p>The purpose of matching the torrent name with the fields in the peer
+certificate is to allow a publisher to have a single root certificate for all
+torrents it distributes, and issue separate peer certificates for each torrent.
+A peer receiving a certificate will not necessarily be able to access all
+torrents published by this root certificate (only if it has a &quot;star cert&quot;).</p>
+<div class="section" id="testing">
+<h2>testing</h2>
+<p>To test incoming SSL connections to an SSL torrent, one can use the following
+<em>openssl</em> command:</p>
+<pre class="literal-block">
+openssl s_client -cert &lt;peer-certificate&gt;.pem -key &lt;peer-private-key&gt;.pem -CAfile \
+   &lt;torrent-cert&gt;.pem -debug -connect 127.0.0.1:4433 -tls1 -servername &lt;info-hash&gt;
+</pre>
+<p>To create a root certificate, the Distinguished Name (<em>DN</em>) is not taken into
+account by bittorrent peers. You still need to specify something, but from
+libtorrent's point of view, it doesn't matter what it is. libtorrent only makes
+sure the peer certificates are signed by the correct root certificate.</p>
+<p>One way to create the certificates is to use the <tt class="docutils literal">CA.sh</tt> script that comes
+with openssl, like thisi (don't forget to enter a common Name for the
+certificate):</p>
+<pre class="literal-block">
+CA.sh -newca
+CA.sh -newreq
+CA.sh -sign
+</pre>
+<p>The torrent certificate is located in <tt class="docutils literal">./demoCA/private/demoCA/cacert.pem</tt>,
+this is the pem file to include in the .torrent file.</p>
+<p>The peer's certificate is located in <tt class="docutils literal">./newcert.pem</tt> and the certificate's
+private key in <tt class="docutils literal">./newkey.pem</tt>.</p>
+</div>
+</div>
+<div class="section" id="session-statistics">
+<h1>session statistics</h1>
+<p>libtorrent provides a mechanism to query performance and statistics counters
+from its internals. This is primarily useful for troubleshooting of production
+systems and performance tuning.</p>
+<p>The statistics consists of two fundamental types. <em>counters</em> and <em>gauges</em>. A
+counter is a monotonically increasing value, incremented every time some event
+occurs. For example, every time the network thread wakes up because a socket
+became readable will increment a counter. Another example is every time a
+socket receives <em>n</em> bytes, a counter is incremented by <em>n</em>.</p>
+<p><em>Counters</em> are the most flexible of metrics. It allows the program to sample
+the counter at any interval, and calculate average rates of increments to the
+counter. Some events may be rare and need to be sampled over a longer period in
+order to get userful rates, where other events may be more frequent and evenly
+distributed that sampling it frequently yields useful values. Counters also
+provides accurate overall counts. For example, converting samples of a download
+rate into a total transfer count is not accurate and takes more samples.
+Converting an increasing counter into a rate is easy and flexible.</p>
+<p><em>Gauges</em> measure the instantaneous state of some kind. This is used for metrics
+that are not counting events or flows, but states that can fluctuate. For
+example, the number of torrents that are currenly being downloaded.</p>
+<p>It's important to know whether a value is a counter or a gauge in order to
+interpret it correctly. In order to query libtorrent for which counters and
+gauges are available, call <a class="reference external" href="reference-Core.html#session_stats_metrics()">session_stats_metrics()</a>. This will return metadata
+about the values available for inspection in libtorrent. It will include
+whether a value is a counter or a gauge. The key information it includes is the
+index used to extract the actual measurements for a specific counter or gauge.</p>
+<p>In order to take a sample, call <a class="reference external" href="reference-Core.html#post_session_stats()">post_session_stats()</a> in the <a class="reference external" href="reference-Core.html#session">session</a> object.
+This will result in a <a class="reference external" href="reference-Alerts.html#session_stats_alert">session_stats_alert</a> being posted. In this <a class="reference external" href="reference-Alerts.html#alert">alert</a> object,
+there is an array of values, these values make up the sample. The value index
+in the stats metric indicates which index the metric's value is stored in.</p>
+<p>The mapping between metric and value is not stable across versions of
+libtorrent. Always query the metrics first, to find out the index at which the
+value is stored, before interpreting the values array in the
+<a class="reference external" href="reference-Alerts.html#session_stats_alert">session_stats_alert</a>. The mapping will <em>not</em> change during the runtime of your
+process though, it's tied to a specific libtorrent version. You only have to
+query the mapping once on startup (or every time <tt class="docutils literal">libtorrent.so</tt> is loaded,
+if it's done dynamically).</p>
+<p>The available stats metrics are:</p>
+<a name="peer.error_peers"></a>
+<a name="peer.disconnected_peers"></a><table border="1" class="docutils">
+<colgroup>
+<col width="74%" />
+<col width="26%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">type</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>peer.error_peers</td>
+<td>counter</td>
+</tr>
+<tr><td>peer.disconnected_peers</td>
+<td>counter</td>
+</tr>
+</tbody>
+</table>
+<p><tt class="docutils literal">error_peers</tt> is the total number of peer disconnects
+caused by an error (not initiated by this client) and
+disconnected initiated by this client (<tt class="docutils literal">disconnected_peers</tt>).</p>
+<a name="peer.eof_peers"></a>
+<a name="peer.connreset_peers"></a>
+<a name="peer.connrefused_peers"></a>
+<a name="peer.connaborted_peers"></a>
+<a name="peer.notconnected_peers"></a>
+<a name="peer.perm_peers"></a>
+<a name="peer.buffer_peers"></a>
+<a name="peer.unreachable_peers"></a>
+<a name="peer.broken_pipe_peers"></a>
+<a name="peer.addrinuse_peers"></a>
+<a name="peer.no_access_peers"></a>
+<a name="peer.invalid_arg_peers"></a>
+<a name="peer.aborted_peers"></a><table border="1" class="docutils">
+<colgroup>
+<col width="74%" />
+<col width="26%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">type</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>peer.eof_peers</td>
+<td>counter</td>
+</tr>
+<tr><td>peer.connreset_peers</td>
+<td>counter</td>
+</tr>
+<tr><td>peer.connrefused_peers</td>
+<td>counter</td>
+</tr>
+<tr><td>peer.connaborted_peers</td>
+<td>counter</td>
+</tr>
+<tr><td>peer.notconnected_peers</td>
+<td>counter</td>
+</tr>
+<tr><td>peer.perm_peers</td>
+<td>counter</td>
+</tr>
+<tr><td>peer.buffer_peers</td>
+<td>counter</td>
+</tr>
+<tr><td>peer.unreachable_peers</td>
+<td>counter</td>
+</tr>
+<tr><td>peer.broken_pipe_peers</td>
+<td>counter</td>
+</tr>
+<tr><td>peer.addrinuse_peers</td>
+<td>counter</td>
+</tr>
+<tr><td>peer.no_access_peers</td>
+<td>counter</td>
+</tr>
+<tr><td>peer.invalid_arg_peers</td>
+<td>counter</td>
+</tr>
+<tr><td>peer.aborted_peers</td>
+<td>counter</td>
+</tr>
+</tbody>
+</table>
+<p>these counters break down the peer errors into more specific
+categories. These errors are what the underlying transport
+reported (i.e. TCP or uTP)</p>
+<a name="peer.piece_requests"></a>
+<a name="peer.max_piece_requests"></a>
+<a name="peer.invalid_piece_requests"></a>
+<a name="peer.choked_piece_requests"></a>
+<a name="peer.cancelled_piece_requests"></a>
+<a name="peer.piece_rejects"></a><table border="1" class="docutils">
+<colgroup>
+<col width="78%" />
+<col width="23%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">type</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>peer.piece_requests</td>
+<td>counter</td>
+</tr>
+<tr><td>peer.max_piece_requests</td>
+<td>counter</td>
+</tr>
+<tr><td>peer.invalid_piece_requests</td>
+<td>counter</td>
+</tr>
+<tr><td>peer.choked_piece_requests</td>
+<td>counter</td>
+</tr>
+<tr><td>peer.cancelled_piece_requests</td>
+<td>counter</td>
+</tr>
+<tr><td>peer.piece_rejects</td>
+<td>counter</td>
+</tr>
+</tbody>
+</table>
+<p>the total number of incoming piece requests we've received followed
+by the number of rejected piece requests for various reasons.
+max_piece_requests mean we already had too many outstanding requests
+from this peer, so we rejected it. cancelled_piece_requests are ones
+where the other end explicitly asked for the piece to be rejected.</p>
+<a name="peer.error_incoming_peers"></a>
+<a name="peer.error_outgoing_peers"></a><table border="1" class="docutils">
+<colgroup>
+<col width="75%" />
+<col width="25%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">type</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>peer.error_incoming_peers</td>
+<td>counter</td>
+</tr>
+<tr><td>peer.error_outgoing_peers</td>
+<td>counter</td>
+</tr>
+</tbody>
+</table>
+<p>these counters break down the peer errors into
+whether they happen on incoming or outgoing peers.</p>
+<a name="peer.error_rc4_peers"></a>
+<a name="peer.error_encrypted_peers"></a><table border="1" class="docutils">
+<colgroup>
+<col width="76%" />
+<col width="24%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">type</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>peer.error_rc4_peers</td>
+<td>counter</td>
+</tr>
+<tr><td>peer.error_encrypted_peers</td>
+<td>counter</td>
+</tr>
+</tbody>
+</table>
+<p>these counters break down the peer errors into
+whether they happen on encrypted peers (just
+encrypted handshake) and rc4 peers (full stream
+encryption). These can indicate whether encrypted
+peers are more or less likely to fail</p>
+<a name="peer.error_tcp_peers"></a>
+<a name="peer.error_utp_peers"></a><table border="1" class="docutils">
+<colgroup>
+<col width="71%" />
+<col width="29%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">type</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>peer.error_tcp_peers</td>
+<td>counter</td>
+</tr>
+<tr><td>peer.error_utp_peers</td>
+<td>counter</td>
+</tr>
+</tbody>
+</table>
+<p>these counters break down the peer errors into
+whether they happen on uTP peers or TCP peers.
+these may indicate whether one protocol is
+more error prone</p>
+<a name="peer.connect_timeouts"></a>
+<a name="peer.uninteresting_peers"></a>
+<a name="peer.timeout_peers"></a>
+<a name="peer.no_memory_peers"></a>
+<a name="peer.too_many_peers"></a>
+<a name="peer.transport_timeout_peers"></a>
+<a name="peer.num_banned_peers"></a>
+<a name="peer.banned_for_hash_failure"></a>
+<a name="peer.connection_attempts"></a>
+<a name="peer.connection_attempt_loops"></a>
+<a name="peer.incoming_connections"></a><table border="1" class="docutils">
+<colgroup>
+<col width="78%" />
+<col width="23%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">type</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>peer.connect_timeouts</td>
+<td>counter</td>
+</tr>
+<tr><td>peer.uninteresting_peers</td>
+<td>counter</td>
+</tr>
+<tr><td>peer.timeout_peers</td>
+<td>counter</td>
+</tr>
+<tr><td>peer.no_memory_peers</td>
+<td>counter</td>
+</tr>
+<tr><td>peer.too_many_peers</td>
+<td>counter</td>
+</tr>
+<tr><td>peer.transport_timeout_peers</td>
+<td>counter</td>
+</tr>
+<tr><td>peer.num_banned_peers</td>
+<td>counter</td>
+</tr>
+<tr><td>peer.banned_for_hash_failure</td>
+<td>counter</td>
+</tr>
+<tr><td>peer.connection_attempts</td>
+<td>counter</td>
+</tr>
+<tr><td>peer.connection_attempt_loops</td>
+<td>counter</td>
+</tr>
+<tr><td>peer.incoming_connections</td>
+<td>counter</td>
+</tr>
+</tbody>
+</table>
+<p>these counters break down the reasons to
+disconnect peers.</p>
+<a name="peer.num_tcp_peers"></a>
+<a name="peer.num_socks5_peers"></a>
+<a name="peer.num_http_proxy_peers"></a>
+<a name="peer.num_utp_peers"></a>
+<a name="peer.num_i2p_peers"></a>
+<a name="peer.num_ssl_peers"></a>
+<a name="peer.num_ssl_socks5_peers"></a>
+<a name="peer.num_ssl_http_proxy_peers"></a>
+<a name="peer.num_ssl_utp_peers"></a>
+<a name="peer.num_peers_half_open"></a>
+<a name="peer.num_peers_connected"></a>
+<a name="peer.num_peers_up_interested"></a>
+<a name="peer.num_peers_down_interested"></a>
+<a name="peer.num_peers_up_unchoked_all"></a>
+<a name="peer.num_peers_up_unchoked_optimistic"></a>
+<a name="peer.num_peers_up_unchoked"></a>
+<a name="peer.num_peers_down_unchoked"></a>
+<a name="peer.num_peers_up_requests"></a>
+<a name="peer.num_peers_down_requests"></a>
+<a name="peer.num_peers_end_game"></a>
+<a name="peer.num_peers_up_disk"></a>
+<a name="peer.num_peers_down_disk"></a><table border="1" class="docutils">
+<colgroup>
+<col width="81%" />
+<col width="19%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">type</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>peer.num_tcp_peers</td>
+<td>counter</td>
+</tr>
+<tr><td>peer.num_socks5_peers</td>
+<td>counter</td>
+</tr>
+<tr><td>peer.num_http_proxy_peers</td>
+<td>counter</td>
+</tr>
+<tr><td>peer.num_utp_peers</td>
+<td>counter</td>
+</tr>
+<tr><td>peer.num_i2p_peers</td>
+<td>counter</td>
+</tr>
+<tr><td>peer.num_ssl_peers</td>
+<td>counter</td>
+</tr>
+<tr><td>peer.num_ssl_socks5_peers</td>
+<td>counter</td>
+</tr>
+<tr><td>peer.num_ssl_http_proxy_peers</td>
+<td>counter</td>
+</tr>
+<tr><td>peer.num_ssl_utp_peers</td>
+<td>counter</td>
+</tr>
+<tr><td>peer.num_peers_half_open</td>
+<td>counter</td>
+</tr>
+<tr><td>peer.num_peers_connected</td>
+<td>counter</td>
+</tr>
+<tr><td>peer.num_peers_up_interested</td>
+<td>counter</td>
+</tr>
+<tr><td>peer.num_peers_down_interested</td>
+<td>counter</td>
+</tr>
+<tr><td>peer.num_peers_up_unchoked_all</td>
+<td>counter</td>
+</tr>
+<tr><td>peer.num_peers_up_unchoked_optimistic</td>
+<td>counter</td>
+</tr>
+<tr><td>peer.num_peers_up_unchoked</td>
+<td>counter</td>
+</tr>
+<tr><td>peer.num_peers_down_unchoked</td>
+<td>counter</td>
+</tr>
+<tr><td>peer.num_peers_up_requests</td>
+<td>counter</td>
+</tr>
+<tr><td>peer.num_peers_down_requests</td>
+<td>counter</td>
+</tr>
+<tr><td>peer.num_peers_end_game</td>
+<td>counter</td>
+</tr>
+<tr><td>peer.num_peers_up_disk</td>
+<td>counter</td>
+</tr>
+<tr><td>peer.num_peers_down_disk</td>
+<td>counter</td>
+</tr>
+</tbody>
+</table>
+<p>the number of peer connections for each kind of socket.
+these counts include half-open (connecting) peers.
+<tt class="docutils literal">num_peers_up_unchoked_all</tt> is the total number of unchoked peers,
+whereas <tt class="docutils literal">num_peers_up_unchoked</tt> only are unchoked peers that count
+against the limit (i.e. excluding peers that are unchoked because the
+limit doesn't apply to them). <tt class="docutils literal">num_peers_up_unchoked_optimistic</tt> is
+the number of optimistically unchoked peers.</p>
+<a name="net.on_read_counter"></a>
+<a name="net.on_write_counter"></a>
+<a name="net.on_tick_counter"></a>
+<a name="net.on_lsd_counter"></a>
+<a name="net.on_lsd_peer_counter"></a>
+<a name="net.on_udp_counter"></a>
+<a name="net.on_accept_counter"></a>
+<a name="net.on_disk_queue_counter"></a>
+<a name="net.on_disk_counter"></a><table border="1" class="docutils">
+<colgroup>
+<col width="75%" />
+<col width="25%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">type</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>net.on_read_counter</td>
+<td>counter</td>
+</tr>
+<tr><td>net.on_write_counter</td>
+<td>counter</td>
+</tr>
+<tr><td>net.on_tick_counter</td>
+<td>counter</td>
+</tr>
+<tr><td>net.on_lsd_counter</td>
+<td>counter</td>
+</tr>
+<tr><td>net.on_lsd_peer_counter</td>
+<td>counter</td>
+</tr>
+<tr><td>net.on_udp_counter</td>
+<td>counter</td>
+</tr>
+<tr><td>net.on_accept_counter</td>
+<td>counter</td>
+</tr>
+<tr><td>net.on_disk_queue_counter</td>
+<td>counter</td>
+</tr>
+<tr><td>net.on_disk_counter</td>
+<td>counter</td>
+</tr>
+</tbody>
+</table>
+<p>These counters count the number of times the
+network thread wakes up for each respective
+reason. If these counters are very large, it
+may indicate a performance issue, causing the
+network thread to wake up too ofte, wasting CPU.
+mitigate it by increasing buffers and limits
+for the specific trigger that wakes up the
+thread.</p>
+<a name="net.sent_payload_bytes"></a>
+<a name="net.sent_bytes"></a>
+<a name="net.sent_ip_overhead_bytes"></a>
+<a name="net.sent_tracker_bytes"></a>
+<a name="net.recv_payload_bytes"></a>
+<a name="net.recv_bytes"></a>
+<a name="net.recv_ip_overhead_bytes"></a>
+<a name="net.recv_tracker_bytes"></a><table border="1" class="docutils">
+<colgroup>
+<col width="76%" />
+<col width="24%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">type</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>net.sent_payload_bytes</td>
+<td>counter</td>
+</tr>
+<tr><td>net.sent_bytes</td>
+<td>counter</td>
+</tr>
+<tr><td>net.sent_ip_overhead_bytes</td>
+<td>counter</td>
+</tr>
+<tr><td>net.sent_tracker_bytes</td>
+<td>counter</td>
+</tr>
+<tr><td>net.recv_payload_bytes</td>
+<td>counter</td>
+</tr>
+<tr><td>net.recv_bytes</td>
+<td>counter</td>
+</tr>
+<tr><td>net.recv_ip_overhead_bytes</td>
+<td>counter</td>
+</tr>
+<tr><td>net.recv_tracker_bytes</td>
+<td>counter</td>
+</tr>
+</tbody>
+</table>
+<p>total number of bytes sent and received by the session</p>
+<a name="net.limiter_up_queue"></a>
+<a name="net.limiter_down_queue"></a><table border="1" class="docutils">
+<colgroup>
+<col width="73%" />
+<col width="27%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">type</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>net.limiter_up_queue</td>
+<td>counter</td>
+</tr>
+<tr><td>net.limiter_down_queue</td>
+<td>counter</td>
+</tr>
+</tbody>
+</table>
+<p>the number of sockets currently waiting for upload and download
+bandwidht from the rate limiter.</p>
+<a name="net.limiter_up_bytes"></a>
+<a name="net.limiter_down_bytes"></a><table border="1" class="docutils">
+<colgroup>
+<col width="73%" />
+<col width="27%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">type</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>net.limiter_up_bytes</td>
+<td>counter</td>
+</tr>
+<tr><td>net.limiter_down_bytes</td>
+<td>counter</td>
+</tr>
+</tbody>
+</table>
+<p>the number of upload and download bytes waiting to be handed out from
+the rate limiter.</p>
+<a name="net.recv_failed_bytes"></a><table border="1" class="docutils">
+<colgroup>
+<col width="72%" />
+<col width="28%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">type</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>net.recv_failed_bytes</td>
+<td>counter</td>
+</tr>
+</tbody>
+</table>
+<p>the number of bytes downloaded that had to be discarded because they
+failed the hash check</p>
+<a name="net.recv_redundant_bytes"></a><table border="1" class="docutils">
+<colgroup>
+<col width="74%" />
+<col width="26%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">type</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>net.recv_redundant_bytes</td>
+<td>counter</td>
+</tr>
+</tbody>
+</table>
+<p>the number of downloaded bytes that were discarded because they
+were downloaded multiple times (from different peers)</p>
+<a name="net.has_incoming_connections"></a><table border="1" class="docutils">
+<colgroup>
+<col width="77%" />
+<col width="23%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">type</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>net.has_incoming_connections</td>
+<td>counter</td>
+</tr>
+</tbody>
+</table>
+<p>is false by default and set to true when
+the first incoming connection is established
+this is used to know if the client is behind
+NAT or not.</p>
+<a name="ses.num_checking_torrents"></a>
+<a name="ses.num_stopped_torrents"></a>
+<a name="ses.num_upload_only_torrents"></a>
+<a name="ses.num_downloading_torrents"></a>
+<a name="ses.num_seeding_torrents"></a>
+<a name="ses.num_queued_seeding_torrents"></a>
+<a name="ses.num_queued_download_torrents"></a>
+<a name="ses.num_error_torrents"></a><table border="1" class="docutils">
+<colgroup>
+<col width="79%" />
+<col width="21%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">type</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>ses.num_checking_torrents</td>
+<td>counter</td>
+</tr>
+<tr><td>ses.num_stopped_torrents</td>
+<td>counter</td>
+</tr>
+<tr><td>ses.num_upload_only_torrents</td>
+<td>counter</td>
+</tr>
+<tr><td>ses.num_downloading_torrents</td>
+<td>counter</td>
+</tr>
+<tr><td>ses.num_seeding_torrents</td>
+<td>counter</td>
+</tr>
+<tr><td>ses.num_queued_seeding_torrents</td>
+<td>counter</td>
+</tr>
+<tr><td>ses.num_queued_download_torrents</td>
+<td>counter</td>
+</tr>
+<tr><td>ses.num_error_torrents</td>
+<td>counter</td>
+</tr>
+</tbody>
+</table>
+<p>these gauges count the number of torrents in
+different states. Each torrent only belongs to
+one of these states. For torrents that could
+belong to multiple of these, the most prominent
+in picked. For instance, a torrent with an error
+counts as an error-torrent, regardless of its other
+state.</p>
+<a name="ses.non_filter_torrents"></a><table border="1" class="docutils">
+<colgroup>
+<col width="74%" />
+<col width="26%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">type</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>ses.non_filter_torrents</td>
+<td>counter</td>
+</tr>
+</tbody>
+</table>
+<p>the number of torrents that don't have the
+IP filter applied to them.</p>
+<a name="ses.num_loaded_torrents"></a>
+<a name="ses.num_pinned_torrents"></a><table border="1" class="docutils">
+<colgroup>
+<col width="74%" />
+<col width="26%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">type</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>ses.num_loaded_torrents</td>
+<td>counter</td>
+</tr>
+<tr><td>ses.num_pinned_torrents</td>
+<td>counter</td>
+</tr>
+</tbody>
+</table>
+<p>the number of torrents that are currently loaded</p>
+<a name="ses.num_piece_passed"></a>
+<a name="ses.num_piece_failed"></a>
+<a name="ses.num_have_pieces"></a>
+<a name="ses.num_total_pieces_added"></a><table border="1" class="docutils">
+<colgroup>
+<col width="76%" />
+<col width="24%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">type</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>ses.num_piece_passed</td>
+<td>counter</td>
+</tr>
+<tr><td>ses.num_piece_failed</td>
+<td>counter</td>
+</tr>
+<tr><td>ses.num_have_pieces</td>
+<td>counter</td>
+</tr>
+<tr><td>ses.num_total_pieces_added</td>
+<td>counter</td>
+</tr>
+</tbody>
+</table>
+<p>these count the number of times a piece has passed the
+hash check, the number of times a piece was successfully
+written to disk and the number of total possible pieces
+added by adding torrents. e.g. when adding a torrent with
+1000 piece, num_total_pieces_added is incremented by 1000.</p>
+<a name="ses.torrent_evicted_counter"></a><table border="1" class="docutils">
+<colgroup>
+<col width="76%" />
+<col width="24%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">type</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>ses.torrent_evicted_counter</td>
+<td>counter</td>
+</tr>
+</tbody>
+</table>
+<p>this counts the number of times a torrent has been
+evicted (only applies when <a class="reference internal" href="#dynamic-loading-of-torrent-files">dynamic loading of torrent files</a>
+is enabled).</p>
+<a name="ses.num_unchoke_slots"></a><table border="1" class="docutils">
+<colgroup>
+<col width="72%" />
+<col width="28%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">type</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>ses.num_unchoke_slots</td>
+<td>counter</td>
+</tr>
+</tbody>
+</table>
+<p>the number of allowed unchoked peers</p>
+<a name="ses.num_incoming_choke"></a>
+<a name="ses.num_incoming_unchoke"></a>
+<a name="ses.num_incoming_interested"></a>
+<a name="ses.num_incoming_not_interested"></a>
+<a name="ses.num_incoming_have"></a>
+<a name="ses.num_incoming_bitfield"></a>
+<a name="ses.num_incoming_request"></a>
+<a name="ses.num_incoming_piece"></a>
+<a name="ses.num_incoming_cancel"></a>
+<a name="ses.num_incoming_dht_port"></a>
+<a name="ses.num_incoming_suggest"></a>
+<a name="ses.num_incoming_have_all"></a>
+<a name="ses.num_incoming_have_none"></a>
+<a name="ses.num_incoming_reject"></a>
+<a name="ses.num_incoming_allowed_fast"></a>
+<a name="ses.num_incoming_ext_handshake"></a>
+<a name="ses.num_incoming_pex"></a>
+<a name="ses.num_incoming_metadata"></a>
+<a name="ses.num_incoming_extended"></a>
+<a name="ses.num_outgoing_choke"></a>
+<a name="ses.num_outgoing_unchoke"></a>
+<a name="ses.num_outgoing_interested"></a>
+<a name="ses.num_outgoing_not_interested"></a>
+<a name="ses.num_outgoing_have"></a>
+<a name="ses.num_outgoing_bitfield"></a>
+<a name="ses.num_outgoing_request"></a>
+<a name="ses.num_outgoing_piece"></a>
+<a name="ses.num_outgoing_cancel"></a>
+<a name="ses.num_outgoing_dht_port"></a>
+<a name="ses.num_outgoing_suggest"></a>
+<a name="ses.num_outgoing_have_all"></a>
+<a name="ses.num_outgoing_have_none"></a>
+<a name="ses.num_outgoing_reject"></a>
+<a name="ses.num_outgoing_allowed_fast"></a>
+<a name="ses.num_outgoing_ext_handshake"></a>
+<a name="ses.num_outgoing_pex"></a>
+<a name="ses.num_outgoing_metadata"></a>
+<a name="ses.num_outgoing_extended"></a><table border="1" class="docutils">
+<colgroup>
+<col width="79%" />
+<col width="21%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">type</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>ses.num_incoming_choke</td>
+<td>counter</td>
+</tr>
+<tr><td>ses.num_incoming_unchoke</td>
+<td>counter</td>
+</tr>
+<tr><td>ses.num_incoming_interested</td>
+<td>counter</td>
+</tr>
+<tr><td>ses.num_incoming_not_interested</td>
+<td>counter</td>
+</tr>
+<tr><td>ses.num_incoming_have</td>
+<td>counter</td>
+</tr>
+<tr><td>ses.num_incoming_bitfield</td>
+<td>counter</td>
+</tr>
+<tr><td>ses.num_incoming_request</td>
+<td>counter</td>
+</tr>
+<tr><td>ses.num_incoming_piece</td>
+<td>counter</td>
+</tr>
+<tr><td>ses.num_incoming_cancel</td>
+<td>counter</td>
+</tr>
+<tr><td>ses.num_incoming_dht_port</td>
+<td>counter</td>
+</tr>
+<tr><td>ses.num_incoming_suggest</td>
+<td>counter</td>
+</tr>
+<tr><td>ses.num_incoming_have_all</td>
+<td>counter</td>
+</tr>
+<tr><td>ses.num_incoming_have_none</td>
+<td>counter</td>
+</tr>
+<tr><td>ses.num_incoming_reject</td>
+<td>counter</td>
+</tr>
+<tr><td>ses.num_incoming_allowed_fast</td>
+<td>counter</td>
+</tr>
+<tr><td>ses.num_incoming_ext_handshake</td>
+<td>counter</td>
+</tr>
+<tr><td>ses.num_incoming_pex</td>
+<td>counter</td>
+</tr>
+<tr><td>ses.num_incoming_metadata</td>
+<td>counter</td>
+</tr>
+<tr><td>ses.num_incoming_extended</td>
+<td>counter</td>
+</tr>
+<tr><td>ses.num_outgoing_choke</td>
+<td>counter</td>
+</tr>
+<tr><td>ses.num_outgoing_unchoke</td>
+<td>counter</td>
+</tr>
+<tr><td>ses.num_outgoing_interested</td>
+<td>counter</td>
+</tr>
+<tr><td>ses.num_outgoing_not_interested</td>
+<td>counter</td>
+</tr>
+<tr><td>ses.num_outgoing_have</td>
+<td>counter</td>
+</tr>
+<tr><td>ses.num_outgoing_bitfield</td>
+<td>counter</td>
+</tr>
+<tr><td>ses.num_outgoing_request</td>
+<td>counter</td>
+</tr>
+<tr><td>ses.num_outgoing_piece</td>
+<td>counter</td>
+</tr>
+<tr><td>ses.num_outgoing_cancel</td>
+<td>counter</td>
+</tr>
+<tr><td>ses.num_outgoing_dht_port</td>
+<td>counter</td>
+</tr>
+<tr><td>ses.num_outgoing_suggest</td>
+<td>counter</td>
+</tr>
+<tr><td>ses.num_outgoing_have_all</td>
+<td>counter</td>
+</tr>
+<tr><td>ses.num_outgoing_have_none</td>
+<td>counter</td>
+</tr>
+<tr><td>ses.num_outgoing_reject</td>
+<td>counter</td>
+</tr>
+<tr><td>ses.num_outgoing_allowed_fast</td>
+<td>counter</td>
+</tr>
+<tr><td>ses.num_outgoing_ext_handshake</td>
+<td>counter</td>
+</tr>
+<tr><td>ses.num_outgoing_pex</td>
+<td>counter</td>
+</tr>
+<tr><td>ses.num_outgoing_metadata</td>
+<td>counter</td>
+</tr>
+<tr><td>ses.num_outgoing_extended</td>
+<td>counter</td>
+</tr>
+</tbody>
+</table>
+<p>bittorrent message counters. These counters are incremented
+every time a message of the corresponding type is received from
+or sent to a bittorrent peer.</p>
+<a name="ses.waste_piece_timed_out"></a>
+<a name="ses.waste_piece_cancelled"></a>
+<a name="ses.waste_piece_unknown"></a>
+<a name="ses.waste_piece_seed"></a>
+<a name="ses.waste_piece_end_game"></a>
+<a name="ses.waste_piece_closing"></a><table border="1" class="docutils">
+<colgroup>
+<col width="75%" />
+<col width="25%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">type</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>ses.waste_piece_timed_out</td>
+<td>counter</td>
+</tr>
+<tr><td>ses.waste_piece_cancelled</td>
+<td>counter</td>
+</tr>
+<tr><td>ses.waste_piece_unknown</td>
+<td>counter</td>
+</tr>
+<tr><td>ses.waste_piece_seed</td>
+<td>counter</td>
+</tr>
+<tr><td>ses.waste_piece_end_game</td>
+<td>counter</td>
+</tr>
+<tr><td>ses.waste_piece_closing</td>
+<td>counter</td>
+</tr>
+</tbody>
+</table>
+<p>the number of wasted downloaded bytes by reason of the bytes being
+wasted.</p>
+<a name="picker.piece_picker_partial_loops"></a>
+<a name="picker.piece_picker_suggest_loops"></a>
+<a name="picker.piece_picker_sequential_loops"></a>
+<a name="picker.piece_picker_reverse_rare_loops"></a>
+<a name="picker.piece_picker_rare_loops"></a>
+<a name="picker.piece_picker_rand_start_loops"></a>
+<a name="picker.piece_picker_rand_loops"></a>
+<a name="picker.piece_picker_busy_loops"></a><table border="1" class="docutils">
+<colgroup>
+<col width="82%" />
+<col width="18%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">type</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>picker.piece_picker_partial_loops</td>
+<td>counter</td>
+</tr>
+<tr><td>picker.piece_picker_suggest_loops</td>
+<td>counter</td>
+</tr>
+<tr><td>picker.piece_picker_sequential_loops</td>
+<td>counter</td>
+</tr>
+<tr><td>picker.piece_picker_reverse_rare_loops</td>
+<td>counter</td>
+</tr>
+<tr><td>picker.piece_picker_rare_loops</td>
+<td>counter</td>
+</tr>
+<tr><td>picker.piece_picker_rand_start_loops</td>
+<td>counter</td>
+</tr>
+<tr><td>picker.piece_picker_rand_loops</td>
+<td>counter</td>
+</tr>
+<tr><td>picker.piece_picker_busy_loops</td>
+<td>counter</td>
+</tr>
+</tbody>
+</table>
+<p>the number of pieces considered while picking pieces</p>
+<a name="picker.reject_piece_picks"></a>
+<a name="picker.unchoke_piece_picks"></a>
+<a name="picker.incoming_redundant_piece_picks"></a>
+<a name="picker.incoming_piece_picks"></a>
+<a name="picker.end_game_piece_picks"></a>
+<a name="picker.snubbed_piece_picks"></a>
+<a name="picker.interesting_piece_picks"></a>
+<a name="picker.hash_fail_piece_picks"></a>
+<a name="disk.write_cache_blocks"></a>
+<a name="disk.read_cache_blocks"></a><table border="1" class="docutils">
+<colgroup>
+<col width="81%" />
+<col width="19%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">type</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>picker.reject_piece_picks</td>
+<td>counter</td>
+</tr>
+<tr><td>picker.unchoke_piece_picks</td>
+<td>counter</td>
+</tr>
+<tr><td>picker.incoming_redundant_piece_picks</td>
+<td>counter</td>
+</tr>
+<tr><td>picker.incoming_piece_picks</td>
+<td>counter</td>
+</tr>
+<tr><td>picker.end_game_piece_picks</td>
+<td>counter</td>
+</tr>
+<tr><td>picker.snubbed_piece_picks</td>
+<td>counter</td>
+</tr>
+<tr><td>picker.interesting_piece_picks</td>
+<td>counter</td>
+</tr>
+<tr><td>picker.hash_fail_piece_picks</td>
+<td>counter</td>
+</tr>
+<tr><td>disk.write_cache_blocks</td>
+<td>counter</td>
+</tr>
+<tr><td>disk.read_cache_blocks</td>
+<td>counter</td>
+</tr>
+</tbody>
+</table>
+<p>This breaks down the piece picks into the event that
+triggered it</p>
+<a name="disk.request_latency"></a>
+<a name="disk.pinned_blocks"></a>
+<a name="disk.disk_blocks_in_use"></a>
+<a name="disk.queued_disk_jobs"></a>
+<a name="disk.num_running_disk_jobs"></a>
+<a name="disk.num_read_jobs"></a>
+<a name="disk.num_write_jobs"></a>
+<a name="disk.num_jobs"></a>
+<a name="disk.num_writing_threads"></a>
+<a name="disk.num_running_threads"></a>
+<a name="disk.blocked_disk_jobs"></a><table border="1" class="docutils">
+<colgroup>
+<col width="76%" />
+<col width="24%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">type</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>disk.request_latency</td>
+<td>counter</td>
+</tr>
+<tr><td>disk.pinned_blocks</td>
+<td>counter</td>
+</tr>
+<tr><td>disk.disk_blocks_in_use</td>
+<td>counter</td>
+</tr>
+<tr><td>disk.queued_disk_jobs</td>
+<td>counter</td>
+</tr>
+<tr><td>disk.num_running_disk_jobs</td>
+<td>counter</td>
+</tr>
+<tr><td>disk.num_read_jobs</td>
+<td>counter</td>
+</tr>
+<tr><td>disk.num_write_jobs</td>
+<td>counter</td>
+</tr>
+<tr><td>disk.num_jobs</td>
+<td>counter</td>
+</tr>
+<tr><td>disk.num_writing_threads</td>
+<td>counter</td>
+</tr>
+<tr><td>disk.num_running_threads</td>
+<td>counter</td>
+</tr>
+<tr><td>disk.blocked_disk_jobs</td>
+<td>counter</td>
+</tr>
+</tbody>
+</table>
+<p>the number of microseconds it takes from receiving a request from a
+peer until we're sending the response back on the socket.</p>
+<a name="disk.queued_write_bytes"></a>
+<a name="disk.arc_mru_size"></a>
+<a name="disk.arc_mru_ghost_size"></a>
+<a name="disk.arc_mfu_size"></a>
+<a name="disk.arc_mfu_ghost_size"></a>
+<a name="disk.arc_write_size"></a>
+<a name="disk.arc_volatile_size"></a><table border="1" class="docutils">
+<colgroup>
+<col width="74%" />
+<col width="26%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">type</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>disk.queued_write_bytes</td>
+<td>counter</td>
+</tr>
+<tr><td>disk.arc_mru_size</td>
+<td>counter</td>
+</tr>
+<tr><td>disk.arc_mru_ghost_size</td>
+<td>counter</td>
+</tr>
+<tr><td>disk.arc_mfu_size</td>
+<td>counter</td>
+</tr>
+<tr><td>disk.arc_mfu_ghost_size</td>
+<td>counter</td>
+</tr>
+<tr><td>disk.arc_write_size</td>
+<td>counter</td>
+</tr>
+<tr><td>disk.arc_volatile_size</td>
+<td>counter</td>
+</tr>
+</tbody>
+</table>
+<p>the number of bytes we have sent to the disk I/O
+thread for writing. Every time we hear back from
+the disk I/O thread with a completed write job, this
+is updated to the number of bytes the disk I/O thread
+is actually waiting for to be written (as opposed to
+bytes just hanging out in the cache)</p>
+<a name="disk.num_blocks_written"></a>
+<a name="disk.num_blocks_read"></a><table border="1" class="docutils">
+<colgroup>
+<col width="74%" />
+<col width="26%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">type</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>disk.num_blocks_written</td>
+<td>counter</td>
+</tr>
+<tr><td>disk.num_blocks_read</td>
+<td>counter</td>
+</tr>
+</tbody>
+</table>
+<p>the number of blocks written and read from disk in total. A block is
+16 kiB.</p>
+<a name="disk.num_blocks_hashed"></a><table border="1" class="docutils">
+<colgroup>
+<col width="73%" />
+<col width="27%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">type</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>disk.num_blocks_hashed</td>
+<td>counter</td>
+</tr>
+</tbody>
+</table>
+<p>the total number of blocks run through SHA-1 hashing</p>
+<a name="disk.num_blocks_cache_hits"></a><table border="1" class="docutils">
+<colgroup>
+<col width="76%" />
+<col width="24%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">type</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>disk.num_blocks_cache_hits</td>
+<td>counter</td>
+</tr>
+</tbody>
+</table>
+<p>the number of blocks read from the disk cache</p>
+<a name="disk.num_write_ops"></a>
+<a name="disk.num_read_ops"></a><table border="1" class="docutils">
+<colgroup>
+<col width="69%" />
+<col width="31%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">type</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>disk.num_write_ops</td>
+<td>counter</td>
+</tr>
+<tr><td>disk.num_read_ops</td>
+<td>counter</td>
+</tr>
+</tbody>
+</table>
+<p>the number of disk I/O operation for reads and writes. One disk
+operation may transfer more then one block.</p>
+<a name="disk.num_read_back"></a><table border="1" class="docutils">
+<colgroup>
+<col width="69%" />
+<col width="31%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">type</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>disk.num_read_back</td>
+<td>counter</td>
+</tr>
+</tbody>
+</table>
+<p>the number of blocks that had to be read back from disk in order to
+hash a piece (when verifying against the piece hash)</p>
+<a name="disk.disk_read_time"></a>
+<a name="disk.disk_write_time"></a>
+<a name="disk.disk_hash_time"></a>
+<a name="disk.disk_job_time"></a><table border="1" class="docutils">
+<colgroup>
+<col width="71%" />
+<col width="29%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">type</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>disk.disk_read_time</td>
+<td>counter</td>
+</tr>
+<tr><td>disk.disk_write_time</td>
+<td>counter</td>
+</tr>
+<tr><td>disk.disk_hash_time</td>
+<td>counter</td>
+</tr>
+<tr><td>disk.disk_job_time</td>
+<td>counter</td>
+</tr>
+</tbody>
+</table>
+<p>cumulative time spent in various disk jobs, as well
+as total for all disk jobs. Measured in microseconds</p>
+<a name="disk.num_fenced_read"></a>
+<a name="disk.num_fenced_write"></a>
+<a name="disk.num_fenced_hash"></a>
+<a name="disk.num_fenced_move_storage"></a>
+<a name="disk.num_fenced_release_files"></a>
+<a name="disk.num_fenced_delete_files"></a>
+<a name="disk.num_fenced_check_fastresume"></a>
+<a name="disk.num_fenced_save_resume_data"></a>
+<a name="disk.num_fenced_rename_file"></a>
+<a name="disk.num_fenced_stop_torrent"></a>
+<a name="disk.num_fenced_cache_piece"></a>
+<a name="disk.num_fenced_flush_piece"></a>
+<a name="disk.num_fenced_flush_hashed"></a>
+<a name="disk.num_fenced_flush_storage"></a>
+<a name="disk.num_fenced_trim_cache"></a>
+<a name="disk.num_fenced_file_priority"></a>
+<a name="disk.num_fenced_load_torrent"></a>
+<a name="disk.num_fenced_clear_piece"></a>
+<a name="disk.num_fenced_tick_storage"></a><table border="1" class="docutils">
+<colgroup>
+<col width="79%" />
+<col width="21%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">type</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>disk.num_fenced_read</td>
+<td>counter</td>
+</tr>
+<tr><td>disk.num_fenced_write</td>
+<td>counter</td>
+</tr>
+<tr><td>disk.num_fenced_hash</td>
+<td>counter</td>
+</tr>
+<tr><td>disk.num_fenced_move_storage</td>
+<td>counter</td>
+</tr>
+<tr><td>disk.num_fenced_release_files</td>
+<td>counter</td>
+</tr>
+<tr><td>disk.num_fenced_delete_files</td>
+<td>counter</td>
+</tr>
+<tr><td>disk.num_fenced_check_fastresume</td>
+<td>counter</td>
+</tr>
+<tr><td>disk.num_fenced_save_resume_data</td>
+<td>counter</td>
+</tr>
+<tr><td>disk.num_fenced_rename_file</td>
+<td>counter</td>
+</tr>
+<tr><td>disk.num_fenced_stop_torrent</td>
+<td>counter</td>
+</tr>
+<tr><td>disk.num_fenced_cache_piece</td>
+<td>counter</td>
+</tr>
+<tr><td>disk.num_fenced_flush_piece</td>
+<td>counter</td>
+</tr>
+<tr><td>disk.num_fenced_flush_hashed</td>
+<td>counter</td>
+</tr>
+<tr><td>disk.num_fenced_flush_storage</td>
+<td>counter</td>
+</tr>
+<tr><td>disk.num_fenced_trim_cache</td>
+<td>counter</td>
+</tr>
+<tr><td>disk.num_fenced_file_priority</td>
+<td>counter</td>
+</tr>
+<tr><td>disk.num_fenced_load_torrent</td>
+<td>counter</td>
+</tr>
+<tr><td>disk.num_fenced_clear_piece</td>
+<td>counter</td>
+</tr>
+<tr><td>disk.num_fenced_tick_storage</td>
+<td>counter</td>
+</tr>
+</tbody>
+</table>
+<p>for each kind of disk job, a counter of how many jobs of that kind
+are currently blocked by a disk fence</p>
+<a name="dht.dht_nodes"></a><table border="1" class="docutils">
+<colgroup>
+<col width="63%" />
+<col width="38%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">type</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>dht.dht_nodes</td>
+<td>counter</td>
+</tr>
+</tbody>
+</table>
+<p>The number of nodes in the DHT routing table</p>
+<a name="dht.dht_node_cache"></a><table border="1" class="docutils">
+<colgroup>
+<col width="69%" />
+<col width="31%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">type</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>dht.dht_node_cache</td>
+<td>counter</td>
+</tr>
+</tbody>
+</table>
+<p>The number of replacement nodes in the DHT routing table</p>
+<a name="dht.dht_torrents"></a><table border="1" class="docutils">
+<colgroup>
+<col width="67%" />
+<col width="33%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">type</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>dht.dht_torrents</td>
+<td>counter</td>
+</tr>
+</tbody>
+</table>
+<p>the number of torrents currently tracked by our DHT node</p>
+<a name="dht.dht_peers"></a><table border="1" class="docutils">
+<colgroup>
+<col width="63%" />
+<col width="38%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">type</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>dht.dht_peers</td>
+<td>counter</td>
+</tr>
+</tbody>
+</table>
+<p>the number of peers currently tracked by our DHT node</p>
+<a name="dht.dht_immutable_data"></a><table border="1" class="docutils">
+<colgroup>
+<col width="73%" />
+<col width="27%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">type</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>dht.dht_immutable_data</td>
+<td>counter</td>
+</tr>
+</tbody>
+</table>
+<p>the number of immutable data items tracked by our DHT node</p>
+<a name="dht.dht_mutable_data"></a><table border="1" class="docutils">
+<colgroup>
+<col width="71%" />
+<col width="29%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">type</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>dht.dht_mutable_data</td>
+<td>counter</td>
+</tr>
+</tbody>
+</table>
+<p>the number of mutable data items tracked by our DHT node</p>
+<a name="dht.dht_allocated_observers"></a><table border="1" class="docutils">
+<colgroup>
+<col width="76%" />
+<col width="24%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">type</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>dht.dht_allocated_observers</td>
+<td>counter</td>
+</tr>
+</tbody>
+</table>
+<p>the number of RPC observers currently allocated</p>
+<a name="dht.dht_messages_in"></a>
+<a name="dht.dht_messages_out"></a><table border="1" class="docutils">
+<colgroup>
+<col width="71%" />
+<col width="29%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">type</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>dht.dht_messages_in</td>
+<td>counter</td>
+</tr>
+<tr><td>dht.dht_messages_out</td>
+<td>counter</td>
+</tr>
+</tbody>
+</table>
+<p>the total number of DHT messages sent and received</p>
+<a name="dht.dht_messages_out_dropped"></a><table border="1" class="docutils">
+<colgroup>
+<col width="77%" />
+<col width="23%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">type</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>dht.dht_messages_out_dropped</td>
+<td>counter</td>
+</tr>
+</tbody>
+</table>
+<p>the number of outgoing messages that failed to be
+sent</p>
+<a name="dht.dht_bytes_in"></a>
+<a name="dht.dht_bytes_out"></a><table border="1" class="docutils">
+<colgroup>
+<col width="68%" />
+<col width="32%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">type</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>dht.dht_bytes_in</td>
+<td>counter</td>
+</tr>
+<tr><td>dht.dht_bytes_out</td>
+<td>counter</td>
+</tr>
+</tbody>
+</table>
+<p>the total number of bytes sent and received by the DHT</p>
+<a name="dht.dht_ping_in"></a>
+<a name="dht.dht_ping_out"></a>
+<a name="dht.dht_find_node_in"></a>
+<a name="dht.dht_find_node_out"></a>
+<a name="dht.dht_get_peers_in"></a>
+<a name="dht.dht_get_peers_out"></a>
+<a name="dht.dht_announce_peer_in"></a>
+<a name="dht.dht_announce_peer_out"></a>
+<a name="dht.dht_get_in"></a>
+<a name="dht.dht_get_out"></a>
+<a name="dht.dht_put_in"></a>
+<a name="dht.dht_put_out"></a><table border="1" class="docutils">
+<colgroup>
+<col width="75%" />
+<col width="25%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">type</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>dht.dht_ping_in</td>
+<td>counter</td>
+</tr>
+<tr><td>dht.dht_ping_out</td>
+<td>counter</td>
+</tr>
+<tr><td>dht.dht_find_node_in</td>
+<td>counter</td>
+</tr>
+<tr><td>dht.dht_find_node_out</td>
+<td>counter</td>
+</tr>
+<tr><td>dht.dht_get_peers_in</td>
+<td>counter</td>
+</tr>
+<tr><td>dht.dht_get_peers_out</td>
+<td>counter</td>
+</tr>
+<tr><td>dht.dht_announce_peer_in</td>
+<td>counter</td>
+</tr>
+<tr><td>dht.dht_announce_peer_out</td>
+<td>counter</td>
+</tr>
+<tr><td>dht.dht_get_in</td>
+<td>counter</td>
+</tr>
+<tr><td>dht.dht_get_out</td>
+<td>counter</td>
+</tr>
+<tr><td>dht.dht_put_in</td>
+<td>counter</td>
+</tr>
+<tr><td>dht.dht_put_out</td>
+<td>counter</td>
+</tr>
+</tbody>
+</table>
+<p>the number of DHT messages we've sent and received
+by kind.</p>
+<a name="dht.dht_invalid_announce"></a>
+<a name="dht.dht_invalid_get_peers"></a>
+<a name="dht.dht_invalid_put"></a>
+<a name="dht.dht_invalid_get"></a><table border="1" class="docutils">
+<colgroup>
+<col width="75%" />
+<col width="25%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">type</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>dht.dht_invalid_announce</td>
+<td>counter</td>
+</tr>
+<tr><td>dht.dht_invalid_get_peers</td>
+<td>counter</td>
+</tr>
+<tr><td>dht.dht_invalid_put</td>
+<td>counter</td>
+</tr>
+<tr><td>dht.dht_invalid_get</td>
+<td>counter</td>
+</tr>
+</tbody>
+</table>
+<p>the number of failed incoming DHT requests by kind of request</p>
+<a name="utp.utp_packet_loss"></a>
+<a name="utp.utp_timeout"></a>
+<a name="utp.utp_packets_in"></a>
+<a name="utp.utp_packets_out"></a>
+<a name="utp.utp_fast_retransmit"></a>
+<a name="utp.utp_packet_resend"></a>
+<a name="utp.utp_samples_above_target"></a>
+<a name="utp.utp_samples_below_target"></a>
+<a name="utp.utp_payload_pkts_in"></a>
+<a name="utp.utp_payload_pkts_out"></a>
+<a name="utp.utp_invalid_pkts_in"></a>
+<a name="utp.utp_redundant_pkts_in"></a><table border="1" class="docutils">
+<colgroup>
+<col width="77%" />
+<col width="23%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">type</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>utp.utp_packet_loss</td>
+<td>counter</td>
+</tr>
+<tr><td>utp.utp_timeout</td>
+<td>counter</td>
+</tr>
+<tr><td>utp.utp_packets_in</td>
+<td>counter</td>
+</tr>
+<tr><td>utp.utp_packets_out</td>
+<td>counter</td>
+</tr>
+<tr><td>utp.utp_fast_retransmit</td>
+<td>counter</td>
+</tr>
+<tr><td>utp.utp_packet_resend</td>
+<td>counter</td>
+</tr>
+<tr><td>utp.utp_samples_above_target</td>
+<td>counter</td>
+</tr>
+<tr><td>utp.utp_samples_below_target</td>
+<td>counter</td>
+</tr>
+<tr><td>utp.utp_payload_pkts_in</td>
+<td>counter</td>
+</tr>
+<tr><td>utp.utp_payload_pkts_out</td>
+<td>counter</td>
+</tr>
+<tr><td>utp.utp_invalid_pkts_in</td>
+<td>counter</td>
+</tr>
+<tr><td>utp.utp_redundant_pkts_in</td>
+<td>counter</td>
+</tr>
+</tbody>
+</table>
+<p>uTP counters. Each counter represents the number of time each event
+has occurred.</p>
+<a name="utp.num_utp_idle"></a>
+<a name="utp.num_utp_syn_sent"></a>
+<a name="utp.num_utp_connected"></a>
+<a name="utp.num_utp_fin_sent"></a>
+<a name="utp.num_utp_close_wait"></a>
+<a name="utp.num_utp_deleted"></a><table border="1" class="docutils">
+<colgroup>
+<col width="73%" />
+<col width="27%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">type</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>utp.num_utp_idle</td>
+<td>counter</td>
+</tr>
+<tr><td>utp.num_utp_syn_sent</td>
+<td>counter</td>
+</tr>
+<tr><td>utp.num_utp_connected</td>
+<td>counter</td>
+</tr>
+<tr><td>utp.num_utp_fin_sent</td>
+<td>counter</td>
+</tr>
+<tr><td>utp.num_utp_close_wait</td>
+<td>counter</td>
+</tr>
+<tr><td>utp.num_utp_deleted</td>
+<td>counter</td>
+</tr>
+</tbody>
+</table>
+<p>the number of uTP sockets in each respective state</p>
+<a name="sock_bufs.socket_send_size3"></a>
+<a name="sock_bufs.socket_send_size4"></a>
+<a name="sock_bufs.socket_send_size5"></a>
+<a name="sock_bufs.socket_send_size6"></a>
+<a name="sock_bufs.socket_send_size7"></a>
+<a name="sock_bufs.socket_send_size8"></a>
+<a name="sock_bufs.socket_send_size9"></a>
+<a name="sock_bufs.socket_send_size10"></a>
+<a name="sock_bufs.socket_send_size11"></a>
+<a name="sock_bufs.socket_send_size12"></a>
+<a name="sock_bufs.socket_send_size13"></a>
+<a name="sock_bufs.socket_send_size14"></a>
+<a name="sock_bufs.socket_send_size15"></a>
+<a name="sock_bufs.socket_send_size16"></a>
+<a name="sock_bufs.socket_send_size17"></a>
+<a name="sock_bufs.socket_send_size18"></a>
+<a name="sock_bufs.socket_send_size19"></a>
+<a name="sock_bufs.socket_send_size20"></a>
+<a name="sock_bufs.socket_recv_size3"></a>
+<a name="sock_bufs.socket_recv_size4"></a>
+<a name="sock_bufs.socket_recv_size5"></a>
+<a name="sock_bufs.socket_recv_size6"></a>
+<a name="sock_bufs.socket_recv_size7"></a>
+<a name="sock_bufs.socket_recv_size8"></a>
+<a name="sock_bufs.socket_recv_size9"></a>
+<a name="sock_bufs.socket_recv_size10"></a>
+<a name="sock_bufs.socket_recv_size11"></a>
+<a name="sock_bufs.socket_recv_size12"></a>
+<a name="sock_bufs.socket_recv_size13"></a>
+<a name="sock_bufs.socket_recv_size14"></a>
+<a name="sock_bufs.socket_recv_size15"></a>
+<a name="sock_bufs.socket_recv_size16"></a>
+<a name="sock_bufs.socket_recv_size17"></a>
+<a name="sock_bufs.socket_recv_size18"></a>
+<a name="sock_bufs.socket_recv_size19"></a>
+<a name="sock_bufs.socket_recv_size20"></a><table border="1" class="docutils">
+<colgroup>
+<col width="77%" />
+<col width="23%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">type</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>sock_bufs.socket_send_size3</td>
+<td>counter</td>
+</tr>
+<tr><td>sock_bufs.socket_send_size4</td>
+<td>counter</td>
+</tr>
+<tr><td>sock_bufs.socket_send_size5</td>
+<td>counter</td>
+</tr>
+<tr><td>sock_bufs.socket_send_size6</td>
+<td>counter</td>
+</tr>
+<tr><td>sock_bufs.socket_send_size7</td>
+<td>counter</td>
+</tr>
+<tr><td>sock_bufs.socket_send_size8</td>
+<td>counter</td>
+</tr>
+<tr><td>sock_bufs.socket_send_size9</td>
+<td>counter</td>
+</tr>
+<tr><td>sock_bufs.socket_send_size10</td>
+<td>counter</td>
+</tr>
+<tr><td>sock_bufs.socket_send_size11</td>
+<td>counter</td>
+</tr>
+<tr><td>sock_bufs.socket_send_size12</td>
+<td>counter</td>
+</tr>
+<tr><td>sock_bufs.socket_send_size13</td>
+<td>counter</td>
+</tr>
+<tr><td>sock_bufs.socket_send_size14</td>
+<td>counter</td>
+</tr>
+<tr><td>sock_bufs.socket_send_size15</td>
+<td>counter</td>
+</tr>
+<tr><td>sock_bufs.socket_send_size16</td>
+<td>counter</td>
+</tr>
+<tr><td>sock_bufs.socket_send_size17</td>
+<td>counter</td>
+</tr>
+<tr><td>sock_bufs.socket_send_size18</td>
+<td>counter</td>
+</tr>
+<tr><td>sock_bufs.socket_send_size19</td>
+<td>counter</td>
+</tr>
+<tr><td>sock_bufs.socket_send_size20</td>
+<td>counter</td>
+</tr>
+<tr><td>sock_bufs.socket_recv_size3</td>
+<td>counter</td>
+</tr>
+<tr><td>sock_bufs.socket_recv_size4</td>
+<td>counter</td>
+</tr>
+<tr><td>sock_bufs.socket_recv_size5</td>
+<td>counter</td>
+</tr>
+<tr><td>sock_bufs.socket_recv_size6</td>
+<td>counter</td>
+</tr>
+<tr><td>sock_bufs.socket_recv_size7</td>
+<td>counter</td>
+</tr>
+<tr><td>sock_bufs.socket_recv_size8</td>
+<td>counter</td>
+</tr>
+<tr><td>sock_bufs.socket_recv_size9</td>
+<td>counter</td>
+</tr>
+<tr><td>sock_bufs.socket_recv_size10</td>
+<td>counter</td>
+</tr>
+<tr><td>sock_bufs.socket_recv_size11</td>
+<td>counter</td>
+</tr>
+<tr><td>sock_bufs.socket_recv_size12</td>
+<td>counter</td>
+</tr>
+<tr><td>sock_bufs.socket_recv_size13</td>
+<td>counter</td>
+</tr>
+<tr><td>sock_bufs.socket_recv_size14</td>
+<td>counter</td>
+</tr>
+<tr><td>sock_bufs.socket_recv_size15</td>
+<td>counter</td>
+</tr>
+<tr><td>sock_bufs.socket_recv_size16</td>
+<td>counter</td>
+</tr>
+<tr><td>sock_bufs.socket_recv_size17</td>
+<td>counter</td>
+</tr>
+<tr><td>sock_bufs.socket_recv_size18</td>
+<td>counter</td>
+</tr>
+<tr><td>sock_bufs.socket_recv_size19</td>
+<td>counter</td>
+</tr>
+<tr><td>sock_bufs.socket_recv_size20</td>
+<td>counter</td>
+</tr>
+</tbody>
+</table>
+<p>the buffer sizes accepted by
+socket send and receive calls respectively.
+The larger the buffers are, the more efficient,
+because it reqire fewer system calls per byte.
+The size is 1 &lt;&lt; n, where n is the number
+at the end of the counter name. i.e.
+8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192,
+16384, 32768, 65536, 131072, 262144, 524288, 1048576
+bytes</p>
+</div>
+
+    </div>
+    </div>
+    <div id="gradient"></div>
+    <div id="footer">
+    <table>
+    <tr>
+      <td><a href="index.html">home</a></td>
+      <td><a href="http://blog.libtorrent.org">blog</a></td>
+      <td><a href="utp.html">uTP</a></td>
+    </tr>
+    <tr>
+      <td><a href="https://sourceforge.net/projects/libtorrent/files/libtorrent/">download</a></td>
+      <td><a href="reference.html">documentation</a></td>
+      <td><a href="dht_store.html">DHT put extension</a></td>
+    </tr>
+    <tr>
+      <td><a href="https://sourceforge.net/projects/libtorrent/files/py-libtorrent/">python bindings</a></td>
+      <td><a href="features.html">features</a></td>
+      <td><a href="dht_sec.html">DHT security extension</a></td>
+    </tr>
+    <tr>
+      <td><a href="http://dir.gmane.org/gmane.network.bit-torrent.libtorrent">mailing list archive</a></td>
+      <td><a href="contributing.html">contributing</a></td>
+      <td><a href="streaming.html">streaming</a></td>
+    </tr>
+    <tr>
+      <td><a href="http://code.google.com/p/libtorrent/issues/entry">report a bug</a></td>
+      <td><a href="building.html">building</a></td>
+      <td><a href="bittorrent.pdf">bittorrent slides</a></td>
+    </tr>
+    </table>
+    </div>
+    <div id="filler"></div>
+
+</div>
+</body>
+</html>

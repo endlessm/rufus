@@ -1,0 +1,3467 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="Docutils 0.12: http://docutils.sourceforge.net/" />
+<title></title>
+<meta name="author" content="Arvid Norberg, arvid&#64;libtorrent.org" />
+<meta name=viewport content="width=device-width, initial-scale=1">
+<script type="text/javascript">
+/* <![CDATA[ */
+    (function() {
+        var s = document.createElement('script'), t = document.getElementsByTagName('script')[0];
+        s.type = 'text/javascript';
+        s.async = true;
+        s.src = 'http://api.flattr.com/js/0.6/load.js?mode=auto';
+        t.parentNode.insertBefore(s, t);
+    })();
+/* ]]> */
+</script>
+<link rel="stylesheet" href="style.css" type="text/css" />
+<link rel="stylesheet" type="text/css" href="rst.css" />
+<style type="text/css">
+/* Hides from IE-mac \*/
+* html pre { height: 1%; }
+/* End hide from IE-mac */
+</style>
+</head>
+<body>
+<div class="document">
+    <div id="container">
+    <table id="header">
+    <tr><td id="orange"></td>
+    <td id="logo">libtorrent</td></tr>
+    </table>
+    <div id="main">
+
+<table class="docinfo" frame="void" rules="none">
+<col class="docinfo-name" />
+<col class="docinfo-content" />
+<tbody valign="top">
+<tr><th class="docinfo-name">Author:</th>
+<td>Arvid Norberg, <a class="last reference external" href="mailto:arvid&#64;libtorrent.org">arvid&#64;libtorrent.org</a></td></tr>
+<tr><th class="docinfo-name">Version:</th>
+<td>1.1.0</td></tr>
+</tbody>
+</table>
+<div class="section" id="alerts">
+<h1>Alerts</h1>
+<div class="contents topic" id="table-of-contents">
+<p class="topic-title first">Table of contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#alerts" id="id303">Alerts</a><ul>
+<li><a class="reference internal" href="#alert" id="id304">alert</a></li>
+<li><a class="reference internal" href="#torrent-alert" id="id305">torrent_alert</a></li>
+<li><a class="reference internal" href="#peer-alert" id="id306">peer_alert</a></li>
+<li><a class="reference internal" href="#tracker-alert" id="id307">tracker_alert</a></li>
+<li><a class="reference internal" href="#torrent-added-alert" id="id308">torrent_added_alert</a></li>
+<li><a class="reference internal" href="#torrent-removed-alert" id="id309">torrent_removed_alert</a></li>
+<li><a class="reference internal" href="#read-piece-alert" id="id310">read_piece_alert</a></li>
+<li><a class="reference internal" href="#file-completed-alert" id="id311">file_completed_alert</a></li>
+<li><a class="reference internal" href="#file-renamed-alert" id="id312">file_renamed_alert</a></li>
+<li><a class="reference internal" href="#file-rename-failed-alert" id="id313">file_rename_failed_alert</a></li>
+<li><a class="reference internal" href="#performance-alert" id="id314">performance_alert</a></li>
+<li><a class="reference internal" href="#state-changed-alert" id="id315">state_changed_alert</a></li>
+<li><a class="reference internal" href="#tracker-error-alert" id="id316">tracker_error_alert</a></li>
+<li><a class="reference internal" href="#tracker-warning-alert" id="id317">tracker_warning_alert</a></li>
+<li><a class="reference internal" href="#scrape-reply-alert" id="id318">scrape_reply_alert</a></li>
+<li><a class="reference internal" href="#scrape-failed-alert" id="id319">scrape_failed_alert</a></li>
+<li><a class="reference internal" href="#tracker-reply-alert" id="id320">tracker_reply_alert</a></li>
+<li><a class="reference internal" href="#dht-reply-alert" id="id321">dht_reply_alert</a></li>
+<li><a class="reference internal" href="#tracker-announce-alert" id="id322">tracker_announce_alert</a></li>
+<li><a class="reference internal" href="#hash-failed-alert" id="id323">hash_failed_alert</a></li>
+<li><a class="reference internal" href="#peer-ban-alert" id="id324">peer_ban_alert</a></li>
+<li><a class="reference internal" href="#peer-unsnubbed-alert" id="id325">peer_unsnubbed_alert</a></li>
+<li><a class="reference internal" href="#peer-snubbed-alert" id="id326">peer_snubbed_alert</a></li>
+<li><a class="reference internal" href="#peer-error-alert" id="id327">peer_error_alert</a></li>
+<li><a class="reference internal" href="#peer-connect-alert" id="id328">peer_connect_alert</a></li>
+<li><a class="reference internal" href="#peer-disconnected-alert" id="id329">peer_disconnected_alert</a></li>
+<li><a class="reference internal" href="#invalid-request-alert" id="id330">invalid_request_alert</a></li>
+<li><a class="reference internal" href="#torrent-finished-alert" id="id331">torrent_finished_alert</a></li>
+<li><a class="reference internal" href="#piece-finished-alert" id="id332">piece_finished_alert</a></li>
+<li><a class="reference internal" href="#request-dropped-alert" id="id333">request_dropped_alert</a></li>
+<li><a class="reference internal" href="#block-timeout-alert" id="id334">block_timeout_alert</a></li>
+<li><a class="reference internal" href="#block-finished-alert" id="id335">block_finished_alert</a></li>
+<li><a class="reference internal" href="#block-downloading-alert" id="id336">block_downloading_alert</a></li>
+<li><a class="reference internal" href="#unwanted-block-alert" id="id337">unwanted_block_alert</a></li>
+<li><a class="reference internal" href="#storage-moved-alert" id="id338">storage_moved_alert</a></li>
+<li><a class="reference internal" href="#storage-moved-failed-alert" id="id339">storage_moved_failed_alert</a></li>
+<li><a class="reference internal" href="#torrent-deleted-alert" id="id340">torrent_deleted_alert</a></li>
+<li><a class="reference internal" href="#torrent-delete-failed-alert" id="id341">torrent_delete_failed_alert</a></li>
+<li><a class="reference internal" href="#save-resume-data-alert" id="id342">save_resume_data_alert</a></li>
+<li><a class="reference internal" href="#save-resume-data-failed-alert" id="id343">save_resume_data_failed_alert</a></li>
+<li><a class="reference internal" href="#torrent-paused-alert" id="id344">torrent_paused_alert</a></li>
+<li><a class="reference internal" href="#torrent-resumed-alert" id="id345">torrent_resumed_alert</a></li>
+<li><a class="reference internal" href="#torrent-checked-alert" id="id346">torrent_checked_alert</a></li>
+<li><a class="reference internal" href="#url-seed-alert" id="id347">url_seed_alert</a></li>
+<li><a class="reference internal" href="#file-error-alert" id="id348">file_error_alert</a></li>
+<li><a class="reference internal" href="#metadata-failed-alert" id="id349">metadata_failed_alert</a></li>
+<li><a class="reference internal" href="#metadata-received-alert" id="id350">metadata_received_alert</a></li>
+<li><a class="reference internal" href="#udp-error-alert" id="id351">udp_error_alert</a></li>
+<li><a class="reference internal" href="#external-ip-alert" id="id352">external_ip_alert</a></li>
+<li><a class="reference internal" href="#listen-failed-alert" id="id353">listen_failed_alert</a></li>
+<li><a class="reference internal" href="#listen-succeeded-alert" id="id354">listen_succeeded_alert</a></li>
+<li><a class="reference internal" href="#portmap-error-alert" id="id355">portmap_error_alert</a></li>
+<li><a class="reference internal" href="#portmap-alert" id="id356">portmap_alert</a></li>
+<li><a class="reference internal" href="#portmap-log-alert" id="id357">portmap_log_alert</a></li>
+<li><a class="reference internal" href="#fastresume-rejected-alert" id="id358">fastresume_rejected_alert</a></li>
+<li><a class="reference internal" href="#peer-blocked-alert" id="id359">peer_blocked_alert</a></li>
+<li><a class="reference internal" href="#dht-announce-alert" id="id360">dht_announce_alert</a></li>
+<li><a class="reference internal" href="#dht-get-peers-alert" id="id361">dht_get_peers_alert</a></li>
+<li><a class="reference internal" href="#stats-alert" id="id362">stats_alert</a></li>
+<li><a class="reference internal" href="#cache-flushed-alert" id="id363">cache_flushed_alert</a></li>
+<li><a class="reference internal" href="#anonymous-mode-alert" id="id364">anonymous_mode_alert</a></li>
+<li><a class="reference internal" href="#lsd-peer-alert" id="id365">lsd_peer_alert</a></li>
+<li><a class="reference internal" href="#trackerid-alert" id="id366">trackerid_alert</a></li>
+<li><a class="reference internal" href="#dht-bootstrap-alert" id="id367">dht_bootstrap_alert</a></li>
+<li><a class="reference internal" href="#torrent-error-alert" id="id368">torrent_error_alert</a></li>
+<li><a class="reference internal" href="#torrent-need-cert-alert" id="id369">torrent_need_cert_alert</a></li>
+<li><a class="reference internal" href="#incoming-connection-alert" id="id370">incoming_connection_alert</a></li>
+<li><a class="reference internal" href="#add-torrent-alert" id="id371">add_torrent_alert</a></li>
+<li><a class="reference internal" href="#state-update-alert" id="id372">state_update_alert</a></li>
+<li><a class="reference internal" href="#mmap-cache-alert" id="id373">mmap_cache_alert</a></li>
+<li><a class="reference internal" href="#session-stats-alert" id="id374">session_stats_alert</a></li>
+<li><a class="reference internal" href="#dht-error-alert" id="id375">dht_error_alert</a></li>
+<li><a class="reference internal" href="#dht-immutable-item-alert" id="id376">dht_immutable_item_alert</a></li>
+<li><a class="reference internal" href="#dht-mutable-item-alert" id="id377">dht_mutable_item_alert</a></li>
+<li><a class="reference internal" href="#dht-put-alert" id="id378">dht_put_alert</a></li>
+<li><a class="reference internal" href="#i2p-alert" id="id379">i2p_alert</a></li>
+<li><a class="reference internal" href="#dht-outgoing-get-peers-alert" id="id380">dht_outgoing_get_peers_alert</a></li>
+<li><a class="reference internal" href="#log-alert" id="id381">log_alert</a></li>
+<li><a class="reference internal" href="#torrent-log-alert" id="id382">torrent_log_alert</a></li>
+<li><a class="reference internal" href="#peer-log-alert" id="id383">peer_log_alert</a></li>
+<li><a class="reference internal" href="#lsd-error-alert" id="id384">lsd_error_alert</a></li>
+<li><a class="reference internal" href="#dht-lookup" id="id385">dht_lookup</a></li>
+<li><a class="reference internal" href="#dht-routing-bucket" id="id386">dht_routing_bucket</a></li>
+<li><a class="reference internal" href="#dht-stats-alert" id="id387">dht_stats_alert</a></li>
+<li><a class="reference internal" href="#incoming-request-alert" id="id388">incoming_request_alert</a></li>
+<li><a class="reference internal" href="#dht-log-alert" id="id389">dht_log_alert</a></li>
+<li><a class="reference internal" href="#dht-pkt-alert" id="id390">dht_pkt_alert</a></li>
+<li><a class="reference internal" href="#dht-get-peers-reply-alert" id="id391">dht_get_peers_reply_alert</a></li>
+<li><a class="reference internal" href="#dht-direct-response-alert" id="id392">dht_direct_response_alert</a></li>
+<li><a class="reference internal" href="#picker-log-alert" id="id393">picker_log_alert</a></li>
+<li><a class="reference internal" href="#alert-cast" id="id394">alert_cast()</a></li>
+<li><a class="reference internal" href="#operation-name" id="id395">operation_name()</a></li>
+<li><a class="reference internal" href="#enum-operation-t" id="id396">enum operation_t</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<p>The <a class="reference external" href="reference-Core.html#pop_alerts()">pop_alerts()</a> function on <a class="reference external" href="reference-Core.html#session">session</a> is the main interface for retrieving
+alerts (warnings, messages and errors from libtorrent). If no alerts have
+been posted by libtorrent <a class="reference external" href="reference-Core.html#pop_alerts()">pop_alerts()</a> will return an empty list.</p>
+<p>By default, only errors are reported. <a class="reference external" href="reference-Settings.html#alert_mask">settings_pack::alert_mask</a> can be
+used to specify which kinds of events should be reported. The <a class="reference external" href="reference-Alerts.html#alert">alert</a> mask is
+comprised by bits from the <a class="reference external" href="reference-Alerts.html#category_t">category_t</a> enum.</p>
+<p>Every <a class="reference external" href="reference-Alerts.html#alert">alert</a> belongs to one or more category. There is a cost associated with
+posting alerts. Only alerts that belong to an enabled category are
+posted. Setting the <a class="reference external" href="reference-Alerts.html#alert">alert</a> bitmask to 0 will disable all alerts (except those
+that are non-discardable). Alerts that are responses to API calls such as
+<a class="reference external" href="reference-Core.html#save_resume_data()">save_resume_data()</a> and <a class="reference external" href="reference-Core.html#post_session_stats()">post_session_stats()</a> are non-discardable and will be
+posted even if their category is disabled.</p>
+<p>There are other <a class="reference external" href="reference-Alerts.html#alert">alert</a> base classes that some alerts derive from, all the
+alerts that are generated for a specific torrent are derived from
+<a class="reference external" href="reference-Alerts.html#torrent_alert">torrent_alert</a>, and tracker events derive from <a class="reference external" href="reference-Alerts.html#tracker_alert">tracker_alert</a>.</p>
+<p>Alerts returned by <a class="reference external" href="reference-Core.html#pop_alerts()">pop_alerts()</a> are only valid until the next call to
+<a class="reference external" href="reference-Core.html#pop_alerts()">pop_alerts()</a>. You may not copy an <a class="reference external" href="reference-Alerts.html#alert">alert</a> object to access it after the next
+call to <a class="reference external" href="reference-Core.html#pop_alerts()">pop_alerts()</a>. Internal members of alerts also become invalid once
+<a class="reference external" href="reference-Core.html#pop_alerts()">pop_alerts()</a> is called again.</p>
+<a name="alert"></a><div class="section" id="alert">
+<h2>alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert.hpp">libtorrent/alert.hpp</a>&quot;</p>
+<p>The <tt class="docutils literal">alert</tt> class is the base class that specific messages are derived from.
+<a class="reference external" href="reference-Alerts.html#alert">alert</a> types are not copyable, and cannot be constructed by the client. The
+pointers returned by libtorrent are short lived (the details are described
+under <a class="reference external" href="reference-Core.html#pop_alerts()">session_handle::pop_alerts()</a>)</p>
+<pre class="literal-block">
+class alert
+{
+   time_point <strong>timestamp</strong> () const;
+   virtual int <strong>type</strong> () const = 0;
+   virtual char const* <strong>what</strong> () const = 0;
+   virtual std::string <strong>message</strong> () const = 0;
+   virtual int <strong>category</strong> () const = 0;
+
+   enum category_t
+   {
+      error_notification,
+      peer_notification,
+      port_mapping_notification,
+      storage_notification,
+      tracker_notification,
+      debug_notification,
+      status_notification,
+      progress_notification,
+      ip_block_notification,
+      performance_warning,
+      dht_notification,
+      stats_notification,
+      session_log_notification,
+      torrent_log_notification,
+      peer_log_notification,
+      incoming_request_notification,
+      dht_log_notification,
+      dht_operation_notification,
+      port_mapping_log_notification,
+      picker_log_notification,
+      all_categories,
+   };
+};
+</pre>
+<a name="timestamp()"></a><div class="section" id="timestamp">
+<h3>timestamp()</h3>
+<pre class="literal-block">
+time_point <strong>timestamp</strong> () const;
+</pre>
+<p>a timestamp is automatically created in the constructor</p>
+<a name="type()"></a></div>
+<div class="section" id="type">
+<h3>type()</h3>
+<pre class="literal-block">
+virtual int <strong>type</strong> () const = 0;
+</pre>
+<p>returns an integer that is unique to this <a class="reference external" href="reference-Alerts.html#alert">alert</a> type. It can be
+compared against a specific <a class="reference external" href="reference-Alerts.html#alert">alert</a> by querying a static constant called <tt class="docutils literal">alert_type</tt>
+in the <a class="reference external" href="reference-Alerts.html#alert">alert</a>. It can be used to determine the run-time type of an alert* in
+order to cast to that <a class="reference external" href="reference-Alerts.html#alert">alert</a> type and access specific members.</p>
+<p>e.g:</p>
+<pre class="code c++ literal-block">
+<span class="name">std</span><span class="operator">::</span><span class="name">vector</span><span class="operator">&lt;</span><span class="name">alert</span><span class="operator">*&gt;</span> <span class="name">alerts</span><span class="punctuation">;</span>
+<span class="name">ses</span><span class="punctuation">.</span><span class="name">pop_alerts</span><span class="punctuation">(</span><span class="operator">&amp;</span><span class="name">alerts</span><span class="punctuation">);</span>
+<span class="keyword">for</span> <span class="punctuation">(</span><span class="name">alert</span><span class="operator">*</span> <span class="name label">i</span> <span class="punctuation">:</span> <span class="name">alerts</span><span class="punctuation">)</span> <span class="punctuation">{</span>
+        <span class="keyword">switch</span> <span class="punctuation">(</span><span class="name">a</span><span class="operator">-&gt;</span><span class="name">type</span><span class="punctuation">())</span> <span class="punctuation">{</span>
+
+                <span class="keyword">case</span> <span class="name">read_piece_alert</span><span class="operator">::</span><span class="name label">alert_type</span><span class="punctuation">:</span>
+                <span class="punctuation">{</span>
+                        <span class="name">read_piece_alert</span><span class="operator">*</span> <span class="name">p</span> <span class="operator">=</span> <span class="punctuation">(</span><span class="name">read_piece_alert</span><span class="operator">*</span><span class="punctuation">)</span><span class="name">a</span><span class="punctuation">;</span>
+                        <span class="keyword">if</span> <span class="punctuation">(</span><span class="name">p</span><span class="operator">-&gt;</span><span class="name">ec</span><span class="punctuation">)</span> <span class="punctuation">{</span>
+                                <span class="comment single">// read_piece failed
+</span>                                <span class="keyword">break</span><span class="punctuation">;</span>
+                        <span class="punctuation">}</span>
+                        <span class="comment single">// use p
+</span>                        <span class="keyword">break</span><span class="punctuation">;</span>
+                <span class="punctuation">}</span>
+                <span class="keyword">case</span> <span class="name">file_renamed_alert</span><span class="operator">::</span><span class="name label">alert_type</span><span class="punctuation">:</span>
+                <span class="punctuation">{</span>
+                        <span class="comment single">// etc...
+</span>                <span class="punctuation">}</span>
+        <span class="punctuation">}</span>
+<span class="punctuation">}</span>
+</pre>
+<a name="what()"></a></div>
+<div class="section" id="what">
+<h3>what()</h3>
+<pre class="literal-block">
+virtual char const* <strong>what</strong> () const = 0;
+</pre>
+<p>returns a string literal describing the type of the <a class="reference external" href="reference-Alerts.html#alert">alert</a>. It does
+not include any information that might be bundled with the <a class="reference external" href="reference-Alerts.html#alert">alert</a>.</p>
+<a name="message()"></a></div>
+<div class="section" id="message">
+<h3>message()</h3>
+<pre class="literal-block">
+virtual std::string <strong>message</strong> () const = 0;
+</pre>
+<p>generate a string describing the <a class="reference external" href="reference-Alerts.html#alert">alert</a> and the information bundled
+with it. This is mainly intended for debug and development use. It is not suitable
+to use this for applications that may be localized. Instead, handle each <a class="reference external" href="reference-Alerts.html#alert">alert</a>
+type individually and extract and render the information from the <a class="reference external" href="reference-Alerts.html#alert">alert</a> depending
+on the locale.</p>
+<a name="category()"></a></div>
+<div class="section" id="category">
+<h3>category()</h3>
+<pre class="literal-block">
+virtual int <strong>category</strong> () const = 0;
+</pre>
+<p>returns a bitmask specifying which categories this <a class="reference external" href="reference-Alerts.html#alert">alert</a> belong to.</p>
+<a name="category_t"></a></div>
+<div class="section" id="enum-category-t">
+<h3>enum category_t</h3>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert.hpp">libtorrent/alert.hpp</a>&quot;</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="28%" />
+<col width="11%" />
+<col width="62%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">value</th>
+<th class="head">description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>error_notification</td>
+<td>1</td>
+<td><p class="first">Enables alerts that report an error. This includes:</p>
+<ul class="last simple">
+<li>tracker errors</li>
+<li>tracker warnings</li>
+<li>file errors</li>
+<li>resume data failures</li>
+<li>web seed errors</li>
+<li>.torrent files errors</li>
+<li>listen socket errors</li>
+<li>port mapping errors</li>
+</ul>
+</td>
+</tr>
+<tr><td>peer_notification</td>
+<td>2</td>
+<td>Enables alerts when peers send invalid requests, get banned or
+snubbed.</td>
+</tr>
+<tr><td>port_mapping_notification</td>
+<td>4</td>
+<td>Enables alerts for port mapping events. For NAT-PMP and UPnP.</td>
+</tr>
+<tr><td>storage_notification</td>
+<td>8</td>
+<td>Enables alerts for events related to the storage. File errors and
+synchronization events for moving the storage, renaming files etc.</td>
+</tr>
+<tr><td>tracker_notification</td>
+<td>16</td>
+<td>Enables all tracker events. Includes announcing to trackers,
+receiving responses, warnings and errors.</td>
+</tr>
+<tr><td>debug_notification</td>
+<td>32</td>
+<td>Low level alerts for when peers are connected and disconnected.</td>
+</tr>
+<tr><td>status_notification</td>
+<td>64</td>
+<td>Enables alerts for when a torrent or the <a class="reference external" href="reference-Core.html#session">session</a> changes state.</td>
+</tr>
+<tr><td>progress_notification</td>
+<td>128</td>
+<td>Alerts for when blocks are requested and completed. Also when
+pieces are completed.</td>
+</tr>
+<tr><td>ip_block_notification</td>
+<td>256</td>
+<td>Alerts when a peer is blocked by the ip blocker or port blocker.</td>
+</tr>
+<tr><td>performance_warning</td>
+<td>512</td>
+<td>Alerts when some limit is reached that might limit the download
+or upload rate.</td>
+</tr>
+<tr><td>dht_notification</td>
+<td>1024</td>
+<td>Alerts on events in the DHT node. For incoming searches or
+bootstrapping being done etc.</td>
+</tr>
+<tr><td>stats_notification</td>
+<td>2048</td>
+<td>If you enable these alerts, you will receive a <a class="reference external" href="reference-Alerts.html#stats_alert">stats_alert</a>
+approximately once every second, for every active torrent.
+These alerts contain all statistics counters for the interval since
+the lasts stats <a class="reference external" href="reference-Alerts.html#alert">alert</a>.</td>
+</tr>
+<tr><td>session_log_notification</td>
+<td>8192</td>
+<td>Enables debug logging alerts. These are available unless libtorrent
+was built with logging disabled (<tt class="docutils literal">TORRENT_DISABLE_LOGGING</tt>). The
+alerts being posted are <a class="reference external" href="reference-Alerts.html#log_alert">log_alert</a> and are <a class="reference external" href="reference-Core.html#session">session</a> wide.</td>
+</tr>
+<tr><td>torrent_log_notification</td>
+<td>16384</td>
+<td>Enables debug logging alerts for torrents. These are available
+unless libtorrent was built with logging disabled
+(<tt class="docutils literal">TORRENT_DISABLE_LOGGING</tt>). The alerts being posted are
+<a class="reference external" href="reference-Alerts.html#torrent_log_alert">torrent_log_alert</a> and are torrent wide debug events.</td>
+</tr>
+<tr><td>peer_log_notification</td>
+<td>32768</td>
+<td>Enables debug logging alerts for peers. These are available unless
+libtorrent was built with logging disabled
+(<tt class="docutils literal">TORRENT_DISABLE_LOGGING</tt>). The alerts being posted are
+<a class="reference external" href="reference-Alerts.html#peer_log_alert">peer_log_alert</a> and low-level peer events and messages.</td>
+</tr>
+<tr><td>incoming_request_notification</td>
+<td>65536</td>
+<td>enables the <a class="reference external" href="reference-Alerts.html#incoming_request_alert">incoming_request_alert</a>.</td>
+</tr>
+<tr><td>dht_log_notification</td>
+<td>131072</td>
+<td>enables <a class="reference external" href="reference-Alerts.html#dht_log_alert">dht_log_alert</a>, debug logging for the DHT</td>
+</tr>
+<tr><td>dht_operation_notification</td>
+<td>262144</td>
+<td>enable events from pure dht operations not related to torrents</td>
+</tr>
+<tr><td>port_mapping_log_notification</td>
+<td>524288</td>
+<td>enables port mapping log events. This log is useful
+for debugging the UPnP or NAT-PMP implementation</td>
+</tr>
+<tr><td>picker_log_notification</td>
+<td>1048576</td>
+<td>enables verbose logging from the piece picker.</td>
+</tr>
+<tr><td>all_categories</td>
+<td>2147483647</td>
+<td><p class="first">The full bitmask, representing all available categories.</p>
+<p class="last">since the enum is signed, make sure this isn't
+interpreted as -1. For instance, boost.python
+does that and fails when assigning it to an
+unsigned parameter.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<a name="torrent_alert"></a></div>
+</div>
+<div class="section" id="torrent-alert">
+<h2>torrent_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This is a base class for alerts that are associated with a
+specific torrent. It contains a handle to the torrent.</p>
+<pre class="literal-block">
+struct torrent_alert : alert
+{
+   virtual std::string <strong>message</strong> () const override;
+   char const* <strong>torrent_name</strong> () const;
+
+   torrent_handle handle;
+};
+</pre>
+<a name="message()"></a><div class="section" id="id43">
+<h3>message()</h3>
+<pre class="literal-block">
+virtual std::string <strong>message</strong> () const override;
+</pre>
+<p>returns the message associated with this <a class="reference external" href="reference-Alerts.html#alert">alert</a></p>
+<a name="handle"></a><dl class="docutils">
+<dt>handle</dt>
+<dd>The <a class="reference external" href="reference-Core.html#torrent_handle">torrent_handle</a> pointing to the torrent this
+<a class="reference external" href="reference-Alerts.html#alert">alert</a> is associated with.</dd>
+</dl>
+<a name="peer_alert"></a></div>
+</div>
+<div class="section" id="peer-alert">
+<h2>peer_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>The peer <a class="reference external" href="reference-Alerts.html#alert">alert</a> is a base class for alerts that refer to a specific peer. It includes all
+the information to identify the peer. i.e. <tt class="docutils literal">ip</tt> and <tt class="docutils literal"><span class="pre">peer-id</span></tt>.</p>
+<pre class="literal-block">
+struct peer_alert : torrent_alert
+{
+   virtual int <strong>category</strong> () const override;
+   virtual std::string <strong>message</strong> () const override;
+
+   static const int alert_type = 1;
+   static const int static_category = alert::peer_notification;
+   tcp::endpoint ip;
+   peer_id pid;
+};
+</pre>
+<a name="ip"></a><dl class="docutils">
+<dt>ip</dt>
+<dd>The peer's IP address and port.</dd>
+</dl>
+<a name="pid"></a><dl class="docutils">
+<dt>pid</dt>
+<dd>the peer ID, if known.</dd>
+</dl>
+<a name="tracker_alert"></a></div>
+<div class="section" id="tracker-alert">
+<h2>tracker_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This is a base class used for alerts that are associated with a
+specific tracker. It derives from <a class="reference external" href="reference-Alerts.html#torrent_alert">torrent_alert</a> since a tracker
+is also associated with a specific torrent.</p>
+<pre class="literal-block">
+struct tracker_alert : torrent_alert
+{
+   virtual int <strong>category</strong> () const override;
+   virtual std::string <strong>message</strong> () const override;
+   char const* <strong>tracker_url</strong> () const;
+
+   static const int alert_type = 2;
+   static const int static_category = alert::tracker_notification;
+};
+</pre>
+<a name="tracker_url()"></a><div class="section" id="tracker-url">
+<h3>tracker_url()</h3>
+<pre class="literal-block">
+char const* <strong>tracker_url</strong> () const;
+</pre>
+<p>returns a null-terminated string of the tracker's URL</p>
+<a name="torrent_added_alert"></a></div>
+</div>
+<div class="section" id="torrent-added-alert">
+<h2>torrent_added_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>The <tt class="docutils literal">torrent_added_alert</tt> is posted once every time a torrent is successfully
+added. It doesn't contain any members of its own, but inherits the torrent handle
+from its base class.
+It's posted when the <tt class="docutils literal">status_notification</tt> bit is set in the alert_mask.</p>
+<pre class="literal-block">
+struct torrent_added_alert final : torrent_alert
+{
+   virtual std::string <strong>message</strong> () const override;
+
+   static const int static_category = alert::status_notification;
+};
+</pre>
+<a name="torrent_removed_alert"></a></div>
+<div class="section" id="torrent-removed-alert">
+<h2>torrent_removed_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>The <tt class="docutils literal">torrent_removed_alert</tt> is posted whenever a torrent is removed. Since
+the torrent handle in its base class will always be invalid (since the torrent
+is already removed) it has the info hash as a member, to identify it.
+It's posted when the <tt class="docutils literal">status_notification</tt> bit is set in the alert_mask.</p>
+<p>Even though the <tt class="docutils literal">handle</tt> member doesn't point to an existing torrent anymore,
+it is still useful for comparing to other handles, which may also no
+longer point to existing torrents, but to the same non-existing torrents.</p>
+<p>The <tt class="docutils literal">torrent_handle</tt> acts as a <tt class="docutils literal">weak_ptr</tt>, even though its object no
+longer exists, it can still compare equal to another weak pointer which
+points to the same non-existent object.</p>
+<pre class="literal-block">
+struct torrent_removed_alert final : torrent_alert
+{
+   virtual std::string <strong>message</strong> () const override;
+
+   static const int static_category = alert::status_notification;
+   sha1_hash info_hash;
+};
+</pre>
+<a name="read_piece_alert"></a></div>
+<div class="section" id="read-piece-alert">
+<h2>read_piece_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is posted when the asynchronous read operation initiated by
+a call to <a class="reference external" href="reference-Core.html#read_piece()">torrent_handle::read_piece()</a> is completed. If the read failed, the torrent
+is paused and an error state is set and the buffer member of the <a class="reference external" href="reference-Alerts.html#alert">alert</a>
+is 0. If successful, <tt class="docutils literal">buffer</tt> points to a buffer containing all the data
+of the piece. <tt class="docutils literal">piece</tt> is the piece index that was read. <tt class="docutils literal">size</tt> is the
+number of bytes that was read.</p>
+<p>If the operation fails, ec will indicate what went wrong.</p>
+<pre class="literal-block">
+struct read_piece_alert final : torrent_alert
+{
+   virtual std::string <strong>message</strong> () const override;
+
+   static const int static_category = alert::storage_notification;
+   error_code ec;
+   boost::shared_array&lt;char&gt; buffer;
+   int piece;
+   int size;
+};
+</pre>
+<a name="file_completed_alert"></a></div>
+<div class="section" id="file-completed-alert">
+<h2>file_completed_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This is posted whenever an individual file completes its download. i.e.
+All pieces overlapping this file have passed their hash check.</p>
+<pre class="literal-block">
+struct file_completed_alert final : torrent_alert
+{
+   virtual std::string <strong>message</strong> () const override;
+
+   static const int static_category = alert::progress_notification;
+   int index;
+};
+</pre>
+<a name="index"></a><dl class="docutils">
+<dt>index</dt>
+<dd>refers to the index of the file that completed.</dd>
+</dl>
+<a name="file_renamed_alert"></a></div>
+<div class="section" id="file-renamed-alert">
+<h2>file_renamed_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This is posted as a response to a <a class="reference external" href="reference-Core.html#rename_file()">torrent_handle::rename_file()</a> call, if the rename
+operation succeeds.</p>
+<pre class="literal-block">
+struct file_renamed_alert final : torrent_alert
+{
+   virtual std::string <strong>message</strong> () const override;
+   char const* <strong>new_name</strong> () const;
+
+   static const int static_category = alert::storage_notification;
+   int index;
+};
+</pre>
+<a name="index"></a><dl class="docutils">
+<dt>index</dt>
+<dd>refers to the index of the file that was renamed,</dd>
+</dl>
+<a name="file_rename_failed_alert"></a></div>
+<div class="section" id="file-rename-failed-alert">
+<h2>file_rename_failed_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This is posted as a response to a <a class="reference external" href="reference-Core.html#rename_file()">torrent_handle::rename_file()</a> call, if the rename
+operation failed.</p>
+<pre class="literal-block">
+struct file_rename_failed_alert final : torrent_alert
+{
+   virtual std::string <strong>message</strong> () const override;
+
+   static const int static_category = alert::storage_notification;
+   int index;
+   error_code error;
+};
+</pre>
+<a name="index"></a>
+<a name="error"></a><dl class="docutils">
+<dt>index  error</dt>
+<dd>refers to the index of the file that was supposed to be renamed,
+<tt class="docutils literal">error</tt> is the error code returned from the filesystem.</dd>
+</dl>
+<a name="performance_alert"></a></div>
+<div class="section" id="performance-alert">
+<h2>performance_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is generated when a limit is reached that might have a negative impact on
+upload or download rate performance.</p>
+<pre class="literal-block">
+struct performance_alert final : torrent_alert
+{
+   virtual std::string <strong>message</strong> () const override;
+
+   enum performance_warning_t
+   {
+      outstanding_disk_buffer_limit_reached,
+      outstanding_request_limit_reached,
+      upload_limit_too_low,
+      download_limit_too_low,
+      send_buffer_watermark_too_low,
+      too_many_optimistic_unchoke_slots,
+      too_high_disk_queue_limit,
+      aio_limit_reached,
+      bittyrant_with_no_uplimit,
+      too_few_outgoing_ports,
+      too_few_file_descriptors,
+      num_warnings,
+   };
+
+   static const int static_category = alert::performance_warning;
+   performance_warning_t warning_code;
+};
+</pre>
+<a name="performance_warning_t"></a><div class="section" id="enum-performance-warning-t">
+<h3>enum performance_warning_t</h3>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="27%" />
+<col width="5%" />
+<col width="68%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">value</th>
+<th class="head">description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>outstanding_disk_buffer_limit_reached</td>
+<td>0</td>
+<td>This warning means that the number of bytes queued to be written to disk
+exceeds the max disk byte queue setting (<tt class="docutils literal"><span class="pre">settings_pack::max_queued_disk_bytes</span></tt>).
+This might restrict the download rate, by not queuing up enough write jobs
+to the disk I/O thread. When this <a class="reference external" href="reference-Alerts.html#alert">alert</a> is posted, peer connections are
+temporarily stopped from downloading, until the queued disk bytes have fallen
+below the limit again. Unless your <tt class="docutils literal">max_queued_disk_bytes</tt> setting is already
+high, you might want to increase it to get better performance.</td>
+</tr>
+<tr><td>outstanding_request_limit_reached</td>
+<td>1</td>
+<td>This is posted when libtorrent would like to send more requests to a peer,
+but it's limited by <tt class="docutils literal"><span class="pre">settings_pack::max_out_request_queue</span></tt>. The queue length
+libtorrent is trying to achieve is determined by the download rate and the
+assumed round-trip-time (<tt class="docutils literal"><span class="pre">settings_pack::request_queue_time</span></tt>). The assumed
+round-trip-time is not limited to just the network RTT, but also the remote disk
+access time and message handling time. It defaults to 3 seconds. The target number
+of outstanding requests is set to fill the bandwidth-delay product (assumed RTT
+times download rate divided by number of bytes per request). When this <a class="reference external" href="reference-Alerts.html#alert">alert</a>
+is posted, there is a risk that the number of outstanding requests is too low
+and limits the download rate. You might want to increase the <tt class="docutils literal">max_out_request_queue</tt>
+setting.</td>
+</tr>
+<tr><td>upload_limit_too_low</td>
+<td>2</td>
+<td>This warning is posted when the amount of TCP/IP overhead is greater than the
+upload rate limit. When this happens, the TCP/IP overhead is caused by a much
+faster download rate, triggering TCP ACK packets. These packets eat into the
+rate limit specified to libtorrent. When the overhead traffic is greater than
+the rate limit, libtorrent will not be able to send any actual payload, such
+as piece requests. This means the download rate will suffer, and new requests
+can be sent again. There will be an equilibrium where the download rate, on
+average, is about 20 times the upload rate limit. If you want to maximize the
+download rate, increase the upload rate limit above 5% of your download capacity.</td>
+</tr>
+<tr><td>download_limit_too_low</td>
+<td>3</td>
+<td>This is the same warning as <tt class="docutils literal">upload_limit_too_low</tt> but referring to the download
+limit instead of upload. This suggests that your download rate limit is much lower
+than your upload capacity. Your upload rate will suffer. To maximize upload rate,
+make sure your download rate limit is above 5% of your upload capacity.</td>
+</tr>
+<tr><td>send_buffer_watermark_too_low</td>
+<td>4</td>
+<td><p class="first">We're stalled on the disk. We want to write to the socket, and we can write
+but our send buffer is empty, waiting to be refilled from the disk.
+This either means the disk is slower than the network connection
+or that our send buffer watermark is too small, because we can
+send it all before the disk gets back to us.
+The number of bytes that we keep outstanding, requested from the disk, is calculated
+as follows:</p>
+<pre class="literal-block">
+min(512, max(upload_rate * send_buffer_watermark_factor / 100, send_buffer_watermark))
+</pre>
+<p class="last">If you receive this <a class="reference external" href="reference-Alerts.html#alert">alert</a>, you might want to either increase your <tt class="docutils literal">send_buffer_watermark</tt>
+or <tt class="docutils literal">send_buffer_watermark_factor</tt>.</p>
+</td>
+</tr>
+<tr><td>too_many_optimistic_unchoke_slots</td>
+<td>5</td>
+<td>If the half (or more) of all upload slots are set as optimistic unchoke slots, this
+warning is issued. You probably want more regular (rate based) unchoke slots.</td>
+</tr>
+<tr><td>too_high_disk_queue_limit</td>
+<td>6</td>
+<td>If the disk write queue ever grows larger than half of the cache size, this warning
+is posted. The disk write queue eats into the total disk cache and leaves very little
+left for the actual cache. This causes the disk cache to oscillate in evicting large
+portions of the cache before allowing peers to download any more, onto the disk write
+queue. Either lower <tt class="docutils literal">max_queued_disk_bytes</tt> or increase <tt class="docutils literal">cache_size</tt>.</td>
+</tr>
+<tr><td>aio_limit_reached</td>
+<td>7</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>bittyrant_with_no_uplimit</td>
+<td>8</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>too_few_outgoing_ports</td>
+<td>9</td>
+<td>This is generated if outgoing peer connections are failing because of <em>address in use</em>
+errors, indicating that <tt class="docutils literal"><span class="pre">settings_pack::outgoing_ports</span></tt> is set and is too small of
+a range. Consider not using the <tt class="docutils literal">outgoing_ports</tt> setting at all, or widen the range to
+include more ports.</td>
+</tr>
+<tr><td>too_few_file_descriptors</td>
+<td>10</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>num_warnings</td>
+<td>11</td>
+<td>&nbsp;</td>
+</tr>
+</tbody>
+</table>
+<a name="state_changed_alert"></a></div>
+</div>
+<div class="section" id="state-changed-alert">
+<h2>state_changed_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>Generated whenever a torrent changes its state.</p>
+<pre class="literal-block">
+struct state_changed_alert final : torrent_alert
+{
+   virtual std::string <strong>message</strong> () const override;
+
+   static const int static_category = alert::status_notification;
+   torrent_status::state_t state;
+   torrent_status::state_t prev_state;
+};
+</pre>
+<a name="state"></a><dl class="docutils">
+<dt>state</dt>
+<dd>the new state of the torrent.</dd>
+</dl>
+<a name="prev_state"></a><dl class="docutils">
+<dt>prev_state</dt>
+<dd>the previous state.</dd>
+</dl>
+<a name="tracker_error_alert"></a></div>
+<div class="section" id="tracker-error-alert">
+<h2>tracker_error_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is generated on tracker time outs, premature disconnects,
+invalid response or a HTTP response other than &quot;200 OK&quot;. From the <a class="reference external" href="reference-Alerts.html#alert">alert</a>
+you can get the handle to the torrent the tracker belongs to.</p>
+<p>The <tt class="docutils literal">times_in_row</tt> member says how many times in a row this tracker has
+failed. <tt class="docutils literal">status_code</tt> is the code returned from the HTTP server. 401
+means the tracker needs authentication, 404 means not found etc. If the
+tracker timed out, the code will be set to 0.</p>
+<pre class="literal-block">
+struct tracker_error_alert final : tracker_alert
+{
+   virtual std::string <strong>message</strong> () const override;
+   char const* <strong>error_message</strong> () const;
+
+   static const int static_category = alert::tracker_notification | alert::error_notification;
+   int times_in_row;
+   int status_code;
+   error_code error;
+};
+</pre>
+<a name="error_message()"></a><div class="section" id="error-message">
+<h3>error_message()</h3>
+<pre class="literal-block">
+char const* <strong>error_message</strong> () const;
+</pre>
+<p>the message associated with this error</p>
+<a name="tracker_warning_alert"></a></div>
+</div>
+<div class="section" id="tracker-warning-alert">
+<h2>tracker_warning_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is triggered if the tracker reply contains a warning field.
+Usually this means that the tracker announce was successful, but the
+tracker has a message to the client.</p>
+<pre class="literal-block">
+struct tracker_warning_alert final : tracker_alert
+{
+   virtual std::string <strong>message</strong> () const override;
+   char const* <strong>warning_message</strong> () const;
+
+   static const int static_category = alert::tracker_notification | alert::error_notification;
+};
+</pre>
+<a name="warning_message()"></a><div class="section" id="warning-message">
+<h3>warning_message()</h3>
+<pre class="literal-block">
+char const* <strong>warning_message</strong> () const;
+</pre>
+<p>the message associated with this warning</p>
+<a name="scrape_reply_alert"></a></div>
+</div>
+<div class="section" id="scrape-reply-alert">
+<h2>scrape_reply_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is generated when a scrape request succeeds.</p>
+<pre class="literal-block">
+struct scrape_reply_alert final : tracker_alert
+{
+   virtual std::string <strong>message</strong> () const override;
+
+   int incomplete;
+   int complete;
+};
+</pre>
+<a name="incomplete"></a>
+<a name="complete"></a><dl class="docutils">
+<dt>incomplete  complete</dt>
+<dd>the data returned in the scrape response. These numbers
+may be -1 if the response was malformed.</dd>
+</dl>
+<a name="scrape_failed_alert"></a></div>
+<div class="section" id="scrape-failed-alert">
+<h2>scrape_failed_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>If a scrape request fails, this <a class="reference external" href="reference-Alerts.html#alert">alert</a> is generated. This might be due
+to the tracker timing out, refusing connection or returning an http response
+code indicating an error.</p>
+<pre class="literal-block">
+struct scrape_failed_alert final : tracker_alert
+{
+   virtual std::string <strong>message</strong> () const override;
+   char const* <strong>error_message</strong> () const;
+
+   static const int static_category = alert::tracker_notification | alert::error_notification;
+   error_code error;
+};
+</pre>
+<a name="error_message()"></a><div class="section" id="id78">
+<h3>error_message()</h3>
+<pre class="literal-block">
+char const* <strong>error_message</strong> () const;
+</pre>
+<p>if the error indicates there is an associated message, this returns
+that message. Otherwise and empty string.</p>
+<a name="error"></a><dl class="docutils">
+<dt>error</dt>
+<dd>the error itself. This may indicate that the tracker sent an error
+message (<tt class="docutils literal"><span class="pre">error::tracker_failure</span></tt>), in which case it can be
+retrieved by calling <tt class="docutils literal">error_message()</tt>.</dd>
+</dl>
+<a name="tracker_reply_alert"></a></div>
+</div>
+<div class="section" id="tracker-reply-alert">
+<h2>tracker_reply_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is only for informational purpose. It is generated when a tracker announce
+succeeds. It is generated regardless what kind of tracker was used, be it UDP, HTTP or
+the DHT.</p>
+<pre class="literal-block">
+struct tracker_reply_alert final : tracker_alert
+{
+   virtual std::string <strong>message</strong> () const override;
+
+   int num_peers;
+};
+</pre>
+<a name="num_peers"></a><dl class="docutils">
+<dt>num_peers</dt>
+<dd>tells how many peers the tracker returned in this response. This is
+not expected to be more thant the <tt class="docutils literal">num_want</tt> settings. These are not necessarily
+all new peers, some of them may already be connected.</dd>
+</dl>
+<a name="dht_reply_alert"></a></div>
+<div class="section" id="dht-reply-alert">
+<h2>dht_reply_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is generated each time the DHT receives peers from a node. <tt class="docutils literal">num_peers</tt>
+is the number of peers we received in this packet. Typically these packets are
+received from multiple DHT nodes, and so the alerts are typically generated
+a few at a time.</p>
+<pre class="literal-block">
+struct dht_reply_alert final : tracker_alert
+{
+   virtual std::string <strong>message</strong> () const override;
+
+   int num_peers;
+};
+</pre>
+<a name="tracker_announce_alert"></a></div>
+<div class="section" id="tracker-announce-alert">
+<h2>tracker_announce_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is generated each time a tracker announce is sent (or attempted to be sent).
+There are no extra data members in this <a class="reference external" href="reference-Alerts.html#alert">alert</a>. The url can be found in the base class
+however.</p>
+<pre class="literal-block">
+struct tracker_announce_alert final : tracker_alert
+{
+   virtual std::string <strong>message</strong> () const override;
+
+   int event;
+};
+</pre>
+<a name="event"></a><dl class="docutils">
+<dt>event</dt>
+<dd><p class="first">specifies what event was sent to the tracker. It is defined as:</p>
+<ol class="last arabic simple" start="0">
+<li>None</li>
+<li>Completed</li>
+<li>Started</li>
+<li>Stopped</li>
+</ol>
+</dd>
+</dl>
+<a name="hash_failed_alert"></a></div>
+<div class="section" id="hash-failed-alert">
+<h2>hash_failed_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is generated when a finished piece fails its hash check. You can get the handle
+to the torrent which got the failed piece and the index of the piece itself from the <a class="reference external" href="reference-Alerts.html#alert">alert</a>.</p>
+<pre class="literal-block">
+struct hash_failed_alert final : torrent_alert
+{
+   virtual std::string <strong>message</strong> () const override;
+
+   static const int static_category = alert::status_notification;
+   int piece_index;
+};
+</pre>
+<a name="peer_ban_alert"></a></div>
+<div class="section" id="peer-ban-alert">
+<h2>peer_ban_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is generated when a peer is banned because it has sent too many corrupt pieces
+to us. <tt class="docutils literal">ip</tt> is the endpoint to the peer that was banned.</p>
+<pre class="literal-block">
+struct peer_ban_alert final : peer_alert
+{
+   virtual std::string <strong>message</strong> () const override;
+};
+</pre>
+<a name="peer_unsnubbed_alert"></a></div>
+<div class="section" id="peer-unsnubbed-alert">
+<h2>peer_unsnubbed_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is generated when a peer is unsnubbed. Essentially when it was snubbed for stalling
+sending data, and now it started sending data again.</p>
+<pre class="literal-block">
+struct peer_unsnubbed_alert final : peer_alert
+{
+   virtual std::string <strong>message</strong> () const override;
+};
+</pre>
+<a name="peer_snubbed_alert"></a></div>
+<div class="section" id="peer-snubbed-alert">
+<h2>peer_snubbed_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is generated when a peer is snubbed, when it stops sending data when we request
+it.</p>
+<pre class="literal-block">
+struct peer_snubbed_alert final : peer_alert
+{
+   virtual std::string <strong>message</strong> () const override;
+};
+</pre>
+<a name="peer_error_alert"></a></div>
+<div class="section" id="peer-error-alert">
+<h2>peer_error_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is generated when a peer sends invalid data over the peer-peer protocol. The peer
+will be disconnected, but you get its ip address from the <a class="reference external" href="reference-Alerts.html#alert">alert</a>, to identify it.</p>
+<pre class="literal-block">
+struct peer_error_alert final : peer_alert
+{
+   virtual std::string <strong>message</strong> () const override;
+
+   static const int static_category = alert::peer_notification;
+   int operation;
+   error_code error;
+};
+</pre>
+<a name="operation"></a><dl class="docutils">
+<dt>operation</dt>
+<dd>a NULL-terminated string of the low-level operation that failed, or NULL if
+there was no low level disk operation.</dd>
+</dl>
+<a name="error"></a><dl class="docutils">
+<dt>error</dt>
+<dd>tells you what error caused this <a class="reference external" href="reference-Alerts.html#alert">alert</a>.</dd>
+</dl>
+<a name="peer_connect_alert"></a></div>
+<div class="section" id="peer-connect-alert">
+<h2>peer_connect_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is posted every time an outgoing peer connect attempts succeeds.</p>
+<pre class="literal-block">
+struct peer_connect_alert final : peer_alert
+{
+   virtual std::string <strong>message</strong> () const override;
+
+   static const int static_category = alert::debug_notification;
+   int socket_type;
+};
+</pre>
+<a name="peer_disconnected_alert"></a></div>
+<div class="section" id="peer-disconnected-alert">
+<h2>peer_disconnected_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is generated when a peer is disconnected for any reason (other than the ones
+covered by <a class="reference external" href="reference-Alerts.html#peer_error_alert">peer_error_alert</a> ).</p>
+<pre class="literal-block">
+struct peer_disconnected_alert final : peer_alert
+{
+   virtual std::string <strong>message</strong> () const override;
+
+   static const int static_category = alert::debug_notification;
+   int socket_type;
+   operation_t operation;
+   error_code error;
+   close_reason_t reason;
+};
+</pre>
+<a name="socket_type"></a><dl class="docutils">
+<dt>socket_type</dt>
+<dd>the kind of socket this peer was connected over</dd>
+</dl>
+<a name="operation"></a><dl class="docutils">
+<dt>operation</dt>
+<dd>the operation or level where the error occurred. Specified as an
+value from the <a class="reference external" href="reference-Alerts.html#operation_t">operation_t</a> enum. Defined in operations.hpp.</dd>
+</dl>
+<a name="error"></a><dl class="docutils">
+<dt>error</dt>
+<dd>tells you what error caused peer to disconnect.</dd>
+</dl>
+<a name="reason"></a><dl class="docutils">
+<dt>reason</dt>
+<dd>the reason the peer disconnected (if specified)</dd>
+</dl>
+<a name="invalid_request_alert"></a></div>
+<div class="section" id="invalid-request-alert">
+<h2>invalid_request_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This is a debug <a class="reference external" href="reference-Alerts.html#alert">alert</a> that is generated by an incoming invalid piece request.
+<tt class="docutils literal">ip</tt> is the address of the peer and the <tt class="docutils literal">request</tt> is the actual incoming
+request from the peer. See <a class="reference external" href="reference-Core.html#peer_request">peer_request</a> for more info.</p>
+<pre class="literal-block">
+struct invalid_request_alert final : peer_alert
+{
+   virtual std::string <strong>message</strong> () const override;
+
+   peer_request request;
+   bool we_have;
+   bool peer_interested;
+   bool withheld;
+};
+</pre>
+<a name="request"></a><dl class="docutils">
+<dt>request</dt>
+<dd>the request we received from the peer</dd>
+</dl>
+<a name="we_have"></a><dl class="docutils">
+<dt>we_have</dt>
+<dd>true if we have this piece</dd>
+</dl>
+<a name="peer_interested"></a><dl class="docutils">
+<dt>peer_interested</dt>
+<dd>true if the peer indicated that it was interested to download before
+sending the request</dd>
+</dl>
+<a name="withheld"></a><dl class="docutils">
+<dt>withheld</dt>
+<dd>if this is true, the peer is not allowed to download this piece because
+of superseeding rules.</dd>
+</dl>
+<a name="torrent_finished_alert"></a></div>
+<div class="section" id="torrent-finished-alert">
+<h2>torrent_finished_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is generated when a torrent switches from being a downloader to a seed.
+It will only be generated once per torrent. It contains a <a class="reference external" href="reference-Core.html#torrent_handle">torrent_handle</a> to the
+torrent in question.</p>
+<pre class="literal-block">
+struct torrent_finished_alert final : torrent_alert
+{
+   virtual std::string <strong>message</strong> () const override;
+
+   static const int static_category = alert::status_notification;
+};
+</pre>
+<a name="piece_finished_alert"></a></div>
+<div class="section" id="piece-finished-alert">
+<h2>piece_finished_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>this <a class="reference external" href="reference-Alerts.html#alert">alert</a> is posted every time a piece completes downloading
+and passes the hash check. This <a class="reference external" href="reference-Alerts.html#alert">alert</a> derives from <a class="reference external" href="reference-Alerts.html#torrent_alert">torrent_alert</a>
+which contains the <a class="reference external" href="reference-Core.html#torrent_handle">torrent_handle</a> to the torrent the piece belongs to.</p>
+<pre class="literal-block">
+struct piece_finished_alert final : torrent_alert
+{
+   virtual std::string <strong>message</strong> () const override;
+
+   static const int static_category = alert::progress_notification;
+   int piece_index;
+};
+</pre>
+<a name="piece_index"></a><dl class="docutils">
+<dt>piece_index</dt>
+<dd>the index of the piece that finished</dd>
+</dl>
+<a name="request_dropped_alert"></a></div>
+<div class="section" id="request-dropped-alert">
+<h2>request_dropped_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is generated when a peer rejects or ignores a piece request.</p>
+<pre class="literal-block">
+struct request_dropped_alert final : peer_alert
+{
+   virtual std::string <strong>message</strong> () const override;
+
+   | alert::peer_notification;
+   int block_index;
+   int piece_index;
+};
+</pre>
+<a name="block_timeout_alert"></a></div>
+<div class="section" id="block-timeout-alert">
+<h2>block_timeout_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is generated when a block request times out.</p>
+<pre class="literal-block">
+struct block_timeout_alert final : peer_alert
+{
+   virtual std::string <strong>message</strong> () const override;
+
+   | alert::peer_notification;
+   int block_index;
+   int piece_index;
+};
+</pre>
+<a name="block_finished_alert"></a></div>
+<div class="section" id="block-finished-alert">
+<h2>block_finished_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is generated when a block request receives a response.</p>
+<pre class="literal-block">
+struct block_finished_alert final : peer_alert
+{
+   virtual std::string <strong>message</strong> () const override;
+
+   static const int static_category = alert::progress_notification;
+   int block_index;
+   int piece_index;
+};
+</pre>
+<a name="block_downloading_alert"></a></div>
+<div class="section" id="block-downloading-alert">
+<h2>block_downloading_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is generated when a block request is sent to a peer.</p>
+<pre class="literal-block">
+struct block_downloading_alert final : peer_alert
+{
+   virtual std::string <strong>message</strong> () const override;
+
+   static const int static_category = alert::progress_notification;
+   int block_index;
+   int piece_index;
+};
+</pre>
+<a name="unwanted_block_alert"></a></div>
+<div class="section" id="unwanted-block-alert">
+<h2>unwanted_block_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is generated when a block is received that was not requested or
+whose request timed out.</p>
+<pre class="literal-block">
+struct unwanted_block_alert final : peer_alert
+{
+   virtual std::string <strong>message</strong> () const override;
+
+   int block_index;
+   int piece_index;
+};
+</pre>
+<a name="storage_moved_alert"></a></div>
+<div class="section" id="storage-moved-alert">
+<h2>storage_moved_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>The <tt class="docutils literal">storage_moved_alert</tt> is generated when all the disk IO has completed and the
+files have been moved, as an effect of a call to <tt class="docutils literal"><span class="pre">torrent_handle::move_storage</span></tt>. This
+is useful to synchronize with the actual disk. The <tt class="docutils literal">path</tt> member is the new path of
+the storage.</p>
+<pre class="literal-block">
+struct storage_moved_alert final : torrent_alert
+{
+   virtual std::string <strong>message</strong> () const override;
+   char const* <strong>storage_path</strong> () const;
+
+   static const int static_category = alert::storage_notification;
+};
+</pre>
+<a name="storage_path()"></a><div class="section" id="storage-path">
+<h3>storage_path()</h3>
+<pre class="literal-block">
+char const* <strong>storage_path</strong> () const;
+</pre>
+<p>the path the torrent was moved to</p>
+<a name="storage_moved_failed_alert"></a></div>
+</div>
+<div class="section" id="storage-moved-failed-alert">
+<h2>storage_moved_failed_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>The <tt class="docutils literal">storage_moved_failed_alert</tt> is generated when an attempt to move the storage,
+via <a class="reference external" href="reference-Core.html#move_storage()">torrent_handle::move_storage()</a>, fails.</p>
+<pre class="literal-block">
+struct storage_moved_failed_alert final : torrent_alert
+{
+   virtual std::string <strong>message</strong> () const override;
+   char const* <strong>file_path</strong> () const;
+
+   static const int static_category = alert::storage_notification;
+   error_code error;
+   char const* operation;
+};
+</pre>
+<a name="file_path()"></a><div class="section" id="file-path">
+<h3>file_path()</h3>
+<pre class="literal-block">
+char const* <strong>file_path</strong> () const;
+</pre>
+<p>If the error happened for a specific file, this returns its path.</p>
+<a name="operation"></a><dl class="docutils">
+<dt>operation</dt>
+<dd>If the error happened in a specific disk operation this is a NULL
+terminated string naming which one, otherwise it's NULL.</dd>
+</dl>
+<a name="torrent_deleted_alert"></a></div>
+</div>
+<div class="section" id="torrent-deleted-alert">
+<h2>torrent_deleted_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is generated when a request to delete the files of a torrent complete.</p>
+<p>The <tt class="docutils literal">info_hash</tt> is the info-hash of the torrent that was just deleted. Most of
+the time the <a class="reference external" href="reference-Core.html#torrent_handle">torrent_handle</a> in the <tt class="docutils literal">torrent_alert</tt> will be invalid by the time
+this <a class="reference external" href="reference-Alerts.html#alert">alert</a> arrives, since the torrent is being deleted. The <tt class="docutils literal">info_hash</tt> member
+is hence the main way of identifying which torrent just completed the delete.</p>
+<p>This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is posted in the <tt class="docutils literal">storage_notification</tt> category, and that bit
+needs to be set in the alert_mask.</p>
+<pre class="literal-block">
+struct torrent_deleted_alert final : torrent_alert
+{
+   virtual std::string <strong>message</strong> () const override;
+
+   static const int static_category = alert::storage_notification;
+   sha1_hash info_hash;
+};
+</pre>
+<a name="torrent_delete_failed_alert"></a></div>
+<div class="section" id="torrent-delete-failed-alert">
+<h2>torrent_delete_failed_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is generated when a request to delete the files of a torrent fails.
+Just removing a torrent from the <a class="reference external" href="reference-Core.html#session">session</a> cannot fail</p>
+<pre class="literal-block">
+struct torrent_delete_failed_alert final : torrent_alert
+{
+   virtual std::string <strong>message</strong> () const override;
+
+   | alert::error_notification;
+   error_code error;
+   sha1_hash info_hash;
+};
+</pre>
+<a name="error"></a><dl class="docutils">
+<dt>error</dt>
+<dd>tells you why it failed.</dd>
+</dl>
+<a name="info_hash"></a><dl class="docutils">
+<dt>info_hash</dt>
+<dd>the info hash of the torrent whose files failed to be deleted</dd>
+</dl>
+<a name="save_resume_data_alert"></a></div>
+<div class="section" id="save-resume-data-alert">
+<h2>save_resume_data_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is generated as a response to a <tt class="docutils literal"><span class="pre">torrent_handle::save_resume_data</span></tt> request.
+It is generated once the disk IO thread is done writing the state for this torrent.</p>
+<pre class="literal-block">
+struct save_resume_data_alert final : torrent_alert
+{
+   virtual std::string <strong>message</strong> () const override;
+
+   static const int static_category = alert::storage_notification;
+   boost::shared_ptr&lt;entry&gt; resume_data;
+};
+</pre>
+<a name="resume_data"></a><dl class="docutils">
+<dt>resume_data</dt>
+<dd>points to the resume data.</dd>
+</dl>
+<a name="save_resume_data_failed_alert"></a></div>
+<div class="section" id="save-resume-data-failed-alert">
+<h2>save_resume_data_failed_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is generated instead of <tt class="docutils literal">save_resume_data_alert</tt> if there was an error
+generating the resume data. <tt class="docutils literal">error</tt> describes what went wrong.</p>
+<pre class="literal-block">
+struct save_resume_data_failed_alert final : torrent_alert
+{
+   virtual std::string <strong>message</strong> () const override;
+
+   | alert::error_notification;
+   error_code error;
+};
+</pre>
+<a name="error"></a><dl class="docutils">
+<dt>error</dt>
+<dd>the error code from the resume_data failure</dd>
+</dl>
+<a name="torrent_paused_alert"></a></div>
+<div class="section" id="torrent-paused-alert">
+<h2>torrent_paused_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is generated as a response to a <tt class="docutils literal"><span class="pre">torrent_handle::pause</span></tt> request. It is
+generated once all disk IO is complete and the files in the torrent have been closed.
+This is useful for synchronizing with the disk.</p>
+<pre class="literal-block">
+struct torrent_paused_alert final : torrent_alert
+{
+   virtual std::string <strong>message</strong> () const override;
+
+   static const int static_category = alert::status_notification;
+};
+</pre>
+<a name="torrent_resumed_alert"></a></div>
+<div class="section" id="torrent-resumed-alert">
+<h2>torrent_resumed_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is generated as a response to a <a class="reference external" href="reference-Core.html#resume()">torrent_handle::resume()</a> request. It is
+generated when a torrent goes from a paused state to an active state.</p>
+<pre class="literal-block">
+struct torrent_resumed_alert final : torrent_alert
+{
+   virtual std::string <strong>message</strong> () const override;
+
+   static const int static_category = alert::status_notification;
+};
+</pre>
+<a name="torrent_checked_alert"></a></div>
+<div class="section" id="torrent-checked-alert">
+<h2>torrent_checked_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is posted when a torrent completes checking. i.e. when it transitions
+out of the <tt class="docutils literal">checking files</tt> state into a state where it is ready to start downloading</p>
+<pre class="literal-block">
+struct torrent_checked_alert final : torrent_alert
+{
+   virtual std::string <strong>message</strong> () const override;
+
+   static const int static_category = alert::status_notification;
+};
+</pre>
+<a name="url_seed_alert"></a></div>
+<div class="section" id="url-seed-alert">
+<h2>url_seed_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is generated when a HTTP seed name lookup fails.</p>
+<pre class="literal-block">
+struct url_seed_alert final : torrent_alert
+{
+   virtual std::string <strong>message</strong> () const override;
+   char const* <strong>server_url</strong> () const;
+   char const* <strong>error_message</strong> () const;
+
+   static const int static_category = alert::peer_notification | alert::error_notification;
+   error_code error;
+};
+</pre>
+<a name="server_url()"></a><div class="section" id="server-url">
+<h3>server_url()</h3>
+<pre class="literal-block">
+char const* <strong>server_url</strong> () const;
+</pre>
+<p>the URL the error is associated with</p>
+<a name="error_message()"></a></div>
+<div class="section" id="id150">
+<h3>error_message()</h3>
+<pre class="literal-block">
+char const* <strong>error_message</strong> () const;
+</pre>
+<p>in case the web server sent an error message, this function returns
+it.</p>
+<a name="error"></a><dl class="docutils">
+<dt>error</dt>
+<dd>the error the web seed encountered. If this is not set, the server
+sent an error message, call <tt class="docutils literal">error_message()</tt>.</dd>
+</dl>
+<a name="file_error_alert"></a></div>
+</div>
+<div class="section" id="file-error-alert">
+<h2>file_error_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>If the storage fails to read or write files that it needs access to, this <a class="reference external" href="reference-Alerts.html#alert">alert</a> is
+generated and the torrent is paused.</p>
+<pre class="literal-block">
+struct file_error_alert final : torrent_alert
+{
+   virtual std::string <strong>message</strong> () const override;
+   char const* <strong>filename</strong> () const;
+
+   | alert::storage_notification;
+   error_code error;
+   char const* operation;
+};
+</pre>
+<a name="filename()"></a><div class="section" id="filename">
+<h3>filename()</h3>
+<pre class="literal-block">
+char const* <strong>filename</strong> () const;
+</pre>
+<p>the file that experienced the error</p>
+<a name="error"></a>
+<a name="operation"></a><dl class="docutils">
+<dt>error  operation</dt>
+<dd>the error code describing the error.</dd>
+</dl>
+<a name="metadata_failed_alert"></a></div>
+</div>
+<div class="section" id="metadata-failed-alert">
+<h2>metadata_failed_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is generated when the metadata has been completely received and the info-hash
+failed to match it. i.e. the metadata that was received was corrupt. libtorrent will
+automatically retry to fetch it in this case. This is only relevant when running a
+torrent-less download, with the metadata extension provided by libtorrent.</p>
+<pre class="literal-block">
+struct metadata_failed_alert final : torrent_alert
+{
+   virtual std::string <strong>message</strong> () const override;
+
+   static const int static_category = alert::error_notification;
+   error_code error;
+};
+</pre>
+<a name="error"></a><dl class="docutils">
+<dt>error</dt>
+<dd>indicates what failed when parsing the metadata. This error is
+what's returned from lazy_bdecode().</dd>
+</dl>
+<a name="metadata_received_alert"></a></div>
+<div class="section" id="metadata-received-alert">
+<h2>metadata_received_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is generated when the metadata has been completely received and the torrent
+can start downloading. It is not generated on torrents that are started with metadata, but
+only those that needs to download it from peers (when utilizing the libtorrent extension).</p>
+<p>There are no additional data members in this <a class="reference external" href="reference-Alerts.html#alert">alert</a>.</p>
+<p>Typically, when receiving this <a class="reference external" href="reference-Alerts.html#alert">alert</a>, you would want to save the torrent file in order
+to load it back up again when the <a class="reference external" href="reference-Core.html#session">session</a> is restarted. Here's an example snippet of
+code to do that:</p>
+<pre class="literal-block">
+torrent_handle h = alert-&gt;handle();
+if (h.is_valid()) {
+        boost::shared_ptr&lt;torrent_info const&gt; ti = h.torrent_file();
+        create_torrent ct(*ti);
+        entry te = ct.generate();
+        std::vector&lt;char&gt; buffer;
+        bencode(std::back_inserter(buffer), te);
+        FILE* f = fopen((to_hex(ti-&gt;info_hash().to_string()) + &quot;.torrent&quot;).c_str(), &quot;wb+&quot;);
+        if (f) {
+                fwrite(&amp;buffer[0], 1, buffer.size(), f);
+                fclose(f);
+        }
+}
+</pre>
+<pre class="literal-block">
+struct metadata_received_alert final : torrent_alert
+{
+   virtual std::string <strong>message</strong> () const override;
+
+   static const int static_category = alert::status_notification;
+};
+</pre>
+<a name="udp_error_alert"></a></div>
+<div class="section" id="udp-error-alert">
+<h2>udp_error_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is posted when there is an error on the UDP socket. The
+UDP socket is used for all uTP, DHT and UDP tracker traffic. It's
+global to the <a class="reference external" href="reference-Core.html#session">session</a>.</p>
+<pre class="literal-block">
+struct udp_error_alert final : alert
+{
+   virtual std::string <strong>message</strong> () const override;
+
+   static const int static_category = alert::error_notification;
+   udp::endpoint endpoint;
+   error_code error;
+};
+</pre>
+<a name="endpoint"></a><dl class="docutils">
+<dt>endpoint</dt>
+<dd>the source address associated with the error (if any)</dd>
+</dl>
+<a name="error"></a><dl class="docutils">
+<dt>error</dt>
+<dd>the error code describing the error</dd>
+</dl>
+<a name="external_ip_alert"></a></div>
+<div class="section" id="external-ip-alert">
+<h2>external_ip_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>Whenever libtorrent learns about the machines external IP, this <a class="reference external" href="reference-Alerts.html#alert">alert</a> is
+generated. The external IP address can be acquired from the tracker (if it
+supports that) or from peers that supports the extension protocol.
+The address can be accessed through the <tt class="docutils literal">external_address</tt> member.</p>
+<pre class="literal-block">
+struct external_ip_alert final : alert
+{
+   virtual std::string <strong>message</strong> () const override;
+
+   static const int static_category = alert::status_notification;
+   address external_address;
+};
+</pre>
+<a name="external_address"></a><dl class="docutils">
+<dt>external_address</dt>
+<dd>the IP address that is believed to be our external IP</dd>
+</dl>
+<a name="listen_failed_alert"></a></div>
+<div class="section" id="listen-failed-alert">
+<h2>listen_failed_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is generated when none of the ports, given in the port range, to
+<a class="reference external" href="reference-Core.html#session">session</a> can be opened for listening. The <tt class="docutils literal">endpoint</tt> member is the
+interface and port that failed, <tt class="docutils literal">error</tt> is the error code describing
+the failure.</p>
+<p>libtorrent may sometimes try to listen on port 0, if all other ports failed.
+Port 0 asks the operating system to pick a port that's free). If that fails
+you may see a <a class="reference external" href="reference-Alerts.html#listen_failed_alert">listen_failed_alert</a> with port 0 even if you didn't ask to
+listen on it.</p>
+<pre class="literal-block">
+struct listen_failed_alert final : alert
+{
+   virtual std::string <strong>message</strong> () const override;
+   char const* <strong>listen_interface</strong> () const;
+
+   enum socket_type_t
+   {
+      tcp,
+      tcp_ssl,
+      udp,
+      i2p,
+      socks5,
+      utp_ssl,
+   };
+
+   enum op_t
+   {
+      parse_addr,
+      open,
+      bind,
+      listen,
+      get_peer_name,
+      accept,
+   };
+
+   static const int static_category = alert::status_notification | alert::error_notification;
+   error_code error;
+   int operation;
+   socket_type_t sock_type;
+   tcp::endpoint endpoint;
+};
+</pre>
+<a name="listen_interface()"></a><div class="section" id="listen-interface">
+<h3>listen_interface()</h3>
+<pre class="literal-block">
+char const* <strong>listen_interface</strong> () const;
+</pre>
+<p>the interface libtorrent attempted to listen on that failed.</p>
+<a name="socket_type_t"></a></div>
+<div class="section" id="enum-socket-type-t">
+<h3>enum socket_type_t</h3>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="31%" />
+<col width="24%" />
+<col width="45%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">value</th>
+<th class="head">description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>tcp</td>
+<td>0</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>tcp_ssl</td>
+<td>1</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>udp</td>
+<td>2</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>i2p</td>
+<td>3</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>socks5</td>
+<td>4</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>utp_ssl</td>
+<td>5</td>
+<td>&nbsp;</td>
+</tr>
+</tbody>
+</table>
+<a name="op_t"></a></div>
+<div class="section" id="enum-op-t">
+<h3>enum op_t</h3>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="43%" />
+<col width="20%" />
+<col width="37%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">value</th>
+<th class="head">description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>parse_addr</td>
+<td>0</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>open</td>
+<td>1</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>bind</td>
+<td>2</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>listen</td>
+<td>3</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>get_peer_name</td>
+<td>4</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>accept</td>
+<td>5</td>
+<td>&nbsp;</td>
+</tr>
+</tbody>
+</table>
+<a name="error"></a><dl class="docutils">
+<dt>error</dt>
+<dd>the error the system returned</dd>
+</dl>
+<a name="operation"></a><dl class="docutils">
+<dt>operation</dt>
+<dd>the specific low level operation that failed. See <a class="reference external" href="reference-Alerts.html#op_t">op_t</a>.</dd>
+</dl>
+<a name="sock_type"></a><dl class="docutils">
+<dt>sock_type</dt>
+<dd>the type of listen socket this <a class="reference external" href="reference-Alerts.html#alert">alert</a> refers to.</dd>
+</dl>
+<a name="endpoint"></a><dl class="docutils">
+<dt>endpoint</dt>
+<dd>the address and port libtorrent attempted to listen on</dd>
+</dl>
+<a name="listen_succeeded_alert"></a></div>
+</div>
+<div class="section" id="listen-succeeded-alert">
+<h2>listen_succeeded_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is posted when the listen port succeeds to be opened on a
+particular interface. <tt class="docutils literal">endpoint</tt> is the endpoint that successfully
+was opened for listening.</p>
+<pre class="literal-block">
+struct listen_succeeded_alert final : alert
+{
+   virtual std::string <strong>message</strong> () const override;
+
+   enum socket_type_t
+   {
+      tcp,
+      tcp_ssl,
+      udp,
+      utp_ssl,
+   };
+
+   static const int static_category = alert::status_notification;
+   tcp::endpoint endpoint;
+   socket_type_t sock_type;
+};
+</pre>
+<a name="socket_type_t"></a><div class="section" id="id175">
+<h3>enum socket_type_t</h3>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="31%" />
+<col width="24%" />
+<col width="45%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">value</th>
+<th class="head">description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>tcp</td>
+<td>0</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>tcp_ssl</td>
+<td>1</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>udp</td>
+<td>2</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>utp_ssl</td>
+<td>3</td>
+<td>&nbsp;</td>
+</tr>
+</tbody>
+</table>
+<a name="endpoint"></a><dl class="docutils">
+<dt>endpoint</dt>
+<dd>the endpoint libtorrent ended up listening on. The address
+refers to the local interface and the port is the listen port.</dd>
+</dl>
+<a name="sock_type"></a><dl class="docutils">
+<dt>sock_type</dt>
+<dd>the type of listen socket this <a class="reference external" href="reference-Alerts.html#alert">alert</a> refers to.</dd>
+</dl>
+<a name="portmap_error_alert"></a></div>
+</div>
+<div class="section" id="portmap-error-alert">
+<h2>portmap_error_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is generated when a NAT router was successfully found but some
+part of the port mapping request failed. It contains a text message that
+may help the user figure out what is wrong. This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is not generated in
+case it appears the client is not running on a NAT:ed network or if it
+appears there is no NAT router that can be remote controlled to add port
+mappings.</p>
+<pre class="literal-block">
+struct portmap_error_alert final : alert
+{
+   virtual std::string <strong>message</strong> () const override;
+
+   | alert::error_notification;
+   int mapping;
+   int map_type;
+   error_code error;
+};
+</pre>
+<a name="mapping"></a><dl class="docutils">
+<dt>mapping</dt>
+<dd>refers to the mapping index of the port map that failed, i.e.
+the index returned from add_mapping().</dd>
+</dl>
+<a name="map_type"></a><dl class="docutils">
+<dt>map_type</dt>
+<dd>is 0 for NAT-PMP and 1 for UPnP.</dd>
+</dl>
+<a name="error"></a><dl class="docutils">
+<dt>error</dt>
+<dd>tells you what failed.</dd>
+</dl>
+<a name="portmap_alert"></a></div>
+<div class="section" id="portmap-alert">
+<h2>portmap_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is generated when a NAT router was successfully found and
+a port was successfully mapped on it. On a NAT:ed network with a NAT-PMP
+capable router, this is typically generated once when mapping the TCP
+port and, if DHT is enabled, when the UDP port is mapped.</p>
+<pre class="literal-block">
+struct portmap_alert final : alert
+{
+   virtual std::string <strong>message</strong> () const override;
+
+   enum protocol_t
+   {
+      tcp,
+      udp,
+   };
+
+   static const int static_category = alert::port_mapping_notification;
+   int mapping;
+   int external_port;
+   int map_type;
+   int protocol;
+};
+</pre>
+<a name="protocol_t"></a><div class="section" id="enum-protocol-t">
+<h3>enum protocol_t</h3>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="23%" />
+<col width="27%" />
+<col width="50%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">value</th>
+<th class="head">description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>tcp</td>
+<td>0</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>udp</td>
+<td>1</td>
+<td>&nbsp;</td>
+</tr>
+</tbody>
+</table>
+<a name="mapping"></a><dl class="docutils">
+<dt>mapping</dt>
+<dd>refers to the mapping index of the port map that failed, i.e.
+the index returned from add_mapping().</dd>
+</dl>
+<a name="external_port"></a><dl class="docutils">
+<dt>external_port</dt>
+<dd>the external port allocated for the mapping.</dd>
+</dl>
+<a name="map_type"></a><dl class="docutils">
+<dt>map_type</dt>
+<dd>0 for NAT-PMP and 1 for UPnP.</dd>
+</dl>
+<a name="protocol"></a><dl class="docutils">
+<dt>protocol</dt>
+<dd>the protocol this mapping was for. one of <a class="reference external" href="reference-Alerts.html#protocol_t">protocol_t</a> enums</dd>
+</dl>
+<a name="portmap_log_alert"></a></div>
+</div>
+<div class="section" id="portmap-log-alert">
+<h2>portmap_log_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is generated to log informational events related to either
+UPnP or NAT-PMP. They contain a log line and the type (0 = NAT-PMP
+and 1 = UPnP). Displaying these messages to an end user is only useful
+for debugging the UPnP or NAT-PMP implementation. This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is only
+posted if the <a class="reference external" href="reference-Alerts.html#port_mapping_log_notification">alert::port_mapping_log_notification</a> flag is enabled in
+the <a class="reference external" href="reference-Alerts.html#alert">alert</a> mask.</p>
+<pre class="literal-block">
+struct portmap_log_alert final : alert
+{
+   virtual std::string <strong>message</strong> () const override;
+   char const* <strong>log_message</strong> () const;
+
+   static const int static_category = alert::port_mapping_log_notification;
+   int map_type;
+};
+</pre>
+<a name="log_message()"></a><div class="section" id="log-message">
+<h3>log_message()</h3>
+<pre class="literal-block">
+char const* <strong>log_message</strong> () const;
+</pre>
+<p>the message associated with this log line</p>
+<a name="fastresume_rejected_alert"></a></div>
+</div>
+<div class="section" id="fastresume-rejected-alert">
+<h2>fastresume_rejected_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is generated when a fastresume file has been passed to
+<a class="reference external" href="reference-Core.html#add_torrent()">add_torrent()</a> but the files on disk did not match the fastresume file.
+The error_code explains the reason why the resume file was rejected.</p>
+<pre class="literal-block">
+struct fastresume_rejected_alert final : torrent_alert
+{
+   virtual std::string <strong>message</strong> () const override;
+   char const* <strong>file_path</strong> () const;
+
+   | alert::error_notification;
+   error_code error;
+   char const* operation;
+};
+</pre>
+<a name="file_path()"></a><div class="section" id="id193">
+<h3>file_path()</h3>
+<pre class="literal-block">
+char const* <strong>file_path</strong> () const;
+</pre>
+<p>If the error happened to a specific file, this returns the path to it.</p>
+<a name="operation"></a><dl class="docutils">
+<dt>operation</dt>
+<dd>If the error happened in a disk operation. a NULL-terminated string of
+the name of that operation. <tt class="docutils literal">operation</tt> is NULL otherwise.</dd>
+</dl>
+<a name="peer_blocked_alert"></a></div>
+</div>
+<div class="section" id="peer-blocked-alert">
+<h2>peer_blocked_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is posted when an incoming peer connection, or a peer that's about to be added
+to our peer list, is blocked for some reason. This could be any of:</p>
+<ul class="simple">
+<li>the IP filter</li>
+<li>i2p mixed mode restrictions (a normal peer is not allowed on an i2p swarm)</li>
+<li>the port filter</li>
+<li>the peer has a low port and <tt class="docutils literal">no_connect_privileged_ports</tt> is enabled</li>
+<li>the protocol of the peer is blocked (uTP/TCP blocking)</li>
+</ul>
+<pre class="literal-block">
+struct peer_blocked_alert final : torrent_alert
+{
+   virtual std::string <strong>message</strong> () const override;
+
+   enum reason_t
+   {
+      ip_filter,
+      port_filter,
+      i2p_mixed,
+      privileged_ports,
+      utp_disabled,
+      tcp_disabled,
+      invalid_local_interface,
+   };
+
+   static const int static_category = alert::ip_block_notification;
+   address ip;
+   int reason;
+};
+</pre>
+<a name="reason_t"></a><div class="section" id="enum-reason-t">
+<h3>enum reason_t</h3>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="56%" />
+<col width="16%" />
+<col width="29%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">value</th>
+<th class="head">description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>ip_filter</td>
+<td>0</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>port_filter</td>
+<td>1</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>i2p_mixed</td>
+<td>2</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>privileged_ports</td>
+<td>3</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>utp_disabled</td>
+<td>4</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>tcp_disabled</td>
+<td>5</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>invalid_local_interface</td>
+<td>6</td>
+<td>&nbsp;</td>
+</tr>
+</tbody>
+</table>
+<a name="ip"></a><dl class="docutils">
+<dt>ip</dt>
+<dd>the address that was blocked.</dd>
+</dl>
+<a name="dht_announce_alert"></a></div>
+</div>
+<div class="section" id="dht-announce-alert">
+<h2>dht_announce_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is generated when a DHT node announces to an info-hash on our
+DHT node. It belongs to the <tt class="docutils literal">dht_notification</tt> category.</p>
+<pre class="literal-block">
+struct dht_announce_alert final : alert
+{
+   virtual std::string <strong>message</strong> () const override;
+
+   static const int static_category = alert::dht_notification;
+   address ip;
+   int port;
+   sha1_hash info_hash;
+};
+</pre>
+<a name="dht_get_peers_alert"></a></div>
+<div class="section" id="dht-get-peers-alert">
+<h2>dht_get_peers_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is generated when a DHT node sends a <tt class="docutils literal">get_peers</tt> message to
+our DHT node. It belongs to the <tt class="docutils literal">dht_notification</tt> category.</p>
+<pre class="literal-block">
+struct dht_get_peers_alert final : alert
+{
+   virtual std::string <strong>message</strong> () const override;
+
+   static const int static_category = alert::dht_notification;
+   sha1_hash info_hash;
+};
+</pre>
+<a name="stats_alert"></a></div>
+<div class="section" id="stats-alert">
+<h2>stats_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is posted approximately once every second, and it contains
+byte counters of most statistics that's tracked for torrents. Each active
+torrent posts these alerts regularly.</p>
+<pre class="literal-block">
+struct stats_alert final : torrent_alert
+{
+   virtual std::string <strong>message</strong> () const override;
+
+   enum stats_channel
+   {
+      upload_payload,
+      upload_protocol,
+      download_payload,
+      download_protocol,
+      upload_ip_protocol,
+      deprecated1,
+      deprecated2,
+      download_ip_protocol,
+      deprecated3,
+      deprecated4,
+      num_channels,
+   };
+
+   static const int static_category = alert::stats_notification;
+   int transferred[num_channels];
+   int interval;
+};
+</pre>
+<a name="stats_channel"></a><div class="section" id="enum-stats-channel">
+<h3>enum stats_channel</h3>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="52%" />
+<col width="17%" />
+<col width="31%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">value</th>
+<th class="head">description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>upload_payload</td>
+<td>0</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>upload_protocol</td>
+<td>1</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>download_payload</td>
+<td>2</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>download_protocol</td>
+<td>3</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>upload_ip_protocol</td>
+<td>4</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>deprecated1</td>
+<td>5</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>deprecated2</td>
+<td>6</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>download_ip_protocol</td>
+<td>7</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>deprecated3</td>
+<td>8</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>deprecated4</td>
+<td>9</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>num_channels</td>
+<td>10</td>
+<td>&nbsp;</td>
+</tr>
+</tbody>
+</table>
+<a name="transferred[num_channels]"></a><dl class="docutils">
+<dt>transferred[num_channels]</dt>
+<dd>an array of samples. The enum describes what each sample is a
+measurement of. All of these are raw, and not smoothing is performed.</dd>
+</dl>
+<a name="interval"></a><dl class="docutils">
+<dt>interval</dt>
+<dd>the number of milliseconds during which these stats were collected.
+This is typically just above 1000, but if CPU is limited, it may be
+higher than that.</dd>
+</dl>
+<a name="cache_flushed_alert"></a></div>
+</div>
+<div class="section" id="cache-flushed-alert">
+<h2>cache_flushed_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is posted when the disk cache has been flushed for a specific
+torrent as a result of a call to <a class="reference external" href="reference-Core.html#flush_cache()">torrent_handle::flush_cache()</a>. This
+<a class="reference external" href="reference-Alerts.html#alert">alert</a> belongs to the <tt class="docutils literal">storage_notification</tt> category, which must be
+enabled to let this <a class="reference external" href="reference-Alerts.html#alert">alert</a> through. The <a class="reference external" href="reference-Alerts.html#alert">alert</a> is also posted when removing
+a torrent from the <a class="reference external" href="reference-Core.html#session">session</a>, once the outstanding cache flush is complete
+and the torrent does no longer have any files open.</p>
+<pre class="literal-block">
+struct cache_flushed_alert final : torrent_alert
+{
+   static const int static_category = alert::storage_notification;
+};
+</pre>
+<a name="anonymous_mode_alert"></a></div>
+<div class="section" id="anonymous-mode-alert">
+<h2>anonymous_mode_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is posted when a bittorrent feature is blocked because of the
+anonymous mode. For instance, if the tracker proxy is not set up, no
+trackers will be used, because trackers can only be used through proxies
+when in anonymous mode.</p>
+<pre class="literal-block">
+struct anonymous_mode_alert final : torrent_alert
+{
+   virtual std::string <strong>message</strong> () const override;
+
+   enum kind_t
+   {
+      tracker_not_anonymous,
+   };
+
+   static const int static_category = alert::error_notification;
+   int kind;
+   std::string str;
+};
+</pre>
+<a name="kind_t"></a><div class="section" id="enum-kind-t">
+<h3>enum kind_t</h3>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="23%" />
+<col width="7%" />
+<col width="70%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">value</th>
+<th class="head">description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>tracker_not_anonymous</td>
+<td>0</td>
+<td>means that there's no proxy set up for tracker
+communication and the tracker will not be contacted.
+The tracker which this failed for is specified in the <tt class="docutils literal">str</tt> member.</td>
+</tr>
+</tbody>
+</table>
+<a name="kind"></a>
+<a name="str"></a><dl class="docutils">
+<dt>kind  str</dt>
+<dd>specifies what error this is,  see <a class="reference external" href="reference-Alerts.html#kind_t">kind_t</a>.</dd>
+</dl>
+<a name="lsd_peer_alert"></a></div>
+</div>
+<div class="section" id="lsd-peer-alert">
+<h2>lsd_peer_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is generated when we receive a local service discovery message
+from a peer for a torrent we're currently participating in.</p>
+<pre class="literal-block">
+struct lsd_peer_alert final : peer_alert
+{
+   virtual std::string <strong>message</strong> () const override;
+
+   static const int static_category = alert::peer_notification;
+};
+</pre>
+<a name="trackerid_alert"></a></div>
+<div class="section" id="trackerid-alert">
+<h2>trackerid_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is posted whenever a tracker responds with a <tt class="docutils literal">trackerid</tt>.
+The tracker ID is like a cookie. The libtorrent will store the tracker ID
+for this tracker and repeat it in subsequent announces.</p>
+<pre class="literal-block">
+struct trackerid_alert final : tracker_alert
+{
+   virtual std::string <strong>message</strong> () const override;
+   char const* <strong>tracker_id</strong> () const;
+
+   static const int static_category = alert::status_notification;
+};
+</pre>
+<a name="tracker_id()"></a><div class="section" id="tracker-id">
+<h3>tracker_id()</h3>
+<pre class="literal-block">
+char const* <strong>tracker_id</strong> () const;
+</pre>
+<p>The tracker ID returned by the tracker</p>
+<a name="dht_bootstrap_alert"></a></div>
+</div>
+<div class="section" id="dht-bootstrap-alert">
+<h2>dht_bootstrap_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is posted when the initial DHT bootstrap is done.</p>
+<pre class="literal-block">
+struct dht_bootstrap_alert final : alert
+{
+   virtual std::string <strong>message</strong> () const override;
+
+   static const int static_category = alert::dht_notification;
+};
+</pre>
+<a name="torrent_error_alert"></a></div>
+<div class="section" id="torrent-error-alert">
+<h2>torrent_error_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This is posted whenever a torrent is transitioned into the error state.</p>
+<pre class="literal-block">
+struct torrent_error_alert final : torrent_alert
+{
+   virtual std::string <strong>message</strong> () const override;
+   char const* <strong>filename</strong> () const;
+
+   static const int static_category = alert::error_notification | alert::status_notification;
+   error_code error;
+};
+</pre>
+<a name="filename()"></a><div class="section" id="id222">
+<h3>filename()</h3>
+<pre class="literal-block">
+char const* <strong>filename</strong> () const;
+</pre>
+<p>the filename (or object) the error occurred on.</p>
+<a name="error"></a><dl class="docutils">
+<dt>error</dt>
+<dd>specifies which error the torrent encountered.</dd>
+</dl>
+<a name="torrent_need_cert_alert"></a></div>
+</div>
+<div class="section" id="torrent-need-cert-alert">
+<h2>torrent_need_cert_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This is always posted for SSL torrents. This is a reminder to the client that
+the torrent won't work unless <a class="reference external" href="reference-Core.html#set_ssl_certificate()">torrent_handle::set_ssl_certificate()</a> is called with
+a valid certificate. Valid certificates MUST be signed by the SSL certificate
+in the .torrent file.</p>
+<pre class="literal-block">
+struct torrent_need_cert_alert final : torrent_alert
+{
+   virtual std::string <strong>message</strong> () const override;
+
+   static const int static_category = alert::status_notification;
+   error_code error;
+};
+</pre>
+<a name="incoming_connection_alert"></a></div>
+<div class="section" id="incoming-connection-alert">
+<h2>incoming_connection_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>The incoming connection <a class="reference external" href="reference-Alerts.html#alert">alert</a> is posted every time we successfully accept
+an incoming connection, through any mean. The most straight-forward ways
+of accepting incoming connections are through the TCP listen socket and
+the UDP listen socket for uTP sockets. However, connections may also be
+accepted offer a Socks5 or i2p listen socket, or via a torrent specific
+listen socket for SSL torrents.</p>
+<pre class="literal-block">
+struct incoming_connection_alert final : alert
+{
+   virtual std::string <strong>message</strong> () const override;
+
+   static const int static_category = alert::peer_notification;
+   int socket_type;
+   tcp::endpoint ip;
+};
+</pre>
+<a name="socket_type"></a><dl class="docutils">
+<dt>socket_type</dt>
+<dd><p class="first">tells you what kind of socket the connection was accepted
+as:</p>
+<ol class="last arabic simple" start="0">
+<li>none (no socket instantiated)</li>
+<li>TCP</li>
+<li>Socks5</li>
+<li>HTTP</li>
+<li>uTP</li>
+<li>i2p</li>
+<li>SSL/TCP</li>
+<li>SSL/Socks5</li>
+<li>HTTPS (SSL/HTTP)</li>
+<li>SSL/uTP</li>
+</ol>
+</dd>
+</dl>
+<a name="ip"></a><dl class="docutils">
+<dt>ip</dt>
+<dd>is the IP address and port the connection came from.</dd>
+</dl>
+<a name="add_torrent_alert"></a></div>
+<div class="section" id="add-torrent-alert">
+<h2>add_torrent_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is always posted when a torrent was attempted to be added
+and contains the return status of the add operation. The torrent handle of the new
+torrent can be found in the base class' <tt class="docutils literal">handle</tt> member. If adding
+the torrent failed, <tt class="docutils literal">error</tt> contains the error code.</p>
+<pre class="literal-block">
+struct add_torrent_alert final : torrent_alert
+{
+   virtual std::string <strong>message</strong> () const override;
+
+   static const int static_category = alert::status_notification;
+   add_torrent_params params;
+   error_code error;
+};
+</pre>
+<a name="params"></a><dl class="docutils">
+<dt>params</dt>
+<dd>a copy of the parameters used when adding the torrent, it can be used
+to identify which invocation to <tt class="docutils literal">async_add_torrent()</tt> caused this <a class="reference external" href="reference-Alerts.html#alert">alert</a>.</dd>
+</dl>
+<a name="error"></a><dl class="docutils">
+<dt>error</dt>
+<dd>set to the error, if one occurred while adding the torrent.</dd>
+</dl>
+<a name="state_update_alert"></a></div>
+<div class="section" id="state-update-alert">
+<h2>state_update_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is only posted when requested by the user, by calling
+session::post_torrent_updates() on the <a class="reference external" href="reference-Core.html#session">session</a>. It contains the torrent
+status of all torrents that changed since last time this message was
+posted. Its category is <tt class="docutils literal">status_notification</tt>, but it's not subject to
+filtering, since it's only manually posted anyway.</p>
+<pre class="literal-block">
+struct state_update_alert final : alert
+{
+   <strong>state_update_alert</strong> (aux::stack_allocator&amp; alloc
+      , std::vector&lt;torrent_status&gt; st);
+   virtual std::string <strong>message</strong> () const override;
+
+   static const int static_category = alert::status_notification;
+   std::vector&lt;torrent_status&gt; status;
+};
+</pre>
+<a name="status"></a><dl class="docutils">
+<dt>status</dt>
+<dd>contains the torrent status of all torrents that changed since last
+time this message was posted. Note that you can map a torrent status
+to a specific torrent via its <tt class="docutils literal">handle</tt> member. The receiving end is
+suggested to have all torrents sorted by the <a class="reference external" href="reference-Core.html#torrent_handle">torrent_handle</a> or hashed
+by it, for efficient updates.</dd>
+</dl>
+<a name="mmap_cache_alert"></a></div>
+<div class="section" id="mmap-cache-alert">
+<h2>mmap_cache_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<pre class="literal-block">
+struct mmap_cache_alert final : alert
+{
+   virtual std::string <strong>message</strong> () const override;
+   <strong>mmap_cache_alert</strong> (aux::stack_allocator&amp; alloc
+      , error_code const&amp; ec);
+
+   static const int static_category = alert::error_notification;
+   error_code error;
+};
+</pre>
+<a name="session_stats_alert"></a></div>
+<div class="section" id="session-stats-alert">
+<h2>session_stats_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>The <a class="reference external" href="reference-Alerts.html#session_stats_alert">session_stats_alert</a> is posted when the user requests <a class="reference external" href="reference-Core.html#session">session</a> statistics by
+calling <a class="reference external" href="reference-Core.html#post_session_stats()">post_session_stats()</a> on the <a class="reference external" href="reference-Core.html#session">session</a> object. Its category is
+<tt class="docutils literal">status_notification</tt>, but it is not subject to filtering, since it's only
+manually posted anyway.</p>
+<pre class="literal-block">
+struct session_stats_alert final : alert
+{
+   <strong>session_stats_alert</strong> (aux::stack_allocator&amp; alloc, counters const&amp; cnt);
+   virtual std::string <strong>message</strong> () const override;
+
+   static const int static_category = alert::stats_notification;
+   boost::uint64_t values[counters::num_counters];
+};
+</pre>
+<a name="values[counters"></a><dl class="docutils">
+<dt>values[counters</dt>
+<dd><p class="first">An array are a mix of <em>counters</em> and <em>gauges</em>, which meanings can be
+queries via the <a class="reference external" href="reference-Core.html#session_stats_metrics()">session_stats_metrics()</a> function on the <a class="reference external" href="reference-Core.html#session">session</a>. The
+mapping from a specific metric to an index into this array is constant
+for a specific version of libtorrent, but may differ for other
+versions. The intended usage is to request the mapping, i.e. call
+<a class="reference external" href="reference-Core.html#session_stats_metrics()">session_stats_metrics()</a>, once on startup, and then use that mapping to
+interpret these values throughout the process' runtime.</p>
+<p class="last">For more information, see the <a class="reference external" href="manual-ref.html#session-statistics">session statistics</a> section.</p>
+</dd>
+</dl>
+<a name="dht_error_alert"></a></div>
+<div class="section" id="dht-error-alert">
+<h2>dht_error_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>posted when something fails in the DHT. This is not necessarily a fatal
+error, but it could prevent proper operation</p>
+<pre class="literal-block">
+struct dht_error_alert final : alert
+{
+   virtual std::string <strong>message</strong> () const override;
+
+   enum op_t
+   {
+      unknown,
+      hostname_lookup,
+   };
+
+   static const int static_category = alert::error_notification | alert::dht_notification;
+   error_code error;
+   op_t operation;
+};
+</pre>
+<a name="op_t"></a><div class="section" id="id245">
+<h3>enum op_t</h3>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="46%" />
+<col width="19%" />
+<col width="35%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">value</th>
+<th class="head">description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>unknown</td>
+<td>0</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>hostname_lookup</td>
+<td>1</td>
+<td>&nbsp;</td>
+</tr>
+</tbody>
+</table>
+<a name="error"></a><dl class="docutils">
+<dt>error</dt>
+<dd>the error code</dd>
+</dl>
+<a name="operation"></a><dl class="docutils">
+<dt>operation</dt>
+<dd>the operation that failed</dd>
+</dl>
+<a name="dht_immutable_item_alert"></a></div>
+</div>
+<div class="section" id="dht-immutable-item-alert">
+<h2>dht_immutable_item_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>this <a class="reference external" href="reference-Alerts.html#alert">alert</a> is posted as a response to a call to session::get_item(),
+specifically the overload for looking up immutable items in the DHT.</p>
+<pre class="literal-block">
+struct dht_immutable_item_alert final : alert
+{
+   <strong>dht_immutable_item_alert</strong> (aux::stack_allocator&amp; alloc, sha1_hash const&amp; t
+      , entry const&amp; i);
+   virtual std::string <strong>message</strong> () const override;
+
+   static const int static_category = alert::dht_notification;
+   sha1_hash target;
+   entry item;
+};
+</pre>
+<a name="target"></a><dl class="docutils">
+<dt>target</dt>
+<dd>the target hash of the immutable item. This must
+match the sha-1 hash of the bencoded form of <tt class="docutils literal">item</tt>.</dd>
+</dl>
+<a name="item"></a><dl class="docutils">
+<dt>item</dt>
+<dd>the data for this item</dd>
+</dl>
+<a name="dht_mutable_item_alert"></a></div>
+<div class="section" id="dht-mutable-item-alert">
+<h2>dht_mutable_item_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>this <a class="reference external" href="reference-Alerts.html#alert">alert</a> is posted as a response to a call to session::get_item(),
+specifically the overload for looking up mutable items in the DHT.</p>
+<pre class="literal-block">
+struct dht_mutable_item_alert final : alert
+{
+   <strong>dht_mutable_item_alert</strong> (aux::stack_allocator&amp; alloc
+      , boost::array&lt;char, 32&gt; k
+      , boost::array&lt;char, 64&gt; sig
+      , boost::uint64_t sequence
+      , std::string const&amp; s
+      , entry const&amp; i
+      , bool a);
+   virtual std::string <strong>message</strong> () const override;
+
+   static const int static_category = alert::dht_notification;
+   boost::array&lt;char, 32&gt; key;
+   boost::array&lt;char, 64&gt; signature;
+   boost::uint64_t seq;
+   std::string salt;
+   entry item;
+   bool authoritative;
+};
+</pre>
+<a name="key"></a><dl class="docutils">
+<dt>key</dt>
+<dd>the public key that was looked up</dd>
+</dl>
+<a name="signature"></a><dl class="docutils">
+<dt>signature</dt>
+<dd>the signature of the data. This is not the signature of the
+plain encoded form of the item, but it includes the sequence number
+and possibly the hash as well. See the dht_store document for more
+information. This is primarily useful for echoing back in a store
+request.</dd>
+</dl>
+<a name="seq"></a><dl class="docutils">
+<dt>seq</dt>
+<dd>the sequence number of this item</dd>
+</dl>
+<a name="salt"></a><dl class="docutils">
+<dt>salt</dt>
+<dd>the salt, if any, used to lookup and store this item. If no
+salt was used, this is an empty string</dd>
+</dl>
+<a name="item"></a><dl class="docutils">
+<dt>item</dt>
+<dd>the data for this item</dd>
+</dl>
+<a name="authoritative"></a><dl class="docutils">
+<dt>authoritative</dt>
+<dd>the last response for mutable data is authoritative.</dd>
+</dl>
+<a name="dht_put_alert"></a></div>
+<div class="section" id="dht-put-alert">
+<h2>dht_put_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>this is posted when a DHT put operation completes. This is useful if the
+client is waiting for a put to complete before shutting down for instance.</p>
+<pre class="literal-block">
+struct dht_put_alert final : alert
+{
+   virtual std::string <strong>message</strong> () const override;
+
+   static const int static_category = alert::dht_notification;
+   sha1_hash target;
+   boost::array&lt;char, 32&gt; public_key;
+   boost::array&lt;char, 64&gt; signature;
+   std::string salt;
+   boost::uint64_t seq;
+   int num_success;
+};
+</pre>
+<a name="target"></a><dl class="docutils">
+<dt>target</dt>
+<dd>the target hash the item was stored under if this was an <em>immutable</em>
+item.</dd>
+</dl>
+<a name="public_key"></a>
+<a name="signature"></a>
+<a name="salt"></a>
+<a name="seq"></a><dl class="docutils">
+<dt>public_key  signature  salt  seq</dt>
+<dd>if a mutable item was stored, these are the public key, signature,
+salt and sequence number the item was stored under.</dd>
+</dl>
+<a name="num_success"></a><dl class="docutils">
+<dt>num_success</dt>
+<dd>DHT put operation usually writes item to k nodes, maybe the node
+is stale so no response, or the node doesn't support 'put', or the
+token for write is out of date, etc. num_success is the number of
+successful responses we got from the puts.</dd>
+</dl>
+<a name="i2p_alert"></a></div>
+<div class="section" id="i2p-alert">
+<h2>i2p_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>this <a class="reference external" href="reference-Alerts.html#alert">alert</a> is used to report errors in the i2p SAM connection</p>
+<pre class="literal-block">
+struct i2p_alert final : alert
+{
+   <strong>i2p_alert</strong> (aux::stack_allocator&amp; alloc, error_code const&amp; ec);
+   virtual std::string <strong>message</strong> () const override;
+
+   static const int static_category = alert::error_notification;
+   error_code error;
+};
+</pre>
+<a name="error"></a><dl class="docutils">
+<dt>error</dt>
+<dd>the error that occurred in the i2p SAM connection</dd>
+</dl>
+<a name="dht_outgoing_get_peers_alert"></a></div>
+<div class="section" id="dht-outgoing-get-peers-alert">
+<h2>dht_outgoing_get_peers_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is generated when we send a get_peers request
+It belongs to the <tt class="docutils literal">dht_notification</tt> category.</p>
+<pre class="literal-block">
+struct dht_outgoing_get_peers_alert final : alert
+{
+   virtual std::string <strong>message</strong> () const override;
+
+   static const int static_category = alert::dht_notification;
+   sha1_hash info_hash;
+   sha1_hash obfuscated_info_hash;
+   udp::endpoint ip;
+};
+</pre>
+<a name="info_hash"></a><dl class="docutils">
+<dt>info_hash</dt>
+<dd>the info_hash of the torrent we're looking for peers for.</dd>
+</dl>
+<a name="obfuscated_info_hash"></a><dl class="docutils">
+<dt>obfuscated_info_hash</dt>
+<dd>if this was an obfuscated lookup, this is the info-hash target
+actually sent to the node.</dd>
+</dl>
+<a name="ip"></a><dl class="docutils">
+<dt>ip</dt>
+<dd>the endpoint we're sending this query to</dd>
+</dl>
+<a name="log_alert"></a></div>
+<div class="section" id="log-alert">
+<h2>log_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is posted by some <a class="reference external" href="reference-Core.html#session">session</a> wide event. Its main purpose is
+trouble shooting and debugging. It's not enabled by the default <a class="reference external" href="reference-Alerts.html#alert">alert</a>
+mask and is enabled by the <tt class="docutils literal"><span class="pre">alert::session_log_notification</span></tt> bit.
+Furthermore, it's by default disabled as a build configuration.</p>
+<pre class="literal-block">
+struct log_alert final : alert
+{
+   virtual std::string <strong>message</strong> () const override;
+   char const* <strong>msg</strong> () const;
+
+   static const int static_category = alert::session_log_notification;
+};
+</pre>
+<a name="msg()"></a><div class="section" id="msg">
+<h3>msg()</h3>
+<pre class="literal-block">
+char const* <strong>msg</strong> () const;
+</pre>
+<p>returns the log message</p>
+<a name="torrent_log_alert"></a></div>
+</div>
+<div class="section" id="torrent-log-alert">
+<h2>torrent_log_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is posted by torrent wide events. It's meant to be used for
+trouble shooting and debugging. It's not enabled by the default <a class="reference external" href="reference-Alerts.html#alert">alert</a>
+mask and is enabled by the <tt class="docutils literal"><span class="pre">alert::torrent_log_notification</span></tt> bit. By
+default it is disabled as a build configuration.</p>
+<pre class="literal-block">
+struct torrent_log_alert final : torrent_alert
+{
+   virtual std::string <strong>message</strong> () const override;
+   char const* <strong>msg</strong> () const;
+
+   static const int static_category = alert::torrent_log_notification;
+};
+</pre>
+<a name="msg()"></a><div class="section" id="id263">
+<h3>msg()</h3>
+<pre class="literal-block">
+char const* <strong>msg</strong> () const;
+</pre>
+<p>returns the log message</p>
+<a name="peer_log_alert"></a></div>
+</div>
+<div class="section" id="peer-log-alert">
+<h2>peer_log_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is posted by events specific to a peer. It's meant to be used
+for trouble shooting and debugging. It's not enabled by the default <a class="reference external" href="reference-Alerts.html#alert">alert</a>
+mask and is enabled by the <tt class="docutils literal"><span class="pre">alert::peer_log_notification</span></tt> bit. By
+default it is disabled as a build configuration.</p>
+<pre class="literal-block">
+struct peer_log_alert final : peer_alert
+{
+   virtual std::string <strong>message</strong> () const override;
+   char const* <strong>msg</strong> () const;
+
+   enum direction_t
+   {
+      incoming_message,
+      outgoing_message,
+      incoming,
+      outgoing,
+      info,
+   };
+
+   static const int static_category = alert::peer_log_notification;
+   char const* event_type;
+   direction_t direction;
+};
+</pre>
+<a name="msg()"></a><div class="section" id="id267">
+<h3>msg()</h3>
+<pre class="literal-block">
+char const* <strong>msg</strong> () const;
+</pre>
+<p>returns the log message</p>
+<a name="direction_t"></a></div>
+<div class="section" id="enum-direction-t">
+<h3>enum direction_t</h3>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="47%" />
+<col width="18%" />
+<col width="34%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">value</th>
+<th class="head">description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>incoming_message</td>
+<td>0</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>outgoing_message</td>
+<td>1</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>incoming</td>
+<td>2</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>outgoing</td>
+<td>3</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>info</td>
+<td>4</td>
+<td>&nbsp;</td>
+</tr>
+</tbody>
+</table>
+<a name="event_type"></a><dl class="docutils">
+<dt>event_type</dt>
+<dd>string literal indicating the kind of event. For messages, this is the
+message name.</dd>
+</dl>
+<a name="lsd_error_alert"></a></div>
+</div>
+<div class="section" id="lsd-error-alert">
+<h2>lsd_error_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>posted if the local service discovery socket fails to start properly.
+it's categorized as <tt class="docutils literal">error_notification</tt>.</p>
+<pre class="literal-block">
+struct lsd_error_alert final : alert
+{
+   virtual std::string <strong>message</strong> () const override;
+
+   static const int static_category = alert::error_notification;
+   error_code error;
+};
+</pre>
+<a name="error"></a><dl class="docutils">
+<dt>error</dt>
+<dd>The error code</dd>
+</dl>
+<a name="dht_lookup"></a></div>
+<div class="section" id="dht-lookup">
+<h2>dht_lookup</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>holds statistics about a current <a class="reference external" href="reference-Alerts.html#dht_lookup">dht_lookup</a> operation.
+a DHT lookup is the traversal of nodes, looking up a
+set of target nodes in the DHT for retrieving and possibly
+storing information in the DHT</p>
+<pre class="literal-block">
+struct dht_lookup
+{
+   char const* type;
+   int outstanding_requests;
+   int timeouts;
+   int responses;
+   int branch_factor;
+   int nodes_left;
+   int last_sent;
+   int first_timeout;
+};
+</pre>
+<a name="type"></a><dl class="docutils">
+<dt>type</dt>
+<dd>string literal indicating which kind of lookup this is</dd>
+</dl>
+<a name="outstanding_requests"></a><dl class="docutils">
+<dt>outstanding_requests</dt>
+<dd>the number of outstanding request to individual nodes
+this lookup has right now</dd>
+</dl>
+<a name="timeouts"></a><dl class="docutils">
+<dt>timeouts</dt>
+<dd>the total number of requests that have timed out so far
+for this lookup</dd>
+</dl>
+<a name="responses"></a><dl class="docutils">
+<dt>responses</dt>
+<dd>the total number of responses we have received for this
+lookup so far for this lookup</dd>
+</dl>
+<a name="branch_factor"></a><dl class="docutils">
+<dt>branch_factor</dt>
+<dd>the branch factor for this lookup. This is the number of
+nodes we keep outstanding requests to in parallel by default.
+when nodes time out we may increase this.</dd>
+</dl>
+<a name="nodes_left"></a><dl class="docutils">
+<dt>nodes_left</dt>
+<dd>the number of nodes left that could be queries for this
+lookup. Many of these are likely to be part of the trail
+while performing the lookup and would never end up actually
+being queried.</dd>
+</dl>
+<a name="last_sent"></a><dl class="docutils">
+<dt>last_sent</dt>
+<dd>the number of seconds ago the
+last message was sent that's still
+outstanding</dd>
+</dl>
+<a name="first_timeout"></a><dl class="docutils">
+<dt>first_timeout</dt>
+<dd>the number of outstanding requests
+that have exceeded the short timeout
+and are considered timed out in the
+sense that they increased the branch
+factor</dd>
+</dl>
+<a name="dht_routing_bucket"></a></div>
+<div class="section" id="dht-routing-bucket">
+<h2>dht_routing_bucket</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>struct to hold information about a single DHT routing table bucket</p>
+<pre class="literal-block">
+struct dht_routing_bucket
+{
+   int num_nodes;
+   int num_replacements;
+   int last_active;
+};
+</pre>
+<a name="num_nodes"></a>
+<a name="num_replacements"></a><dl class="docutils">
+<dt>num_nodes  num_replacements</dt>
+<dd>the total number of nodes and replacement nodes
+in the routing table</dd>
+</dl>
+<a name="last_active"></a><dl class="docutils">
+<dt>last_active</dt>
+<dd>number of seconds since last activity</dd>
+</dl>
+<a name="dht_stats_alert"></a></div>
+<div class="section" id="dht-stats-alert">
+<h2>dht_stats_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>contains current DHT state. Posted in response to session::post_dht_stats().</p>
+<pre class="literal-block">
+struct dht_stats_alert final : alert
+{
+   virtual std::string <strong>message</strong> () const override;
+
+   static const int static_category = alert::stats_notification;
+   std::vector&lt;dht_lookup&gt; active_requests;
+   std::vector&lt;dht_routing_bucket&gt; routing_table;
+};
+</pre>
+<a name="active_requests"></a><dl class="docutils">
+<dt>active_requests</dt>
+<dd>a vector of the currently running DHT lookups.</dd>
+</dl>
+<a name="routing_table"></a><dl class="docutils">
+<dt>routing_table</dt>
+<dd>contains information about every bucket in the DHT routing
+table.</dd>
+</dl>
+<a name="incoming_request_alert"></a></div>
+<div class="section" id="incoming-request-alert">
+<h2>incoming_request_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>posted every time an incoming request from a peer is accepted and queued
+up for being serviced. This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is only posted if
+the <a class="reference external" href="reference-Alerts.html#incoming_request_notification">alert::incoming_request_notification</a> flag is enabled in the <a class="reference external" href="reference-Alerts.html#alert">alert</a>
+mask.</p>
+<pre class="literal-block">
+struct incoming_request_alert final : peer_alert
+{
+   virtual std::string <strong>message</strong> () const override;
+
+   static const int static_category = alert::incoming_request_notification;
+   peer_request req;
+};
+</pre>
+<a name="req"></a><dl class="docutils">
+<dt>req</dt>
+<dd>the request this peer sent to us</dd>
+</dl>
+<a name="dht_log_alert"></a></div>
+<div class="section" id="dht-log-alert">
+<h2>dht_log_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<pre class="literal-block">
+struct dht_log_alert final : alert
+{
+   <strong>dht_log_alert</strong> (aux::stack_allocator&amp; alloc
+      , dht_module_t m, char const* msg);
+   virtual std::string <strong>message</strong> () const override;
+   char const* <strong>log_message</strong> () const;
+
+   enum dht_module_t
+   {
+      tracker,
+      node,
+      routing_table,
+      rpc_manager,
+      traversal,
+   };
+
+   static const int static_category = alert::dht_log_notification;
+   dht_module_t module;
+};
+</pre>
+<a name="log_message()"></a><div class="section" id="id279">
+<h3>log_message()</h3>
+<pre class="literal-block">
+char const* <strong>log_message</strong> () const;
+</pre>
+<p>the log message</p>
+<a name="dht_module_t"></a></div>
+<div class="section" id="enum-dht-module-t">
+<h3>enum dht_module_t</h3>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="43%" />
+<col width="20%" />
+<col width="37%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">value</th>
+<th class="head">description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>tracker</td>
+<td>0</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>node</td>
+<td>1</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>routing_table</td>
+<td>2</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>rpc_manager</td>
+<td>3</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>traversal</td>
+<td>4</td>
+<td>&nbsp;</td>
+</tr>
+</tbody>
+</table>
+<a name="module"></a><dl class="docutils">
+<dt>module</dt>
+<dd>the module, or part, of the DHT that produced this log message.</dd>
+</dl>
+<a name="dht_pkt_alert"></a></div>
+</div>
+<div class="section" id="dht-pkt-alert">
+<h2>dht_pkt_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This <a class="reference external" href="reference-Alerts.html#alert">alert</a> is posted every time a DHT message is sent or received. It is
+only posted if the <tt class="docutils literal"><span class="pre">alert::dht_log_notification</span></tt> <a class="reference external" href="reference-Alerts.html#alert">alert</a> category is
+enabled. It contains a verbatim copy of the message.</p>
+<pre class="literal-block">
+struct dht_pkt_alert final : alert
+{
+   <strong>dht_pkt_alert</strong> (aux::stack_allocator&amp; alloc, char const* buf, int size
+      , dht_pkt_alert::direction_t d, udp::endpoint ep);
+   virtual std::string <strong>message</strong> () const override;
+   int <strong>pkt_size</strong> () const;
+   char const* <strong>pkt_buf</strong> () const;
+
+   enum direction_t
+   {
+      incoming,
+      outgoing,
+   };
+
+   static const int static_category = alert::dht_log_notification;
+   direction_t dir;
+   udp::endpoint node;
+};
+</pre>
+<a name="pkt_size()"></a>
+<a name="pkt_buf()"></a><div class="section" id="pkt-size-pkt-buf">
+<h3>pkt_size() pkt_buf()</h3>
+<pre class="literal-block">
+int <strong>pkt_size</strong> () const;
+char const* <strong>pkt_buf</strong> () const;
+</pre>
+<p>returns a pointer to the packet buffer and size of the packet,
+respectively. This buffer is only valid for as long as the <a class="reference external" href="reference-Alerts.html#alert">alert</a> itself
+is valid, which is owned by libtorrent and reclaimed whenever
+<a class="reference external" href="reference-Core.html#pop_alerts()">pop_alerts()</a> is called on the <a class="reference external" href="reference-Core.html#session">session</a>.</p>
+<a name="direction_t"></a></div>
+<div class="section" id="id287">
+<h3>enum direction_t</h3>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="33%" />
+<col width="23%" />
+<col width="43%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">value</th>
+<th class="head">description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>incoming</td>
+<td>0</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>outgoing</td>
+<td>1</td>
+<td>&nbsp;</td>
+</tr>
+</tbody>
+</table>
+<a name="dir"></a><dl class="docutils">
+<dt>dir</dt>
+<dd>whether this is an incoming or outgoing packet.</dd>
+</dl>
+<a name="node"></a><dl class="docutils">
+<dt>node</dt>
+<dd>the DHT node we received this packet from, or sent this packet to
+(depending on <tt class="docutils literal">dir</tt>).</dd>
+</dl>
+<a name="dht_get_peers_reply_alert"></a></div>
+</div>
+<div class="section" id="dht-get-peers-reply-alert">
+<h2>dht_get_peers_reply_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<pre class="literal-block">
+struct dht_get_peers_reply_alert final : alert
+{
+   <strong>dht_get_peers_reply_alert</strong> (aux::stack_allocator&amp; alloc
+      , sha1_hash const&amp; ih
+      , std::vector&lt;tcp::endpoint&gt; const&amp; v);
+   virtual std::string <strong>message</strong> () const override;
+   void <strong>peers</strong> (std::vector&lt;tcp::endpoint&gt;&amp; peers) const;
+   int <strong>num_peers</strong> () const;
+
+   static const int static_category = alert::dht_operation_notification;
+   sha1_hash info_hash;
+};
+</pre>
+<a name="dht_direct_response_alert"></a></div>
+<div class="section" id="dht-direct-response-alert">
+<h2>dht_direct_response_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>This is posted exactly once for every call to session_handle::dht_direct_request.
+If the request failed, <a class="reference external" href="reference-Alerts.html#response()">response()</a> will return a default constructed <a class="reference external" href="reference-Bdecoding.html#bdecode_node">bdecode_node</a>.</p>
+<pre class="literal-block">
+struct dht_direct_response_alert final : alert
+{
+   <strong>dht_direct_response_alert</strong> (aux::stack_allocator&amp; alloc, void* userdata
+      , udp::endpoint const&amp; addr, bdecode_node const&amp; response);
+   virtual std::string <strong>message</strong> () const override;
+   <strong>dht_direct_response_alert</strong> (aux::stack_allocator&amp; alloc, void* userdata
+      , udp::endpoint const&amp; addr);
+   bdecode_node <strong>response</strong> () const;
+
+   static const int static_category = alert::dht_notification;
+   void* userdata;
+   udp::endpoint addr;
+};
+</pre>
+<a name="dht_direct_response_alert()"></a>
+<a name="message()"></a><div class="section" id="dht-direct-response-alert-message">
+<h3>dht_direct_response_alert() message()</h3>
+<pre class="literal-block">
+virtual std::string <strong>message</strong> () const override;
+<strong>dht_direct_response_alert</strong> (aux::stack_allocator&amp; alloc, void* userdata
+      , udp::endpoint const&amp; addr);
+</pre>
+<p>for when there was a timeout so we don't have a response</p>
+<a name="picker_log_alert"></a></div>
+</div>
+<div class="section" id="picker-log-alert">
+<h2>picker_log_alert</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<p>this is posted when one or more blocks are picked by the piece picker,
+assuming the verbose piece picker logging is enabled (see
+picker_log_notification).</p>
+<pre class="literal-block">
+struct picker_log_alert : peer_alert
+{
+   virtual std::string <strong>message</strong> () const override;
+   std::vector&lt;piece_block&gt; <strong>blocks</strong> () const;
+
+   enum picker_flags_t
+   {
+      partial_ratio,
+      prioritize_partials,
+      rarest_first_partials,
+      rarest_first,
+      reverse_rarest_first,
+      suggested_pieces,
+      prio_sequential_pieces,
+      sequential_pieces,
+      reverse_pieces,
+      time_critical,
+      random_pieces,
+      prefer_contiguous,
+      reverse_sequential,
+      backup1,
+      backup2,
+      end_game,
+   };
+
+   static const int static_category = alert::picker_log_notification;
+   boost::uint32_t picker_flags;
+};
+</pre>
+<a name="picker_flags_t"></a><div class="section" id="enum-picker-flags-t">
+<h3>enum picker_flags_t</h3>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="24%" />
+<col width="7%" />
+<col width="68%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">value</th>
+<th class="head">description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>partial_ratio</td>
+<td>1</td>
+<td>the ratio of partial pieces is too high. This forces a preference
+for picking blocks from partial pieces.</td>
+</tr>
+<tr><td>prioritize_partials</td>
+<td>2</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>rarest_first_partials</td>
+<td>4</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>rarest_first</td>
+<td>8</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>reverse_rarest_first</td>
+<td>16</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>suggested_pieces</td>
+<td>32</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>prio_sequential_pieces</td>
+<td>64</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>sequential_pieces</td>
+<td>128</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>reverse_pieces</td>
+<td>256</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>time_critical</td>
+<td>512</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>random_pieces</td>
+<td>1024</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>prefer_contiguous</td>
+<td>2048</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>reverse_sequential</td>
+<td>4096</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>backup1</td>
+<td>8192</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>backup2</td>
+<td>16384</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>end_game</td>
+<td>32768</td>
+<td>&nbsp;</td>
+</tr>
+</tbody>
+</table>
+<a name="picker_flags"></a><dl class="docutils">
+<dt>picker_flags</dt>
+<dd>this is a bitmask of which features were enabled for this particular
+pick. The bits are defined in the <a class="reference external" href="reference-Alerts.html#picker_flags_t">picker_flags_t</a> enum.</dd>
+</dl>
+<a name="alert_cast()"></a></div>
+</div>
+<div class="section" id="alert-cast">
+<h2>alert_cast()</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert.hpp">libtorrent/alert.hpp</a>&quot;</p>
+<pre class="literal-block">
+template &lt;class T&gt; T* <strong>alert_cast</strong> (alert* a);
+template &lt;class T&gt; T const* <strong>alert_cast</strong> (alert const* a);
+</pre>
+<p>When you get an <a class="reference external" href="reference-Alerts.html#alert">alert</a>, you can use <tt class="docutils literal">alert_cast&lt;&gt;</tt> to attempt to cast the pointer to a
+more specific <a class="reference external" href="reference-Alerts.html#alert">alert</a> type, in order to query it for more information.</p>
+<a name="operation_name()"></a></div>
+<div class="section" id="operation-name">
+<h2>operation_name()</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/alert_types.hpp">libtorrent/alert_types.hpp</a>&quot;</p>
+<pre class="literal-block">
+char const* <strong>operation_name</strong> (int op);
+</pre>
+<p>maps an operation id (from <a class="reference external" href="reference-Alerts.html#peer_error_alert">peer_error_alert</a> and <a class="reference external" href="reference-Alerts.html#peer_disconnected_alert">peer_disconnected_alert</a>)
+to its name. See peer_connection for the constants</p>
+<a name="operation_t"></a></div>
+<div class="section" id="enum-operation-t">
+<h2>enum operation_t</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/operations.hpp">libtorrent/operations.hpp</a>&quot;</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="18%" />
+<col width="7%" />
+<col width="74%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">value</th>
+<th class="head">description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>op_bittorrent</td>
+<td>0</td>
+<td>this is used when the bittorrent logic
+determines to disconnect</td>
+</tr>
+<tr><td>op_iocontrol</td>
+<td>1</td>
+<td>a call to iocontrol failed</td>
+</tr>
+<tr><td>op_getpeername</td>
+<td>2</td>
+<td>a call to getpeername failed (querying the remote IP of a
+connection)</td>
+</tr>
+<tr><td>op_getname</td>
+<td>3</td>
+<td>a call to getname failed (querying the local IP of a
+connection)</td>
+</tr>
+<tr><td>op_alloc_recvbuf</td>
+<td>4</td>
+<td>an attempt to allocate a receive buffer failed</td>
+</tr>
+<tr><td>op_alloc_sndbuf</td>
+<td>5</td>
+<td>an attempt to allocate a send buffer failed</td>
+</tr>
+<tr><td>op_file_write</td>
+<td>6</td>
+<td>writing to a file failed</td>
+</tr>
+<tr><td>op_file_read</td>
+<td>7</td>
+<td>reading from a file failed</td>
+</tr>
+<tr><td>op_file</td>
+<td>8</td>
+<td>a non-read and non-write file operation failed</td>
+</tr>
+<tr><td>op_sock_write</td>
+<td>9</td>
+<td>a socket write operation failed</td>
+</tr>
+<tr><td>op_sock_read</td>
+<td>10</td>
+<td>a socket read operation failed</td>
+</tr>
+<tr><td>op_sock_open</td>
+<td>11</td>
+<td>a call to open(), to create a socket socket failed</td>
+</tr>
+<tr><td>op_sock_bind</td>
+<td>12</td>
+<td>a call to bind() on a socket failed</td>
+</tr>
+<tr><td>op_available</td>
+<td>13</td>
+<td>an attempt to query the number of bytes available to read from a socket
+failed</td>
+</tr>
+<tr><td>op_encryption</td>
+<td>14</td>
+<td>a call related to bittorrent protocol encryption failed</td>
+</tr>
+<tr><td>op_connect</td>
+<td>15</td>
+<td>an attempt to connect a socket failed</td>
+</tr>
+<tr><td>op_ssl_handshake</td>
+<td>16</td>
+<td>establishing an SSL connection failed</td>
+</tr>
+<tr><td>op_get_interface</td>
+<td>17</td>
+<td>a connection failed to satisfy the bind interface setting</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+    </div>
+    </div>
+    <div id="gradient"></div>
+    <div id="footer">
+    <table>
+    <tr>
+      <td><a href="index.html">home</a></td>
+      <td><a href="http://blog.libtorrent.org">blog</a></td>
+      <td><a href="utp.html">uTP</a></td>
+    </tr>
+    <tr>
+      <td><a href="https://sourceforge.net/projects/libtorrent/files/libtorrent/">download</a></td>
+      <td><a href="reference.html">documentation</a></td>
+      <td><a href="dht_store.html">DHT put extension</a></td>
+    </tr>
+    <tr>
+      <td><a href="https://sourceforge.net/projects/libtorrent/files/py-libtorrent/">python bindings</a></td>
+      <td><a href="features.html">features</a></td>
+      <td><a href="dht_sec.html">DHT security extension</a></td>
+    </tr>
+    <tr>
+      <td><a href="http://dir.gmane.org/gmane.network.bit-torrent.libtorrent">mailing list archive</a></td>
+      <td><a href="contributing.html">contributing</a></td>
+      <td><a href="streaming.html">streaming</a></td>
+    </tr>
+    <tr>
+      <td><a href="http://code.google.com/p/libtorrent/issues/entry">report a bug</a></td>
+      <td><a href="building.html">building</a></td>
+      <td><a href="bittorrent.pdf">bittorrent slides</a></td>
+    </tr>
+    </table>
+    </div>
+    <div id="filler"></div>
+
+</div>
+</body>
+</html>

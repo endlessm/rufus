@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="Docutils 0.12: http://docutils.sourceforge.net/" />
+<title></title>
+<meta name="author" content="Arvid Norberg, arvid&#64;libtorrent.org" />
+<meta name=viewport content="width=device-width, initial-scale=1">
+<script type="text/javascript">
+/* <![CDATA[ */
+    (function() {
+        var s = document.createElement('script'), t = document.getElementsByTagName('script')[0];
+        s.type = 'text/javascript';
+        s.async = true;
+        s.src = 'http://api.flattr.com/js/0.6/load.js?mode=auto';
+        t.parentNode.insertBefore(s, t);
+    })();
+/* ]]> */
+</script>
+<link rel="stylesheet" href="style.css" type="text/css" />
+<link rel="stylesheet" type="text/css" href="rst.css" />
+<style type="text/css">
+/* Hides from IE-mac \*/
+* html pre { height: 1%; }
+/* End hide from IE-mac */
+</style>
+</head>
+<body>
+<div class="document">
+    <div id="container">
+    <table id="header">
+    <tr><td id="orange"></td>
+    <td id="logo">libtorrent</td></tr>
+    </table>
+    <div id="main">
+
+<table class="docinfo" frame="void" rules="none">
+<col class="docinfo-name" />
+<col class="docinfo-content" />
+<tbody valign="top">
+<tr><th class="docinfo-name">Author:</th>
+<td>Arvid Norberg, <a class="last reference external" href="mailto:arvid&#64;libtorrent.org">arvid&#64;libtorrent.org</a></td></tr>
+<tr><th class="docinfo-name">Version:</th>
+<td>1.1.0</td></tr>
+</tbody>
+</table>
+<div class="section" id="ed25519">
+<h1>ed25519</h1>
+<div class="contents topic" id="table-of-contents">
+<p class="topic-title first">Table of contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#ed25519" id="id3">ed25519</a><ul>
+<li><a class="reference internal" href="#ed25519-create-seed" id="id4">ed25519_create_seed()</a></li>
+<li><a class="reference internal" href="#ed25519-key-exchange-ed25519-create-keypair-ed25519-verify-ed25519-sign-ed25519-add-scalar" id="id5">ed25519_key_exchange() ed25519_create_keypair() ed25519_verify() ed25519_sign() ed25519_add_scalar()</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<a name="ed25519_create_seed()"></a><div class="section" id="ed25519-create-seed">
+<h2>ed25519_create_seed()</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/ed25519.hpp">libtorrent/ed25519.hpp</a>&quot;</p>
+<pre class="literal-block">
+void <strong>ed25519_create_seed</strong> (unsigned char *seed);
+</pre>
+<a name="ed25519_key_exchange()"></a>
+<a name="ed25519_create_keypair()"></a>
+<a name="ed25519_verify()"></a>
+<a name="ed25519_sign()"></a>
+<a name="ed25519_add_scalar()"></a></div>
+<div class="section" id="ed25519-key-exchange-ed25519-create-keypair-ed25519-verify-ed25519-sign-ed25519-add-scalar">
+<h2>ed25519_key_exchange() ed25519_create_keypair() ed25519_verify() ed25519_sign() ed25519_add_scalar()</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/ed25519.hpp">libtorrent/ed25519.hpp</a>&quot;</p>
+<pre class="literal-block">
+void <strong>ed25519_add_scalar</strong> (unsigned char *public_key, unsigned char *private_key, const unsigned char *scalar);
+void <strong>ed25519_key_exchange</strong> (unsigned char *shared_secret, const unsigned char *public_key, const unsigned char *private_key);
+void <strong>ed25519_create_keypair</strong> (unsigned char *public_key, unsigned char *private_key, const unsigned char *seed);
+int <strong>ed25519_verify</strong> (const unsigned char *signature, const unsigned char *message, size_t message_len, const unsigned char *private_key);
+void <strong>ed25519_sign</strong> (unsigned char *signature, const unsigned char *message, size_t message_len, const unsigned char *public_key, const unsigned char *private_key);
+</pre>
+</div>
+</div>
+
+    </div>
+    </div>
+    <div id="gradient"></div>
+    <div id="footer">
+    <table>
+    <tr>
+      <td><a href="index.html">home</a></td>
+      <td><a href="http://blog.libtorrent.org">blog</a></td>
+      <td><a href="utp.html">uTP</a></td>
+    </tr>
+    <tr>
+      <td><a href="https://sourceforge.net/projects/libtorrent/files/libtorrent/">download</a></td>
+      <td><a href="reference.html">documentation</a></td>
+      <td><a href="dht_store.html">DHT put extension</a></td>
+    </tr>
+    <tr>
+      <td><a href="https://sourceforge.net/projects/libtorrent/files/py-libtorrent/">python bindings</a></td>
+      <td><a href="features.html">features</a></td>
+      <td><a href="dht_sec.html">DHT security extension</a></td>
+    </tr>
+    <tr>
+      <td><a href="http://dir.gmane.org/gmane.network.bit-torrent.libtorrent">mailing list archive</a></td>
+      <td><a href="contributing.html">contributing</a></td>
+      <td><a href="streaming.html">streaming</a></td>
+    </tr>
+    <tr>
+      <td><a href="http://code.google.com/p/libtorrent/issues/entry">report a bug</a></td>
+      <td><a href="building.html">building</a></td>
+      <td><a href="bittorrent.pdf">bittorrent slides</a></td>
+    </tr>
+    </table>
+    </div>
+    <div id="filler"></div>
+
+</div>
+</body>
+</html>

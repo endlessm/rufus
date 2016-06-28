@@ -1,0 +1,630 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="Docutils 0.12: http://docutils.sourceforge.net/" />
+<title></title>
+<meta name="author" content="Arvid Norberg, arvid&#64;libtorrent.org" />
+<meta name=viewport content="width=device-width, initial-scale=1">
+<script type="text/javascript">
+/* <![CDATA[ */
+    (function() {
+        var s = document.createElement('script'), t = document.getElementsByTagName('script')[0];
+        s.type = 'text/javascript';
+        s.async = true;
+        s.src = 'http://api.flattr.com/js/0.6/load.js?mode=auto';
+        t.parentNode.insertBefore(s, t);
+    })();
+/* ]]> */
+</script>
+<link rel="stylesheet" href="style.css" type="text/css" />
+<link rel="stylesheet" type="text/css" href="rst.css" />
+<style type="text/css">
+/* Hides from IE-mac \*/
+* html pre { height: 1%; }
+/* End hide from IE-mac */
+</style>
+</head>
+<body>
+<div class="document">
+    <div id="container">
+    <table id="header">
+    <tr><td id="orange"></td>
+    <td id="logo">libtorrent</td></tr>
+    </table>
+    <div id="main">
+
+<table class="docinfo" frame="void" rules="none">
+<col class="docinfo-name" />
+<col class="docinfo-content" />
+<tbody valign="top">
+<tr><th class="docinfo-name">Author:</th>
+<td>Arvid Norberg, <a class="last reference external" href="mailto:arvid&#64;libtorrent.org">arvid&#64;libtorrent.org</a></td></tr>
+<tr><th class="docinfo-name">Version:</th>
+<td>1.1.0</td></tr>
+</tbody>
+</table>
+<div class="section" id="storage">
+<h1>Storage</h1>
+<div class="contents topic" id="table-of-contents">
+<p class="topic-title first">Table of contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#storage" id="id25">Storage</a><ul>
+<li><a class="reference internal" href="#file-slice" id="id26">file_slice</a></li>
+<li><a class="reference internal" href="#file-storage" id="id27">file_storage</a></li>
+<li><a class="reference internal" href="#storage-params" id="id28">storage_params</a></li>
+<li><a class="reference internal" href="#default-storage-constructor" id="id29">default_storage_constructor()</a></li>
+<li><a class="reference internal" href="#disabled-storage-constructor" id="id30">disabled_storage_constructor()</a></li>
+<li><a class="reference internal" href="#zero-storage-constructor" id="id31">zero_storage_constructor()</a></li>
+<li><a class="reference internal" href="#enum-storage-mode-t" id="id32">enum storage_mode_t</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<a name="file_slice"></a><div class="section" id="file-slice">
+<h2>file_slice</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/file_storage.hpp">libtorrent/file_storage.hpp</a>&quot;</p>
+<p>represents a window of a file in a torrent.</p>
+<p>The <tt class="docutils literal">file_index</tt> refers to the index of the file (in the <a class="reference external" href="reference-Core.html#torrent_info">torrent_info</a>).
+To get the path and filename, use <tt class="docutils literal">file_path()</tt> and give the <tt class="docutils literal">file_index</tt>
+as argument. The <tt class="docutils literal">offset</tt> is the byte offset in the file where the range
+starts, and <tt class="docutils literal">size</tt> is the number of bytes this range is. The size + offset
+will never be greater than the file size.</p>
+<pre class="literal-block">
+struct file_slice
+{
+   int file_index;
+   boost::int64_t offset;
+   boost::int64_t size;
+};
+</pre>
+<a name="file_index"></a><dl class="docutils">
+<dt>file_index</dt>
+<dd>the index of the file</dd>
+</dl>
+<a name="offset"></a><dl class="docutils">
+<dt>offset</dt>
+<dd>the offset from the start of the file, in bytes</dd>
+</dl>
+<a name="size"></a><dl class="docutils">
+<dt>size</dt>
+<dd>the size of the window, in bytes</dd>
+</dl>
+<a name="file_storage"></a></div>
+<div class="section" id="file-storage">
+<h2>file_storage</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/file_storage.hpp">libtorrent/file_storage.hpp</a>&quot;</p>
+<p>The <tt class="docutils literal">file_storage</tt> class represents a file list and the piece
+size. Everything necessary to interpret a regular bittorrent storage
+file structure.</p>
+<pre class="literal-block">
+class file_storage
+{
+   bool <strong>is_valid</strong> () const;
+   void <strong>reserve</strong> (int num_files);
+   void <strong>add_file</strong> (std::string const&amp; path, boost::int64_t file_size, int file_flags = 0
+      , std::time_t mtime = 0, std::string const&amp; symlink_path = &quot;&quot;);
+   void <strong>add_file_borrow</strong> (char const* filename, int filename_len
+      , std::string const&amp; path, boost::int64_t file_size
+      , boost::uint32_t file_flags = 0, char const* filehash = 0
+      , boost::int64_t mtime = 0, std::string const&amp; symlink_path = &quot;&quot;);
+   void <strong>rename_file</strong> (int index, std::string const&amp; new_filename);
+   std::vector&lt;file_slice&gt; <strong>map_block</strong> (int piece, boost::int64_t offset
+      , int size) const;
+   peer_request <strong>map_file</strong> (int file, boost::int64_t offset, int size) const;
+   int <strong>num_files</strong> () const;
+   boost::int64_t <strong>total_size</strong> () const;
+   void <strong>set_num_pieces</strong> (int n);
+   int <strong>num_pieces</strong> () const;
+   void <strong>set_piece_length</strong> (int l);
+   int <strong>piece_length</strong> () const;
+   int <strong>piece_size</strong> (int index) const;
+   std::string const&amp; <strong>name</strong> () const;
+   void <strong>set_name</strong> (std::string const&amp; n);
+   void <strong>swap</strong> (file_storage&amp; ti);
+   void <strong>unload</strong> ();
+   bool <strong>is_loaded</strong> () const;
+   void <strong>optimize</strong> (int pad_file_limit = -1, int alignment = -1
+      , bool tail_padding = false);
+   sha1_hash <strong>hash</strong> (int index) const;
+   std::string <strong>file_name</strong> (int index) const;
+   boost::int64_t <strong>file_offset</strong> (int index) const;
+   time_t <strong>mtime</strong> (int index) const;
+   bool <strong>pad_file_at</strong> (int index) const;
+   std::string const&amp; <strong>symlink</strong> (int index) const;
+   std::string <strong>file_path</strong> (int index, std::string const&amp; save_path = &quot;&quot;) const;
+   boost::int64_t <strong>file_size</strong> (int index) const;
+   boost::uint32_t <strong>file_path_hash</strong> (int index, std::string const&amp; save_path) const;
+   void <strong>all_path_hashes</strong> (boost::unordered_set&lt;boost::uint32_t&gt;&amp; table) const;
+   std::vector&lt;std::string&gt; const&amp; <strong>paths</strong> () const;
+   int <strong>file_flags</strong> (int index) const;
+   int <strong>file_index_at_offset</strong> (boost::int64_t offset) const;
+   char const* <strong>file_name_ptr</strong> (int index) const;
+   int <strong>file_name_len</strong> (int index) const;
+   void <strong>apply_pointer_offset</strong> (ptrdiff_t off);
+
+   enum flags_t
+   {
+      pad_file,
+      attribute_hidden,
+      attribute_executable,
+      attribute_symlink,
+   };
+
+   enum file_flags_t
+   {
+      flag_pad_file,
+      flag_hidden,
+      flag_executable,
+      flag_symlink,
+   };
+};
+</pre>
+<a name="is_valid()"></a><div class="section" id="is-valid">
+<h3>is_valid()</h3>
+<pre class="literal-block">
+bool <strong>is_valid</strong> () const;
+</pre>
+<p>returns true if the piece length has been initialized
+on the <a class="reference external" href="reference-Storage.html#file_storage">file_storage</a>. This is typically taken as a proxy
+of whether the <a class="reference external" href="reference-Storage.html#file_storage">file_storage</a> as a whole is initialized or
+not.</p>
+<a name="reserve()"></a></div>
+<div class="section" id="reserve">
+<h3>reserve()</h3>
+<pre class="literal-block">
+void <strong>reserve</strong> (int num_files);
+</pre>
+<p>allocates space for <tt class="docutils literal">num_files</tt> in the internal file list. This can
+be used to avoid reallocating the internal file list when the number
+of files to be added is known up-front.</p>
+<a name="add_file()"></a>
+<a name="add_file_borrow()"></a></div>
+<div class="section" id="add-file-add-file-borrow">
+<h3>add_file() add_file_borrow()</h3>
+<pre class="literal-block">
+void <strong>add_file</strong> (std::string const&amp; path, boost::int64_t file_size, int file_flags = 0
+      , std::time_t mtime = 0, std::string const&amp; symlink_path = &quot;&quot;);
+void <strong>add_file_borrow</strong> (char const* filename, int filename_len
+      , std::string const&amp; path, boost::int64_t file_size
+      , boost::uint32_t file_flags = 0, char const* filehash = 0
+      , boost::int64_t mtime = 0, std::string const&amp; symlink_path = &quot;&quot;);
+</pre>
+<p>Adds a file to the file storage. The <tt class="docutils literal">add_file_borrow</tt> version
+expects that <tt class="docutils literal">filename</tt> points to a string of <tt class="docutils literal">filename_len</tt>
+bytes that is the file name (without a path) of the file that's
+being added. This memory is <em>borrowed</em>, i.e. it is the caller's
+responsibility to make sure it stays valid throughout the lifetime
+of this <a class="reference external" href="reference-Storage.html#file_storage">file_storage</a> object or any copy of it. The same thing applies
+to <tt class="docutils literal">filehash</tt>, wich is an optional pointer to a 20 byte binary
+SHA-1 hash of the file.</p>
+<p>if <tt class="docutils literal">filename</tt> is NULL, the filename from <tt class="docutils literal">path</tt> is used and not
+borrowed. In this case <tt class="docutils literal">filename_len</tt> is ignored.</p>
+<p>The <tt class="docutils literal">path</tt> argument is the full path (in the torrent file) to
+the file to add. Note that this is not supposed to be an absolute
+path, but it is expected to include the name of the torrent as the
+first path element.</p>
+<p><tt class="docutils literal">file_size</tt> is the size of the file in bytes.</p>
+<p>The <tt class="docutils literal">file_flags</tt> argument sets attributes on the file. The file
+attributes is an extension and may not work in all bittorrent clients.</p>
+<p>For possible file attributes, see <a class="reference external" href="reference-Storage.html#flags_t">file_storage::flags_t</a>.</p>
+<p>The <tt class="docutils literal">mtime</tt> argument is optional and can be set to 0. If non-zero,
+it is the posix time of the last modification time of this file.</p>
+<p><tt class="docutils literal">symlink_path</tt> is the path the file is a symlink to. To make this a
+symlink you also need to set the <a class="reference external" href="reference-Storage.html#flag_symlink">file_storage::flag_symlink</a> file flag.</p>
+<p>If more files than one are added, certain restrictions to their paths
+apply. In a multi-file file storage (torrent), all files must share
+the same root directory.</p>
+<p>That is, the first path element of all files must be the same.
+This shared path element is also set to the name of the torrent. It
+can be changed by calling <tt class="docutils literal">set_name</tt>.</p>
+<a name="rename_file()"></a></div>
+<div class="section" id="rename-file">
+<h3>rename_file()</h3>
+<pre class="literal-block">
+void <strong>rename_file</strong> (int index, std::string const&amp; new_filename);
+</pre>
+<p>renames the file at <tt class="docutils literal">index</tt> to <tt class="docutils literal">new_filename</tt>. Keep in mind
+that filenames are expected to be UTF-8 encoded.</p>
+<a name="map_block()"></a></div>
+<div class="section" id="map-block">
+<h3>map_block()</h3>
+<pre class="literal-block">
+std::vector&lt;file_slice&gt; <strong>map_block</strong> (int piece, boost::int64_t offset
+      , int size) const;
+</pre>
+<p>returns a list of <a class="reference external" href="reference-Storage.html#file_slice">file_slice</a> objects representing the portions of
+files the specified piece index, byte offset and size range overlaps.
+this is the inverse mapping of <a class="reference external" href="reference-Core.html#map_file()">map_file()</a>.</p>
+<p>Preconditions of this function is that the input range is within the
+torrents address space. <tt class="docutils literal">piece</tt> may not be negative and</p>
+<blockquote>
+<tt class="docutils literal">piece</tt> * piece_size + <tt class="docutils literal">offset</tt> + <tt class="docutils literal">size</tt></blockquote>
+<p>may not exceed the total size of the torrent.</p>
+<a name="map_file()"></a></div>
+<div class="section" id="map-file">
+<h3>map_file()</h3>
+<pre class="literal-block">
+peer_request <strong>map_file</strong> (int file, boost::int64_t offset, int size) const;
+</pre>
+<p>returns a <a class="reference external" href="reference-Core.html#peer_request">peer_request</a> representing the piece index, byte offset
+and size the specified file range overlaps. This is the inverse
+mapping ove <a class="reference external" href="reference-Core.html#map_block()">map_block()</a>. Note that the <tt class="docutils literal">peer_request</tt> return type
+is meant to hold bittorrent block requests, which may not be larger
+than 16 kiB. Mapping a range larger than that may return an overflown
+integer.</p>
+<a name="num_files()"></a></div>
+<div class="section" id="num-files">
+<h3>num_files()</h3>
+<pre class="literal-block">
+int <strong>num_files</strong> () const;
+</pre>
+<p>returns the number of files in the <a class="reference external" href="reference-Storage.html#file_storage">file_storage</a></p>
+<a name="total_size()"></a></div>
+<div class="section" id="total-size">
+<h3>total_size()</h3>
+<pre class="literal-block">
+boost::int64_t <strong>total_size</strong> () const;
+</pre>
+<p>returns the total number of bytes all the files in this torrent spans</p>
+<a name="num_pieces()"></a>
+<a name="set_num_pieces()"></a></div>
+<div class="section" id="num-pieces-set-num-pieces">
+<h3>num_pieces() set_num_pieces()</h3>
+<pre class="literal-block">
+void <strong>set_num_pieces</strong> (int n);
+int <strong>num_pieces</strong> () const;
+</pre>
+<p>set and get the number of pieces in the torrent</p>
+<a name="piece_length()"></a>
+<a name="set_piece_length()"></a></div>
+<div class="section" id="piece-length-set-piece-length">
+<h3>piece_length() set_piece_length()</h3>
+<pre class="literal-block">
+void <strong>set_piece_length</strong> (int l);
+int <strong>piece_length</strong> () const;
+</pre>
+<p>set and get the size of each piece in this torrent. This size is typically an even power
+of 2. It doesn't have to be though. It should be divisible by 16kiB however.</p>
+<a name="piece_size()"></a></div>
+<div class="section" id="piece-size">
+<h3>piece_size()</h3>
+<pre class="literal-block">
+int <strong>piece_size</strong> (int index) const;
+</pre>
+<p>returns the piece size of <tt class="docutils literal">index</tt>. This will be the same as <a class="reference external" href="reference-Core.html#piece_length()">piece_length()</a>, except
+for the last piece, which may be shorter.</p>
+<a name="set_name()"></a>
+<a name="name()"></a></div>
+<div class="section" id="set-name-name">
+<h3>set_name() name()</h3>
+<pre class="literal-block">
+std::string const&amp; <strong>name</strong> () const;
+void <strong>set_name</strong> (std::string const&amp; n);
+</pre>
+<p>set and get the name of this torrent. For multi-file torrents, this is also
+the name of the root directory all the files are stored in.</p>
+<a name="swap()"></a></div>
+<div class="section" id="swap">
+<h3>swap()</h3>
+<pre class="literal-block">
+void <strong>swap</strong> (file_storage&amp; ti);
+</pre>
+<p>swap all content of <em>this</em> with <em>ti</em>.</p>
+<a name="unload()"></a></div>
+<div class="section" id="unload">
+<h3>unload()</h3>
+<pre class="literal-block">
+void <strong>unload</strong> ();
+</pre>
+<p>deallocates most of the memory used by this
+instance, leaving it only partially usable</p>
+<a name="is_loaded()"></a></div>
+<div class="section" id="is-loaded">
+<h3>is_loaded()</h3>
+<pre class="literal-block">
+bool <strong>is_loaded</strong> () const;
+</pre>
+<p>returns true when populated with at least one file</p>
+<a name="optimize()"></a></div>
+<div class="section" id="optimize">
+<h3>optimize()</h3>
+<pre class="literal-block">
+void <strong>optimize</strong> (int pad_file_limit = -1, int alignment = -1
+      , bool tail_padding = false);
+</pre>
+<p>if pad_file_limit &gt;= 0, files larger than that limit will be padded,
+default is to not add any padding (-1). The alignment specifies the
+alignment files should be padded to. This defaults to the piece size
+(-1) but it may also make sense to set it to 16 kiB, or something
+divisible by 16 kiB.
+If pad_file_limit is 0, every file will be padded (except empty ones).
+<tt class="docutils literal">tail_padding</tt> indicates whether aligned files also are padded at
+the end to make them end aligned. This is required for mutable
+torrents, since piece hashes are compared</p>
+<a name="mtime()"></a>
+<a name="hash()"></a>
+<a name="symlink()"></a>
+<a name="file_name()"></a>
+<a name="pad_file_at()"></a>
+<a name="file_size()"></a>
+<a name="file_path()"></a>
+<a name="file_offset()"></a></div>
+<div class="section" id="mtime-hash-symlink-file-name-pad-file-at-file-size-file-path-file-offset">
+<h3>mtime() hash() symlink() file_name() pad_file_at() file_size() file_path() file_offset()</h3>
+<pre class="literal-block">
+sha1_hash <strong>hash</strong> (int index) const;
+std::string <strong>file_name</strong> (int index) const;
+boost::int64_t <strong>file_offset</strong> (int index) const;
+time_t <strong>mtime</strong> (int index) const;
+bool <strong>pad_file_at</strong> (int index) const;
+std::string const&amp; <strong>symlink</strong> (int index) const;
+std::string <strong>file_path</strong> (int index, std::string const&amp; save_path = &quot;&quot;) const;
+boost::int64_t <strong>file_size</strong> (int index) const;
+</pre>
+<p>These functions are used to query attributes of files at
+a given index.</p>
+<p>The <tt class="docutils literal">hash()</tt> is a sha-1 hash of the file, or 0 if none was
+provided in the torrent file. This can potentially be used to
+join a bittorrent network with other file sharing networks.</p>
+<p>The <tt class="docutils literal">mtime()</tt> is the modification time is the posix
+time when a file was last modified when the torrent
+was created, or 0 if it was not included in the torrent file.</p>
+<p><tt class="docutils literal">file_path()</tt> returns the full path to a file.</p>
+<p><tt class="docutils literal">file_size()</tt> returns the size of a file.</p>
+<p><tt class="docutils literal">pad_file_at()</tt> returns true if the file at the given
+index is a pad-file.</p>
+<p><tt class="docutils literal">file_name()</tt> returns <em>just</em> the name of the file, whereas
+<tt class="docutils literal">file_path()</tt> returns the path (inside the torrent file) with
+the filename appended.</p>
+<p><tt class="docutils literal">file_offset()</tt> returns the byte offset within the torrent file
+where this file starts. It can be used to map the file to a piece
+index (given the piece size).</p>
+<a name="file_path_hash()"></a></div>
+<div class="section" id="file-path-hash">
+<h3>file_path_hash()</h3>
+<pre class="literal-block">
+boost::uint32_t <strong>file_path_hash</strong> (int index, std::string const&amp; save_path) const;
+</pre>
+<p>returns the crc32 hash of file_path(index)</p>
+<a name="all_path_hashes()"></a></div>
+<div class="section" id="all-path-hashes">
+<h3>all_path_hashes()</h3>
+<pre class="literal-block">
+void <strong>all_path_hashes</strong> (boost::unordered_set&lt;boost::uint32_t&gt;&amp; table) const;
+</pre>
+<p>this will add the CRC32 hash of all directory entries to the table. No
+filename will be included, just directories. Every depth of directories
+are added separately to allow test for collisions with files at all
+levels. i.e. if one path in the torrent is <tt class="docutils literal">foo/bar/baz</tt>, the CRC32
+hashes for <tt class="docutils literal">foo</tt>, <tt class="docutils literal">foo/bar</tt> and <tt class="docutils literal">foo/bar/baz</tt> will be added to
+the set.</p>
+<a name="file_flags()"></a></div>
+<div class="section" id="file-flags">
+<h3>file_flags()</h3>
+<pre class="literal-block">
+int <strong>file_flags</strong> (int index) const;
+</pre>
+<p>returns a bitmask of flags from <a class="reference external" href="reference-Storage.html#file_flags_t">file_flags_t</a> that apply
+to file at <tt class="docutils literal">index</tt>.</p>
+<a name="file_index_at_offset()"></a></div>
+<div class="section" id="file-index-at-offset">
+<h3>file_index_at_offset()</h3>
+<pre class="literal-block">
+int <strong>file_index_at_offset</strong> (boost::int64_t offset) const;
+</pre>
+<p>returns the index of the file at the given offset in the torrent</p>
+<a name="file_name_len()"></a>
+<a name="file_name_ptr()"></a></div>
+<div class="section" id="file-name-len-file-name-ptr">
+<h3>file_name_len() file_name_ptr()</h3>
+<pre class="literal-block">
+char const* <strong>file_name_ptr</strong> (int index) const;
+int <strong>file_name_len</strong> (int index) const;
+</pre>
+<p>low-level function. returns a pointer to the internal storage for
+the filename. This string may not be null terminated!
+the <tt class="docutils literal">file_name_len()</tt> function returns the length of the filename.</p>
+<a name="apply_pointer_offset()"></a></div>
+<div class="section" id="apply-pointer-offset">
+<h3>apply_pointer_offset()</h3>
+<pre class="literal-block">
+void <strong>apply_pointer_offset</strong> (ptrdiff_t off);
+</pre>
+<p>if the backing buffer changed for this storage, this is the pointer
+offset to add to any pointers to make them point into the new buffer</p>
+<a name="flags_t"></a></div>
+<div class="section" id="enum-flags-t">
+<h3>enum flags_t</h3>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/file_storage.hpp">libtorrent/file_storage.hpp</a>&quot;</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="25%" />
+<col width="8%" />
+<col width="67%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">value</th>
+<th class="head">description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>pad_file</td>
+<td>1</td>
+<td>the file is a pad file. It's required to contain zeroes
+at it will not be saved to disk. Its purpose is to make
+the following file start on a piece boundary.</td>
+</tr>
+<tr><td>attribute_hidden</td>
+<td>2</td>
+<td>this file has the hidden attribute set. This is primarily
+a windows attribute</td>
+</tr>
+<tr><td>attribute_executable</td>
+<td>4</td>
+<td>this file has the executable attribute set.</td>
+</tr>
+<tr><td>attribute_symlink</td>
+<td>8</td>
+<td>this file is a symbilic link. It should have a link
+target string associated with it.</td>
+</tr>
+</tbody>
+</table>
+<a name="file_flags_t"></a></div>
+<div class="section" id="enum-file-flags-t">
+<h3>enum file_flags_t</h3>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/file_storage.hpp">libtorrent/file_storage.hpp</a>&quot;</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="23%" />
+<col width="9%" />
+<col width="68%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">value</th>
+<th class="head">description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>flag_pad_file</td>
+<td>1</td>
+<td>this file is a pad file. The creator of the
+torrent promises the file is entirely filled with
+zeroes and does not need to be downloaded. The
+purpose is just to align the next file to either
+a block or piece boundary.</td>
+</tr>
+<tr><td>flag_hidden</td>
+<td>2</td>
+<td>this file is hidden (sets the hidden attribute
+on windows)</td>
+</tr>
+<tr><td>flag_executable</td>
+<td>4</td>
+<td>this file is executable (sets the executable bit
+on posix like systems)</td>
+</tr>
+<tr><td>flag_symlink</td>
+<td>8</td>
+<td>this file is a symlink. The symlink target is
+specified in a separate field</td>
+</tr>
+</tbody>
+</table>
+<a name="storage_params"></a></div>
+</div>
+<div class="section" id="storage-params">
+<h2>storage_params</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/storage_defs.hpp">libtorrent/storage_defs.hpp</a>&quot;</p>
+<p>see <a class="reference external" href="reference-Custom_Storage.html#default_storage()">default_storage::default_storage()</a></p>
+<pre class="literal-block">
+struct storage_params
+{
+   <strong>storage_params</strong> ();
+
+   file_storage const* files;
+   std::string path;
+   file_pool* pool;
+   storage_mode_t mode;
+};
+</pre>
+<a name="default_storage_constructor()"></a></div>
+<div class="section" id="default-storage-constructor">
+<h2>default_storage_constructor()</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/storage_defs.hpp">libtorrent/storage_defs.hpp</a>&quot;</p>
+<pre class="literal-block">
+storage_interface* <strong>default_storage_constructor</strong> (storage_params const&amp;);
+</pre>
+<p>the constructor function for the regular file storage. This is the
+default value for <a class="reference external" href="reference-Core.html#storage">add_torrent_params::storage</a>.</p>
+<a name="disabled_storage_constructor()"></a></div>
+<div class="section" id="disabled-storage-constructor">
+<h2>disabled_storage_constructor()</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/storage_defs.hpp">libtorrent/storage_defs.hpp</a>&quot;</p>
+<pre class="literal-block">
+storage_interface* <strong>disabled_storage_constructor</strong> (storage_params const&amp;);
+</pre>
+<p>the constructor function for the disabled storage. This can be used for
+testing and benchmarking. It will throw away any data written to
+it and return garbage for anything read from it.</p>
+<a name="zero_storage_constructor()"></a></div>
+<div class="section" id="zero-storage-constructor">
+<h2>zero_storage_constructor()</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/storage_defs.hpp">libtorrent/storage_defs.hpp</a>&quot;</p>
+<pre class="literal-block">
+storage_interface* <strong>zero_storage_constructor</strong> (storage_params const&amp;);
+</pre>
+<a name="storage_mode_t"></a></div>
+<div class="section" id="enum-storage-mode-t">
+<h2>enum storage_mode_t</h2>
+<p>Declared in &quot;<a class="reference external" href="../include/libtorrent/storage_defs.hpp">libtorrent/storage_defs.hpp</a>&quot;</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="22%" />
+<col width="7%" />
+<col width="72%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">name</th>
+<th class="head">value</th>
+<th class="head">description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>storage_mode_allocate</td>
+<td>0</td>
+<td>All pieces will be written to their final position, all files will be
+allocated in full when the torrent is first started. This is done with
+<tt class="docutils literal">fallocate()</tt> and similar calls. This mode minimizes fragmentation.</td>
+</tr>
+<tr><td>storage_mode_sparse</td>
+<td>1</td>
+<td>All pieces will be written to the place where they belong and sparse files
+will be used. This is the recommended, and default mode.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+    </div>
+    </div>
+    <div id="gradient"></div>
+    <div id="footer">
+    <table>
+    <tr>
+      <td><a href="index.html">home</a></td>
+      <td><a href="http://blog.libtorrent.org">blog</a></td>
+      <td><a href="utp.html">uTP</a></td>
+    </tr>
+    <tr>
+      <td><a href="https://sourceforge.net/projects/libtorrent/files/libtorrent/">download</a></td>
+      <td><a href="reference.html">documentation</a></td>
+      <td><a href="dht_store.html">DHT put extension</a></td>
+    </tr>
+    <tr>
+      <td><a href="https://sourceforge.net/projects/libtorrent/files/py-libtorrent/">python bindings</a></td>
+      <td><a href="features.html">features</a></td>
+      <td><a href="dht_sec.html">DHT security extension</a></td>
+    </tr>
+    <tr>
+      <td><a href="http://dir.gmane.org/gmane.network.bit-torrent.libtorrent">mailing list archive</a></td>
+      <td><a href="contributing.html">contributing</a></td>
+      <td><a href="streaming.html">streaming</a></td>
+    </tr>
+    <tr>
+      <td><a href="http://code.google.com/p/libtorrent/issues/entry">report a bug</a></td>
+      <td><a href="building.html">building</a></td>
+      <td><a href="bittorrent.pdf">bittorrent slides</a></td>
+    </tr>
+    </table>
+    </div>
+    <div id="filler"></div>
+
+</div>
+</body>
+</html>
