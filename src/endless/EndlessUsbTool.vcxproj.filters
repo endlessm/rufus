@@ -132,6 +132,9 @@
     <ClInclude Include="StringHelperMethods.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="TorrentDownloader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EndlessUsbTool.cpp">
@@ -219,6 +222,9 @@
       <Filter>Source Files\grub</Filter>
     </ClCompile>
     <ClCompile Include="StringHelperMethods.cpp">
+	      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TorrentDownloader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
