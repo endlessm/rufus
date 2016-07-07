@@ -36,10 +36,13 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EndlessUsbTool", "src\endle
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libtorrent", "src\endless\libtorrent\libtorrent.vcxproj", "{EDA6CE2C-4E88-4B03-A86D-A5C26F47EDB4}"
 	ProjectSection(ProjectDependencies) = postProject
+		{1779A264-5DCD-4D2A-9F76-A27A347DD35E} = {1779A264-5DCD-4D2A-9F76-A27A347DD35E}
 		{71BE3AFA-8F74-47BF-B335-88CE637776B4} = {71BE3AFA-8F74-47BF-B335-88CE637776B4}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "boost", "src\endless\boost\boost.vcxproj", "{71BE3AFA-8F74-47BF-B335-88CE637776B4}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "openssl", "src\endless\openssl-1.0.1t\openssl.vcxproj", "{1779A264-5DCD-4D2A-9F76-A27A347DD35E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -238,6 +241,18 @@ Global
 		{71BE3AFA-8F74-47BF-B335-88CE637776B4}.Release|x86.Build.0 = Release|Win32
 		{71BE3AFA-8F74-47BF-B335-88CE637776B4}.Release|x86_32.ActiveCfg = Release|Win32
 		{71BE3AFA-8F74-47BF-B335-88CE637776B4}.Release|x86_64.ActiveCfg = Release|Win32
+		{1779A264-5DCD-4D2A-9F76-A27A347DD35E}.Debug|x64.ActiveCfg = Debug|x64
+		{1779A264-5DCD-4D2A-9F76-A27A347DD35E}.Debug|x64.Build.0 = Debug|x64
+		{1779A264-5DCD-4D2A-9F76-A27A347DD35E}.Debug|x86.ActiveCfg = Debug|Win32
+		{1779A264-5DCD-4D2A-9F76-A27A347DD35E}.Debug|x86.Build.0 = Debug|Win32
+		{1779A264-5DCD-4D2A-9F76-A27A347DD35E}.Debug|x86_32.ActiveCfg = Debug|Win32
+		{1779A264-5DCD-4D2A-9F76-A27A347DD35E}.Debug|x86_64.ActiveCfg = Debug|Win32
+		{1779A264-5DCD-4D2A-9F76-A27A347DD35E}.Release|x64.ActiveCfg = Release|x64
+		{1779A264-5DCD-4D2A-9F76-A27A347DD35E}.Release|x64.Build.0 = Release|x64
+		{1779A264-5DCD-4D2A-9F76-A27A347DD35E}.Release|x86.ActiveCfg = Release|Win32
+		{1779A264-5DCD-4D2A-9F76-A27A347DD35E}.Release|x86.Build.0 = Release|Win32
+		{1779A264-5DCD-4D2A-9F76-A27A347DD35E}.Release|x86_32.ActiveCfg = Release|Win32
+		{1779A264-5DCD-4D2A-9F76-A27A347DD35E}.Release|x86_64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

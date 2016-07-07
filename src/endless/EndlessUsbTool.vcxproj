@@ -104,7 +104,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>BOOST_FILESYSTEM_VERSION=2;WITH_SHIPPED_GEOIP_H;BOOST_ASIO_SEPARATE_COMPILATION;BOOST_ALL_NO_LIB;ENDLESSUSB_TOOL;_OFF_T_DEFINED;_off_t=__int64;off_t=_off_t;_CRTDBG_MAP_ALLOC;WIN32;_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\endless;..\msvc-missing;..\ms-sys\inc;..\syslinux\libinstaller;..\syslinux\libfat;..\syslinux\win;..\libcdio;..\getopt;..\;..\endless\boost;..\endless\libtorrent\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\endless;..\msvc-missing;..\ms-sys\inc;..\syslinux\libinstaller;..\syslinux\libfat;..\syslinux\win;..\libcdio;..\getopt;..\;..\endless\boost;..\endless\libtorrent\include;..\endless\openssl-1.0.1t\inc32;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MinimalRebuild>true</MinimalRebuild>
       <ExceptionHandling>Sync</ExceptionHandling>
@@ -113,7 +113,7 @@
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <AdditionalDependencies>setupapi.lib;comctl32.lib;wininet.lib;shlwapi.lib;crypt32.lib;wintrust.lib;libtorrent.lib;Uafxcwd.lib;Libcmtd.lib;libboost_system-vc140-mt-sgd-1_61.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>setupapi.lib;comctl32.lib;wininet.lib;shlwapi.lib;crypt32.lib;wintrust.lib;libtorrent.lib;ssleay32.lib;libeay32.lib;Uafxcwd.lib;Libcmtd.lib;libboost_system-vc140-mt-sgd-1_61.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
       <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>Uafxcwd.lib;Libcmtd.lib</IgnoreSpecificDefaultLibraries>
@@ -138,14 +138,14 @@
       <Optimization>MaxSpeed</Optimization>
       <PreprocessorDefinitions>BOOST_FILESYSTEM_VERSION=2;WITH_SHIPPED_GEOIP_H;BOOST_ASIO_SEPARATE_COMPILATION;BOOST_ALL_NO_LIB;ENDLESSUSB_TOOL;_OFF_T_DEFINED;_off_t=__int64;off_t=_off_t;_CRTDBG_MAP_ALLOC;_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\endless;..\msvc-missing;..\ms-sys\inc;..\syslinux\libinstaller;..\syslinux\libfat;..\syslinux\win;..\libcdio;..\getopt;..\;..\endless\boost;..\endless\libtorrent\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\endless;..\msvc-missing;..\ms-sys\inc;..\syslinux\libinstaller;..\syslinux\libfat;..\syslinux\win;..\libcdio;..\getopt;..\;..\endless\boost;..\endless\libtorrent\include;..\endless\openssl-1.0.1t\inc32;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <DisableSpecificWarnings>4091</DisableSpecificWarnings>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <AdditionalDependencies>setupapi.lib;comctl32.lib;wininet.lib;shlwapi.lib;crypt32.lib;wintrust.lib;libtorrent.lib;Uafxcwd.lib;Libcmtd.lib;libboost_system-vc140-mt-sgd-1_61.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>setupapi.lib;comctl32.lib;wininet.lib;shlwapi.lib;crypt32.lib;wintrust.lib;libtorrent.lib;ssleay32.lib;libeay32.lib;Uafxcwd.lib;Libcmtd.lib;libboost_system-vc140-mt-sgd-1_61.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>Uafxcwd.lib;Libcmtd.lib</IgnoreSpecificDefaultLibraries>
       <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
       <AdditionalLibraryDirectories>$(OutDir)lib</AdditionalLibraryDirectories>
@@ -171,7 +171,7 @@
       <PreprocessorDefinitions>BOOST_FILESYSTEM_VERSION=2;WITH_SHIPPED_GEOIP_H;BOOST_ASIO_SEPARATE_COMPILATION;BOOST_ALL_NO_LIB;ENDLESSUSB_TOOL;_OFF_T_DEFINED;_off_t=__int64;off_t=_off_t;WIN32;_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <ExceptionHandling>Sync</ExceptionHandling>
-      <AdditionalIncludeDirectories>..\endless;..\msvc-missing;..\ms-sys\inc;..\syslinux\libinstaller;..\syslinux\libfat;..\syslinux\win;..\libcdio;..\getopt;..\;..\endless\boost;..\endless\libtorrent\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\endless;..\msvc-missing;..\ms-sys\inc;..\syslinux\libinstaller;..\syslinux\libfat;..\syslinux\win;..\libcdio;..\getopt;..\;..\endless\boost;..\endless\libtorrent\include;..\endless\openssl-1.0.1t\inc32;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4091</DisableSpecificWarnings>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
@@ -179,7 +179,7 @@
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>setupapi.lib;comctl32.lib;wininet.lib;shlwapi.lib;crypt32.lib;wintrust.lib;libtorrent.lib;Uafxcw.lib;Libcmt.lib;libboost_system-vc140-mt-s-1_61.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>setupapi.lib;comctl32.lib;wininet.lib;shlwapi.lib;crypt32.lib;wintrust.lib;libtorrent.lib;ssleay32.lib;libeay32.lib;Uafxcw.lib;Libcmt.lib;libboost_system-vc140-mt-s-1_61.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
       <GenerateDebugInformation>Debug</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>Uafxcw.lib;Libcmt.lib</IgnoreSpecificDefaultLibraries>
@@ -206,7 +206,7 @@
       <IntrinsicFunctions>false</IntrinsicFunctions>
       <PreprocessorDefinitions>BOOST_FILESYSTEM_VERSION=2;WITH_SHIPPED_GEOIP_H;BOOST_ASIO_SEPARATE_COMPILATION;BOOST_ALL_NO_LIB;ENDLESSUSB_TOOL;_OFF_T_DEFINED;_off_t=__int64;off_t=_off_t;_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\endless;..\msvc-missing;..\ms-sys\inc;..\syslinux\libinstaller;..\syslinux\libfat;..\syslinux\win;..\libcdio;..\getopt;..\;..\endless\boost;..\endless\libtorrent\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\endless;..\msvc-missing;..\ms-sys\inc;..\syslinux\libinstaller;..\syslinux\libfat;..\syslinux\win;..\libcdio;..\getopt;..\;..\endless\boost;..\endless\libtorrent\include;..\endless\openssl-1.0.1t\inc32;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4091</DisableSpecificWarnings>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
@@ -214,7 +214,7 @@
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>setupapi.lib;comctl32.lib;wininet.lib;shlwapi.lib;crypt32.lib;wintrust.lib;libtorrent.lib;Uafxcw.lib;Libcmt.lib;libboost_system-vc140-mt-s-1_61.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>setupapi.lib;comctl32.lib;wininet.lib;shlwapi.lib;crypt32.lib;wintrust.lib;libtorrent.lib;ssleay32.lib;libeay32.lib;Uafxcw.lib;Libcmt.lib;libboost_system-vc140-mt-s-1_61.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>Uafxcw.lib;Libcmt.lib</IgnoreSpecificDefaultLibraries>
       <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
       <AdditionalLibraryDirectories>$(OutDir)lib</AdditionalLibraryDirectories>
