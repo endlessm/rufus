@@ -213,7 +213,7 @@ t MSG_311 "Writing"
 
 t MSG_312 "https://support.endlessm.com/hc/en-us/articles/208895726"
 t MSG_313 "https://support.endlessm.com/hc/en-us/articles/210508723"
-t MSG_314 "https://groups.google.com/forum/#!forum/endless-community"
+t MSG_314 "http://community.endlessm.com/"
 
 t MSG_315 "%s Download"
 t MSG_316 "Full"
