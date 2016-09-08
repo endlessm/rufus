@@ -296,7 +296,7 @@ const wchar_t* mainWindowTitle = L"Endless USB Creator";
 
 
 //#define HARDCODED_PATH L"release/3.0.2/eos-amd64-amd64/base/eos-eos3.0-amd64-amd64.160827-104530.base"
-#define HARDCODED_PATH L"eosnonfree-amd64-amd64/master/base/160830-025208/eosnonfree-master-amd64-amd64.160830-025208.base"
+#define HARDCODED_PATH L"eos-amd64-amd64/eos3.0/base/160906-030224/eos-eos3.0-amd64-amd64.160906-030224.base"
 CString hardcoded_BootPath(HARDCODED_PATH BOOT_ARCHIVE_SUFFIX);
 CString hardcoded_BootPathAsc(HARDCODED_PATH BOOT_ARCHIVE_SUFFIX SIGNATURE_FILE_EXT);
 
