@@ -114,6 +114,9 @@
     <ClInclude Include="WindowsUsbDefines.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Analytics.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EndlessUsbTool.cpp">
@@ -188,6 +191,9 @@
     <ClCompile Include="gpt\crc32.c">
       <Filter>Source Files\gpt</Filter>
     </ClCompile>
+    <ClCompile Include="Analytics.cpp">
+      <Filter>Source Files</Filter>
+	</ClCompile>
     <ClCompile Include="UEFIBootSetup.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

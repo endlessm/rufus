@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "EndlessUsbTool.h"
 #include "EndlessUsbToolDlg.h"
+#include "Analytics.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -68,6 +69,7 @@ BOOL CEndlessUsbToolApp::InitInstance()
 	InitCommonControlsEx(&InitCtrls);
 
 	CWinApp::InitInstance();
+	CWinApp::SetRegistryKey(_T("Endless"));
 
 	AfxEnableControlContainer();
 
@@ -85,6 +87,8 @@ BOOL CEndlessUsbToolApp::InitInstance()
     UINT wndMsg = RegisterWindowMessage(_T("EndlessUSBToolShow"));
     // check if we are the first instance
     HANDLE singleInstanceMutex = CreateMutex(NULL, TRUE, _T("Global\\EndlessUsbTool"));
+
+	Analytics::instance()->sessionControl(true);
 
     if (singleInstanceMutex != NULL && GetLastError() != ERROR_ALREADY_EXISTS) {
         //CEndlessUsbToolDlg dlg(wndMsg, commandLineInfo.logDebugInfo);
@@ -109,6 +113,8 @@ BOOL CEndlessUsbToolApp::InitInstance()
     } else {
         ::SendMessage(HWND_BROADCAST, wndMsg, 0, 0);
     }
+
+	Analytics::instance()->sessionControl(false);
 
 	// Delete the shell manager created above.
 	if (pShellManager != NULL)
