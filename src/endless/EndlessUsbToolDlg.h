@@ -313,6 +313,6 @@ private:
 	static BOOL ChangeAccessPermissions(CString path, bool restrictAccess);
 
 	static CStringW GetSystemDrive();
-
 	static BOOL SetEndlessRegistryKey(HKEY parentKey, const CString &keyPath, const CString &keyName, CComVariant keyValue, bool createBackup = true);
+	static BOOL IsBitlockedDrive(const CString &drive);
 };

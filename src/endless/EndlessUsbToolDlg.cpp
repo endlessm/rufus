@@ -11,6 +11,7 @@
 #include <atlpath.h>
 #include <intrin.h>
 #include <Aclapi.h>
+#include <Wbemidl.h>
 
 #include "json/json.h"
 #include <fstream>
@@ -568,6 +569,9 @@ END_MESSAGE_MAP()
 void CEndlessUsbToolDlg::OnDocumentComplete(LPDISPATCH pDisp, LPCTSTR szUrl)
 {
     FUNCTION_ENTER;
+
+	CString systemDriveLetter = GetSystemDrive().Left(2);
+
 	CDHtmlDialog::OnDocumentComplete(pDisp, szUrl);
 
 	uprintf("OnDocumentComplete '%ls'", szUrl);
@@ -594,9 +598,12 @@ void CEndlessUsbToolDlg::OnDocumentComplete(LPDISPATCH pDisp, LPCTSTR szUrl)
     StartCheckInternetConnectionThread();
     FindMaxUSBSpeed();
 
-	BOOL x64BitSupported = Has64BitSupport() ? TRUE :  FALSE;
+	// TODO: Leave the "Dual boot" button enabled, on click check the below and move to proper error page
+	BOOL x64BitSupported = Has64BitSupport() ? TRUE : FALSE;
 	uprintf("HW processor has 64 bit support: %s", x64BitSupported ? "YES" : "NO");
-	CallJavascript(_T(JS_ENABLE_BUTTON), CComVariant(HTML_BUTTON_ID(_T(ELEMENT_DUALBOOT_INSTALL_BUTTON))), CComVariant(x64BitSupported));
+	BOOL isBitLockerEnabled = IsBitlockedDrive(systemDriveLetter);
+	uprintf("Is bitlocker enabled on '%ls': %s", systemDriveLetter, isBitLockerEnabled ? "YES" : "NO");
+	CallJavascript(_T(JS_ENABLE_BUTTON), CComVariant(HTML_BUTTON_ID(_T(ELEMENT_DUALBOOT_INSTALL_BUTTON))), CComVariant(x64BitSupported && !isBitLockerEnabled));
 
 	return;
 error:
@@ -5019,4 +5026,82 @@ BOOL CEndlessUsbToolDlg::SetEndlessRegistryKey(HKEY parentKey, const CString &ke
 	}
 
 	return TRUE;
+}
+
+#pragma comment(lib, "wbemuuid.lib")
+
+BOOL CEndlessUsbToolDlg::IsBitlockedDrive(const CString &drive)
+{
+	HRESULT hres;
+	BOOL retResult = FALSE;
+	CComPtr<IWbemLocator> pLoc;
+	CComPtr<IWbemServices> pSvc;
+	CComPtr<IEnumWbemClassObject> pEnumerator;
+	CComPtr<IWbemClassObject> pclsObj;
+	CString bitlockerQuery;
+
+	hres = CoInitializeEx(0, COINIT_APARTMENTTHREADED);
+	IFFALSE_PRINTERROR(SUCCEEDED(hres), "Error on CoInitializeEx.");
+
+	hres = CoInitializeSecurity(
+		NULL,
+		-1,                          // COM authentication
+		NULL,                        // Authentication services
+		NULL,                        // Reserved
+		RPC_C_AUTHN_LEVEL_DEFAULT,   // Default authentication
+		RPC_C_IMP_LEVEL_IMPERSONATE, // Default Impersonation
+		NULL,                        // Authentication info
+		EOAC_NONE,                   // Additional capabilities
+		NULL                         // Reserved
+	);
+	IFFALSE_PRINTERROR(SUCCEEDED(hres), "Error on CoInitializeSecurity.");
+
+	// Obtain the initial locator to WMI
+	hres = CoCreateInstance(CLSID_WbemLocator, 0, CLSCTX_INPROC_SERVER, IID_IWbemLocator, (LPVOID *)&pLoc);
+	IFFALSE_GOTOERROR(SUCCEEDED(hres), "Error on CoCreateInstance.");
+
+	// Connect to WMI through the IWbemLocator::ConnectServer method
+	// Connect to the root\cimv2 namespace with the current user and obtain pointer pSvc to make IWbemServices calls.
+	hres = pLoc->ConnectServer(
+		_bstr_t(L"ROOT\\CIMV2\\Security\\MicrosoftVolumeEncryption"), // Object path of WMI namespace
+		NULL,                    // User name. NULL = current user
+		NULL,                    // User password. NULL = current
+		0,                       // Locale. NULL indicates current
+		NULL,                    // Security flags.
+		0,                       // Authority (for example, Kerberos)
+		0,                       // Context object
+		&pSvc                    // pointer to IWbemServices proxy
+	);
+	IFFALSE_GOTOERROR(SUCCEEDED(hres), "Error on pLoc->ConnectServer.");
+
+	// Set security levels on the proxy
+	hres = CoSetProxyBlanket(
+		pSvc,                        // Indicates the proxy to set
+		RPC_C_AUTHN_WINNT,           // RPC_C_AUTHN_xxx
+		RPC_C_AUTHZ_NONE,            // RPC_C_AUTHZ_xxx
+		NULL,                        // Server principal name
+		RPC_C_AUTHN_LEVEL_CALL,      // RPC_C_AUTHN_LEVEL_xxx
+		RPC_C_IMP_LEVEL_IMPERSONATE, // RPC_C_IMP_LEVEL_xxx
+		NULL,                        // client identity
+		EOAC_NONE                    // proxy capabilities
+	);
+	IFFALSE_GOTOERROR(SUCCEEDED(hres), "Error on CoSetProxyBlanket.");
+
+	bitlockerQuery.Format(L"Select * from Win32_EncryptableVolume where ProtectionStatus = 1 and DriveLetter = '%ls'", drive);
+
+	// Use the IWbemServices pointer to make requests of WMI
+	hres = pSvc->ExecQuery(bstr_t("WQL"), bstr_t(bitlockerQuery), WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY, NULL, &pEnumerator);
+	IFFALSE_GOTOERROR(SUCCEEDED(hres), "Error on pSvc->ExecQuery.");
+
+	// Retrieve the objects in the result set.
+	ULONG uReturned = 0;
+	hres = pEnumerator->Next(0, 1, &pclsObj, &uReturned);
+
+	retResult = (hres == S_OK) && (uReturned == 1);
+
+error:
+	uprintf("IsBitlockedDrive done with hres=%x and retResult=%d", hres, retResult);
+	CoUninitialize();
+
+	return retResult;
 }
