@@ -3048,6 +3048,7 @@ void CEndlessUsbToolDlg::GoToSelectStoragePage()
 	}
 
 	// Add the entries
+	m_nrGigsSelected = neededGigs;
 	IFFALSE_RETURN(AddStorageEntryToSelect(selectElement, neededGigs, IS_MINIMUM_VALUE), "Error adding value to select.");
 
 	for (int nrGigs = MIN_NO_OF_GIGS; nrGigs < min(maxAvailableGigs, MAX_NO_OF_GIGS); nrGigs = nrGigs * 2) {
