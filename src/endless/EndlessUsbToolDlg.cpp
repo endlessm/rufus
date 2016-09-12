@@ -4902,7 +4902,8 @@ BOOL CEndlessUsbToolDlg::SetAttributesForFilesInFolder(CString path, bool addAtt
 
 BOOL CEndlessUsbToolDlg::SetPrivilege(HANDLE hToken, LPCTSTR lpszPrivilege, BOOL bEnablePrivilege)
 {
-	TOKEN_PRIVILEGES tp;
+	TOKEN_PRIVILEGES tp, tpOld;
+	DWORD tpOldLen = sizeof(TOKEN_PRIVILEGES);
 	LUID luid;
 	BOOL retResult = FALSE;
 
@@ -4912,10 +4913,15 @@ BOOL CEndlessUsbToolDlg::SetPrivilege(HANDLE hToken, LPCTSTR lpszPrivilege, BOOL
 	tp.Privileges[0].Luid = luid;
 	tp.Privileges[0].Attributes = bEnablePrivilege ? SE_PRIVILEGE_ENABLED : 0;
 
-	// Enable the privilege or disable all privileges.
-	IFFALSE_GOTOERROR(AdjustTokenPrivileges(hToken, FALSE, &tp, sizeof(TOKEN_PRIVILEGES), (PTOKEN_PRIVILEGES)NULL, (PDWORD)NULL) != 0, "AdjustTokenPrivileges error");
-	IFTRUE_GOTOERROR(GetLastError() == ERROR_NOT_ALL_ASSIGNED, "The token does not have the specified privilege.");
-
+	IFFALSE_GOTOERROR(AdjustTokenPrivileges(hToken, FALSE, &tp, sizeof(TOKEN_PRIVILEGES), &tpOld, &tpOldLen) != 0, "AdjustTokenPrivileges error");
+	if (GetLastError() == ERROR_NOT_ALL_ASSIGNED) {
+		IFFALSE_GOTOERROR(
+			tpOld.PrivilegeCount == 1 &&
+			tpOld.Privileges[0].Luid.LowPart == luid.LowPart &&
+			tpOld.Privileges[0].Luid.HighPart == luid.HighPart,
+			"AdjustTokenPrivileges returned ERROR_NOT_ALL_ASSIGNED, and the requested privilege was indeed not altered");
+	}
+	
 	retResult = TRUE;
 error:
 	return retResult;
