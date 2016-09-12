@@ -730,39 +730,15 @@ select:disabled {
 	font-size: 13px;
 }
 
-#SecureBootContainer {
-	height: 249px;	
+#MarketingContainer {
+	height: 251px;
 	margin-top: 35px;
 }
 
-#SecureBootLabel {
-	margin-top: 39px;
-	font-family: LatoBold;
-	color: black;
-	font-size: 14px;	
-}
-
-#SecureBootImage {
+#MarketingImage {
 	background: url("res:/IMG/#205") 0 0 no-repeat;
-	width: 296px;
-	height: 249px;
-	float: right;
-}
-
-.SecureBootText {	
-	padding-bottom: 24px;
-	font-size: 13px;
-}
-
-#SecureBootText2 {
-	padding-bottom: 10px;
-}
-
-#SecureBootLabel,
-.SecureBootText,
-#SecureBootHowTo {
-	padding-left: 40px;
-	max-width: 225px;
+	width: 572px;
+	height: 251px;
 }
 
 /* Thank you Page */

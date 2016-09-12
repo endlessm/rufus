@@ -169,7 +169,6 @@ DWORD usbDevicesCount;
 #define ELEMENT_STORAGE_SUPPORT_LINK	"StorageSupportLink"
 
 //Installing page elements
-#define ELEMENT_SECUREBOOT_HOWTO        "SecureBootHowTo"
 #define ELEMENT_INSTALL_DESCRIPTION     "InstallStepDescription"
 #define ELEMENT_INSTALL_STATUS          "InstallStepStatus"
 #define ELEMENT_INSTALL_STEP            "CurrentStepText"
@@ -178,7 +177,6 @@ DWORD usbDevicesCount;
 #define ELEMENT_INSTALL_CANCEL          "InstallCancelButton"
 
 //Thank You page elements
-#define ELEMENT_SECUREBOOT_HOWTO2       "SecureBootHowToReminder"
 #define ELEMENT_CLOSE_BUTTON            "CloseAppButton"
 #define ELEMENT_INSTALLER_VERSION       "InstallerVersionValue"
 #define ELEMENT_INSTALLER_LANGUAGE      "InstallerVersionLanguage"
@@ -460,11 +458,9 @@ BEGIN_DHTML_EVENT_MAP(CEndlessUsbToolDlg)
 	DHTML_EVENT_ONCLICK(_T(ELEMENT_STORAGE_SUPPORT_LINK), OnLinkClicked)
 
 	// Installing Page handlers
-	DHTML_EVENT_ONCLICK(_T(ELEMENT_SECUREBOOT_HOWTO), OnLinkClicked)    
     DHTML_EVENT_ONCLICK(_T(ELEMENT_INSTALL_CANCEL), OnInstallCancelClicked)
 
 	// Thank You Page handlers
-	DHTML_EVENT_ONCLICK(_T(ELEMENT_SECUREBOOT_HOWTO2), OnLinkClicked)
     DHTML_EVENT_ONCLICK(_T(ELEMENT_CLOSE_BUTTON), OnCloseAppClicked)
     DHTML_EVENT_ONCLICK(_T(ELEMENT_USBBOOT_HOWTO), OnLinkClicked)
     // Error Page handlers
@@ -1937,8 +1933,6 @@ HRESULT CEndlessUsbToolDlg::OnLinkClicked(IHTMLElement* pElement)
 
     if (id == _T(ELEMENT_COMPARE_OPTIONS)) {
         msg_id = MSG_312;
-    } else if (id == _T(ELEMENT_SECUREBOOT_HOWTO) || id == _T(ELEMENT_SECUREBOOT_HOWTO2)) {
-        msg_id = MSG_313;
     } else if (id == _T(ELEMENT_ENDLESS_SUPPORT) || id == _T(ELEMENT_CONNECTED_SUPPORT_LINK) || id == _T(ELEMENT_STORAGE_SUPPORT_LINK)) {
         msg_id = MSG_314;
     } else if (id == _T(ELEMENT_CONNECTED_LINK)) {
