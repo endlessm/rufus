@@ -2589,8 +2589,6 @@ HRESULT CEndlessUsbToolDlg::OnSelectFileNextClicked(IHTMLElement* pElement)
 	if (m_useLocalFile) imageType = _T("LocalImage");
 	Analytics::instance()->eventTracking(_T(ELEMENT_FILE_PAGE), imageType, selectedImage);
 
-	ChangePage(_T(ELEMENT_USB_PAGE));
-
 	return S_OK;
 }
 
