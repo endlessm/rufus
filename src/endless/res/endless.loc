@@ -244,7 +244,7 @@ t MSG_340 "%s (Maximum)"
 t MSG_341 "You currently have %s free on your %s %s drive."
 t MSG_342 "Select how much of your %s drive to dedicate to Endless OS."
 
-t MSG_400 "Light"
+t MSG_400 "Basic"
 t MSG_401 "English"
 t MSG_402 "Spanish"
 t MSG_403 "Portuguese (Brazilian)"
