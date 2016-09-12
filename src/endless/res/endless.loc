@@ -210,10 +210,10 @@ t MSG_314 "http://community.endlessm.com/"
 
 t MSG_315 "%s Download"
 t MSG_316 "Full"
-t MSG_317 "Live"
-t MSG_318 "Installer"
 t MSG_319 "%ls (%s)"
-t MSG_320 "Great! Your Endless OS %ls %ls %ls %ls USB has been successfully created."
+t MSG_320 "Great! Endless OS has been successfully installed."
+t MSG_343 "Great! Your Endless OS Live USB has been created."
+t MSG_344 "Great! Your Endless OS Reflasher USB has been created."
 t MSG_321 "Select Your Endless OS Version"
 t MSG_322 "Is this the version you’d like to use? If not, select another."
 

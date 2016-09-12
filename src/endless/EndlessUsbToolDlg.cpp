@@ -2564,10 +2564,21 @@ HRESULT CEndlessUsbToolDlg::OnSelectFileNextClicked(IHTMLElement* pElement)
     if (ParseImgFileName(selectedImage, personality, version, isInstallerImage)) {
         if(isInstallerImage) uprintf("ERROR: An installer image has been selected.");
 
-        CString usbType = UTF8ToCString(lmprintf(m_liveInstall ? MSG_317 : MSG_318)); // Live or installer
-        CString imageType = UTF8ToCString(lmprintf(personality == PERSONALITY_BASE ? MSG_400 : MSG_316)); // Light or Full
-        CString imageLanguage = personality == PERSONALITY_BASE ?  L"" : UTF8ToCString(lmprintf(m_personalityToLocaleMsg[personality])); // Language for Full or empty string for Light
-        CString finalMessageStr = UTF8ToCString(lmprintf(MSG_320, version, imageType, imageLanguage, usbType));
+        uint32_t headlineMsg;
+        if (m_dualBootSelected) {
+            headlineMsg = MSG_320;
+        }
+        else if (m_liveInstall) {
+            headlineMsg = MSG_343;
+        }
+        else {
+            headlineMsg = MSG_344;
+        }
+
+        CString finalMessageStr = UTF8ToCString(lmprintf(headlineMsg));
+        CString imageLanguage = UTF8ToCString(lmprintf(m_personalityToLocaleMsg[personality]));
+        CString imageType = UTF8ToCString(lmprintf(personality == PERSONALITY_BASE ? MSG_400 : MSG_316)); // Basic or Full
+
         SetElementText(_T(ELEMENT_THANKYOU_MESSAGE), CComBSTR(finalMessageStr));
 
         SetElementText(_T(ELEMENT_INSTALLER_VERSION), CComBSTR(version));
