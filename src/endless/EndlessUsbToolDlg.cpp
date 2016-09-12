@@ -4580,12 +4580,14 @@ DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 	CEndlessUsbToolDlg *dlg = (CEndlessUsbToolDlg*)param;
 	CString systemDriveLetter;
 	CString endlessFilesPath;
+	CString endlessImgPath;
 	CString bootFilesPath = GET_LOCAL_PATH(CString(BOOT_COMPONENTS_FOLDER)) + L"\\";
 	wchar_t fileSystemType[MAX_PATH + 1];
 
 	// TODO: Should we detect what the system partition is or just assume it's on C:\?
 	systemDriveLetter = GetSystemDrive();
 	endlessFilesPath = systemDriveLetter + PATH_ENDLESS_SUBDIRECTORY;
+	endlessImgPath = endlessFilesPath + ENDLESS_IMG_FILE_NAME;
 
 	IFFALSE_PRINTERROR(ChangeAccessPermissions(endlessFilesPath, false), "Error on granting Endless files permissions.");
 
@@ -4613,19 +4615,12 @@ DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 	CEndlessUsbToolDlg::ImageUnpackPercentStart = DB_PROGRESS_CHECK_PARTITION;
 	CEndlessUsbToolDlg::ImageUnpackPercentEnd = DB_PROGRESS_FINISHED_UNPACK;
 	CEndlessUsbToolDlg::ImageUnpackFileSize = dlg->m_selectedFileSize;
-	bool unpackResult = dlg->UnpackFile(ConvertUnicodeToUTF8(dlg->m_localFile), ConvertUnicodeToUTF8(endlessFilesPath + ENDLESS_IMG_FILE_NAME), BLED_COMPRESSION_GZIP, ImageUnpackCallback, &dlg->m_cancelImageUnpack);
+	bool unpackResult = dlg->UnpackFile(ConvertUnicodeToUTF8(dlg->m_localFile), ConvertUnicodeToUTF8(endlessImgPath), BLED_COMPRESSION_GZIP, ImageUnpackCallback, &dlg->m_cancelImageUnpack);
 	IFFALSE_GOTOERROR(unpackResult, "Error unpacking image to endless folder.");
 
-	// extend this file with 0s so it reaches the required size
-	HANDLE endlessImage = CreateFile(endlessFilesPath + ENDLESS_IMG_FILE_NAME, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	IFFALSE_GOTOERROR(endlessImage != INVALID_HANDLE_VALUE, "Error opening Endless image file.");
-	ULONGLONG selectedGigs = dlg->m_nrGigsSelected;
-	LARGE_INTEGER lsize;
-	lsize.QuadPart = selectedGigs * BYTES_IN_GIGABYTE;
-	uprintf("Trying to set size of Endless image to %I64i bytes which is about %s", lsize.QuadPart, SizeToHumanReadable(lsize.QuadPart, FALSE, use_fake_units));
-	IFFALSE_PRINTERROR(SetFilePointerEx(endlessImage, lsize, NULL, FILE_BEGIN) != 0, "Error on SetFilePointerEx");
-	IFFALSE_PRINTERROR(SetEndOfFile(endlessImage), "Error on SetEndOfFile");
-	IFFALSE_PRINTERROR(CloseHandle(endlessImage), "Error on CloseHandle.");
+	// extend this file so it reaches the required size
+	IFFALSE_GOTOERROR(ExtendImageFile(endlessImgPath, dlg->m_nrGigsSelected), "Error extending Endless image file");
+
 	UpdateProgress(OP_SETUP_DUALBOOT, DB_PROGRESS_FINISHED_UNPACK);
 	CHECK_IF_CANCELED;
 
@@ -4665,6 +4660,43 @@ done:
 	RemoveNonEmptyDirectory(bootFilesPath);
 	dlg->PostMessage(WM_FINISHED_ALL_OPERATIONS, 0, 0);
 	return 0;
+}
+
+
+bool CEndlessUsbToolDlg::ExtendImageFile(const CString &endlessImgPath, ULONGLONG selectedGigs)
+{
+	FUNCTION_ENTER;
+	HANDLE endlessImage = INVALID_HANDLE_VALUE;
+	HANDLE hToken = INVALID_HANDLE_VALUE;
+	bool retResult = false;
+
+	// We need to have the MANAGE_VOLUME privilege to use SetFileValidData.
+	// This lets us mark the extra blocks allocated by SetEndOfFile as
+	// initialized, without actually writing 100Gb of zeroes.
+	IFFALSE_GOTOERROR(OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY | TOKEN_QUERY_SOURCE, &hToken) != 0, "OpenProcessToken failed");
+	IFFALSE_GOTOERROR(SetPrivilege(hToken, SE_MANAGE_VOLUME_NAME, TRUE), "Can't take MANAGE_VOLUME privilege. You must be logged on as Administrator.");
+
+	endlessImage = CreateFile(endlessImgPath, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	IFFALSE_GOTOERROR(endlessImage != INVALID_HANDLE_VALUE, "Error opening Endless image file.");
+	LARGE_INTEGER lCurrentSize;
+	IFFALSE_GOTOERROR(GetFileSizeEx(endlessImage, &lCurrentSize), "Error getting Endless image file size");
+	LARGE_INTEGER lsize;
+	lsize.QuadPart = selectedGigs * BYTES_IN_GIGABYTE;
+	
+	uprintf("Trying to extend Endless image from %I64i bytes to %I64i bytes which is about %s", lCurrentSize.QuadPart, lsize.QuadPart, SizeToHumanReadable(lsize.QuadPart, FALSE, use_fake_units));
+	IFFALSE_GOTOERROR(SetFilePointerEx(endlessImage, lsize, NULL, FILE_BEGIN) != 0, "Error on SetFilePointerEx");
+	IFFALSE_GOTOERROR(SetEndOfFile(endlessImage), "Error on SetEndOfFile");
+	IFFALSE_GOTOERROR(SetFileValidData(endlessImage, lsize.QuadPart), "Error on SetFileValidData");
+	uprintf("Extended Endless image");
+
+	IFFALSE_PRINTERROR(SetPrivilege(hToken, SE_MANAGE_VOLUME_NAME, FALSE), "Can't release MANAGE_VOLUME privilege.");
+
+	retResult = true;
+
+error:
+	safe_closehandle(endlessImage);
+	safe_closehandle(hToken);
+	return retResult;
 }
 
 bool CEndlessUsbToolDlg::UnpackBootComponents(const CString &bootFilesPathGz, const CString &bootFilesPath)

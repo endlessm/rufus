@@ -293,6 +293,7 @@ private:
 
 	static DWORD WINAPI SetupDualBoot(LPVOID param);
 
+	static bool ExtendImageFile(const CString &endlessImgPath, ULONGLONG selectedGigs);
 	static bool UnpackBootComponents(const CString &bootFilesPathGz, const CString &bootFilesPath);
 	static bool CopyMultipleItems(const CString &fromPath, const CString &toPath);
 	static bool IsLegacyBIOSBoot();
