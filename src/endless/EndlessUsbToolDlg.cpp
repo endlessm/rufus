@@ -169,7 +169,6 @@ DWORD usbDevicesCount;
 #define ELEMENT_STORAGE_SUPPORT_LINK	"StorageSupportLink"
 
 //Installing page elements
-#define ELEMENT_INSTALL_DESCRIPTION     "InstallStepDescription"
 #define ELEMENT_INSTALL_STATUS          "InstallStepStatus"
 #define ELEMENT_INSTALL_STEP            "CurrentStepText"
 #define ELEMENT_INSTALL_STEPS_TOTAL     "TotalStepsText"
@@ -2759,7 +2758,6 @@ HRESULT CEndlessUsbToolDlg::OnSelectUSBNextClicked(IHTMLElement* pElement)
 void CEndlessUsbToolDlg::StartInstallationProcess()
 {
 	SetElementText(_T(ELEMENT_INSTALL_STATUS), CComBSTR(""));
-	SetElementText(_T(ELEMENT_INSTALL_DESCRIPTION), CComBSTR(""));
 
 	EnableHibernate(false);
 
@@ -3271,7 +3269,6 @@ bool CEndlessUsbToolDlg::CancelInstall()
                 m_lastErrorCause = ErrorCause_t::ErrorCauseCanceled;
                 uprintf("Cancelling current operation.");
                 CString str = UTF8ToCString(lmprintf(MSG_201));
-                SetElementText(_T(ELEMENT_INSTALL_DESCRIPTION), CComBSTR(str));
                 SetElementText(_T(ELEMENT_INSTALL_STATUS), CComBSTR(""));
             }
         }
@@ -3343,26 +3340,26 @@ void CEndlessUsbToolDlg::UpdateCurrentStep(int currentStep)
 
     int nrSteps = m_useLocalFile ? 2 : 3;
     int nrCurrentStep;
-    int locMsgIdTitle, locMsgIdSubtitle;
+    int locMsgIdTitle;
     m_currentStep = currentStep;
     
     switch (m_currentStep)
     {
     case OP_DOWNLOADING_FILES:
         locMsgIdTitle = MSG_304;
-        locMsgIdSubtitle = MSG_301;
         nrCurrentStep = 1;
         break;
     case OP_VERIFYING_SIGNATURE:
         locMsgIdTitle = MSG_310;
-        locMsgIdSubtitle = MSG_308;
         nrCurrentStep = m_useLocalFile ? 1 : 2;
         break;
     case OP_FLASHING_DEVICE:
     case OP_FILE_COPY:
+		locMsgIdTitle = MSG_311;
+		nrCurrentStep = m_useLocalFile ? 2 : 3;
+		break;
 	case OP_SETUP_DUALBOOT:
-        locMsgIdTitle = MSG_311;
-        locMsgIdSubtitle = MSG_309;
+        locMsgIdTitle = MSG_309;
         nrCurrentStep = m_useLocalFile ? 2 : 3;
         break;
     default:
@@ -3370,8 +3367,7 @@ void CEndlessUsbToolDlg::UpdateCurrentStep(int currentStep)
         break;
     }
     
-    CString str = UTF8ToCString(lmprintf(locMsgIdSubtitle));
-    SetElementText(_T(ELEMENT_INSTALL_DESCRIPTION), CComBSTR(str));
+	CString str;
 
     str = UTF8ToCString(lmprintf(MSG_305, nrCurrentStep));
     SetElementText(_T(ELEMENT_INSTALL_STEP), CComBSTR(str));
