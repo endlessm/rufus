@@ -7,8 +7,13 @@
 #include "rufus.h"
 #include "file.h"
 
+#define GRUB_SETUP_BIOS 1
+
 #define GRUB_DISK_SECTOR_SIZE	0x200
 #define GRUB_DISK_SECTOR_BITS	9
+
+/* The segment where the kernel is loaded.  */
+#define GRUB_BOOT_I386_PC_KERNEL_SEG	0x800
 
 #define GRUB_KERNEL_I386_PC_LINK_ADDR  0x9000
 
@@ -17,6 +22,33 @@
 
 /* Offset of reed_solomon_redundancy.  */
 #define GRUB_KERNEL_I386_PC_REED_SOLOMON_REDUNDANCY	0x10
+
+# define grub_cpu_to_le16(x)	((grub_uint16_t) (x))
+# define grub_cpu_to_le32(x)	((grub_uint32_t) (x))
+# define grub_cpu_to_le64(x)	((grub_uint64_t) (x))
+# define grub_le_to_cpu16(x)	((grub_uint16_t) (x))
+# define grub_le_to_cpu32(x)	((grub_uint32_t) (x))
+# define grub_le_to_cpu64(x)	((grub_uint64_t) (x))
+# define grub_cpu_to_be16(x)	grub_swap_bytes16(x)
+# define grub_cpu_to_be32(x)	grub_swap_bytes32(x)
+# define grub_cpu_to_be64(x)	grub_swap_bytes64(x)
+# define grub_be_to_cpu16(x)	grub_swap_bytes16(x)
+# define grub_be_to_cpu32(x)	grub_swap_bytes32(x)
+# define grub_be_to_cpu64(x)	grub_swap_bytes64(x)
+# define grub_cpu_to_be16_compile_time(x)	grub_swap_bytes16_compile_time(x)
+# define grub_cpu_to_be32_compile_time(x)	grub_swap_bytes32_compile_time(x)
+# define grub_cpu_to_be64_compile_time(x)	grub_swap_bytes64_compile_time(x)
+# define grub_be_to_cpu64_compile_time(x)	grub_swap_bytes64_compile_time(x)
+# define grub_cpu_to_le16_compile_time(x)	((grub_uint16_t) (x))
+# define grub_cpu_to_le32_compile_time(x)	((grub_uint32_t) (x))
+# define grub_cpu_to_le64_compile_time(x)	((grub_uint64_t) (x))
+
+#define grub_target_to_host16(x)	grub_le_to_cpu16(x)
+#define grub_target_to_host32(x)	grub_le_to_cpu32(x)
+#define grub_target_to_host64(x)	grub_le_to_cpu64(x)
+#define grub_host_to_target16(x)	grub_cpu_to_le16(x)
+#define grub_host_to_target32(x)	grub_cpu_to_le32(x)
+#define grub_host_to_target64(x)	grub_cpu_to_le64(x)
 
 struct embed_signature
 {
@@ -155,6 +187,89 @@ grub_err_t pc_partition_map_embed(HANDLE dest_dev, grub_disk_addr_t last_availab
 	return ERROR_SUCCESS;
 }
 
+#define grub_boot_blocklist grub_pc_bios_boot_blocklist
+
+#pragma pack (push, 1)
+struct grub_pc_bios_boot_blocklist
+{
+    grub_uint64_t start;
+    grub_uint16_t len;
+    grub_uint16_t segment;
+};
+#pragma pack(pop)
+
+struct blocklists
+{
+    struct grub_boot_blocklist *first_block, *block;
+#ifdef GRUB_SETUP_BIOS
+    grub_uint16_t current_segment;
+#endif
+    grub_uint16_t last_length;
+    grub_disk_addr_t first_sector;
+};
+
+/* Helper for setup.  */
+static void
+save_blocklists(grub_disk_addr_t sector, unsigned offset, unsigned length,
+    void *data)
+{
+    struct blocklists *bl = data;
+    struct grub_boot_blocklist *prev = bl->block + 1;
+    grub_uint64_t seclen;
+
+    uprintf("saving <%"  PRIu64 ",%u,%u>",
+        sector, offset, length);
+
+    if (bl->first_sector == (grub_disk_addr_t)-1)
+    {
+        if (offset != 0 || length < GRUB_DISK_SECTOR_SIZE)
+            PRINT_ERROR_MSG("the first sector of the core file is not sector-aligned");
+
+        bl->first_sector = sector;
+        sector++;
+        length -= GRUB_DISK_SECTOR_SIZE;
+        if (!length)
+            return;
+    }
+
+    /* we hit this, bl.currentsegment, last_length, first_sector are junk:
+    current_segment	52428	unsigned short
+    last_length	52428	unsigned short
+    first_sector	14757395258967641292	unsigned __int64
+    */
+    if (offset != 0 || bl->last_length != 0)
+        PRINT_ERROR_MSG("non-sector-aligned data is found in the core file");
+
+    seclen = (length + GRUB_DISK_SECTOR_SIZE - 1) >> GRUB_DISK_SECTOR_BITS;
+
+    if (bl->block != bl->first_block
+        && (grub_target_to_host64(prev->start)
+            + grub_target_to_host16(prev->len)) == sector)
+    {
+        grub_uint16_t t = grub_target_to_host16(prev->len);
+        t += seclen;
+        prev->len = grub_host_to_target16(t);
+    }
+    else
+    {
+        bl->block->start = grub_host_to_target64(sector);
+        bl->block->len = grub_host_to_target16(seclen);
+#ifdef GRUB_SETUP_BIOS
+        bl->block->segment = grub_host_to_target16(bl->current_segment);
+#endif
+
+        bl->block--;
+        if (bl->block->len)
+            PRINT_ERROR_MSG("the sectors of the core file are too fragmented");
+    }
+
+    bl->last_length = length & (GRUB_DISK_SECTOR_SIZE - 1);
+#ifdef GRUB_SETUP_BIOS
+    bl->current_segment += seclen << (GRUB_DISK_SECTOR_BITS - 4);
+#endif
+}
+
+
 int grub_util_bios_setup(const wchar_t *core_path, HANDLE dest_dev, grub_disk_addr_t last_available_sector)
 {
 	unsigned int nsec, maxsec;
@@ -180,8 +295,23 @@ int grub_util_bios_setup(const wchar_t *core_path, HANDLE dest_dev, grub_disk_ad
 		countRead = fread(core_img + sizeRead, 1, GRUB_DISK_SECTOR_SIZE, coreImgFile);
 		sizeRead += countRead;
 	}
-
 	// grub 2 stuff copied from https://github.com/endlessm/grub/blob/master/util/setup.c#L490
+
+	struct blocklists bl;
+
+	bl.first_sector = (grub_disk_addr_t)-1;
+
+#ifdef GRUB_SETUP_BIOS
+	bl.current_segment =
+		GRUB_BOOT_I386_PC_KERNEL_SEG + (GRUB_DISK_SECTOR_SIZE >> 4);
+#endif
+	bl.last_length = 0;
+
+	/* Have FIRST_BLOCK to point to the first blocklist.  */
+	bl.first_block = (struct grub_boot_blocklist *) (core_img
+		+ GRUB_DISK_SECTOR_SIZE
+		- sizeof(*bl.block));
+
 	core_sectors = (grub_uint16_t) ((core_size + GRUB_DISK_SECTOR_SIZE - 1) >> GRUB_DISK_SECTOR_BITS);
 
 	if (core_size < GRUB_DISK_SECTOR_SIZE) uprintf("the size of '%s' is too small", core_path);
@@ -198,6 +328,31 @@ int grub_util_bios_setup(const wchar_t *core_path, HANDLE dest_dev, grub_disk_ad
 	int err = pc_partition_map_embed(dest_dev, last_available_sector, &nsec, maxsec, &sectors);
 	if (err == ERROR_SUCCESS && nsec < core_sectors)  uprintf("Your embedding area is unusually small. core.img won't fit in it.");
 	IFFALSE_GOTOERROR(err == ERROR_SUCCESS && nsec >= core_sectors, "Error after pc_partition_map_embed.");
+
+    /* Clean out the blocklists.  */
+    bl.block = bl.first_block;
+    while (bl.block->len)
+    {
+        memset(bl.block, 0, sizeof(bl.block));
+
+        bl.block--;
+
+        IFTRUE_GOTOERROR(((char *)bl.block <= core_img), "no terminator in the core image");
+    }
+
+    /* Bake the list of sectors returned by pc_partition_map_embed() into the core image */
+    bl.block = bl.first_block;
+    unsigned int i;
+    for (i = 0; i < nsec; i++)
+        save_blocklists(sectors[i],
+            0, GRUB_DISK_SECTOR_SIZE, &bl);
+
+    /* Make sure that the last blocklist is a terminator.  */
+    if (bl.block == bl.first_block)
+        bl.block--;
+    bl.block->start = 0;
+    bl.block->len = 0;
+    bl.block->segment = 0;
 
 	/* Round up to the nearest sector boundary, and zero the extra memory */
 	core_img = realloc(core_img, nsec * GRUB_DISK_SECTOR_SIZE);
