@@ -18,29 +18,24 @@
             </div>
 
             <div class="FullWidthContent PageContent">
-                <div class="FullWidthContent LanguageContainer">
-                    <label for="LanguageSelectDualBoot" id="DualBootLanguageLabel" class="LanguageLabel">Select Language</label>
-                    <select id="LanguageSelectDualBoot" class="LanguageSelect">
-                        <!-- These will be replaced at runtime by actual available languages in endless.loc -->
-                        <option value="en_us">English (United States)</option>
-                        <option value="ro_ro">Română (România)</option>
-                    </select>
-                </div>
                 <div class="ContentContainer" id="DualBootContainer">
-                    <div class="RoundedCornersContainer">
-                        <div id="LeftContent" class="DualBootPanel">
-                            <div id="DualBootContentTitle">Download and Install Endless on this PC</div>
-                            <div id="DualBootContentDescription">Each time you start your PC, you will be able to choose between Endless and Windows. Your apps and files on Windows will not be affected.</div>
-                        </div>
-                        <div id="RightContent" class="DualBootPanel">
-                            <div class="Button ButtonBlue ButtonDisabled" id="DualBootInstallButonC"><div id="DualBootInstallButon">Install Endless</div></div>
-                            <div id="DualBootRecommendation">At least 32 GB free on the system drive is recommended.</div>
-                        </div>
+                    <div class="RoundedCornersContainer FullWidthContent">
+                        <div id="DualBootContentTitle">Download and Install Endless on this PC</div>
+                        <div id="DualBootContentDescription">Each time you start your PC, you will be able to choose between Endless and Windows. Your apps and files on Windows will not be affected.</div>
+                        <div class="Button ButtonBlue ButtonDisabled" id="DualBootInstallButonC"><div id="DualBootInstallButon">Install Endless</div></div>
+                        <div id="DualBootRecommendation">At least 32 GB free on the system drive is recommended.</div>
                     </div>
 
                     <div class="FullWidthContent" id="AdvancedOptionsText">
                         For advanced install options using an <b>Endless USB Stick</b>, <a id='AdvancedOptionsLink'>click here</a>.
                     </div>
+                </div>
+                <div class="FullWidthContent LanguageContainer">
+                    <select id="LanguageSelectDualBoot" class="LanguageSelect">
+                        <!-- These will be replaced at runtime by actual available languages in endless.loc -->
+                        <option value="en_us">English (United States)</option>
+                        <option value="ro_ro">Română (România)</option>
+                    </select>
                 </div>
             </div>
 

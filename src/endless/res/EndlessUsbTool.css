@@ -305,7 +305,6 @@ select:disabled {
 }
 
 .LanguageContainer {
-    margin-top: 20px;
 }
 
 .LanguageLabel {
@@ -332,44 +331,39 @@ select:disabled {
 }
 
 
-#DualBootInstallPage .RoundedCornersContainer .DualBootPanel {
+#DualBootInstallPage .RoundedCornersContainer {
     margin-top: 40px;
     font-size: 14px;
-}
-
-#DualBootInstallPage .RoundedCornersContainer #LeftContent {
-    width: 65%;
-    float: left;
-}
-
-#DualBootInstallPage .RoundedCornersContainer #RightContent {
-    width: 30%;
-    float: right;
-}
-
-
-#DualBootInstallPage .RoundedCornersContainer #LeftContent div {
-    padding-left: 40px;
+	text-align: center;
 }
 
 #DualBootContentTitle {
     font-size: 22px;
     font-family: LatoBold;
     color: #000000;
-    width: 50%;
+    width: 70%;
+	margin: 0 15%;
+	padding-top: 20px;
+	text-align: center;
 }
 
 #DualBootContentDescription {
     width: 70%;
+	margin: 0 15%;
     padding-top: 20px;
     letter-spacing: 0.5px;
+	text-align: center;
+}
+
+#DualBootInstallButonC {
+	margin: 20px auto;
 }
 
 #DualBootRecommendation {
     font-family: LatoBold;
     font-size: 11px;
-    padding-top: 50px;
     width: 85%;
+	margin: 0 7.5%;
     text-align: center;
 }
 
