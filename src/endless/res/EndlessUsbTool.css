@@ -777,13 +777,9 @@ select:disabled {
 	margin-right: 40px;
 }
 
-#SecureBootReminder1 {
+#ReminderTextContainer .ReminderTitle {
 	padding-top: 31px;
 	font-family: LatoBold;	
-}
-
-#SecureBootReminder2 {
-	margin-right: 5px;
 }
 
 /* Error Page */

@@ -182,6 +182,9 @@ DWORD usbDevicesCount;
 #define ELEMENT_INSTALLER_LANGUAGE      "InstallerLanguageValue"
 #define ELEMENT_INSTALLER_CONTENT       "InstallerContentValue"
 #define ELEMENT_THANKYOU_MESSAGE        "ThankYouMessage"
+#define ELEMENT_DUALBOOT_REMINDER       "ThankYouDualBootReminder"
+#define ELEMENT_LIVE_REMINDER           "ThankYouLiveReminder"
+#define ELEMENT_REFLASHER_REMINDER      "ThankYouReflasherReminder"
 #define ELEMENT_USBBOOT_HOWTO           "UsbBootHowToLink"
 //Error page
 #define ELEMENT_ERROR_MESSAGE           "ErrorMessage"
@@ -2587,6 +2590,11 @@ HRESULT CEndlessUsbToolDlg::OnSelectFileNextClicked(IHTMLElement* pElement)
         SetElementText(_T(ELEMENT_INSTALLER_LANGUAGE), CComBSTR(imageLanguage));
         CString contentStr  = UTF8ToCString(lmprintf(MSG_319, imageType, SizeToHumanReadable(size, FALSE, use_fake_units)));
         SetElementText(_T(ELEMENT_INSTALLER_CONTENT), CComBSTR(contentStr));
+
+        CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_DUALBOOT_REMINDER), CComVariant(m_dualBootSelected));
+        CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_LIVE_REMINDER), CComVariant(!m_dualBootSelected && m_liveInstall));
+        CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_REFLASHER_REMINDER), CComVariant(!m_dualBootSelected && !m_liveInstall));
+        CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_USBBOOT_HOWTO), CComVariant(!m_dualBootSelected));
 
         GetImgDisplayName(selectedImage, version, personality, 0);
     } else {
