@@ -337,6 +337,20 @@ select:disabled {
 	text-align: center;
 }
 
+#DualBootContentLogo {
+	position: absolute;
+	padding: 0 15px;
+	top: 74px; /* trial and error to match up with the design */
+	left: 315px; /* (page width (746px) - logo width (85px) - padding (30px)) // 2 */
+	background: #e6e6e6; /* .WizardPage background; covers up some of the border */
+}
+
+#DualBootContentLogoImage {
+	width: 85px;
+	height: 37px;
+	background: url("res:/IMG/#209") 0 0 no-repeat;
+}
+
 #DualBootContentTitle {
     font-size: 22px;
     font-family: LatoBold;
@@ -368,7 +382,7 @@ select:disabled {
 }
 
 #AdvancedOptionsText {
-    margin-top: 30px;
+    margin-top: 20px;
 }
 
 
