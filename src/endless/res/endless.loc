@@ -220,8 +220,9 @@ t MSG_321 "Select Your Endless OS Version"
 t MSG_322 "Is this the version you’d like to use? If not, select another."
 
 t MSG_323 "We couldn’t finish getting Endless OS. Check your internet connection and click \"Resume\" to carry on downloading."
-t MSG_324 "Something is wrong with your Endless OS file. Click \"Download Again\" to try downloading it one more time."
+t MSG_324 "Something is wrong with your Endless OS file. Click \"Download Again\" to try downloading it again."
 t MSG_325 "Something went wrong writing Endless OS to your USB device. Find a different device and click \"Try Again\"."
+t MSG_358 "Something went wrong installing Endless OS to your computer."
 
 t MSG_326 "Resume"
 t MSG_327 "Download again"

@@ -1622,7 +1622,7 @@ void CEndlessUsbToolDlg::ErrorOccured(ErrorCause_t errorCause)
     case ErrorCause_t::ErrorCauseBitLocker:
     case ErrorCause_t::ErrorCauseNotNTFS:
         buttonMsgId = MSG_328;
-        suggestionMsgId = MSG_325;
+        suggestionMsgId = m_dualBootSelected ? MSG_358 : MSG_325;
         break;
     default:
         uprintf("Unhandled error cause %ls(%d)", ErrorCauseToStr(errorCause), errorCause);
