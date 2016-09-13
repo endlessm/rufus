@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 
+import os
+
 # Script to parse the endless.loc file into a placeholder rufus.pot
 # that can be used with standard translation tools such as Transifex
 
-LOC_FILE = '../src/endless/res/endless.loc'
-POT_FILE = 'rufus.pot'
+PO_DIR = os.path.dirname(__file__)
+LOC_FILE = os.path.join(PO_DIR, '../src/endless/res/endless.loc')
+POT_FILE = os.path.join(PO_DIR, 'rufus.pot')
 
 PREAMBLE = '''# SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
