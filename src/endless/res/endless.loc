@@ -263,6 +263,8 @@ t MSG_403 "Portuguese (Brazilian)"
 t MSG_404 "Arabic"
 t MSG_405 "French"
 t MSG_406 "Chinese Simplified"
+t MSG_407 "Bengali"
+t MSG_408 "Spanish (Guatemala)"
 
 ################################################################################
 ############################# TRANSLATOR END COPY ##############################
