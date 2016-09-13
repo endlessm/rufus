@@ -169,8 +169,6 @@ DWORD usbDevicesCount;
 #define ELEMENT_STORAGE_SUPPORT_LINK	"StorageSupportLink"
 
 //Installing page elements
-#define ELEMENT_SECUREBOOT_HOWTO        "SecureBootHowTo"
-#define ELEMENT_INSTALL_DESCRIPTION     "InstallStepDescription"
 #define ELEMENT_INSTALL_STATUS          "InstallStepStatus"
 #define ELEMENT_INSTALL_STEP            "CurrentStepText"
 #define ELEMENT_INSTALL_STEPS_TOTAL     "TotalStepsText"
@@ -178,12 +176,15 @@ DWORD usbDevicesCount;
 #define ELEMENT_INSTALL_CANCEL          "InstallCancelButton"
 
 //Thank You page elements
-#define ELEMENT_SECUREBOOT_HOWTO2       "SecureBootHowToReminder"
 #define ELEMENT_CLOSE_BUTTON            "CloseAppButton"
 #define ELEMENT_INSTALLER_VERSION       "InstallerVersionValue"
-#define ELEMENT_INSTALLER_LANGUAGE      "InstallerVersionLanguage"
+#define ELEMENT_INSTALLER_LANGUAGE_ROW  "InstallerLanguageRow"
+#define ELEMENT_INSTALLER_LANGUAGE      "InstallerLanguageValue"
 #define ELEMENT_INSTALLER_CONTENT       "InstallerContentValue"
 #define ELEMENT_THANKYOU_MESSAGE        "ThankYouMessage"
+#define ELEMENT_DUALBOOT_REMINDER       "ThankYouDualBootReminder"
+#define ELEMENT_LIVE_REMINDER           "ThankYouLiveReminder"
+#define ELEMENT_REFLASHER_REMINDER      "ThankYouReflasherReminder"
 #define ELEMENT_USBBOOT_HOWTO           "UsbBootHowToLink"
 //Error page
 #define ELEMENT_ERROR_MESSAGE           "ErrorMessage"
@@ -460,11 +461,9 @@ BEGIN_DHTML_EVENT_MAP(CEndlessUsbToolDlg)
 	DHTML_EVENT_ONCLICK(_T(ELEMENT_STORAGE_SUPPORT_LINK), OnLinkClicked)
 
 	// Installing Page handlers
-	DHTML_EVENT_ONCLICK(_T(ELEMENT_SECUREBOOT_HOWTO), OnLinkClicked)    
     DHTML_EVENT_ONCLICK(_T(ELEMENT_INSTALL_CANCEL), OnInstallCancelClicked)
 
 	// Thank You Page handlers
-	DHTML_EVENT_ONCLICK(_T(ELEMENT_SECUREBOOT_HOWTO2), OnLinkClicked)
     DHTML_EVENT_ONCLICK(_T(ELEMENT_CLOSE_BUTTON), OnCloseAppClicked)
     DHTML_EVENT_ONCLICK(_T(ELEMENT_USBBOOT_HOWTO), OnLinkClicked)
     // Error Page handlers
@@ -1609,6 +1608,8 @@ void CEndlessUsbToolDlg::ErrorOccured(ErrorCause_t errorCause)
         break;
     case ErrorCause_t::ErrorCauseDownloadFailedDiskFull:
         buttonMsgId = MSG_326;
+        // TODO: distinguish between "not enough space to download" and "not enough space to install",
+        // use MSG_350 / MSG_351 in the latter case
         suggestionMsgId = MSG_334;
         break;
     case ErrorCause_t::ErrorCauseJSONDownloadFailed:
@@ -1619,11 +1620,23 @@ void CEndlessUsbToolDlg::ErrorOccured(ErrorCause_t errorCause)
     case ErrorCause_t::ErrorCauseCanceled:
     case ErrorCause_t::ErrorCauseGeneric:
     case ErrorCause_t::ErrorCauseWriteFailed:
+        buttonMsgId = MSG_328;
+        suggestionMsgId = m_dualBootSelected ? MSG_358 : MSG_325;
+        break;
     case ErrorCause_t::ErrorCauseNot64Bit:
+        buttonMsgId = MSG_328;
+        // TODO: headline should be MSG_354
+        suggestionMsgId = MSG_355;
+        break;
     case ErrorCause_t::ErrorCauseBitLocker:
+        buttonMsgId = MSG_328;
+        // TODO: headline should be MSG_356, with system drive letter
+        suggestionMsgId = MSG_357;
+        break;
     case ErrorCause_t::ErrorCauseNotNTFS:
         buttonMsgId = MSG_328;
-        suggestionMsgId = MSG_325;
+        // TODO: headline should be MSG_352, with system drive letter
+        suggestionMsgId = MSG_353;
         break;
     default:
         uprintf("Unhandled error cause %ls(%d)", ErrorCauseToStr(errorCause), errorCause);
@@ -1937,8 +1950,6 @@ HRESULT CEndlessUsbToolDlg::OnLinkClicked(IHTMLElement* pElement)
 
     if (id == _T(ELEMENT_COMPARE_OPTIONS)) {
         msg_id = MSG_312;
-    } else if (id == _T(ELEMENT_SECUREBOOT_HOWTO) || id == _T(ELEMENT_SECUREBOOT_HOWTO2)) {
-        msg_id = MSG_313;
     } else if (id == _T(ELEMENT_ENDLESS_SUPPORT) || id == _T(ELEMENT_CONNECTED_SUPPORT_LINK) || id == _T(ELEMENT_STORAGE_SUPPORT_LINK)) {
         msg_id = MSG_314;
     } else if (id == _T(ELEMENT_CONNECTED_LINK)) {
@@ -2571,16 +2582,33 @@ HRESULT CEndlessUsbToolDlg::OnSelectFileNextClicked(IHTMLElement* pElement)
     if (ParseImgFileName(selectedImage, personality, version, isInstallerImage)) {
         if(isInstallerImage) uprintf("ERROR: An installer image has been selected.");
 
-        CString usbType = UTF8ToCString(lmprintf(m_liveInstall ? MSG_317 : MSG_318)); // Live or installer
-        CString imageType = UTF8ToCString(lmprintf(personality == PERSONALITY_BASE ? MSG_400 : MSG_316)); // Light or Full
-        CString imageLanguage = personality == PERSONALITY_BASE ?  L"" : UTF8ToCString(lmprintf(m_personalityToLocaleMsg[personality])); // Language for Full or empty string for Light
-        CString finalMessageStr = UTF8ToCString(lmprintf(MSG_320, version, imageType, imageLanguage, usbType));
+        uint32_t headlineMsg;
+        if (m_dualBootSelected) {
+            headlineMsg = MSG_320;
+        }
+        else if (m_liveInstall) {
+            headlineMsg = MSG_343;
+        }
+        else {
+            headlineMsg = MSG_344;
+        }
+
+        CString finalMessageStr = UTF8ToCString(lmprintf(headlineMsg));
+        CString imageLanguage = UTF8ToCString(lmprintf(m_personalityToLocaleMsg[personality]));
+        CString imageType = UTF8ToCString(lmprintf(personality == PERSONALITY_BASE ? MSG_400 : MSG_316)); // Basic or Full
+
         SetElementText(_T(ELEMENT_THANKYOU_MESSAGE), CComBSTR(finalMessageStr));
 
         SetElementText(_T(ELEMENT_INSTALLER_VERSION), CComBSTR(version));
+        CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_INSTALLER_LANGUAGE_ROW), CComVariant(personality != PERSONALITY_BASE));
         SetElementText(_T(ELEMENT_INSTALLER_LANGUAGE), CComBSTR(imageLanguage));
         CString contentStr  = UTF8ToCString(lmprintf(MSG_319, imageType, SizeToHumanReadable(size, FALSE, use_fake_units)));
         SetElementText(_T(ELEMENT_INSTALLER_CONTENT), CComBSTR(contentStr));
+
+        CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_DUALBOOT_REMINDER), CComVariant(m_dualBootSelected));
+        CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_LIVE_REMINDER), CComVariant(!m_dualBootSelected && m_liveInstall));
+        CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_REFLASHER_REMINDER), CComVariant(!m_dualBootSelected && !m_liveInstall));
+        CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_USBBOOT_HOWTO), CComVariant(!m_dualBootSelected));
 
         GetImgDisplayName(selectedImage, version, personality, 0);
     } else {
@@ -2765,7 +2793,6 @@ HRESULT CEndlessUsbToolDlg::OnSelectUSBNextClicked(IHTMLElement* pElement)
 void CEndlessUsbToolDlg::StartInstallationProcess()
 {
 	SetElementText(_T(ELEMENT_INSTALL_STATUS), CComBSTR(""));
-	SetElementText(_T(ELEMENT_INSTALL_DESCRIPTION), CComBSTR(""));
 
 	EnableHibernate(false);
 
@@ -3277,7 +3304,6 @@ bool CEndlessUsbToolDlg::CancelInstall()
                 m_lastErrorCause = ErrorCause_t::ErrorCauseCanceled;
                 uprintf("Cancelling current operation.");
                 CString str = UTF8ToCString(lmprintf(MSG_201));
-                SetElementText(_T(ELEMENT_INSTALL_DESCRIPTION), CComBSTR(str));
                 SetElementText(_T(ELEMENT_INSTALL_STATUS), CComBSTR(""));
             }
         }
@@ -3349,26 +3375,26 @@ void CEndlessUsbToolDlg::UpdateCurrentStep(int currentStep)
 
     int nrSteps = m_useLocalFile ? 2 : 3;
     int nrCurrentStep;
-    int locMsgIdTitle, locMsgIdSubtitle;
+    int locMsgIdTitle;
     m_currentStep = currentStep;
     
     switch (m_currentStep)
     {
     case OP_DOWNLOADING_FILES:
         locMsgIdTitle = MSG_304;
-        locMsgIdSubtitle = MSG_301;
         nrCurrentStep = 1;
         break;
     case OP_VERIFYING_SIGNATURE:
         locMsgIdTitle = MSG_310;
-        locMsgIdSubtitle = MSG_308;
         nrCurrentStep = m_useLocalFile ? 1 : 2;
         break;
     case OP_FLASHING_DEVICE:
     case OP_FILE_COPY:
+		locMsgIdTitle = MSG_311;
+		nrCurrentStep = m_useLocalFile ? 2 : 3;
+		break;
 	case OP_SETUP_DUALBOOT:
-        locMsgIdTitle = MSG_311;
-        locMsgIdSubtitle = MSG_309;
+        locMsgIdTitle = MSG_309;
         nrCurrentStep = m_useLocalFile ? 2 : 3;
         break;
     default:
@@ -3376,8 +3402,7 @@ void CEndlessUsbToolDlg::UpdateCurrentStep(int currentStep)
         break;
     }
     
-    CString str = UTF8ToCString(lmprintf(locMsgIdSubtitle));
-    SetElementText(_T(ELEMENT_INSTALL_DESCRIPTION), CComBSTR(str));
+	CString str;
 
     str = UTF8ToCString(lmprintf(MSG_305, nrCurrentStep));
     SetElementText(_T(ELEMENT_INSTALL_STEP), CComBSTR(str));
@@ -4601,14 +4626,6 @@ DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 	endlessFilesPath = systemDriveLetter + PATH_ENDLESS_SUBDIRECTORY;
 	endlessImgPath = endlessFilesPath + ENDLESS_IMG_FILE_NAME;
 
-	IFFALSE_PRINTERROR(ChangeAccessPermissions(endlessFilesPath, false), "Error on granting Endless files permissions.");
-
-	// Unpack boot components
-	IFFALSE_GOTOERROR(UnpackBootComponents(dlg->m_bootArchive, bootFilesPath), "Error unpacking boot components.");
-
-	UpdateProgress(OP_SETUP_DUALBOOT, DB_PROGRESS_UNPACK_BOOT_ZIP);
-	CHECK_IF_CANCELED;
-
 	// Verify that this is an NTFS C:\ partition
 	IFFALSE_GOTOERROR(GetVolumeInformation(systemDriveLetter, NULL, 0, NULL, NULL, NULL, fileSystemType, MAX_PATH + 1) != 0, "Error on GetVolumeInformation.");
 	uprintf("File system type '%ls'", fileSystemType);
@@ -4617,6 +4634,14 @@ DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 	// TODO: Verify that the C:\ drive is not encrypted with BitLocker or similar
 
 	UpdateProgress(OP_SETUP_DUALBOOT, DB_PROGRESS_CHECK_PARTITION);
+
+	IFFALSE_PRINTERROR(ChangeAccessPermissions(endlessFilesPath, false), "Error on granting Endless files permissions.");
+
+	// Unpack boot components
+	IFFALSE_GOTOERROR(UnpackBootComponents(dlg->m_bootArchive, bootFilesPath), "Error unpacking boot components.");
+
+	UpdateProgress(OP_SETUP_DUALBOOT, DB_PROGRESS_UNPACK_BOOT_ZIP);
+	CHECK_IF_CANCELED;
 
 	// Create endless folder
 	int createDirResult = SHCreateDirectoryExW(NULL, endlessFilesPath, NULL);

@@ -18,29 +18,25 @@
             </div>
 
             <div class="FullWidthContent PageContent">
-                <div class="FullWidthContent LanguageContainer">
-                    <label for="LanguageSelectDualBoot" id="DualBootLanguageLabel" class="LanguageLabel">Select Language</label>
-                    <select id="LanguageSelectDualBoot" class="LanguageSelect">
-                        <!-- These will be replaced at runtime by actual available languages in endless.loc -->
-                        <option value="en_us">English (United States)</option>
-                        <option value="ro_ro">Română (România)</option>
-                    </select>
-                </div>
                 <div class="ContentContainer" id="DualBootContainer">
-                    <div class="RoundedCornersContainer">
-                        <div id="LeftContent" class="DualBootPanel">
-                            <div id="DualBootContentTitle">Download and Install Endless on this PC</div>
-                            <div id="DualBootContentDescription">Each time you start your PC, you will be able to choose between Endless and Windows. Your apps and files on Windows will not be affected.</div>
-                        </div>
-                        <div id="RightContent" class="DualBootPanel">
-                            <div class="Button ButtonBlue ButtonDisabled" id="DualBootInstallButonC"><div id="DualBootInstallButon">Install Endless</div></div>
-                            <div id="DualBootRecommendation">At least 32 GB free on the system drive is recommended.</div>
-                        </div>
+                    <div class="RoundedCornersContainer FullWidthContent">
+                        <div id="DualBootContentLogo"><div id="DualBootContentLogoImage"></div></div>
+                        <div id="DualBootContentTitle">Download and Install Endless on this PC</div>
+                        <div id="DualBootContentDescription">Each time you start your PC, you will be able to choose between Endless and Windows. Your apps and files on Windows will not be affected.</div>
+                        <div class="Button ButtonBlue ButtonDisabled" id="DualBootInstallButonC"><div id="DualBootInstallButon">Install Endless</div></div>
+                        <div id="DualBootRecommendation">At least 32 GB free on the system drive is recommended.</div>
                     </div>
 
                     <div class="FullWidthContent" id="AdvancedOptionsText">
                         For advanced install options using an <b>Endless USB Stick</b>, <a id='AdvancedOptionsLink'>click here</a>.
                     </div>
+                </div>
+                <div class="FullWidthContent LanguageContainer">
+                    <select id="LanguageSelectDualBoot" class="LanguageSelect">
+                        <!-- These will be replaced at runtime by actual available languages in endless.loc -->
+                        <option value="en_us">English (United States)</option>
+                        <option value="ro_ro">Română (România)</option>
+                    </select>
                 </div>
             </div>
 
@@ -261,16 +257,11 @@
 						</div>
 					</div>
 					<div class="FullWidthContent">
-						<span id="InstallStepDescription">Download progress</span>
-						<span id="InstallStepStatus">512Mb of 2.12 Gb (500k / sec)</span>
+						&nbsp;<span id="InstallStepStatus">512Mb of 2.12 Gb (500k / sec)</span>&nbsp;
 					</div>
 					
-					<div id="SecureBootContainer" class="RoundedCornersContainer">
-						<div id="SecureBootImage"></div>
-						<div id="SecureBootLabel">Secure Boot</div>
-						<div class="SecureBootText" id="SecureBootText1">Depending on the motherboard's BIOS/EFI firmware, the Secure Boot option will be found on the "Boot", "Security" or "Authentication" page.	</div>
-						<div class="SecureBootText" id="SecureBootText2">It must be set to "Disabled" or "Off" to allow you to boot from external media correctly.</div>
-						<a id="SecureBootHowTo">How should I do it?</a>												
+					<div id="MarketingContainer" class="RoundedCornersContainer">
+						<div id="MarketingImage"></div>											
 					</div>
 				</div>
             </div>
@@ -299,7 +290,7 @@
 						<label for="InstallerVersionValue" id="InstallerVersion">Version:</label>
 						<span id="InstallerVersionValue">---</span>
 					</div>
-					<div class="ImageDataRow">
+					<div id="InstallerLanguageRow" class="ImageDataRow">
 						<label for="InstallerLanguageValue" id="InstallerLanguage">Language:</label>
 						<span id="InstallerLanguageValue">---</span>
 					</div>
@@ -310,9 +301,9 @@
                 
 					<div id="SecureBootReminder" class="RoundedCornersContainer">
 						<div id="ReminderTextContainer">
-							<div id="SecureBootReminder1">Restart your computer and select "boot from USB" to <install> <try> Endless.</div>
-							<span id="SecureBootReminder2">Remember to switch off Secure Boot in order to boot from external media correctly.</span>
-							<a id="SecureBootHowToReminder">How should I do it?</a><br/>
+                            <div class="ReminderTitle" id="ThankYouDualBootReminder">Restart your computer and select "Endless OS" from the menu.</div>
+                            <div class="ReminderTitle" id="ThankYouLiveReminder">To try Endless OS now, restart your computer.</div>
+                            <div class="ReminderTitle" id="ThankYouReflasherReminder">Now you're ready to install Endless OS on more computers.</div>
 							<a id="UsbBootHowToLink">How should I do it?</a>
 						</div>
 					</div>
