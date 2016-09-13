@@ -1608,6 +1608,8 @@ void CEndlessUsbToolDlg::ErrorOccured(ErrorCause_t errorCause)
         break;
     case ErrorCause_t::ErrorCauseDownloadFailedDiskFull:
         buttonMsgId = MSG_326;
+        // TODO: distinguish between "not enough space to download" and "not enough space to install",
+        // use MSG_350 / MSG_351 in the latter case
         suggestionMsgId = MSG_334;
         break;
     case ErrorCause_t::ErrorCauseJSONDownloadFailed:
@@ -1618,11 +1620,23 @@ void CEndlessUsbToolDlg::ErrorOccured(ErrorCause_t errorCause)
     case ErrorCause_t::ErrorCauseCanceled:
     case ErrorCause_t::ErrorCauseGeneric:
     case ErrorCause_t::ErrorCauseWriteFailed:
-    case ErrorCause_t::ErrorCauseNot64Bit:
-    case ErrorCause_t::ErrorCauseBitLocker:
-    case ErrorCause_t::ErrorCauseNotNTFS:
         buttonMsgId = MSG_328;
         suggestionMsgId = m_dualBootSelected ? MSG_358 : MSG_325;
+        break;
+    case ErrorCause_t::ErrorCauseNot64Bit:
+        buttonMsgId = MSG_328;
+        // TODO: headline should be MSG_354
+        suggestionMsgId = MSG_355;
+        break;
+    case ErrorCause_t::ErrorCauseBitLocker:
+        buttonMsgId = MSG_328;
+        // TODO: headline should be MSG_356, with system drive letter
+        suggestionMsgId = MSG_357;
+        break;
+    case ErrorCause_t::ErrorCauseNotNTFS:
+        buttonMsgId = MSG_328;
+        // TODO: headline should be MSG_352, with system drive letter
+        suggestionMsgId = MSG_353;
         break;
     default:
         uprintf("Unhandled error cause %ls(%d)", ErrorCauseToStr(errorCause), errorCause);
