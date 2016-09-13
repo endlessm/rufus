@@ -50,9 +50,6 @@ LANGS = collections.OrderedDict([
                'name': 'Chinese Simplified (简体中文)',
                'lcids': '0x0804, 0x1004'})])
 
-# Temporarily omit unsupported languages
-del LANGS['zh_CN']
-
 # Read in the preamble until the marker that starts Endless translations
 preamble = ''
 have_marker = False
