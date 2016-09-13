@@ -30,6 +30,9 @@ typedef enum ErrorCause {
     ErrorCauseDownloadFailedDiskFull,
     ErrorCauseVerificationFailed,
     ErrorCauseWriteFailed,
+    ErrorCauseNot64Bit,
+    ErrorCauseBitLocker,
+    ErrorCauseNotNTFS,
     ErrorCauseNone
 } ErrorCause_t;
 

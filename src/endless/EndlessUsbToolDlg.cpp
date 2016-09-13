@@ -385,6 +385,9 @@ static LPCTSTR ErrorCauseToStr(ErrorCause_t errorCause)
         TOSTR(ErrorCauseDownloadFailedDiskFull);
         TOSTR(ErrorCauseVerificationFailed);
         TOSTR(ErrorCauseWriteFailed);
+        TOSTR(ErrorCauseNot64Bit);
+        TOSTR(ErrorCauseBitLocker);
+        TOSTR(ErrorCauseNotNTFS);
         TOSTR(ErrorCauseNone);
         default: return _T("Error Cause Unknown");
     }
@@ -602,8 +605,14 @@ void CEndlessUsbToolDlg::OnDocumentComplete(LPDISPATCH pDisp, LPCTSTR szUrl)
 	// TODO: Leave the "Dual boot" button enabled, on click check the below and move to proper error page
 	BOOL x64BitSupported = Has64BitSupport() ? TRUE : FALSE;
 	uprintf("HW processor has 64 bit support: %s", x64BitSupported ? "YES" : "NO");
+	if (!x64BitSupported)
+		Analytics::instance()->exceptionTracking(ErrorCauseToStr(ErrorCauseNot64Bit), FALSE);
+
 	BOOL isBitLockerEnabled = IsBitlockedDrive(systemDriveLetter);
 	uprintf("Is bitlocker enabled on '%ls': %s", systemDriveLetter, isBitLockerEnabled ? "YES" : "NO");
+	if (isBitLockerEnabled)
+		Analytics::instance()->exceptionTracking(ErrorCauseToStr(ErrorCauseBitLocker), FALSE);
+
 	CallJavascript(_T(JS_ENABLE_BUTTON), CComVariant(HTML_BUTTON_ID(_T(ELEMENT_DUALBOOT_INSTALL_BUTTON))), CComVariant(x64BitSupported && !isBitLockerEnabled));
 
 	return;
@@ -1610,6 +1619,9 @@ void CEndlessUsbToolDlg::ErrorOccured(ErrorCause_t errorCause)
     case ErrorCause_t::ErrorCauseCanceled:
     case ErrorCause_t::ErrorCauseGeneric:
     case ErrorCause_t::ErrorCauseWriteFailed:
+    case ErrorCause_t::ErrorCauseNot64Bit:
+    case ErrorCause_t::ErrorCauseBitLocker:
+    case ErrorCause_t::ErrorCauseNotNTFS:
         buttonMsgId = MSG_328;
         suggestionMsgId = MSG_325;
         break;
@@ -4600,7 +4612,7 @@ DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 	// Verify that this is an NTFS C:\ partition
 	IFFALSE_GOTOERROR(GetVolumeInformation(systemDriveLetter, NULL, 0, NULL, NULL, NULL, fileSystemType, MAX_PATH + 1) != 0, "Error on GetVolumeInformation.");
 	uprintf("File system type '%ls'", fileSystemType);
-	IFFALSE_GOTOERROR(0 == wcscmp(fileSystemType, L"NTFS"), "File system type is not NTFS");
+	IFFALSE_GOTO(0 == wcscmp(fileSystemType, L"NTFS"), "File system type is not NTFS", not_ntfs);
 
 	// TODO: Verify that the C:\ drive is not encrypted with BitLocker or similar
 
@@ -4647,6 +4659,9 @@ DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 	UpdateProgress(OP_SETUP_DUALBOOT, DB_PROGRESS_MBR_OR_EFI_SETUP);
 
 	goto done;
+
+not_ntfs:
+    dlg->m_lastErrorCause = ErrorCause_t::ErrorCauseNotNTFS;
 
 error:
 	uprintf("SetupDualBoot exited with error.");
