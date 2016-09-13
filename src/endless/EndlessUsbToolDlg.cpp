@@ -178,7 +178,8 @@ DWORD usbDevicesCount;
 //Thank You page elements
 #define ELEMENT_CLOSE_BUTTON            "CloseAppButton"
 #define ELEMENT_INSTALLER_VERSION       "InstallerVersionValue"
-#define ELEMENT_INSTALLER_LANGUAGE      "InstallerVersionLanguage"
+#define ELEMENT_INSTALLER_LANGUAGE_ROW  "InstallerLanguageRow"
+#define ELEMENT_INSTALLER_LANGUAGE      "InstallerLanguageValue"
 #define ELEMENT_INSTALLER_CONTENT       "InstallerContentValue"
 #define ELEMENT_THANKYOU_MESSAGE        "ThankYouMessage"
 #define ELEMENT_USBBOOT_HOWTO           "UsbBootHowToLink"
@@ -2582,6 +2583,7 @@ HRESULT CEndlessUsbToolDlg::OnSelectFileNextClicked(IHTMLElement* pElement)
         SetElementText(_T(ELEMENT_THANKYOU_MESSAGE), CComBSTR(finalMessageStr));
 
         SetElementText(_T(ELEMENT_INSTALLER_VERSION), CComBSTR(version));
+        CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_INSTALLER_LANGUAGE_ROW), CComVariant(personality != PERSONALITY_BASE));
         SetElementText(_T(ELEMENT_INSTALLER_LANGUAGE), CComBSTR(imageLanguage));
         CString contentStr  = UTF8ToCString(lmprintf(MSG_319, imageType, SizeToHumanReadable(size, FALSE, use_fake_units)));
         SetElementText(_T(ELEMENT_INSTALLER_CONTENT), CComBSTR(contentStr));
