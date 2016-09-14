@@ -4682,7 +4682,7 @@ DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 	CHECK_IF_CANCELED;
 
 	if (IsLegacyBIOSBoot()) {
-		IFFALSE_GOTOERROR(WriteMBRAndSBRToWinDrive(systemDriveLetter, bootFilesPath, endlessFilesPath), "Error on WriteMBRAndSBRToWinDrive");
+		IFFALSE_GOTOERROR(WriteMBRAndSBRToWinDrive(dlg, systemDriveLetter, bootFilesPath, endlessFilesPath), "Error on WriteMBRAndSBRToWinDrive");
 	} else {
 		IFFALSE_GOTOERROR(SetupEndlessEFI(systemDriveLetter, bootFilesPath), "Error on SetupEndlessEFI");
 	}
@@ -4806,7 +4806,7 @@ bool CEndlessUsbToolDlg::IsWindowsMBR(FILE* fpDrive, const CString &TargetName)
 	return FALSE;
 }
 
-bool CEndlessUsbToolDlg::WriteMBRAndSBRToWinDrive(const CString &systemDriveLetter, const CString &bootFilesPath, const CString &endlessFilesPath)
+bool CEndlessUsbToolDlg::WriteMBRAndSBRToWinDrive(CEndlessUsbToolDlg *dlg, const CString &systemDriveLetter, const CString &bootFilesPath, const CString &endlessFilesPath)
 {
 	FUNCTION_ENTER;
 
@@ -4831,8 +4831,13 @@ bool CEndlessUsbToolDlg::WriteMBRAndSBRToWinDrive(const CString &systemDriveLett
 	hPhysical = GetPhysicalFromDriveLetter(systemDriveLetter);
 	IFFALSE_GOTOERROR(hPhysical != INVALID_HANDLE_VALUE, "Error on acquiring disk handle.");
 
-	// Make sure there already is a MBR on this disk
-	IFFALSE_GOTOERROR(AnalyzeMBR(hPhysical, "Drive"), "Error: no MBR detected on drive. Returning so we don't break something else.");
+	// Make sure there already is a Windows MBR on this disk
+	fake_fd._handle = (char*)hPhysical;
+	if (!IsWindowsMBR(fp, systemDriveLetter)) {
+		uprintf("Error: no Windows MBR detected, unsupported configuration.");
+		dlg->m_lastErrorCause = ErrorCause_t::ErrorCauseNonWindowsMBR;
+		goto error;
+	}
 
 	// get disk geometry information
 	result = DeviceIoControl(hPhysical, IOCTL_DISK_GET_DRIVE_GEOMETRY_EX, NULL, 0, geometry, sizeof(geometry), &size, NULL);

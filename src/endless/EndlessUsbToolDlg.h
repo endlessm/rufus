@@ -302,7 +302,7 @@ private:
 	static bool CopyMultipleItems(const CString &fromPath, const CString &toPath);
 	static bool IsLegacyBIOSBoot();
 	static bool IsWindowsMBR(FILE* fpDrive, const CString &TargetName);
-	static bool WriteMBRAndSBRToWinDrive(const CString &systemDriveLetter, const CString &bootFilesPath, const CString &endlessFilesPath);
+	static bool WriteMBRAndSBRToWinDrive(CEndlessUsbToolDlg *dlg, const CString &systemDriveLetter, const CString &bootFilesPath, const CString &endlessFilesPath);
 	static bool SetupEndlessEFI(const CString &systemDriveLetter, const CString &bootFilesPath);
 	static HANDLE GetPhysicalFromDriveLetter(const CString &driveLetter);
 
