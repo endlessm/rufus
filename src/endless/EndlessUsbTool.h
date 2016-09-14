@@ -10,6 +10,7 @@
 
 #include "resource.h"		// main symbols
 
+#define ENDLESS_INSTALLER_TEXT L"EndlessInstaller"
 
 // CEndlessUsbToolApp:
 // See EndlessUsbTool.cpp for the implementation of this class
