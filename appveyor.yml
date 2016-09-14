@@ -1,6 +1,3 @@
-artifacts:
-  - path: $(platform)\$(configuration)\EndlessUsbTool.exe
-
 matrix:
   fast_finish: true
 
@@ -13,3 +10,14 @@ platform:
 configuration:
   - Debug
   - Release
+
+install:
+  - curl -L -o upx.zip https://github.com/upx/upx/releases/download/v3.91/upx391w.zip
+  - 7z e upx.zip *.exe -r
+
+after_build:
+  - 7z a endless-installer-v%APPVEYOR_BUILD_VERSION%.zip %PLATFORM%\%CONFIGURATION%\EndlessUsbTool.exe
+  - 7z a endless-installer-v%APPVEYOR_BUILD_VERSION%.zip %PLATFORM%\%CONFIGURATION%\EndlessUsbTool.pdb
+  - upx.exe -9 -o endless-installer-v%APPVEYOR_BUILD_VERSION%.exe %PLATFORM%\%CONFIGURATION%\EndlessUsbTool.exe
+  - 7z a endless-installer-v%APPVEYOR_BUILD_VERSION%.zip %APPVEYOR_BUILD_FOLDER%\endless-installer-v%APPVEYOR_BUILD_VERSION%.exe
+  - appveyor PushArtifact endless-installer-v%APPVEYOR_BUILD_VERSION%.zip
