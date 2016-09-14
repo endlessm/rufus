@@ -4774,6 +4774,32 @@ bool CEndlessUsbToolDlg::IsLegacyBIOSBoot()
 	return result == 0 && GetLastError() == ERROR_INVALID_FUNCTION;
 }
 
+// Returns TRUE if the drive has a Windows MBR, FALSE otherwise
+bool CEndlessUsbToolDlg::IsWindowsMBR(FILE* fpDrive, const CString &TargetName)
+{
+	FUNCTION_ENTER;
+
+    const struct {int (*fn)(FILE *fp); char* str;} windows_mbr[] = {
+	    { is_2000_mbr, "Windows 2000/XP/2003" },
+	    { is_vista_mbr, "Windows Vista" },
+	    { is_win7_mbr, "Windows 7" },
+    };
+
+	int i;
+
+	set_bytes_per_sector(SelectedDrive.Geometry.BytesPerSector);
+
+	for (i=0; i < ARRAYSIZE(windows_mbr); i++) {
+		if (windows_mbr[i].fn(fpDrive)) {
+			uprintf("%ls has a %s MBR\n", TargetName, windows_mbr[i].str);
+			return TRUE;
+		}
+	}
+
+	uprintf("%ls has a non-Windows MBR\n", TargetName);
+	return FALSE;
+}
+
 bool CEndlessUsbToolDlg::WriteMBRAndSBRToWinDrive(const CString &systemDriveLetter, const CString &bootFilesPath, const CString &endlessFilesPath)
 {
 	FUNCTION_ENTER;
