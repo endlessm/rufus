@@ -4144,6 +4144,7 @@ void CEndlessUsbToolDlg::JSONDownloadFailed()
 #define NTFS_BOOT_IMG_FILE				L"ntfs\\boot.img"
 #define NTFS_CORE_IMG_FILE				L"ntfs\\core.img"
 #define ENDLESS_BOOT_EFI_FILE			"bootx64.efi"
+#define BACKUP_BOOTTRACK_IMG			L"boottrack.img"
 
 /* The offset of BOOT_DRIVE_CHECK.  */
 #define GRUB_BOOT_MACHINE_DRIVE_CHECK	0x66
@@ -4599,15 +4600,8 @@ bool CEndlessUsbToolDlg::WriteMBRAndSBRToUSB(HANDLE hPhysical, const CString &bo
 		uprintf("Failed to notify system about disk properties update: %s\n", WindowsErrorString());
 
 error:
-	if (bootImgFile != NULL) {
-		fclose(bootImgFile);
-		bootImgFile = NULL;
-	}
-
-	if (coreImgFile != NULL) {
-		fclose(coreImgFile);
-		coreImgFile = NULL;
-	}
+	safe_closefile(bootImgFile);
+	safe_closefile(coreImgFile);
 
 	if (endlessSBRData != NULL) {
 		safe_free(endlessSBRData);
@@ -4682,7 +4676,7 @@ DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 	CHECK_IF_CANCELED;
 
 	if (IsLegacyBIOSBoot()) {
-		IFFALSE_GOTOERROR(WriteMBRAndSBRToWinDrive(systemDriveLetter, bootFilesPath), "Error on WriteMBRAndSBRToWinDrive");
+		IFFALSE_GOTOERROR(WriteMBRAndSBRToWinDrive(systemDriveLetter, bootFilesPath, endlessFilesPath), "Error on WriteMBRAndSBRToWinDrive");
 	} else {
 		IFFALSE_GOTOERROR(SetupEndlessEFI(systemDriveLetter, bootFilesPath), "Error on SetupEndlessEFI");
 	}
@@ -4780,7 +4774,7 @@ bool CEndlessUsbToolDlg::IsLegacyBIOSBoot()
 	return result == 0 && GetLastError() == ERROR_INVALID_FUNCTION;
 }
 
-bool CEndlessUsbToolDlg::WriteMBRAndSBRToWinDrive(const CString &systemDriveLetter, const CString &bootFilesPath)
+bool CEndlessUsbToolDlg::WriteMBRAndSBRToWinDrive(const CString &systemDriveLetter, const CString &bootFilesPath, const CString &endlessFilesPath)
 {
 	FUNCTION_ENTER;
 
@@ -4793,12 +4787,13 @@ bool CEndlessUsbToolDlg::WriteMBRAndSBRToWinDrive(const CString &systemDriveLett
 	DWORD size;
 	BOOL result;
 	CString coreImgFilePath = bootFilesPath + NTFS_CORE_IMG_FILE;
-	FILE *bootImgFile = NULL;
+	FILE *bootImgFile = NULL, *boottrackImgFile = NULL;
 	FAKE_FD fake_fd = { 0 };
 	FILE* fp = (FILE*)&fake_fd;
 	CString bootImgFilePath = bootFilesPath + NTFS_BOOT_IMG_FILE;
 	unsigned char endlessMBRData[MAX_BOOT_IMG_FILE_SIZE];
 	size_t countRead;
+	unsigned char *boottrackData = NULL;	
 
 	// Get system disk handle
 	hPhysical = GetPhysicalFromDriveLetter(systemDriveLetter);
@@ -4819,6 +4814,21 @@ bool CEndlessUsbToolDlg::WriteMBRAndSBRToWinDrive(const CString &systemDriveLett
 	IFFALSE_GOTOERROR(result != 0 && size > 0, "Error on querying disk layout.");
 	IFFALSE_GOTOERROR(DriveLayout->PartitionCount > 0, "We don't have any partitions?");
 	uprintf("BytesPerSector=%d, PartitionEntry[0].StartingOffset=%I64i", DiskGeometry->Geometry.BytesPerSector, DriveLayout->PartitionEntry[0].StartingOffset.QuadPart);
+
+	// preserve boot track before writing anything to disk
+	// Jira https://movial.atlassian.net/browse/EOIFT-169
+	IFFALSE_GOTOERROR(0 == _wfopen_s(&boottrackImgFile, endlessFilesPath + BACKUP_BOOTTRACK_IMG, L"wb"), "Error opening boottrack.img file");
+	boottrackData = (unsigned char*)malloc(DiskGeometry->Geometry.BytesPerSector);
+	LONGLONG boottrackNrSectors = DriveLayout->PartitionEntry[0].StartingOffset.QuadPart / DiskGeometry->Geometry.BytesPerSector;
+	uprintf("Trying to save %I64i sectors in file %ls", boottrackNrSectors, endlessFilesPath + BACKUP_BOOTTRACK_IMG);
+	for (LONGLONG i = 0; i < boottrackNrSectors; i++) {
+		int64_t result = read_sectors(hPhysical, DiskGeometry->Geometry.BytesPerSector, i, 1, boottrackData);
+		IFFALSE_GOTOERROR(result == DiskGeometry->Geometry.BytesPerSector, "Error reading from disk.");
+		IFFALSE_GOTOERROR(fwrite(boottrackData, 1, DiskGeometry->Geometry.BytesPerSector, boottrackImgFile) == DiskGeometry->Geometry.BytesPerSector, "Error writing data to boottrack.img.");
+	}
+	safe_closefile(boottrackImgFile);
+
+	// Write core.img
 	IFFALSE_GOTOERROR(grub_util_bios_setup(coreImgFilePath, hPhysical, DriveLayout->PartitionEntry[0].StartingOffset.QuadPart / DiskGeometry->Geometry.BytesPerSector), "Error writing SBR to disk");
 
 	// Load boot.img from file
@@ -4842,11 +4852,10 @@ bool CEndlessUsbToolDlg::WriteMBRAndSBRToWinDrive(const CString &systemDriveLett
 
 error:
 	safe_closehandle(hPhysical);
+	safe_closefile(bootImgFile);
+	safe_closefile(boottrackImgFile);
 
-	if (bootImgFile != NULL) {
-		fclose(bootImgFile);
-		bootImgFile = NULL;
-	}
+	if (boottrackData != NULL) safe_free(boottrackData);
 
 	return retResult;
 }
