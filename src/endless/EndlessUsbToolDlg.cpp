@@ -401,6 +401,7 @@ static LPCTSTR ErrorCauseToStr(ErrorCause_t errorCause)
         TOSTR(ErrorCauseNot64Bit);
         TOSTR(ErrorCauseBitLocker);
         TOSTR(ErrorCauseNotNTFS);
+        TOSTR(ErrorCauseNonWindowsMBR);
         TOSTR(ErrorCauseNone);
         default: return _T("Error Cause Unknown");
     }
@@ -1651,6 +1652,11 @@ void CEndlessUsbToolDlg::ErrorOccured(ErrorCause_t errorCause)
         buttonMsgId = MSG_328;
         // TODO: headline should be MSG_352, with system drive letter
         suggestionMsgId = MSG_353;
+        break;
+    case ErrorCause_t::ErrorCauseNonWindowsMBR:
+        buttonMsgId = MSG_328;
+        // TODO: headline should be MSG_359
+        suggestionMsgId = MSG_360;
         break;
     default:
         uprintf("Unhandled error cause %ls(%d)", ErrorCauseToStr(errorCause), errorCause);

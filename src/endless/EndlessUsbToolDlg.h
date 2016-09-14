@@ -33,6 +33,7 @@ typedef enum ErrorCause {
     ErrorCauseNot64Bit,
     ErrorCauseBitLocker,
     ErrorCauseNotNTFS,
+    ErrorCauseNonWindowsMBR,
     ErrorCauseNone
 } ErrorCause_t;
 
