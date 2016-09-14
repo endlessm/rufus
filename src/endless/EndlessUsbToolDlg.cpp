@@ -401,6 +401,7 @@ static LPCTSTR ErrorCauseToStr(ErrorCause_t errorCause)
         TOSTR(ErrorCauseNot64Bit);
         TOSTR(ErrorCauseBitLocker);
         TOSTR(ErrorCauseNotNTFS);
+        TOSTR(ErrorCauseNonWindowsMBR);
         TOSTR(ErrorCauseNone);
         default: return _T("Error Cause Unknown");
     }
@@ -1651,6 +1652,11 @@ void CEndlessUsbToolDlg::ErrorOccured(ErrorCause_t errorCause)
         buttonMsgId = MSG_328;
         // TODO: headline should be MSG_352, with system drive letter
         suggestionMsgId = MSG_353;
+        break;
+    case ErrorCause_t::ErrorCauseNonWindowsMBR:
+        buttonMsgId = MSG_328;
+        // TODO: headline should be MSG_359
+        suggestionMsgId = MSG_360;
         break;
     default:
         uprintf("Unhandled error cause %ls(%d)", ErrorCauseToStr(errorCause), errorCause);
@@ -4676,7 +4682,7 @@ DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 	CHECK_IF_CANCELED;
 
 	if (IsLegacyBIOSBoot()) {
-		IFFALSE_GOTOERROR(WriteMBRAndSBRToWinDrive(systemDriveLetter, bootFilesPath, endlessFilesPath), "Error on WriteMBRAndSBRToWinDrive");
+		IFFALSE_GOTOERROR(WriteMBRAndSBRToWinDrive(dlg, systemDriveLetter, bootFilesPath, endlessFilesPath), "Error on WriteMBRAndSBRToWinDrive");
 	} else {
 		IFFALSE_GOTOERROR(SetupEndlessEFI(systemDriveLetter, bootFilesPath), "Error on SetupEndlessEFI");
 	}
@@ -4774,7 +4780,33 @@ bool CEndlessUsbToolDlg::IsLegacyBIOSBoot()
 	return result == 0 && GetLastError() == ERROR_INVALID_FUNCTION;
 }
 
-bool CEndlessUsbToolDlg::WriteMBRAndSBRToWinDrive(const CString &systemDriveLetter, const CString &bootFilesPath, const CString &endlessFilesPath)
+// Returns TRUE if the drive has a Windows MBR, FALSE otherwise
+bool CEndlessUsbToolDlg::IsWindowsMBR(FILE* fpDrive, const CString &TargetName)
+{
+	FUNCTION_ENTER;
+
+    const struct {int (*fn)(FILE *fp); char* str;} windows_mbr[] = {
+	    { is_2000_mbr, "Windows 2000/XP/2003" },
+	    { is_vista_mbr, "Windows Vista" },
+	    { is_win7_mbr, "Windows 7" },
+    };
+
+	int i;
+
+	set_bytes_per_sector(SelectedDrive.Geometry.BytesPerSector);
+
+	for (i=0; i < ARRAYSIZE(windows_mbr); i++) {
+		if (windows_mbr[i].fn(fpDrive)) {
+			uprintf("%ls has a %s MBR\n", TargetName, windows_mbr[i].str);
+			return TRUE;
+		}
+	}
+
+	uprintf("%ls has a non-Windows MBR\n", TargetName);
+	return FALSE;
+}
+
+bool CEndlessUsbToolDlg::WriteMBRAndSBRToWinDrive(CEndlessUsbToolDlg *dlg, const CString &systemDriveLetter, const CString &bootFilesPath, const CString &endlessFilesPath)
 {
 	FUNCTION_ENTER;
 
@@ -4799,8 +4831,13 @@ bool CEndlessUsbToolDlg::WriteMBRAndSBRToWinDrive(const CString &systemDriveLett
 	hPhysical = GetPhysicalFromDriveLetter(systemDriveLetter);
 	IFFALSE_GOTOERROR(hPhysical != INVALID_HANDLE_VALUE, "Error on acquiring disk handle.");
 
-	// Make sure there already is a MBR on this disk
-	IFFALSE_GOTOERROR(AnalyzeMBR(hPhysical, "Drive"), "Error: no MBR detected on drive. Returning so we don't break something else.");
+	// Make sure there already is a Windows MBR on this disk
+	fake_fd._handle = (char*)hPhysical;
+	if (!IsWindowsMBR(fp, systemDriveLetter)) {
+		uprintf("Error: no Windows MBR detected, unsupported configuration.");
+		dlg->m_lastErrorCause = ErrorCause_t::ErrorCauseNonWindowsMBR;
+		goto error;
+	}
 
 	// get disk geometry information
 	result = DeviceIoControl(hPhysical, IOCTL_DISK_GET_DRIVE_GEOMETRY_EX, NULL, 0, geometry, sizeof(geometry), &size, NULL);
