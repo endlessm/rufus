@@ -19,6 +19,8 @@
  /* Disable: warning C4018: signed/unsigned mismatch */
 #pragma warning(disable:4018)
 
+#include "reed_solomon.h"
+
 
 #include <stdio.h>
 #include <string.h>
@@ -28,10 +30,6 @@
 #define grub_memcpy memcpy
 
 #include <assert.h>
-
-typedef unsigned int grub_size_t;
-typedef unsigned char grub_uint8_t;
-typedef long grub_ssize_t;
 
 #define SECTOR_SIZE 512
 #define MAX_BLOCK_SIZE (200 * SECTOR_SIZE)
