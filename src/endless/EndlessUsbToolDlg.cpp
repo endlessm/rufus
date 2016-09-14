@@ -4142,6 +4142,7 @@ void CEndlessUsbToolDlg::JSONDownloadFailed()
 #define MAX_BOOT_IMG_FILE_SIZE			446
 #define NTFS_CORE_IMG_FILE				L"ntfs\\core.img"
 #define ENDLESS_BOOT_EFI_FILE			"bootx64.efi"
+#define BACKUP_BOOTTRACK_IMG			L"boottrack.img"
 
 #define CHECK_IF_CANCELED IFFALSE_GOTOERROR(dlg->m_cancelImageUnpack == 0 && WaitForSingleObject((HANDLE)dlg->m_cancelOperationEvent, 0) != WAIT_OBJECT_0, "Operation has been canceled")
 
@@ -4594,15 +4595,8 @@ bool CEndlessUsbToolDlg::WriteMBRAndSBRToUSB(HANDLE hPhysical, const CString &bo
 		uprintf("Failed to notify system about disk properties update: %s\n", WindowsErrorString());
 
 error:
-	if (bootImgFile != NULL) {
-		fclose(bootImgFile);
-		bootImgFile = NULL;
-	}
-
-	if (coreImgFile != NULL) {
-		fclose(coreImgFile);
-		coreImgFile = NULL;
-	}
+	safe_closefile(bootImgFile);
+	safe_closefile(coreImgFile);
 
 	if (endlessSBRData != NULL) {
 		safe_free(endlessSBRData);
@@ -4680,7 +4674,7 @@ DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 	CHECK_IF_CANCELED;
 
 	if (IsLegacyBIOSBoot()) {
-		IFFALSE_GOTOERROR(WriteMBRAndSBRToWinDrive(systemDriveLetter, bootFilesPath), "Error on WriteMBRAndSBRToWinDrive");
+		IFFALSE_GOTOERROR(WriteMBRAndSBRToWinDrive(systemDriveLetter, bootFilesPath, endlessFilesPath), "Error on WriteMBRAndSBRToWinDrive");
 	} else {
 		IFFALSE_GOTOERROR(SetupEndlessEFI(systemDriveLetter, bootFilesPath), "Error on SetupEndlessEFI");
 	}
@@ -4778,7 +4772,7 @@ bool CEndlessUsbToolDlg::IsLegacyBIOSBoot()
 	return result == 0 && GetLastError() == ERROR_INVALID_FUNCTION;
 }
 
-bool CEndlessUsbToolDlg::WriteMBRAndSBRToWinDrive(const CString &systemDriveLetter, const CString &bootFilesPath)
+bool CEndlessUsbToolDlg::WriteMBRAndSBRToWinDrive(const CString &systemDriveLetter, const CString &bootFilesPath, const CString &endlessFilesPath)
 {
 	FUNCTION_ENTER;
 
@@ -4791,11 +4785,12 @@ bool CEndlessUsbToolDlg::WriteMBRAndSBRToWinDrive(const CString &systemDriveLett
 	DWORD size;
 	BOOL result;
 	CString coreImgFilePath = bootFilesPath + NTFS_CORE_IMG_FILE;
-	FILE *coreImgFile = NULL;
+	FILE *coreImgFile = NULL, *boottrackImgFile = NULL;
 	FAKE_FD fake_fd = { 0 };
 	FILE* fp = (FILE*)&fake_fd;
 	size_t countRead, coreImgSize;
 	unsigned char *endlessSBRData = NULL;
+	unsigned char *boottrackData = NULL;
 
 	// Get system disk handle
 	hPhysical = GetPhysicalFromDriveLetter(systemDriveLetter);
@@ -4825,6 +4820,19 @@ bool CEndlessUsbToolDlg::WriteMBRAndSBRToWinDrive(const CString &systemDriveLett
 		DiskGeometry->Geometry.BytesPerSector, coreImgSize, DriveLayout->PartitionEntry[0].StartingOffset.QuadPart);
 	IFFALSE_GOTOERROR(DiskGeometry->Geometry.BytesPerSector + coreImgSize < DriveLayout->PartitionEntry[0].StartingOffset.QuadPart, "Error: SBR found in core.img is too big.");
 
+	// preserve boot track before writing anything to disk
+	// Jira https://movial.atlassian.net/browse/EOIFT-169
+	IFFALSE_GOTOERROR(0 == _wfopen_s(&boottrackImgFile, endlessFilesPath + BACKUP_BOOTTRACK_IMG, L"wb"), "Error opening boottrack.img file");
+	boottrackData = (unsigned char*)malloc(DiskGeometry->Geometry.BytesPerSector);
+	LONGLONG boottrackNrSectors = DriveLayout->PartitionEntry[0].StartingOffset.QuadPart / DiskGeometry->Geometry.BytesPerSector;
+	uprintf("Trying to save %I64i sectors in file %ls", boottrackNrSectors, endlessFilesPath + BACKUP_BOOTTRACK_IMG);
+	for (LONGLONG i = 0; i < boottrackNrSectors; i++) {
+		int64_t result = read_sectors(hPhysical, DiskGeometry->Geometry.BytesPerSector, i, 1, boottrackData);
+		IFFALSE_GOTOERROR(result == DiskGeometry->Geometry.BytesPerSector, "Error reading from disk.");
+		IFFALSE_GOTOERROR(fwrite(boottrackData, 1, DiskGeometry->Geometry.BytesPerSector, boottrackImgFile) == DiskGeometry->Geometry.BytesPerSector, "Error writing data to boottrack.img.");
+	}
+	safe_closefile(boottrackImgFile);
+
 	// I know it's hardcoded data but better safe than sorry
 	IFFALSE_GOTOERROR(sizeof(mbr_grub2_0x0) <= MAX_BOOT_IMG_FILE_SIZE, "Size of grub2 boot.img is not what is expected.");
 
@@ -4847,11 +4855,10 @@ bool CEndlessUsbToolDlg::WriteMBRAndSBRToWinDrive(const CString &systemDriveLett
 
 error:
 	safe_closehandle(hPhysical);
+	safe_closefile(coreImgFile);
+	safe_closefile(boottrackImgFile);
 
-	if (coreImgFile != NULL) {
-		fclose(coreImgFile);
-		coreImgFile = NULL;
-	}
+	if (boottrackData != NULL) safe_free(boottrackData);
 
 	return retResult;
 }
