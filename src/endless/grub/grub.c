@@ -253,11 +253,6 @@ save_blocklists(grub_disk_addr_t sector, unsigned offset, unsigned length,
             return;
     }
 
-    /* we hit this, bl.currentsegment, last_length, first_sector are junk:
-    current_segment	52428	unsigned short
-    last_length	52428	unsigned short
-    first_sector	14757395258967641292	unsigned __int64
-    */
     if (offset != 0 || bl->last_length != 0)
         PRINT_ERROR_MSG("non-sector-aligned data is found in the core file");
 
