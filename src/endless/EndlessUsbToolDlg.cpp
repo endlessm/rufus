@@ -3895,7 +3895,7 @@ void CEndlessUsbToolDlg::InitLogging()
     // Create file name
     CTime time = CTime::GetCurrentTime();
     CString s = time.Format(_T("%Y%m%d_%H_%M_%S"));
-    CString fileName(mainWindowTitle);
+    CString fileName(ENDLESS_INSTALLER_TEXT);
     fileName.Replace(L" ", L"");
     fileName += s;
     fileName += L".log";
