@@ -31,6 +31,8 @@ extern "C" {
 
 #include "usb.h"
 #include "mbr_grub2.h"
+#include "grub/grub.h"
+
 
 // RADU: try to remove the need for all of these
 OPENED_LIBRARIES_VARS;
@@ -307,7 +309,6 @@ enum endless_action_type {
 const wchar_t* mainWindowTitle = L"Endless USB Creator";
 
 #define ALL_FILES					L"*.*"
-
 
 //#define HARDCODED_PATH L"release/3.0.2/eos-amd64-amd64/base/eos-eos3.0-amd64-amd64.160827-104530.base"
 #define HARDCODED_PATH L"eos-amd64-amd64/eos3.0/base/160906-030224/eos-eos3.0-amd64-amd64.160906-030224.base"
@@ -4140,9 +4141,13 @@ void CEndlessUsbToolDlg::JSONDownloadFailed()
 #define LIVE_BOOT_IMG_FILE				L"live\\boot.img"
 #define LIVE_CORE_IMG_FILE				L"live\\core.img"
 #define MAX_BOOT_IMG_FILE_SIZE			446
+#define NTFS_BOOT_IMG_FILE				L"ntfs\\boot.img"
 #define NTFS_CORE_IMG_FILE				L"ntfs\\core.img"
 #define ENDLESS_BOOT_EFI_FILE			"bootx64.efi"
 #define BACKUP_BOOTTRACK_IMG			L"boottrack.img"
+
+/* The offset of BOOT_DRIVE_CHECK.  */
+#define GRUB_BOOT_MACHINE_DRIVE_CHECK	0x66
 
 #define CHECK_IF_CANCELED IFFALSE_GOTOERROR(dlg->m_cancelImageUnpack == 0 && WaitForSingleObject((HANDLE)dlg->m_cancelOperationEvent, 0) != WAIT_OBJECT_0, "Operation has been canceled")
 
@@ -4628,7 +4633,6 @@ DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 	CString bootFilesPath = GET_LOCAL_PATH(CString(BOOT_COMPONENTS_FOLDER)) + L"\\";
 	wchar_t fileSystemType[MAX_PATH + 1];
 
-	// TODO: Should we detect what the system partition is or just assume it's on C:\?
 	systemDriveLetter = GetSystemDrive();
 	endlessFilesPath = systemDriveLetter + PATH_ENDLESS_SUBDIRECTORY;
 	endlessImgPath = endlessFilesPath + ENDLESS_IMG_FILE_NAME;
@@ -4637,8 +4641,6 @@ DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 	IFFALSE_GOTOERROR(GetVolumeInformation(systemDriveLetter, NULL, 0, NULL, NULL, NULL, fileSystemType, MAX_PATH + 1) != 0, "Error on GetVolumeInformation.");
 	uprintf("File system type '%ls'", fileSystemType);
 	IFFALSE_GOTO(0 == wcscmp(fileSystemType, L"NTFS"), "File system type is not NTFS", not_ntfs);
-
-	// TODO: Verify that the C:\ drive is not encrypted with BitLocker or similar
 
 	UpdateProgress(OP_SETUP_DUALBOOT, DB_PROGRESS_CHECK_PARTITION);
 
@@ -4785,12 +4787,13 @@ bool CEndlessUsbToolDlg::WriteMBRAndSBRToWinDrive(const CString &systemDriveLett
 	DWORD size;
 	BOOL result;
 	CString coreImgFilePath = bootFilesPath + NTFS_CORE_IMG_FILE;
-	FILE *coreImgFile = NULL, *boottrackImgFile = NULL;
+	FILE *bootImgFile = NULL, *boottrackImgFile = NULL;
 	FAKE_FD fake_fd = { 0 };
 	FILE* fp = (FILE*)&fake_fd;
-	size_t countRead, coreImgSize;
-	unsigned char *endlessSBRData = NULL;
-	unsigned char *boottrackData = NULL;
+	CString bootImgFilePath = bootFilesPath + NTFS_BOOT_IMG_FILE;
+	unsigned char endlessMBRData[MAX_BOOT_IMG_FILE_SIZE];
+	size_t countRead;
+	unsigned char *boottrackData = NULL;	
 
 	// Get system disk handle
 	hPhysical = GetPhysicalFromDriveLetter(systemDriveLetter);
@@ -4804,21 +4807,13 @@ bool CEndlessUsbToolDlg::WriteMBRAndSBRToWinDrive(const CString &systemDriveLett
 	IFFALSE_GOTOERROR(result != 0 && size > 0, "Error on querying disk geometry.");
 	set_bytes_per_sector(DiskGeometry->Geometry.BytesPerSector);
 
-	// get size of core.img
-	IFFALSE_GOTOERROR(0 == _wfopen_s(&coreImgFile, coreImgFilePath, L"rb"), "Error opening core.img file");
-	fseek(coreImgFile, 0L, SEEK_END);
-	coreImgSize = ftell(coreImgFile);
-	rewind(coreImgFile);
-	uprintf("Size of SBR is %d bytes from %ls", coreImgSize, coreImgFilePath);
-
 	// Check that SBR will "fit" before writing to disk
 	// Jira issue: https://movial.atlassian.net/browse/EOIFT-158
+	// This will be done in grub_util_bios_setup, here just get the last available sector for writing the SBR between MBR and first partition
 	result = DeviceIoControl(hPhysical, IOCTL_DISK_GET_DRIVE_LAYOUT_EX, NULL, 0, layout, sizeof(layout), &size, NULL);
 	IFFALSE_GOTOERROR(result != 0 && size > 0, "Error on querying disk layout.");
 	IFFALSE_GOTOERROR(DriveLayout->PartitionCount > 0, "We don't have any partitions?");
-	uprintf("BytesPerSector=%d, coreImgSize=%d, PartitionEntry[0].StartingOffset=%I64i",
-		DiskGeometry->Geometry.BytesPerSector, coreImgSize, DriveLayout->PartitionEntry[0].StartingOffset.QuadPart);
-	IFFALSE_GOTOERROR(DiskGeometry->Geometry.BytesPerSector + coreImgSize < DriveLayout->PartitionEntry[0].StartingOffset.QuadPart, "Error: SBR found in core.img is too big.");
+	uprintf("BytesPerSector=%d, PartitionEntry[0].StartingOffset=%I64i", DiskGeometry->Geometry.BytesPerSector, DriveLayout->PartitionEntry[0].StartingOffset.QuadPart);
 
 	// preserve boot track before writing anything to disk
 	// Jira https://movial.atlassian.net/browse/EOIFT-169
@@ -4833,29 +4828,31 @@ bool CEndlessUsbToolDlg::WriteMBRAndSBRToWinDrive(const CString &systemDriveLett
 	}
 	safe_closefile(boottrackImgFile);
 
-	// I know it's hardcoded data but better safe than sorry
-	IFFALSE_GOTOERROR(sizeof(mbr_grub2_0x0) <= MAX_BOOT_IMG_FILE_SIZE, "Size of grub2 boot.img is not what is expected.");
+	// Write core.img
+	IFFALSE_GOTOERROR(grub_util_bios_setup(coreImgFilePath, hPhysical, DriveLayout->PartitionEntry[0].StartingOffset.QuadPart / DiskGeometry->Geometry.BytesPerSector), "Error writing SBR to disk");
 
-	// Write Rufus Grub2 MBR to disk
+	// Load boot.img from file
+	IFFALSE_GOTOERROR(0 == _wfopen_s(&bootImgFile, bootImgFilePath, L"rb"), "Error opening boot.img file");
+	countRead = fread(endlessMBRData, 1, MAX_BOOT_IMG_FILE_SIZE, bootImgFile);
+	IFFALSE_GOTOERROR(countRead == MAX_BOOT_IMG_FILE_SIZE, "Size of boot.img is not what is expected. Not enough data to read");
+
+	// Also, ensure we apply the workaround for stupid BIOSes: https://github.com/endlessm/grub/blob/master/util/setup.c#L384
+	// use boot.img from boot.zip rather than rufus - https://movial.atlassian.net/browse/EOIFT-170
+	unsigned char *boot_drive_check = (unsigned char *)(endlessMBRData + GRUB_BOOT_MACHINE_DRIVE_CHECK);
+	/* Replace the jmp (2 bytes) with double nop's.  */
+	boot_drive_check[0] = 0x90;
+	boot_drive_check[1] = 0x90;
+
+	// write boot.img to disk
 	fake_fd._handle = (char*)hPhysical;
-	IFFALSE_GOTOERROR(write_grub2_mbr(fp) != 0, "Error on write_grub2_mbr.");
-
-	// Write Endless SBR to disk
-	uprintf("Writing core.img at position %d", DiskGeometry->Geometry.BytesPerSector);
-	endlessSBRData = (unsigned char*)malloc(DiskGeometry->Geometry.BytesPerSector);
-	coreImgSize = 0;
-	while (!feof(coreImgFile) && coreImgSize < MBR_PART_LENGTH_BYTES) {
-		countRead = fread(endlessSBRData, 1, DiskGeometry->Geometry.BytesPerSector, coreImgFile);
-		IFFALSE_GOTOERROR(write_data(fp, DiskGeometry->Geometry.BytesPerSector + coreImgSize, endlessSBRData, countRead) != 0, "Error on write data with core.img contents.");
-		coreImgSize += countRead;
-		uprintf("Wrote %d bytes", coreImgSize);
-	}
+	set_bytes_per_sector(SelectedDrive.Geometry.BytesPerSector);
+	IFFALSE_GOTOERROR(write_data(fp, 0x0, endlessMBRData, MAX_BOOT_IMG_FILE_SIZE) != 0, "Error on write_data with boot.img contents.");
 
 	retResult = true;
 
 error:
 	safe_closehandle(hPhysical);
-	safe_closefile(coreImgFile);
+	safe_closefile(bootImgFile);
 	safe_closefile(boottrackImgFile);
 
 	if (boottrackData != NULL) safe_free(boottrackData);

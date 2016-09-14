@@ -16,6 +16,8 @@
 #define IFFALSE_CONTINUE(__CONDITION__, __ERRROR_MSG__) if(!(__CONDITION__)) { PRINT_ERROR_MSG(__ERRROR_MSG__); continue; }
 
 #define IFTRUE_GOTO(__CONDITION__, __ERRROR_MSG__, __LABEL__) if((__CONDITION__)) { PRINT_ERROR_MSG(__ERRROR_MSG__); goto __LABEL__; }
+#define IFTRUE_GOTOERROR(__CONDITION__, __ERRROR_MSG__) if((__CONDITION__)) { PRINT_ERROR_MSG(__ERRROR_MSG__); goto error; }
+
 
 #define safe_closefile(__file__) if (__file__ != NULL) { fclose(__file__); __file__ = NULL; }
 
@@ -119,9 +121,11 @@ static const uint8_t endless_public_key[] = {
     "-----END PGP PUBLIC KEY BLOCK-----\n"
 };
 
+#ifdef __cplusplus
 // methods for adding our entry in BIOS EFI
 bool EFIRequireNeededPrivileges();
 bool EFICreateNewEntry(const wchar_t *drive, wchar_t *path, wchar_t *desc);
+#endif
 
 
 // TODO: remove these
