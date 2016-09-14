@@ -22,11 +22,13 @@
 #include <inttypes.h>
 
 
+typedef uint8_t grub_uint8_t;
 typedef uint16_t grub_uint16_t;
 typedef uint32_t grub_uint32_t;
 typedef uint64_t grub_uint64_t;
 
-typedef grub_uint64_t grub_size_t;
+typedef size_t grub_size_t;
+typedef SSIZE_T grub_ssize_t;
 typedef int grub_err_t;
 
 /* The type for representing a disk block address.  */
