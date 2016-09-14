@@ -4146,7 +4146,15 @@ void CEndlessUsbToolDlg::JSONDownloadFailed()
 #define GRUB_BOOT_SUBDIRECTORY			L"grub"
 #define LIVE_BOOT_IMG_FILE				L"live\\boot.img"
 #define LIVE_CORE_IMG_FILE				L"live\\core.img"
-#define MAX_BOOT_IMG_FILE_SIZE			446
+
+/* The offset of a magic number used by Windows NT.  */
+#define MBR_WINDOWS_NT_MAGIC 0x1b8
+
+/* The offset of the start of the partition table.  */
+#define MBR_PART_START    0x1be
+
+/* The size of boot.img produced by the Endless OS image builder */
+#define MAX_BOOT_IMG_FILE_SIZE			MBR_PART_START
 #define NTFS_BOOT_IMG_FILE				L"ntfs\\boot.img"
 #define NTFS_CORE_IMG_FILE				L"ntfs\\core.img"
 #define ENDLESS_BOOT_EFI_FILE			"bootx64.efi"
@@ -4883,7 +4891,7 @@ bool CEndlessUsbToolDlg::WriteMBRAndSBRToWinDrive(CEndlessUsbToolDlg *dlg, const
 	// write boot.img to disk
 	fake_fd._handle = (char*)hPhysical;
 	set_bytes_per_sector(SelectedDrive.Geometry.BytesPerSector);
-	IFFALSE_GOTOERROR(write_data(fp, 0x0, endlessMBRData, MAX_BOOT_IMG_FILE_SIZE) != 0, "Error on write_data with boot.img contents.");
+	IFFALSE_GOTOERROR(write_data(fp, 0x0, endlessMBRData, MBR_WINDOWS_NT_MAGIC) != 0, "Error on write_data with boot.img contents.");
 
 	retResult = true;
 
