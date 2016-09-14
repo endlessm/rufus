@@ -4814,6 +4814,21 @@ bool CEndlessUsbToolDlg::IsWindowsMBR(FILE* fpDrive, const CString &TargetName)
 	return FALSE;
 }
 
+/* Handle nonstandard sector sizes (such as 4K) by writing
+the boot marker at every 512-2 bytes location */
+static int write_bootmark(FILE *fp, unsigned long ulBytesPerSector)
+{
+    unsigned char aucRef[] = { 0x55, 0xAA };
+    unsigned long pos = 0x1FE;
+
+    for (pos = 0x1FE; pos < ulBytesPerSector; pos += 0x200) {
+        if (!write_data(fp, pos, aucRef, sizeof(aucRef)))
+            return 0;
+    }
+    return 1;
+}
+
+
 bool CEndlessUsbToolDlg::WriteMBRAndSBRToWinDrive(CEndlessUsbToolDlg *dlg, const CString &systemDriveLetter, const CString &bootFilesPath, const CString &endlessFilesPath)
 {
 	FUNCTION_ENTER;
@@ -4892,6 +4907,7 @@ bool CEndlessUsbToolDlg::WriteMBRAndSBRToWinDrive(CEndlessUsbToolDlg *dlg, const
 	fake_fd._handle = (char*)hPhysical;
 	set_bytes_per_sector(SelectedDrive.Geometry.BytesPerSector);
 	IFFALSE_GOTOERROR(write_data(fp, 0x0, endlessMBRData, MBR_WINDOWS_NT_MAGIC) != 0, "Error on write_data with boot.img contents.");
+    IFFALSE_GOTOERROR(write_bootmark(fp, DiskGeometry->Geometry.BytesPerSector), "Error on write_bootmark");
 
 	retResult = true;
 
