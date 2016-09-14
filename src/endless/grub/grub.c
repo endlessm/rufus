@@ -280,7 +280,7 @@ int grub_util_bios_setup(const wchar_t *core_path, HANDLE dest_dev, grub_disk_ad
 	size_t countRead, core_size;
 	FILE *coreImgFile = NULL;
 
-	uprintf("grub_util_bios_setup called with '%ls' and last_available_sector=%I64i", core_path, last_available_sector);
+	uprintf("grub_util_bios_setup called with '%ls' and last_available_sector=%"PRIu64, core_path, last_available_sector);
 
 	// read data from core.img
 	IFFALSE_GOTOERROR(0 == _wfopen_s(&coreImgFile, core_path, L"rb"), "Error opening core.img file");
@@ -362,8 +362,8 @@ int grub_util_bios_setup(const wchar_t *core_path, HANDLE dest_dev, grub_disk_ad
 	uprintf("after pc_partition_map_embed nsec=%d", nsec);
 
 	grub_size_t no_rs_length;
-	no_rs_length = grub_get_unaligned16(core_img + GRUB_DISK_SECTOR_SIZE + GRUB_KERNEL_I386_PC_NO_REED_SOLOMON_LENGTH);
-	uprintf("no_rs_length=%I64u", no_rs_length);
+	no_rs_length = grub_target_to_host16(grub_get_unaligned16(core_img + GRUB_DISK_SECTOR_SIZE + GRUB_KERNEL_I386_PC_NO_REED_SOLOMON_LENGTH));
+	uprintf("no_rs_length=%"PRIu64, no_rs_length);
 
 	if (no_rs_length == 0xffff) uprintf("core.img version mismatch");
 
@@ -371,11 +371,11 @@ int grub_util_bios_setup(const wchar_t *core_path, HANDLE dest_dev, grub_disk_ad
 
 	uprintf("nsec*GRUB_DISK_SECTOR_SIZE = %u, core_size=%u", nsec * GRUB_DISK_SECTOR_SIZE, core_size);
 
-	grub_size_t redudancy = nsec * GRUB_DISK_SECTOR_SIZE - core_size;
+	grub_size_t redudancy = grub_host_to_target32(nsec * GRUB_DISK_SECTOR_SIZE - core_size);
 	grub_size_t data_size = core_size - no_rs_length - GRUB_DISK_SECTOR_SIZE;
 	void *buffer_start = core_img + no_rs_length + GRUB_DISK_SECTOR_SIZE;
 
-	uprintf("calling grub_reed_solomon_add_redundancy with buffer=0x%08X, data_size=%I64u, redudancy=%I64u", buffer_start, data_size, redudancy);
+	uprintf("calling grub_reed_solomon_add_redundancy with buffer=0x%08X, data_size=%"PRIu64", redudancy=%"PRIu64, buffer_start, data_size, redudancy);
 	grub_reed_solomon_add_redundancy(buffer_start, data_size, redudancy);
 
 	/* Write the core image onto the disk.  */

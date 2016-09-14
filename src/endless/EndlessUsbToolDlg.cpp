@@ -4663,18 +4663,18 @@ DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 	IFFALSE_GOTOERROR(createDirResult == ERROR_SUCCESS || createDirResult == ERROR_ALREADY_EXISTS, "Error creating directory on USB drive.");
 
 	// Unpack img file
-	// CEndlessUsbToolDlg::ImageUnpackOperation = OP_SETUP_DUALBOOT;
-	// CEndlessUsbToolDlg::ImageUnpackPercentStart = DB_PROGRESS_CHECK_PARTITION;
-	// CEndlessUsbToolDlg::ImageUnpackPercentEnd = DB_PROGRESS_FINISHED_UNPACK;
-	// CEndlessUsbToolDlg::ImageUnpackFileSize = dlg->m_selectedFileSize;
-	// bool unpackResult = dlg->UnpackFile(ConvertUnicodeToUTF8(dlg->m_localFile), ConvertUnicodeToUTF8(endlessImgPath), BLED_COMPRESSION_GZIP, ImageUnpackCallback, &dlg->m_cancelImageUnpack);
-	// IFFALSE_GOTOERROR(unpackResult, "Error unpacking image to endless folder.");
+	CEndlessUsbToolDlg::ImageUnpackOperation = OP_SETUP_DUALBOOT;
+	CEndlessUsbToolDlg::ImageUnpackPercentStart = DB_PROGRESS_CHECK_PARTITION;
+	CEndlessUsbToolDlg::ImageUnpackPercentEnd = DB_PROGRESS_FINISHED_UNPACK;
+	CEndlessUsbToolDlg::ImageUnpackFileSize = dlg->m_selectedFileSize;
+	bool unpackResult = dlg->UnpackFile(ConvertUnicodeToUTF8(dlg->m_localFile), ConvertUnicodeToUTF8(endlessImgPath), BLED_COMPRESSION_GZIP, ImageUnpackCallback, &dlg->m_cancelImageUnpack);
+	IFFALSE_GOTOERROR(unpackResult, "Error unpacking image to endless folder.");
 
-	// // extend this file so it reaches the required size
-	// IFFALSE_GOTOERROR(ExtendImageFile(endlessImgPath, dlg->m_nrGigsSelected), "Error extending Endless image file");
+	// extend this file so it reaches the required size
+	IFFALSE_GOTOERROR(ExtendImageFile(endlessImgPath, dlg->m_nrGigsSelected), "Error extending Endless image file");
 
-	// UpdateProgress(OP_SETUP_DUALBOOT, DB_PROGRESS_FINISHED_UNPACK);
-	// CHECK_IF_CANCELED;
+	UpdateProgress(OP_SETUP_DUALBOOT, DB_PROGRESS_FINISHED_UNPACK);
+	CHECK_IF_CANCELED;
 
 	// Copy grub
 	IFFALSE_GOTOERROR(CopyMultipleItems(bootFilesPath + GRUB_BOOT_SUBDIRECTORY, endlessFilesPath), "Error copying grub folder to USB drive.");
