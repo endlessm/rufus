@@ -5443,7 +5443,16 @@ BOOL CEndlessUsbToolDlg::UninstallDualBoot()
 	// restore Fast Start (aka Hiberboot)
 	IFFALSE_PRINTERROR(ResetEndlessRegistryKey(HKEY_LOCAL_MACHINE, REGKEY_FASTBOOT_PATH, REGKEY_FASTBOOT), "Error on restoring fastboot.");
 
-	// TODO: remove uninstall entry in registry
+	// remove uninstall entry from registry
+	do {
+		CRegKey uninstallKey;
+		LSTATUS result = uninstallKey.Open(HKEY_LOCAL_MACHINE, REGKEY_WIN_UNINSTALL, KEY_ALL_ACCESS);
+		IFFALSE_CONTINUE(result == ERROR_SUCCESS, "Error opening uninstall key");
+
+		result = uninstallKey.DeleteSubKey(REGKEY_ENDLESS_OS);
+		IFFALSE_CONTINUE(result == ERROR_SUCCESS, "Error on DeleteSubKey");
+	} while (FALSE);
+
 
 	// TODO: remove C:\Endless
 
