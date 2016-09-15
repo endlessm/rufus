@@ -1,3 +1,5 @@
+version: "{build}-{branch}"
+
 matrix:
   fast_finish: true
 
