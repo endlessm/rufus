@@ -1,5 +1,4 @@
-artifacts:
-  - path: $(platform)\$(configuration)\EndlessUsbTool.exe
+version: "{build}-{branch}"
 
 matrix:
   fast_finish: true
@@ -13,3 +12,26 @@ platform:
 configuration:
   - Debug
   - Release
+
+install:
+  - curl -L -o upx.zip https://github.com/upx/upx/releases/download/v3.91/upx391w.zip
+  - 7z e upx.zip *.exe -r
+
+# We assume tags are of the form VERSION_foo, and we assume that foo matches
+# the version number embedded in the executable.
+#
+# Non-tags get executables named for the Git commit ID.
+before_build:
+  - set EI_VERSION=%APPVEYOR_REPO_COMMIT:~0,7%
+  - if "%APPVEYOR_REPO_TAG%"=="true" set EI_VERSION=v%APPVEYOR_REPO_TAG_NAME:~8%
+  - if not "%APPVEYOR_REPO_BRANCH%"=="master" set EI_VERSION=%EI_VERSION%-%APPVEYOR_REPO_BRANCH%
+  - if not "%APPVEYOR_PULL_REQUEST_NUMBER%"=="" set EI_VERSION=%EI_VERSION%-pr%APPVEYOR_PULL_REQUEST_NUMBER%
+  - if not "%CONFIGURATION%"=="Release" set EI_VERSION=%EI_VERSION%-%CONFIGURATION%
+  - echo EI_VERSION=%EI_VERSION%
+
+after_build:
+  - 7z a endless-installer-%EI_VERSION%.zip %PLATFORM%\%CONFIGURATION%\EndlessUsbTool.exe
+  - 7z a endless-installer-%EI_VERSION%.zip %PLATFORM%\%CONFIGURATION%\EndlessUsbTool.pdb
+  - upx.exe -9 -o endless-installer-%EI_VERSION%.exe %PLATFORM%\%CONFIGURATION%\EndlessUsbTool.exe
+  - 7z a endless-installer-%EI_VERSION%.zip %APPVEYOR_BUILD_FOLDER%\endless-installer-%EI_VERSION%.exe
+  - appveyor PushArtifact endless-installer-%EI_VERSION%.zip
