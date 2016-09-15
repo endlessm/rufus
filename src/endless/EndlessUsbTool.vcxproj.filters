@@ -286,6 +286,11 @@
     </Image>
   </ItemGroup>
   <ItemGroup>
+    <Manifest Include="EndlessUsbTool.manifest">
+      <Filter>Resource Files</Filter>
+    </Manifest>
+  </ItemGroup>
+  <ItemGroup>
     <Font Include="res\fonts\ttf\Lato-Black.ttf">
       <Filter>Resource Files\Fonts</Filter>
     </Font>

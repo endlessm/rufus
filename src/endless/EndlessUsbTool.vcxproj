@@ -504,6 +504,9 @@
     <Image Include="res\images\wizard_page_indicator_selected.png" />
   </ItemGroup>
   <ItemGroup>
+    <Manifest Include="EndlessUsbTool.manifest" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\bled\.msvc\bled.vcxproj">
       <Project>{fb6d52d4-a2f8-c358-db85-bbcaecfddd7d}</Project>
     </ProjectReference>
