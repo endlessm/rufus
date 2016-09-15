@@ -825,7 +825,7 @@ BOOL CEndlessUsbToolDlg::OnInitDialog()
 	//if (CSTRING_GET_LAST(exePath,'\\') == ENDLESS_UNINSTALLER_NAME) {
 	if (CSTRING_GET_LAST(exePath, '\\') == L"EndlessUsbTool.exe") {
 		m_uninstallMode = true;
-		int selected = AfxMessageBox(UTF8ToCString(lmprintf(MSG_361)), MB_YESNO | MB_ICONQUESTION);
+		int selected = AfxMessageBox(UTF8ToCString(lmprintf(MSG_361)), MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2);
 		if (selected == IDYES) {
 			ShowWindow(SW_HIDE);
 			UninstallDualBoot();
@@ -5226,6 +5226,7 @@ CStringW CEndlessUsbToolDlg::GetSystemDrive()
 }
 
 #define REGKEY_BACKUP_PREFIX	L"EndlessBackup"
+#define REGKEY_DWORD_MISSING	DWORD_MAX
 
 BOOL CEndlessUsbToolDlg::SetEndlessRegistryKey(HKEY parentKey, const CString &keyPath, const CString &keyName, CComVariant keyValue, bool createBackup)
 {
@@ -5253,7 +5254,7 @@ BOOL CEndlessUsbToolDlg::SetEndlessRegistryKey(HKEY parentKey, const CString &ke
 
 				result = registryKey.QueryDWORDValue(keyName, dwValue);
 				if (result == ERROR_SUCCESS) backupValue = dwValue;
-				else backupValue = DWORD_MAX;
+				else backupValue = REGKEY_DWORD_MISSING;
 			}
 			result = registryKey.SetDWORDValue(keyName, keyValue.intVal);
 			break;
@@ -5435,14 +5436,16 @@ BOOL CEndlessUsbToolDlg::UninstallDualBoot()
 
 	// TODO: remove UEFI or MBR entry
 
-	// TODO: undo policy changes
+
+	// restore the registry key for Windows clock in UTC
+	IFFALSE_PRINTERROR(ResetEndlessRegistryKey(HKEY_LOCAL_MACHINE, REGKEY_UTC_TIME_PATH, REGKEY_UTC_TIME), "Error on restoring Windows clock to UTC.");
+
+	// restore Fast Start (aka Hiberboot)
+	IFFALSE_PRINTERROR(ResetEndlessRegistryKey(HKEY_LOCAL_MACHINE, REGKEY_FASTBOOT_PATH, REGKEY_FASTBOOT), "Error on restoring fastboot.");
 
 	// TODO: remove uninstall entry in registry
 
 	// TODO: remove C:\Endless
-
-	goto error;
-
 
 done:
 	popupMsgId = MSG_362;
@@ -5454,4 +5457,49 @@ error:
 	ExitProcess(0);
 
 	return retResult;
+}
+
+BOOL CEndlessUsbToolDlg::ResetEndlessRegistryKey(HKEY parentKey, const CString &keyPath, const CString &keyName)
+{
+	BOOL retResult = FALSE;
+	CRegKey registryKey;
+	LSTATUS result;
+	LONG queryResult;
+	DWORD keyType;
+	ULONG dataSize = 0;
+	uprintf("ResetEndlessRegistryKey called with path '%ls' and key '%ls'", keyPath, keyName);
+
+	result = registryKey.Open(parentKey, keyPath, KEY_ALL_ACCESS);
+	IFFALSE_GOTO(result == ERROR_SUCCESS, "Error opening registry key.", done);
+
+	queryResult = registryKey.QueryValue(CString(REGKEY_BACKUP_PREFIX) + keyName, &keyType, NULL, &dataSize);
+	IFFALSE_GOTO(queryResult == ERROR_SUCCESS, "Error on QueryValue. Backup value doesn't exist", done);
+
+	switch (keyType) {
+	case VT_R4:
+		DWORD dwValue;
+		result = registryKey.QueryDWORDValue(CString(REGKEY_BACKUP_PREFIX) + keyName, dwValue);
+		IFFALSE_BREAK(result == ERROR_SUCCESS, "QueryDWORDValue failed for backup value");
+
+		result = registryKey.DeleteValue(CString(REGKEY_BACKUP_PREFIX) + keyName);
+		IFFALSE_PRINTERROR(result == ERROR_SUCCESS, "Error on deleting backup value.");
+		if (dwValue == REGKEY_DWORD_MISSING) {
+			result = registryKey.DeleteValue(keyName);
+			IFFALSE_PRINTERROR(result == ERROR_SUCCESS, "Error on deleting Endless added value.");
+		} else {
+			result = registryKey.SetDWORDValue(keyName, dwValue);
+			IFFALSE_PRINTERROR(result == ERROR_SUCCESS, "Error on setting key to original value.");
+		}
+		break;
+	default:
+		uprintf("ERROR: registry key type %d not handled", keyType);
+		return FALSE;
+	}
+
+done:
+	retResult = TRUE;
+error:
+	return retResult;
+
+	return TRUE;
 }

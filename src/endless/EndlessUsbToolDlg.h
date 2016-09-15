@@ -328,4 +328,5 @@ private:
 	static BOOL AddUninstallRegistryKeys(const CStringW &uninstallExePath, const CStringW &installPath, DWORD versionMajor, DWORD versionMinor);
 
 	static BOOL UninstallDualBoot();
+	static BOOL ResetEndlessRegistryKey(HKEY parentKey, const CString &keyPath, const CString &keyName);
 };
