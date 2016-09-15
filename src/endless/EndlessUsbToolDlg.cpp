@@ -4636,6 +4636,8 @@ error:
 #define REGKEY_FASTBOOT_PATH	L"SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Power"
 #define REGKEY_FASTBOOT			L"HiberbootEnabled"
 
+#define ENDLESS_UNINSTALLER_NAME L"endless-uninstaller.exe"
+
 DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 {
 	FUNCTION_ENTER;
@@ -4646,12 +4648,13 @@ DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 	CString endlessImgPath;
 	CString bootFilesPath = GET_LOCAL_PATH(CString(BOOT_COMPONENTS_FOLDER)) + L"\\";
 	wchar_t fileSystemType[MAX_PATH + 1];
+	CStringW exeFilePath = GetExePath();
 
 	systemDriveLetter = GetSystemDrive();
 	endlessFilesPath = systemDriveLetter + PATH_ENDLESS_SUBDIRECTORY;
 	endlessImgPath = endlessFilesPath + ENDLESS_IMG_FILE_NAME;
 
-	// Verify that this is an NTFS C:\ partition
+	// Verify that this is an NTFS partition
 	IFFALSE_GOTOERROR(GetVolumeInformation(systemDriveLetter, NULL, 0, NULL, NULL, NULL, fileSystemType, MAX_PATH + 1) != 0, "Error on GetVolumeInformation.");
 	uprintf("File system type '%ls'", fileSystemType);
 	IFFALSE_GOTO(0 == wcscmp(fileSystemType, L"NTFS"), "File system type is not NTFS", not_ntfs);
@@ -4669,6 +4672,9 @@ DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 	// Create endless folder
 	int createDirResult = SHCreateDirectoryExW(NULL, endlessFilesPath, NULL);
 	IFFALSE_GOTOERROR(createDirResult == ERROR_SUCCESS || createDirResult == ERROR_ALREADY_EXISTS, "Error creating directory on USB drive.");
+
+	// Copy ourseleves to the <SYSDRIVE>:\endless directory
+	IFFALSE_GOTOERROR(0 != CopyFile(exeFilePath, endlessFilesPath + ENDLESS_UNINSTALLER_NAME, FALSE), "Error copying exe uninstaller file.");
 
 	// Unpack img file
 	CEndlessUsbToolDlg::ImageUnpackOperation = OP_SETUP_DUALBOOT;
@@ -4703,6 +4709,9 @@ DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 
 	// disable Fast Start (aka Hiberboot) so that the NTFS partition is always cleanly unmounted at shutdown:
 	IFFALSE_PRINTERROR(SetEndlessRegistryKey(HKEY_LOCAL_MACHINE, REGKEY_FASTBOOT_PATH, REGKEY_FASTBOOT, CComVariant(1)), "Error on disabling fastboot.");
+
+	// Add uninstall entry for Control Panel
+	IFFALSE_GOTOERROR(AddUninstallRegistryKeys(endlessFilesPath + ENDLESS_UNINSTALLER_NAME, endlessFilesPath, 3, 0), "Error on AddUninstallRegistryKeys.");
 
 	UpdateProgress(OP_SETUP_DUALBOOT, DB_PROGRESS_MBR_OR_EFI_SETUP);
 
@@ -5027,7 +5036,7 @@ BOOL CEndlessUsbToolDlg::SetAttributesForFilesInFolder(CString path, bool addAtt
 
 	uprintf("RestrictAccessToFilesInFolder called with '%ls'", path);
 
-	IFFALSE_PRINTERROR(SetFileAttributes(path + findFileData.cFileName, addAttributes ? FILE_ATTRIBUTE_SYSTEM | FILE_ATTRIBUTE_READONLY : FILE_ATTRIBUTE_NORMAL) != 0, "Error on SetFileAttributes");
+	IFFALSE_PRINTERROR(SetFileAttributes(path, addAttributes ? FILE_ATTRIBUTE_SYSTEM | FILE_ATTRIBUTE_READONLY : FILE_ATTRIBUTE_NORMAL) != 0, "Error on SetFileAttributes");
 
 	if (findFilesHandle == INVALID_HANDLE_VALUE) {
 		uprintf("UpdateFileEntries: No files found in current directory [%ls]", path);
@@ -5040,7 +5049,9 @@ BOOL CEndlessUsbToolDlg::SetAttributesForFilesInFolder(CString path, bool addAtt
 				IFFALSE_PRINTERROR(result = SetAttributesForFilesInFolder(newFolder, addAttributes), "Error on setting attributes.");
 				retValue = retValue && result;
 			} else {
-				IFFALSE_PRINTERROR(SetFileAttributes(path + findFileData.cFileName, addAttributes ? FILE_ATTRIBUTE_SYSTEM | FILE_ATTRIBUTE_READONLY | FILE_ATTRIBUTE_HIDDEN : FILE_ATTRIBUTE_NORMAL) != 0, "Error on SetFileAttributes");
+				if (0 != wcscmp(findFileData.cFileName, ENDLESS_UNINSTALLER_NAME)) {
+					IFFALSE_PRINTERROR(SetFileAttributes(path + findFileData.cFileName, addAttributes ? FILE_ATTRIBUTE_SYSTEM | FILE_ATTRIBUTE_READONLY | FILE_ATTRIBUTE_HIDDEN : FILE_ATTRIBUTE_NORMAL) != 0, "Error on SetFileAttributes");
+				}
 			}
 		} while (FindNextFile(findFilesHandle, &findFileData) != 0);
 
@@ -5231,6 +5242,13 @@ BOOL CEndlessUsbToolDlg::SetEndlessRegistryKey(HKEY parentKey, const CString &ke
 			}
 			result = registryKey.SetDWORDValue(keyName, keyValue.intVal);
 			break;
+		case VT_BSTR:
+			if (createBackup) {
+				uprintf("Error: backup requested and not implemented for type VT_BSTR.");
+				return FALSE;
+			}
+			result = registryKey.SetStringValue(keyName, keyValue.bstrVal);
+			break;
 		default:
 			uprintf("ERROR: variant type %d not handled", keyValue.vt);
 			return FALSE;
@@ -5320,6 +5338,76 @@ BOOL CEndlessUsbToolDlg::IsBitlockedDrive(const CString &drive)
 error:
 	uprintf("IsBitlockedDrive done with hres=%x and retResult=%d", hres, retResult);
 	CoUninitialize();
+
+	return retResult;
+}
+
+CStringW CEndlessUsbToolDlg::GetExePath()
+{
+	wchar_t *exePath = NULL;
+	DWORD neededSize = MAX_PATH;
+	CStringW retValue = L"";
+
+	do {
+		if (exePath != NULL) safe_free(exePath);
+		exePath = (wchar_t*)malloc((neededSize + 1) * sizeof(wchar_t));
+		memset(exePath, 0, (neededSize + 1) * sizeof(wchar_t));
+		DWORD result = GetModuleFileNameW(NULL, exePath, neededSize);
+		IFFALSE_GOTOERROR(result != 0 && (GetLastError() == ERROR_SUCCESS || GetLastError() == ERROR_INSUFFICIENT_BUFFER), "Could not get needed size for module path");
+		neededSize = result;
+		IFFALSE_CONTINUE(GetLastError() != ERROR_INSUFFICIENT_BUFFER, "Not enough memory allocated for buffer. Trying again.");
+		break;
+	} while (TRUE);
+
+	retValue = exePath;
+error:
+	if (exePath != NULL) safe_free(exePath);
+
+	return retValue;
+}
+
+#define REGKEY_WIN_UNINSTALL	L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\"
+#define REGKEY_ENDLESS_OS		L"Endless OS"
+#define REGKEY_UNINSTALLENDLESS (REGKEY_WIN_UNINSTALL REGKEY_ENDLESS_OS)
+#define REGKEY_DISPLAYNAME		L"DisplayName"
+#define REGKEY_DISPLAYVERSION	L"DisplayVersion"
+#define REGKEY_UNINSTALL_STRING	L"UninstallString"
+#define REGKEY_INSTALL_LOCATION	L"InstallLocation"
+#define REGKEY_PUBLISHER		L"Publisher"
+#define REGKEY_VERSION_MAJOR	L"VersionMajor"
+#define REGKEY_VERSION_MINOR	L"VersionMinor"
+#define REGKEY_HELP_LINK		L"HelpLink"
+#define REGKEY_NOCHANGE			L"NoChange"
+#define REGKEY_NOMODIFY			L"NoModify"
+
+#define REGKEY_DISPLAYNAME_TEXT	L"Endless OS"
+#define REGKEY_PUBLISHER_TEXT	L"Endless Mobile, Inc."
+
+BOOL CEndlessUsbToolDlg::AddUninstallRegistryKeys(const CStringW &uninstallExePath, const CStringW &installPath, DWORD versionMajor, DWORD versionMinor)
+{
+	CRegKey registryKey;
+	LSTATUS result;
+	BOOL retResult = FALSE;
+	CStringW displayVersion;
+
+	result = registryKey.Create(HKEY_LOCAL_MACHINE, REGKEY_UNINSTALLENDLESS);
+	uprintf("Result %d on creating key '%ls'", result, REGKEY_UNINSTALLENDLESS);
+	IFFALSE_GOTOERROR(result == ERROR_SUCCESS, "Error on CRegKey::Create.");
+
+	IFFALSE_GOTOERROR(SetEndlessRegistryKey(HKEY_LOCAL_MACHINE, REGKEY_UNINSTALLENDLESS, REGKEY_DISPLAYNAME, REGKEY_DISPLAYNAME_TEXT, false), "Error on REGKEY_DISPLAYNAME");
+	displayVersion.Format(L"%d.%d", versionMajor, versionMinor);
+	IFFALSE_GOTOERROR(SetEndlessRegistryKey(HKEY_LOCAL_MACHINE, REGKEY_UNINSTALLENDLESS, REGKEY_DISPLAYVERSION, CComBSTR(displayVersion), false), "Error on REGKEY_DISPLAYVERSION");
+	IFFALSE_GOTOERROR(SetEndlessRegistryKey(HKEY_LOCAL_MACHINE, REGKEY_UNINSTALLENDLESS, REGKEY_HELP_LINK, UTF8ToBSTR(lmprintf(MSG_314)), false), "Error on REGKEY_HELP_LINK");
+	IFFALSE_GOTOERROR(SetEndlessRegistryKey(HKEY_LOCAL_MACHINE, REGKEY_UNINSTALLENDLESS, REGKEY_UNINSTALL_STRING, CComBSTR(uninstallExePath), false), "Error on REGKEY_UNINSTALL_STRING");
+	IFFALSE_GOTOERROR(SetEndlessRegistryKey(HKEY_LOCAL_MACHINE, REGKEY_UNINSTALLENDLESS, REGKEY_INSTALL_LOCATION, CComBSTR(installPath), false), "Error on REGKEY_INSTALL_LOCATION");
+	IFFALSE_GOTOERROR(SetEndlessRegistryKey(HKEY_LOCAL_MACHINE, REGKEY_UNINSTALLENDLESS, REGKEY_PUBLISHER, REGKEY_PUBLISHER_TEXT, false), "Error on REGKEY_PUBLISHER");
+	IFFALSE_GOTOERROR(SetEndlessRegistryKey(HKEY_LOCAL_MACHINE, REGKEY_UNINSTALLENDLESS, REGKEY_VERSION_MAJOR, versionMajor, false), "Error on REGKEY_VERSION_MAJOR");
+	IFFALSE_GOTOERROR(SetEndlessRegistryKey(HKEY_LOCAL_MACHINE, REGKEY_UNINSTALLENDLESS, REGKEY_VERSION_MINOR, versionMinor, false), "Error on REGKEY_VERSION_MINOR");
+	IFFALSE_GOTOERROR(SetEndlessRegistryKey(HKEY_LOCAL_MACHINE, REGKEY_UNINSTALLENDLESS, REGKEY_NOCHANGE, 1, false), "Error on REGKEY_NOCHANGE");
+	IFFALSE_GOTOERROR(SetEndlessRegistryKey(HKEY_LOCAL_MACHINE, REGKEY_UNINSTALLENDLESS, REGKEY_NOMODIFY, 1, false), "Error on REGKEY_NOMODIFY");
+
+	retResult = TRUE;
+error:
 
 	return retResult;
 }

@@ -322,4 +322,7 @@ private:
 	static CStringW GetSystemDrive();
 	static BOOL SetEndlessRegistryKey(HKEY parentKey, const CString &keyPath, const CString &keyName, CComVariant keyValue, bool createBackup = true);
 	static BOOL IsBitlockedDrive(const CString &drive);
+
+	static CStringW GetExePath();
+	static BOOL AddUninstallRegistryKeys(const CStringW &uninstallExePath, const CStringW &installPath, DWORD versionMajor, DWORD versionMinor);
 };
