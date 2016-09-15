@@ -306,9 +306,11 @@ enum endless_action_type {
 #define EOS_INSTALLER_PRODUCT_TEXT  "eosinstaller"
 #define EOS_NONFREE_PRODUCT_TEXT    "eosnonfree"
 #define EOS_OEM_PRODUCT_TEXT		"eosoem"
-const wchar_t* mainWindowTitle = L"Endless USB Creator";
+const wchar_t* mainWindowTitle = L"Endless Installer";
 
 #define ALL_FILES					L"*.*"
+
+#define ENDLESS_UNINSTALLER_NAME L"endless-uninstaller.exe"
 
 //#define HARDCODED_PATH L"release/3.0.2/eos-amd64-amd64/base/eos-eos3.0-amd64-amd64.160827-104530.base"
 #define HARDCODED_PATH L"eos-amd64-amd64/eos3.0/base/160906-030224/eos-eos3.0-amd64-amd64.160906-030224.base"
@@ -534,7 +536,8 @@ CEndlessUsbToolDlg::CEndlessUsbToolDlg(UINT globalMessage, bool enableLogDebuggi
     m_enableLogDebugging(enableLogDebugging),
     m_lastErrorCause(ErrorCause_t::ErrorCauseNone),
     m_localFilesScanned(false),
-    m_jsonDownloadAttempted(false)
+    m_jsonDownloadAttempted(false),
+	m_uninstallMode(false)
 {
     GlobalLoggingMutex = CreateMutex(NULL, FALSE, NULL);
 
@@ -593,6 +596,8 @@ void CEndlessUsbToolDlg::OnDocumentComplete(LPDISPATCH pDisp, LPCTSTR szUrl)
 	CDHtmlDialog::OnDocumentComplete(pDisp, szUrl);
 
 	uprintf("OnDocumentComplete '%ls'", szUrl);
+
+	IFTRUE_RETURN(m_uninstallMode, "Returning as we are in uninstall mode");
 
 	if (this->m_spHtmlDoc == NULL) {
 		uprintf("CEndlessUsbToolDlg::OnDocumentComplete m_spHtmlDoc==NULL");
@@ -803,7 +808,6 @@ BOOL CEndlessUsbToolDlg::OnInitDialog()
         SetWindowRgn(static_cast<HRGN>(rgnComp.GetSafeHandle()), TRUE);
     }
 
-
 	// Init localization before doing anything else
 	LoadLocalizationData();
 
@@ -816,6 +820,19 @@ BOOL CEndlessUsbToolDlg::OnInitDialog()
     bool result = m_downloadManager.Init(m_hWnd, WM_FILE_DOWNLOAD_STATUS);
 
     SetWindowTextW(L"");
+
+	CStringW exePath = GetExePath();
+	//if (CSTRING_GET_LAST(exePath,'\\') == ENDLESS_UNINSTALLER_NAME) {
+	if (CSTRING_GET_LAST(exePath, '\\') == L"EndlessUsbTool.exe") {
+		m_uninstallMode = true;
+		int selected = AfxMessageBox(UTF8ToCString(lmprintf(MSG_361)), MB_YESNO | MB_ICONQUESTION);
+		if (selected == IDYES) {
+			ShowWindow(SW_HIDE);
+			UninstallDualBoot();
+		} else {
+			ExitProcess(0);
+		}
+	}
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -4636,8 +4653,6 @@ error:
 #define REGKEY_FASTBOOT_PATH	L"SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Power"
 #define REGKEY_FASTBOOT			L"HiberbootEnabled"
 
-#define ENDLESS_UNINSTALLER_NAME L"endless-uninstaller.exe"
-
 DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 {
 	FUNCTION_ENTER;
@@ -5408,6 +5423,35 @@ BOOL CEndlessUsbToolDlg::AddUninstallRegistryKeys(const CStringW &uninstallExePa
 
 	retResult = TRUE;
 error:
+
+	return retResult;
+}
+
+BOOL CEndlessUsbToolDlg::UninstallDualBoot()
+{
+	BOOL retResult = FALSE;
+	uint32_t popupMsgId = MSG_363;
+	UINT popupStyle = MB_OK | MB_ICONERROR;
+
+	// TODO: remove UEFI or MBR entry
+
+	// TODO: undo policy changes
+
+	// TODO: remove uninstall entry in registry
+
+	// TODO: remove C:\Endless
+
+	goto error;
+
+
+done:
+	popupMsgId = MSG_362;
+	popupStyle = MB_OK | MB_ICONINFORMATION;
+	retResult = TRUE;
+
+error:
+	AfxMessageBox(UTF8ToCString(lmprintf(popupMsgId)), popupStyle);
+	ExitProcess(0);
 
 	return retResult;
 }

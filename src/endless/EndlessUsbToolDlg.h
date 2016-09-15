@@ -198,6 +198,7 @@ private:
     ErrorCause_t m_lastErrorCause;
     long m_maximumUSBVersion;
 	unsigned long m_cancelImageUnpack;
+	bool m_uninstallMode;
 
     void StartOperationThread(int operation, LPTHREAD_START_ROUTINE threadRoutine, LPVOID param = NULL);
 
@@ -325,4 +326,6 @@ private:
 
 	static CStringW GetExePath();
 	static BOOL AddUninstallRegistryKeys(const CStringW &uninstallExePath, const CStringW &installPath, DWORD versionMajor, DWORD versionMinor);
+
+	static BOOL UninstallDualBoot();
 };
