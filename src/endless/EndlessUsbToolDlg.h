@@ -7,9 +7,6 @@
 #include "localization.h"
 #include "DownloadManager.h"
 
-// Remove this define to disable hardcoded stuff added for internal release on August 31st
-#define TEST_RELEASE_HARDCODED_STUFF 1
-
 typedef struct FileImageEntry {
     CString filePath;
     ULONGLONG size;
@@ -17,6 +14,8 @@ typedef struct FileImageEntry {
     LONG htmlIndex;
     BOOL stillPresent;
 	CString personality;
+	CString bootArchivePath;
+	CString bootArchiveSigPath;
 	BOOL hasBootArchive;
 	BOOL hasBootArchiveSig;
 	BOOL hasUnpackedImgSig;
@@ -43,6 +42,8 @@ typedef struct RemoteImageEntry {
     CString personality;
     CString urlFile;
     CString urlSignature;
+    CString urlBootArchive;
+    CString urlBootArchiveSignature;
     CString displayName;
     CString downloadJobName;
     CString version;

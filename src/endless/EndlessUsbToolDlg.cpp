@@ -312,10 +312,19 @@ const wchar_t* mainWindowTitle = L"Endless Installer";
 #define ENDLESS_UNINSTALLER_NAME L"endless-uninstaller.exe"
 #define ENDLESS_OS_NAME L"Endless OS"
 
-//#define HARDCODED_PATH L"release/3.0.2/eos-amd64-amd64/base/eos-eos3.0-amd64-amd64.160827-104530.base"
 #define HARDCODED_PATH L"eos-amd64-amd64/eos3.0/base/160906-030224/eos-eos3.0-amd64-amd64.160906-030224.base"
 CString hardcoded_BootPath(HARDCODED_PATH BOOT_ARCHIVE_SUFFIX);
 CString hardcoded_BootPathAsc(HARDCODED_PATH BOOT_ARCHIVE_SUFFIX SIGNATURE_FILE_EXT);
+
+// Endless OS 3.0.2's boot.zip didn't work, we use a later one for that release only.
+// TODO: remove this and the definitions above.
+static BOOL needsHardcodedBoot(CString imagePath) {
+	if (imagePath.Find(L"eos-eos3.0-amd64-amd64.160827") >= 0) {
+		uprintf("%ls needs hardcoded boot blob", imagePath);
+		return true;
+	}
+	return false;
+}
 
 // Radu: How much do we need to reserve for the exfat partition header?
 // reserve 10 mb for now; this will also include the signature file
@@ -2084,17 +2093,20 @@ void CEndlessUsbToolDlg::UpdateFileEntries(bool shouldInit)
                     m_imageIndexToPath.AddTail(currentEntry->filePath);
                 }
                 currentEntry->stillPresent = TRUE;
-				CString basePath = CSTRING_GET_PATH(CSTRING_GET_PATH(fullPathFile, '.'), '.');
+                CString basePath = CSTRING_GET_PATH(CSTRING_GET_PATH(fullPathFile, '.'), '.');
+                CString bootArchiveBasePath;
 
-#if TEST_RELEASE_HARDCODED_STUFF
-				CString hardcodedPath = GET_LOCAL_PATH(CSTRING_GET_LAST(CString(HARDCODED_PATH), '/'));
-				currentEntry->hasBootArchive = PathFileExists(hardcodedPath + BOOT_ARCHIVE_SUFFIX);
-				currentEntry->hasBootArchiveSig = PathFileExists(hardcodedPath + BOOT_ARCHIVE_SUFFIX + SIGNATURE_FILE_EXT);
-#else
-				currentEntry->hasBootArchive = PathFileExists(basePath + BOOT_ARCHIVE_SUFFIX);
-				currentEntry->hasBootArchiveSig = PathFileExists(basePath + BOOT_ARCHIVE_SUFFIX + SIGNATURE_FILE_EXT);
-#endif
-				currentEntry->hasUnpackedImgSig = PathFileExists(basePath + IMAGE_FILE_EXT + SIGNATURE_FILE_EXT);
+                if (needsHardcodedBoot(basePath)) {
+                    bootArchiveBasePath = GET_LOCAL_PATH(CSTRING_GET_LAST(CString(HARDCODED_PATH), '/'));
+                }
+                else {
+                    bootArchiveBasePath = basePath;
+                }
+                currentEntry->bootArchivePath = bootArchiveBasePath + BOOT_ARCHIVE_SUFFIX;
+                currentEntry->bootArchiveSigPath = bootArchiveBasePath + BOOT_ARCHIVE_SUFFIX + SIGNATURE_FILE_EXT;
+                currentEntry->hasBootArchive = PathFileExists(currentEntry->bootArchivePath);
+                currentEntry->hasBootArchiveSig = PathFileExists(currentEntry->bootArchiveSigPath);
+                currentEntry->hasUnpackedImgSig = PathFileExists(basePath + IMAGE_FILE_EXT + SIGNATURE_FILE_EXT);
             }
 
 			uprintf("Found local image '%ls'", file.GetFilePath());
@@ -2307,16 +2319,9 @@ bool CEndlessUsbToolDlg::ParseJsonFile(LPCTSTR filename, bool isInstallerJson)
 
     std::ifstream jsonStream;
 
-#if TEST_RELEASE_HARDCODED_STUFF
-	const char *beginDoc = isInstallerJson ? eosinstaller_hardcoded_json : eos_hardcoded_json;
-	const char *endDoc = beginDoc + strlen(isInstallerJson ? eosinstaller_hardcoded_json : eos_hardcoded_json);
-
-	IFFALSE_GOTOERROR(reader.parse(beginDoc, endDoc, rootValue, false), "Parsing of JSON failed.");
-#else // TEST_RELEASE_HARDCODED_STUFF
     jsonStream.open(filename);
     IFFALSE_GOTOERROR(!jsonStream.fail(), "Opening JSON file failed.");
     IFFALSE_GOTOERROR(reader.parse(jsonStream, rootValue, false), "Parsing of JSON failed.");
-#endif //TEST_RELEASE_HARDCODED_STUFF
 
     // Print version
     jsonElem = rootValue[JSON_VERSION];
@@ -2382,6 +2387,16 @@ bool CEndlessUsbToolDlg::ParseJsonFile(LPCTSTR filename, bool isInstallerJson)
             remoteImage.urlSignature = fullImage[JSON_IMG_URL_SIG].asCString();
             remoteImage.personality = persIt->asCString();
             remoteImage.version = latestVersion;
+
+            if (needsHardcodedBoot(remoteImage.urlFile)) {
+                remoteImage.urlBootArchive = CString(RELEASE_JSON_URLPATH) + hardcoded_BootPath;
+                remoteImage.urlBootArchiveSignature = CString(RELEASE_JSON_URLPATH) + hardcoded_BootPathAsc;
+            }
+            else {
+                // TODO: get URL from manifest
+                remoteImage.urlBootArchive = CSTRING_GET_PATH(CSTRING_GET_PATH(remoteImage.urlFile, L'.'), L'.') + BOOT_ARCHIVE_SUFFIX;
+                remoteImage.urlBootArchiveSignature = remoteImage.urlBootArchive + SIGNATURE_FILE_EXT;
+            }
 
             if(!isInstallerJson) {
                 // Create display name
@@ -2795,16 +2810,12 @@ void CEndlessUsbToolDlg::StartInstallationProcess()
 
 	if(!m_dualBootSelected) ChangeDriveAutoRunAndMount(true);
 
-	// TODO: remove these once we parse proper JSON or discover local files
-	m_bootArchive = GET_LOCAL_PATH(CSTRING_GET_LAST(hardcoded_BootPath, '/'));
-	m_bootArchiveSig = GET_LOCAL_PATH(CSTRING_GET_LAST(hardcoded_BootPathAsc, '/'));
-	// END REMOVE
-
 	if (m_dualBootSelected && m_useLocalFile) {
 		pFileImageEntry_t localEntry = NULL;
 		CString selectedImage = UTF8ToCString(image_path);
-		if (m_imageFiles.Lookup(selectedImage, localEntry)) {
-			if(!localEntry->hasBootArchive || !localEntry->hasBootArchiveSig) m_useLocalFile = false;
+		if (m_imageFiles.Lookup(selectedImage, localEntry) && localEntry->hasBootArchive && localEntry->hasBootArchiveSig) {
+			m_bootArchive = localEntry->bootArchivePath;
+			m_bootArchiveSig = localEntry->bootArchiveSigPath;
 		} else {
 			m_useLocalFile = false;
 		}
@@ -2851,11 +2862,11 @@ void CEndlessUsbToolDlg::StartInstallationProcess()
 		CString urlInstaller, urlInstallerAsc, installerFile, installerAscFile;
 		CString urlBootFiles, urlBootFilesAsc, urlImageSig;
 		if (m_dualBootSelected) {
-			urlBootFiles = CString(RELEASE_JSON_URLPATH) + hardcoded_BootPath;
-			m_bootArchive = GET_LOCAL_PATH(CSTRING_GET_LAST(hardcoded_BootPath, '/'));
+			urlBootFiles = CString(RELEASE_JSON_URLPATH) +  remote.urlBootArchive;
+			m_bootArchive = GET_LOCAL_PATH(CSTRING_GET_LAST(urlBootFiles, '/'));
 
-			urlBootFilesAsc = CString(RELEASE_JSON_URLPATH) + hardcoded_BootPathAsc;
-			m_bootArchiveSig = GET_LOCAL_PATH(CSTRING_GET_LAST(hardcoded_BootPathAsc, '/'));
+			urlBootFilesAsc = CString(RELEASE_JSON_URLPATH) + remote.urlBootArchiveSignature;
+			m_bootArchiveSig = GET_LOCAL_PATH(CSTRING_GET_LAST(urlBootFilesAsc, '/'));
 
 			urlImageSig = CString(RELEASE_JSON_URLPATH) + m_unpackedImageSig;
 			m_unpackedImageSig = GET_LOCAL_PATH(CSTRING_GET_LAST(m_unpackedImageSig, '/'));
