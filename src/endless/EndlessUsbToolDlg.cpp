@@ -778,14 +778,22 @@ BOOL CEndlessUsbToolDlg::OnInitDialog()
 	if (CSTRING_GET_LAST(exePath,'\\') == ENDLESS_UNINSTALLER_NAME) {
 	//if (CSTRING_GET_LAST(exePath, '\\') == L"EndlessUsbTool.exe") { // for debugging
 		m_uninstallMode = true;
+
 		int selected = AfxMessageBox(UTF8ToCString(lmprintf(MSG_361)), MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2);
 		if (selected == IDYES) {
+			Analytics::instance()->sessionControl(true, m_uninstallMode);
+
 			ShowWindow(SW_HIDE);
-			UninstallDualBoot();
+			if (!UninstallDualBoot())
+				Analytics::instance()->exceptionTracking(_T("UninstallError"), TRUE);
+
+			Analytics::instance()->sessionControl(false, m_uninstallMode);
 		}
 
 		ExitProcess(0);
 	}
+
+	Analytics::instance()->sessionControl(true, m_uninstallMode);
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -798,6 +806,8 @@ void CEndlessUsbToolDlg::Uninit()
     int handlesCount = 0;
     HANDLE handlesToWaitFor[4];
     
+	Analytics::instance()->sessionControl(false, m_uninstallMode);
+
     if (m_fileScanThread != INVALID_HANDLE_VALUE) handlesToWaitFor[handlesCount++] = m_fileScanThread;
     if (m_operationThread != INVALID_HANDLE_VALUE) handlesToWaitFor[handlesCount++] = m_operationThread;
     if (m_downloadUpdateThread != INVALID_HANDLE_VALUE) handlesToWaitFor[handlesCount++] = m_downloadUpdateThread;
