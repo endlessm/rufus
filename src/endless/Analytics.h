@@ -8,7 +8,7 @@ public:
 
 	static Analytics *instance();
 
-	void sessionControl(BOOL start);
+	void sessionControl(BOOL start, BOOL uninstall);
 	void screenTracking(const CString &name);
 	void eventTracking(const CString &category, const CString &action, const CString &label = CString(), int value = -1);
 	void exceptionTracking(const CString &description, BOOL fatal);

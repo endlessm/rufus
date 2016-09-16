@@ -80,14 +80,15 @@ Analytics *Analytics::instance()
 	return &instance;
 }
 
-void Analytics::sessionControl(BOOL start)
+void Analytics::sessionControl(BOOL start, BOOL uninstall)
 {
 	if (m_disabled) return;
 	FUNCTION_ENTER;
 	CString body;
 	prefixId(body);
 	if (start) {
-		body = body + _T("t=screenview&cd=DualBootInstallPage&sc=start");
+		CString page = uninstall ? _T("Uninstall") : _T("DualBootInstall");
+		body = body + _T("t=screenview&cd=") + page + _T("Page&sc=start");
 		sendRequest(body);
 	}
 	else {
