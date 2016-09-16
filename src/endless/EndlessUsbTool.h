@@ -25,9 +25,19 @@ public:
 public:
 	virtual BOOL InitInstance();
 
+	static CString m_appDir;
+	static bool m_enableLogDebugging;
+
+	static void Log(const char *logMessage);
+
 // Implementation
 
 	DECLARE_MESSAGE_MAP()
+
+private:
+	static void InitLogging();
+	static void UninitLogging();
+	static CFile m_logFile;
 };
 
 extern CEndlessUsbToolApp theApp;
