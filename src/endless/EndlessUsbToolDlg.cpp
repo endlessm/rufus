@@ -311,6 +311,7 @@ const wchar_t* mainWindowTitle = L"Endless Installer";
 #define ALL_FILES					L"*.*"
 
 #define ENDLESS_UNINSTALLER_NAME L"endless-uninstaller.exe"
+#define ENDLESS_OS_NAME L"Endless OS"
 
 //#define HARDCODED_PATH L"release/3.0.2/eos-amd64-amd64/base/eos-eos3.0-amd64-amd64.160827-104530.base"
 #define HARDCODED_PATH L"eos-amd64-amd64/eos3.0/base/160906-030224/eos-eos3.0-amd64-amd64.160906-030224.base"
@@ -822,8 +823,8 @@ BOOL CEndlessUsbToolDlg::OnInitDialog()
     SetWindowTextW(L"");
 
 	CStringW exePath = GetExePath();
-	//if (CSTRING_GET_LAST(exePath,'\\') == ENDLESS_UNINSTALLER_NAME) {
-	if (CSTRING_GET_LAST(exePath, '\\') == L"EndlessUsbTool.exe") {
+	if (CSTRING_GET_LAST(exePath,'\\') == ENDLESS_UNINSTALLER_NAME) {
+	//if (CSTRING_GET_LAST(exePath, '\\') == L"EndlessUsbTool.exe") { // for debugging
 		m_uninstallMode = true;
 		int selected = AfxMessageBox(UTF8ToCString(lmprintf(MSG_361)), MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2);
 		if (selected == IDYES) {
@@ -4962,36 +4963,13 @@ bool CEndlessUsbToolDlg::SetupEndlessEFI(const CString &systemDriveLetter, const
 	hPhysical = GetPhysicalFromDriveLetter(systemDriveLetter);
 	IFFALSE_GOTOERROR(hPhysical != INVALID_HANDLE_VALUE, "Error on acquiring disk handle.");
 
-	// get partition layout
-	result = DeviceIoControl(hPhysical, IOCTL_DISK_GET_DRIVE_LAYOUT_EX, NULL, 0, layout, sizeof(layout), &size, NULL);
-	IFFALSE_GOTOERROR(result != 0 && size > 0, "Error on querying disk layout.");
-	IFFALSE_GOTOERROR(DriveLayout->PartitionStyle == PARTITION_STYLE_GPT, "Unexpected partition type. Partition style is not GPT");
-
-	DWORD efiPartitionNumber = -1;
-	PARTITION_INFORMATION_EX *partition = NULL;
-	for (DWORD index = 0; index < DriveLayout->PartitionCount; index++) {
-		partition = &(DriveLayout->PartitionEntry[index]);
-
-		if (partition->Gpt.PartitionType == PARTITION_SYSTEM_GUID) {
-			uprintf("Found ESP\r\nPartition %d:\r\n  Type: %s\r\n  Name: '%ls'\r\n ID: %s",
-				index + 1, GuidToString(&partition->Gpt.PartitionType), partition->Gpt.Name, GuidToString(&partition->Gpt.PartitionId));
-			efiPartitionNumber = partition->PartitionNumber;
-			break;
-		}
-	}
-	IFFALSE_GOTOERROR(efiPartitionNumber != -1, "ESP not found.");
-	// Fail if EFI partition number is bigger than we can fit in the
-	// uin8_t that AltMountVolume receives as parameter for partition number
-	IFFALSE_GOTOERROR(efiPartitionNumber <= 0xFF, "EFI partition number is bigger than 255.");
-
-	espMountLetter = AltMountVolume(ConvertUnicodeToUTF8(systemDriveLetter.Left(2)), (uint8_t)efiPartitionNumber);
-	IFFALSE_GOTOERROR(espMountLetter != NULL, "Error assigning a letter to the ESP.");
+	IFFALSE_GOTOERROR(MountESPFromDrive(hPhysical, espMountLetter, systemDriveLetter), "Error on MountESPFromDrive");
 	windowsEspDriveLetter = UTF8ToCString(espMountLetter);
 
 	IFFALSE_GOTOERROR(CopyMultipleItems(bootFilesPath + EFI_BOOT_SUBDIRECTORY + L"\\" + ALL_FILES, windowsEspDriveLetter + L"\\" + ENDLESS_BOOT_SUBDIRECTORY), "Error copying EFI folder to Windows ESP partition.");
 
-	IFFALSE_PRINTERROR(EFIRequireNeededPrivileges(), "Error on EFIRequireNeededPrivileges.")
-	IFFALSE_GOTOERROR(EFICreateNewEntry(windowsEspDriveLetter, CString(L"\\") + ENDLESS_BOOT_SUBDIRECTORY + L"\\" + ENDLESS_BOOT_EFI_FILE, L"Endless OS"), "Error on EFICreateNewEntry");
+	IFFALSE_PRINTERROR(EFIRequireNeededPrivileges(), "Error on EFIRequireNeededPrivileges.");
+	IFFALSE_GOTOERROR(EFICreateNewEntry(windowsEspDriveLetter, CString(L"\\") + ENDLESS_BOOT_SUBDIRECTORY + L"\\" + ENDLESS_BOOT_EFI_FILE, ENDLESS_OS_NAME), "Error on EFICreateNewEntry");
 
 	retResult = true;
 
@@ -5383,7 +5361,7 @@ error:
 }
 
 #define REGKEY_WIN_UNINSTALL	L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\"
-#define REGKEY_ENDLESS_OS		L"Endless OS"
+#define REGKEY_ENDLESS_OS		ENDLESS_OS_NAME
 #define REGKEY_UNINSTALLENDLESS (REGKEY_WIN_UNINSTALL REGKEY_ENDLESS_OS)
 #define REGKEY_DISPLAYNAME		L"DisplayName"
 #define REGKEY_DISPLAYVERSION	L"DisplayVersion"
@@ -5396,7 +5374,7 @@ error:
 #define REGKEY_NOCHANGE			L"NoChange"
 #define REGKEY_NOMODIFY			L"NoModify"
 
-#define REGKEY_DISPLAYNAME_TEXT	L"Endless OS"
+#define REGKEY_DISPLAYNAME_TEXT	ENDLESS_OS_NAME
 #define REGKEY_PUBLISHER_TEXT	L"Endless Mobile, Inc."
 
 BOOL CEndlessUsbToolDlg::AddUninstallRegistryKeys(const CStringW &uninstallExePath, const CStringW &installPath, DWORD versionMajor, DWORD versionMinor)
@@ -5430,12 +5408,43 @@ error:
 
 BOOL CEndlessUsbToolDlg::UninstallDualBoot()
 {
+	FUNCTION_ENTER;
+
 	BOOL retResult = FALSE;
 	uint32_t popupMsgId = MSG_363;
 	UINT popupStyle = MB_OK | MB_ICONERROR;
+	FILE *boottrackImgFile = NULL;
 
-	// TODO: remove UEFI or MBR entry
+	CString systemDriveLetter = GetSystemDrive();
+	CString endlessFilesPath = systemDriveLetter + PATH_ENDLESS_SUBDIRECTORY;
+	HANDLE hPhysical = GetPhysicalFromDriveLetter(systemDriveLetter);
+	const char *espMountLetter = NULL;
 
+	if (IsLegacyBIOSBoot()) { // remove MBR entry
+		FAKE_FD fake_fd = { 0 };
+		FILE* fp = (FILE*)&fake_fd;
+		fake_fd._handle = (char*)hPhysical;
+		IFFALSE_GOTOERROR(hPhysical != INVALID_HANDLE_VALUE, "Error on acquiring disk handle.");
+		if (nWindowsVersion >= WINDOWS_7) {
+			IFFALSE_GOTOERROR(write_win7_mbr(fp), "Error on write_win7_mbr");
+		} else if(nWindowsVersion == WINDOWS_VISTA) {
+			IFFALSE_GOTOERROR(write_vista_mbr(fp), "Error on write_vista_mbr");
+		} else if (nWindowsVersion == WINDOWS_2003 || nWindowsVersion == WINDOWS_XP) {
+			IFFALSE_GOTOERROR(write_2000_mbr(fp), "Error on write_2000_mbr");
+		} else {
+			uprintf("Restore MBR not supported for this windows version '%s', ver %d", WindowsVersionStr, nWindowsVersion);
+			goto error;
+		}
+	} else { // remove EFI entry
+		CString windowsEspDriveLetter;
+		IFFALSE_PRINTERROR(EFIRequireNeededPrivileges(), "Error on EFIRequireNeededPrivileges.")
+		IFFALSE_GOTOERROR(EFIRemoveEntry(ENDLESS_OS_NAME), "Error on EFIRemoveEntry");
+
+		IFFALSE_GOTOERROR(MountESPFromDrive(hPhysical, espMountLetter, systemDriveLetter), "Error on MountESPFromDrive");
+		windowsEspDriveLetter = UTF8ToCString(espMountLetter);
+		RemoveNonEmptyDirectory(windowsEspDriveLetter + L"\\" + ENDLESS_BOOT_SUBDIRECTORY);
+
+	}
 
 	// restore the registry key for Windows clock in UTC
 	IFFALSE_PRINTERROR(ResetEndlessRegistryKey(HKEY_LOCAL_MACHINE, REGKEY_UTC_TIME_PATH, REGKEY_UTC_TIME), "Error on restoring Windows clock to UTC.");
@@ -5456,12 +5465,15 @@ BOOL CEndlessUsbToolDlg::UninstallDualBoot()
 
 	// TODO: remove C:\Endless
 
-done:
+	// set success message and icon
 	popupMsgId = MSG_362;
 	popupStyle = MB_OK | MB_ICONINFORMATION;
 	retResult = TRUE;
 
 error:
+	safe_closehandle(hPhysical);
+	if (espMountLetter != NULL) AltUnmountVolume(espMountLetter);
+
 	AfxMessageBox(UTF8ToCString(lmprintf(popupMsgId)), popupStyle);
 	ExitProcess(0);
 
@@ -5502,7 +5514,7 @@ BOOL CEndlessUsbToolDlg::ResetEndlessRegistryKey(HKEY parentKey, const CString &
 		break;
 	default:
 		uprintf("ERROR: registry key type %d not handled", keyType);
-		return FALSE;
+		goto error;
 	}
 
 done:
@@ -5510,5 +5522,44 @@ done:
 error:
 	return retResult;
 
-	return TRUE;
+}
+
+BOOL CEndlessUsbToolDlg::MountESPFromDrive(HANDLE hPhysical, const char *espMountLetter, const CString &systemDriveLetter)
+{
+	FUNCTION_ENTER;
+
+	BOOL retResult = FALSE;
+	BYTE layout[4096] = { 0 };
+	PDRIVE_LAYOUT_INFORMATION_EX DriveLayout = (PDRIVE_LAYOUT_INFORMATION_EX)(void*)layout;
+	DWORD size;
+	BOOL result;
+
+	// get partition layout
+	result = DeviceIoControl(hPhysical, IOCTL_DISK_GET_DRIVE_LAYOUT_EX, NULL, 0, layout, sizeof(layout), &size, NULL);
+	IFFALSE_GOTOERROR(result != 0 && size > 0, "Error on querying disk layout.");
+	IFFALSE_GOTOERROR(DriveLayout->PartitionStyle == PARTITION_STYLE_GPT, "Unexpected partition type. Partition style is not GPT");
+
+	DWORD efiPartitionNumber = -1;
+	PARTITION_INFORMATION_EX *partition = NULL;
+	for (DWORD index = 0; index < DriveLayout->PartitionCount; index++) {
+		partition = &(DriveLayout->PartitionEntry[index]);
+
+		if (partition->Gpt.PartitionType == PARTITION_SYSTEM_GUID) {
+			uprintf("Found ESP\r\nPartition %d:\r\n  Type: %s\r\n  Name: '%ls'\r\n ID: %s",
+				index + 1, GuidToString(&partition->Gpt.PartitionType), partition->Gpt.Name, GuidToString(&partition->Gpt.PartitionId));
+			efiPartitionNumber = partition->PartitionNumber;
+			break;
+		}
+	}
+	IFFALSE_GOTOERROR(efiPartitionNumber != -1, "ESP not found.");
+	// Fail if EFI partition number is bigger than we can fit in the
+	// uin8_t that AltMountVolume receives as parameter for partition number
+	IFFALSE_GOTOERROR(efiPartitionNumber <= 0xFF, "EFI partition number is bigger than 255.");
+
+	espMountLetter = AltMountVolume(ConvertUnicodeToUTF8(systemDriveLetter.Left(2)), (uint8_t)efiPartitionNumber);
+	IFFALSE_GOTOERROR(espMountLetter != NULL, "Error assigning a letter to the ESP.");
+
+	retResult = TRUE;
+error:
+	return retResult;
 }

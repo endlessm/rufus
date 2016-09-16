@@ -461,3 +461,48 @@ bool EFICreateNewEntry(const wchar_t *drive, wchar_t *path, wchar_t *desc) {
 error: 
 	return retResult;
 }
+
+bool EFIRemoveEntry(wchar_t *desc) {
+	wchar_t varname[9];
+	int target = -1;
+
+	print_entries();
+
+	target = EFIGetBootEntryNumber(desc);
+	IFFALSE_RETURN_VALUE(target != -1, "Failed to find EFI entry for Endless OS", false);
+
+	swprintf(varname, sizeof(varname), UEFI_VAR_BOOT_ENTRY_FORMAT, target);
+	/* Writing a zero length variable deletes it */
+	IFFALSE_RETURN_VALUE(SetFirmwareEnvironmentVariable(varname, L"{8BE4DF61-93CA-11d2-AA0D-00E098032B8C}", NULL, 0), "Error on SetFirmwareEnvironmentVariable", false);
+
+	/* Remove our entry from the boot order */
+	DWORD size = GetFirmwareEnvironmentVariable(UEFI_VAR_BOOTORDER, UEFI_BOOT_NAMESPACE, vardata, sizeof(vardata));
+	IFFALSE_RETURN_VALUE(size > 0, "Error on querying for BootOrder with GetFirmwareEnvironmentVariable", false);
+
+	WORD *bootorder = (WORD *)vardata;
+	int nrEntries = (int)(size / 2);
+	int position = nrEntries;
+	int i;
+
+	// find our entry in the list
+	for (i = 0; i < (int)(size / 2); i++) {
+		if (bootorder[i] == target) {
+			position = i;
+			break;
+		}
+	}
+
+	if (position != nrEntries) {
+		// and remove it from the list
+		for (i = position; i < nrEntries - 1; i++) {
+			bootorder[i] = bootorder[i + 1];
+		}
+		IFFALSE_RETURN_VALUE(SetFirmwareEnvironmentVariable(UEFI_VAR_BOOTORDER, UEFI_BOOT_NAMESPACE, vardata, size - 2), "Error on SetFirmwareEnvironmentVariable", false);
+	} else {
+		uprintf("Our EFI entry %ls was not found in BootOrder list", varname);
+	}
+
+	print_entries();
+
+	return true;
+}
