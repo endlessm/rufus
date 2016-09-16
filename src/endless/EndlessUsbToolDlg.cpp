@@ -2389,8 +2389,8 @@ bool CEndlessUsbToolDlg::ParseJsonFile(LPCTSTR filename, bool isInstallerJson)
             remoteImage.version = latestVersion;
 
             if (needsHardcodedBoot(remoteImage.urlFile)) {
-                remoteImage.urlBootArchive = CString(RELEASE_JSON_URLPATH) + hardcoded_BootPath;
-                remoteImage.urlBootArchiveSignature = CString(RELEASE_JSON_URLPATH) + hardcoded_BootPathAsc;
+                remoteImage.urlBootArchive = hardcoded_BootPath;
+                remoteImage.urlBootArchiveSignature = hardcoded_BootPathAsc;
             }
             else {
                 // TODO: get URL from manifest
