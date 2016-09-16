@@ -782,9 +782,9 @@ BOOL CEndlessUsbToolDlg::OnInitDialog()
 		if (selected == IDYES) {
 			ShowWindow(SW_HIDE);
 			UninstallDualBoot();
-		} else {
-			ExitProcess(0);
 		}
+
+		ExitProcess(0);
 	}
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
@@ -5369,7 +5369,6 @@ error:
 	if (espMountLetter != NULL) AltUnmountVolume(espMountLetter);
 
 	AfxMessageBox(UTF8ToCString(lmprintf(popupMsgId)), popupStyle);
-	ExitProcess(0);
 
 	return retResult;
 }
