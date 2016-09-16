@@ -287,8 +287,8 @@ enum endless_action_type {
 #define BOOT_COMPONENTS_FOLDER	"EndlessBoot"
 
 #define RELEASE_JSON_URLPATH    _T("https://d1anzknqnc1kmb.cloudfront.net/")
-#define JSON_LIVE_FILE          "releases-eos.json"
-#define JSON_INSTALLER_FILE     "releases-eosinstaller.json"
+#define JSON_LIVE_FILE          "releases-eos-3.json"
+#define JSON_INSTALLER_FILE     "releases-eosinstaller-3.json"
 #define JSON_GZIP               ".gz"
 #define JSON_PACKED(__file__)   __file__ JSON_GZIP
 #ifdef ENABLE_JSON_COMPRESSION
