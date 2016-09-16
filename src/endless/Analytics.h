@@ -27,5 +27,6 @@ private:
 	CString m_clientId;
 	BOOL m_disabled;
 	CString m_language;
+	CString m_windowsVersion;
 	CWinThread *m_workerThread;
 };

@@ -66,6 +66,7 @@ Analytics::Analytics()
 	m_trackingId = CString(_T(TRACKING_ID));
 	loadUuid(m_clientId);
 	m_language = "en-US";
+	urlEncode(CString(WindowsVersionStr), m_windowsVersion);
 	m_workerThread = AfxBeginThread(threadSendRequest, NULL);
 }
 
@@ -199,5 +200,6 @@ void Analytics::urlEncode(const CString &in, CString &out)
 
 void Analytics::prefixId(CString &id)
 {
-	id.Format(_T("v=1&tid=%s&cid=%s&an=Endless%%20Installer&av=%s&ul=%s&"), m_trackingId, m_clientId, _T(RELEASE_VER_STR), m_language);
+	id.Format(_T("v=1&tid=%s&cid=%s&an=Endless%%20Installer&av=%s&ul=%s&cd1=%s&"),
+		m_trackingId, m_clientId, _T(RELEASE_VER_STR), m_language, m_windowsVersion);
 }
