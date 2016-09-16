@@ -95,7 +95,8 @@ void Analytics::sessionControl(BOOL start, BOOL uninstall)
 		sendRequest(body);
 	}
 	else {
-		body = body + _T("t=screenview&cd=LastPage&sc=end");
+		CString page = uninstall ? _T("UninstallFinished") : _T("LastPage");
+		body = body + _T("t=screenview&cd=") + page + _T("&sc=end");
 		sendRequest(body, TRUE);
 		DWORD ret = WaitForSingleObject(m_workerThread->m_hThread, 4000);
 		if (ret == WAIT_TIMEOUT) {
