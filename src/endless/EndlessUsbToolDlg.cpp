@@ -5464,8 +5464,7 @@ BOOL CEndlessUsbToolDlg::UninstallDualBoot()
 	// remove <SYSDRIVE>:\Endless
 	IFFALSE_PRINTERROR(ChangeAccessPermissions(endlessFilesPath, false), "Error on granting Endless files permissions.");
 	if (exePath.Find(endlessFilesPath) == 0) {
-		// TODO: we need to add a self-delete solution
-
+		DelayDeleteFolder(endlessFilesPath); // maybe we should do the delay delete evrytime to make sure the folder will get deleted?
 	} else {
 		RemoveNonEmptyDirectory(endlessFilesPath);
 	}
@@ -5567,4 +5566,34 @@ BOOL CEndlessUsbToolDlg::MountESPFromDrive(HANDLE hPhysical, const char **espMou
 	retResult = TRUE;
 error:
 	return retResult;
+}
+
+// A combination of 2 of the options found here: http://www.catch22.net/tuts/self-deleting-executables
+// This needs to be tested on all supported OS versions; I tested on Windows 8 and XP and it works
+void CEndlessUsbToolDlg::DelayDeleteFolder(const CString &folder)
+{
+	wchar_t *shortPath = NULL, cmd[MAX_PATH], params[MAX_PATH];
+	int timeoutSeconds = 5;
+
+	long  result = GetShortPathName(folder, shortPath, 0);
+	IFFALSE_GOTOERROR(result != 0, "Error on getting size needed for GetShortPathName");
+	shortPath = new wchar_t[result];
+
+	result = GetShortPathName(folder, shortPath, result);
+	IFFALSE_RETURN(result != 0, "Error on GetShortPathName");
+
+	// cmd.exe /q /c "for /l %N in () do timeout 5 >> NUL & @rmdir /S /Q C:\endless >> NUL & if not exist C:\endless exit"
+	swprintf_s(params, L"/q /c \"for /l %%N in () do timeout %d >> NUL & @rmdir /S /Q %ls >> NUL & if not exist %ls exit\"", timeoutSeconds, shortPath, shortPath);
+
+	IFFALSE_GOTOERROR(GetEnvironmentVariableW(L"ComSpec", cmd, MAX_PATH) != 0, "Error on GetEnvironmentVariableW");
+	uprintf("Running '%ls' with '%ls'", cmd, params);
+	INT execResult = (INT)ShellExecute(0, 0, cmd, params, 0, SW_HIDE);
+	uprintf("ShellExecute returned %d", execResult);
+	IFFALSE_GOTOERROR(execResult > 32, "Error returned by ShellExecute");
+
+error:
+	if (shortPath != NULL) {
+		delete [] shortPath;
+		shortPath = NULL;
+	}
 }

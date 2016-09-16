@@ -331,4 +331,6 @@ private:
 	static BOOL ResetEndlessRegistryKey(HKEY parentKey, const CString &keyPath, const CString &keyName);
 
 	static BOOL MountESPFromDrive(HANDLE hPhysical, const char **espMountLetter, const CString &systemDriveLetter);
+
+	static void DelayDeleteFolder(const CString &folder);
 };
