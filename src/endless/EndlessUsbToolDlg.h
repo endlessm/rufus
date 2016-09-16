@@ -325,7 +325,7 @@ private:
 	static BOOL IsBitlockedDrive(const CString &drive);
 
 	static CStringW GetExePath();
-	static BOOL AddUninstallRegistryKeys(const CStringW &uninstallExePath, const CStringW &installPath, DWORD versionMajor, DWORD versionMinor);
+	static BOOL AddUninstallRegistryKeys(const CStringW &uninstallExePath, const CStringW &installPath);
 
 	static BOOL UninstallDualBoot();
 	static BOOL ResetEndlessRegistryKey(HKEY parentKey, const CString &keyPath, const CString &keyName);

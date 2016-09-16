@@ -4727,7 +4727,7 @@ DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 	IFFALSE_PRINTERROR(SetEndlessRegistryKey(HKEY_LOCAL_MACHINE, REGKEY_FASTBOOT_PATH, REGKEY_FASTBOOT, CComVariant(1)), "Error on disabling fastboot.");
 
 	// Add uninstall entry for Control Panel
-	IFFALSE_GOTOERROR(AddUninstallRegistryKeys(endlessFilesPath + ENDLESS_UNINSTALLER_NAME, endlessFilesPath, 3, 0), "Error on AddUninstallRegistryKeys.");
+	IFFALSE_GOTOERROR(AddUninstallRegistryKeys(endlessFilesPath + ENDLESS_UNINSTALLER_NAME, endlessFilesPath), "Error on AddUninstallRegistryKeys.");
 
 	UpdateProgress(OP_SETUP_DUALBOOT, DB_PROGRESS_MBR_OR_EFI_SETUP);
 
@@ -5362,12 +5362,9 @@ error:
 #define REGKEY_ENDLESS_OS		ENDLESS_OS_NAME
 #define REGKEY_UNINSTALLENDLESS (REGKEY_WIN_UNINSTALL REGKEY_ENDLESS_OS)
 #define REGKEY_DISPLAYNAME		L"DisplayName"
-#define REGKEY_DISPLAYVERSION	L"DisplayVersion"
 #define REGKEY_UNINSTALL_STRING	L"UninstallString"
 #define REGKEY_INSTALL_LOCATION	L"InstallLocation"
 #define REGKEY_PUBLISHER		L"Publisher"
-#define REGKEY_VERSION_MAJOR	L"VersionMajor"
-#define REGKEY_VERSION_MINOR	L"VersionMinor"
 #define REGKEY_HELP_LINK		L"HelpLink"
 #define REGKEY_NOCHANGE			L"NoChange"
 #define REGKEY_NOMODIFY			L"NoModify"
@@ -5375,7 +5372,7 @@ error:
 #define REGKEY_DISPLAYNAME_TEXT	ENDLESS_OS_NAME
 #define REGKEY_PUBLISHER_TEXT	L"Endless Mobile, Inc."
 
-BOOL CEndlessUsbToolDlg::AddUninstallRegistryKeys(const CStringW &uninstallExePath, const CStringW &installPath, DWORD versionMajor, DWORD versionMinor)
+BOOL CEndlessUsbToolDlg::AddUninstallRegistryKeys(const CStringW &uninstallExePath, const CStringW &installPath)
 {
 	CRegKey registryKey;
 	LSTATUS result;
@@ -5387,14 +5384,10 @@ BOOL CEndlessUsbToolDlg::AddUninstallRegistryKeys(const CStringW &uninstallExePa
 	IFFALSE_GOTOERROR(result == ERROR_SUCCESS, "Error on CRegKey::Create.");
 
 	IFFALSE_GOTOERROR(SetEndlessRegistryKey(HKEY_LOCAL_MACHINE, REGKEY_UNINSTALLENDLESS, REGKEY_DISPLAYNAME, REGKEY_DISPLAYNAME_TEXT, false), "Error on REGKEY_DISPLAYNAME");
-	displayVersion.Format(L"%d.%d", versionMajor, versionMinor);
-	IFFALSE_GOTOERROR(SetEndlessRegistryKey(HKEY_LOCAL_MACHINE, REGKEY_UNINSTALLENDLESS, REGKEY_DISPLAYVERSION, CComBSTR(displayVersion), false), "Error on REGKEY_DISPLAYVERSION");
 	IFFALSE_GOTOERROR(SetEndlessRegistryKey(HKEY_LOCAL_MACHINE, REGKEY_UNINSTALLENDLESS, REGKEY_HELP_LINK, UTF8ToBSTR(lmprintf(MSG_314)), false), "Error on REGKEY_HELP_LINK");
 	IFFALSE_GOTOERROR(SetEndlessRegistryKey(HKEY_LOCAL_MACHINE, REGKEY_UNINSTALLENDLESS, REGKEY_UNINSTALL_STRING, CComBSTR(uninstallExePath), false), "Error on REGKEY_UNINSTALL_STRING");
 	IFFALSE_GOTOERROR(SetEndlessRegistryKey(HKEY_LOCAL_MACHINE, REGKEY_UNINSTALLENDLESS, REGKEY_INSTALL_LOCATION, CComBSTR(installPath), false), "Error on REGKEY_INSTALL_LOCATION");
 	IFFALSE_GOTOERROR(SetEndlessRegistryKey(HKEY_LOCAL_MACHINE, REGKEY_UNINSTALLENDLESS, REGKEY_PUBLISHER, REGKEY_PUBLISHER_TEXT, false), "Error on REGKEY_PUBLISHER");
-	IFFALSE_GOTOERROR(SetEndlessRegistryKey(HKEY_LOCAL_MACHINE, REGKEY_UNINSTALLENDLESS, REGKEY_VERSION_MAJOR, versionMajor, false), "Error on REGKEY_VERSION_MAJOR");
-	IFFALSE_GOTOERROR(SetEndlessRegistryKey(HKEY_LOCAL_MACHINE, REGKEY_UNINSTALLENDLESS, REGKEY_VERSION_MINOR, versionMinor, false), "Error on REGKEY_VERSION_MINOR");
 	IFFALSE_GOTOERROR(SetEndlessRegistryKey(HKEY_LOCAL_MACHINE, REGKEY_UNINSTALLENDLESS, REGKEY_NOCHANGE, 1, false), "Error on REGKEY_NOCHANGE");
 	IFFALSE_GOTOERROR(SetEndlessRegistryKey(HKEY_LOCAL_MACHINE, REGKEY_UNINSTALLENDLESS, REGKEY_NOMODIFY, 1, false), "Error on REGKEY_NOMODIFY");
 
