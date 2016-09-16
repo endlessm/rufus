@@ -50,6 +50,7 @@ struct ExtraEntries : DRIVE_LAYOUT_INFORMATION_EX
 	PARTITION_INFORMATION_EX PartitionEntry[9];
 };
 
+#define UEFI_BOOT_NAMESPACE			L"{8BE4DF61-93CA-11d2-AA0D-00E098032B8C}"
 
 int print_drive_letter(WCHAR *VolumeName) {
 	DWORD CharCount = MAX_PATH + 1;
@@ -158,7 +159,7 @@ int print_entries(void) {wchar_t varname[9];
 	int i;
 	int countEmpty = 0;
 
-	size = GetFirmwareEnvironmentVariable(L"BootOrder", _T("{8BE4DF61-93CA-11d2-AA0D-00E098032B8C}"), vardata, sizeof(vardata));
+	size = GetFirmwareEnvironmentVariableW(L"BootOrder", UEFI_BOOT_NAMESPACE, vardata, sizeof(vardata));
 	if (size > 0) {
 		bootorder = (WORD *)vardata;
 		uprintf("Bootorder: ");
@@ -168,7 +169,7 @@ int print_entries(void) {wchar_t varname[9];
 		uprintf("\n");
 	}
 
-	size = GetFirmwareEnvironmentVariable(L"BootNext", _T("{8BE4DF61-93CA-11d2-AA0D-00E098032B8C}"), vardata, sizeof(vardata));
+	size = GetFirmwareEnvironmentVariableW(L"BootNext", UEFI_BOOT_NAMESPACE, vardata, sizeof(vardata));
 	if (size > 0) {
 		WORD *bootnext = (WORD *)vardata;
 		uprintf("BootNext: %d\n", *bootnext);
@@ -176,7 +177,7 @@ int print_entries(void) {wchar_t varname[9];
 	for (i = 0; i <= 0xffff && countEmpty < 5; i++) {
 		EFI_HARD_DRIVE_PATH *hdpath;
 		swprintf(varname, sizeof(varname), L"Boot%04x", i);
-		size = GetFirmwareEnvironmentVariable(varname, _T("{8BE4DF61-93CA-11d2-AA0D-00E098032B8C}"), vardata, sizeof(vardata));
+		size = GetFirmwareEnvironmentVariableW(varname, UEFI_BOOT_NAMESPACE, vardata, sizeof(vardata));
 		if (size > 0) {
 			GUID guid;
 			ULONG mbr = 0;
@@ -262,7 +263,6 @@ error:
 	return retResult;
 }
 
-#define UEFI_BOOT_NAMESPACE			L"{8BE4DF61-93CA-11d2-AA0D-00E098032B8C}"
 #define UEFI_VAR_BOOTORDER			L"BootOrder"
 #define UEFI_VAR_BOOT_ENTRY_FORMAT	L"Boot%04x"
 
@@ -473,7 +473,7 @@ bool EFIRemoveEntry(wchar_t *desc) {
 
 	swprintf(varname, sizeof(varname), UEFI_VAR_BOOT_ENTRY_FORMAT, target);
 	/* Writing a zero length variable deletes it */
-	IFFALSE_RETURN_VALUE(SetFirmwareEnvironmentVariable(varname, L"{8BE4DF61-93CA-11d2-AA0D-00E098032B8C}", NULL, 0), "Error on SetFirmwareEnvironmentVariable", false);
+	IFFALSE_RETURN_VALUE(SetFirmwareEnvironmentVariable(varname, UEFI_BOOT_NAMESPACE, NULL, 0), "Error on SetFirmwareEnvironmentVariable", false);
 
 	/* Remove our entry from the boot order */
 	DWORD size = GetFirmwareEnvironmentVariable(UEFI_VAR_BOOTORDER, UEFI_BOOT_NAMESPACE, vardata, sizeof(vardata));
