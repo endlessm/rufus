@@ -35,6 +35,9 @@ static UINT threadSendRequest(LPVOID pParam)
 			if (file) {
 				file->SendRequest(headers, (LPVOID)(LPCSTR)bodyUtf8, bodyUtf8.GetLength());
 				uprintf("Analytics req: %s\n", (LPCSTR)bodyUtf8);
+				DWORD responseCode = 0;
+				IFFALSE_PRINTERROR(file->QueryInfoStatusCode(responseCode), "QueryInfoStatusCode failed");
+				uprintf("Analytics: response code %d", responseCode);
 				delete file;
 			}
 			else {
