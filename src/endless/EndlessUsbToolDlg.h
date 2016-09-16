@@ -53,7 +53,7 @@ class CEndlessUsbToolDlg : public CDHtmlDialog
 {
 	// Construction
 public:
-	CEndlessUsbToolDlg(UINT globalMessage, bool enableLogDebugging, CWnd* pParent = NULL);	// standard constructor
+	CEndlessUsbToolDlg(UINT globalMessage, CWnd* pParent = NULL);	// standard constructor
     ~CEndlessUsbToolDlg();
 
 // Dialog Data
@@ -177,7 +177,6 @@ private:
 
     CString m_LiveFile;
     CString m_LiveFileSig;
-    static CString m_appDir;
 
 	CString m_bootArchive;
 	CString m_bootArchiveSig;
@@ -193,8 +192,6 @@ private:
     DWORD m_ieVersion;
     UINT m_globalWndMessage;
 
-    bool m_enableLogDebugging;
-    CFile m_logFile;
     ErrorCause_t m_lastErrorCause;
     long m_maximumUSBVersion;
 	unsigned long m_cancelImageUnpack;

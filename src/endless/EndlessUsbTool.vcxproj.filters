@@ -129,6 +129,9 @@
     <ClInclude Include="grub\reed_solomon.h">
       <Filter>Header Files\grub</Filter>
     </ClInclude>
+    <ClInclude Include="StringHelperMethods.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EndlessUsbTool.cpp">
@@ -205,7 +208,7 @@
     </ClCompile>
     <ClCompile Include="Analytics.cpp">
       <Filter>Source Files</Filter>
-	</ClCompile>
+    </ClCompile>
     <ClCompile Include="UEFIBootSetup.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -214,6 +217,9 @@
     </ClCompile>
     <ClCompile Include="grub\grub.c">
       <Filter>Source Files\grub</Filter>
+    </ClCompile>
+    <ClCompile Include="StringHelperMethods.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

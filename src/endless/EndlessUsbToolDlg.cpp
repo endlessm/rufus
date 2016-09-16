@@ -18,6 +18,7 @@
 #include <fstream>
 #include "Version.h"
 #include "WindowsUsbDefines.h"
+#include "StringHelperMethods.h"
 
 // Rufus include files
 extern "C" {
@@ -55,7 +56,7 @@ HINSTANCE hMainInstance = NULL;
 
 BOOL detect_fakes = FALSE;
 
-char app_dir[MAX_PATH], system_dir[MAX_PATH], sysnative_dir[MAX_PATH];
+char system_dir[MAX_PATH], sysnative_dir[MAX_PATH];
 char* image_path = NULL;
 // Number of steps for each FS for FCC_STRUCTURE_PROGRESS
 const int nb_steps[FS_MAX] = { 5, 5, 12, 1, 10 };
@@ -75,8 +76,6 @@ PF_TYPE_DECL(WINAPI, BOOL, SHChangeNotifyDeregister, (ULONG));
 PF_TYPE_DECL(WINAPI, ULONG, SHChangeNotifyRegister, (HWND, int, LONG, UINT, int, const SHChangeNotifyEntry *));
 
 BOOL FormatDrive(DWORD DriveIndex, int fsToUse, const wchar_t *partLabel);
-
-extern HANDLE GlobalLoggingMutex;
 
 // Added by us so we don't go through the hastle of getting device speed again
 // Rufus code already does it
@@ -256,7 +255,7 @@ static_assert(
 #define INI_LOCALE_BN       "bn_BD.utf8"
 
 
-#define GET_LOCAL_PATH(__filename__) (m_appDir + "\\" + (__filename__))
+#define GET_LOCAL_PATH(__filename__) (CEndlessUsbToolApp::m_appDir + "\\" + (__filename__))
 #define CSTRING_GET_LAST(__path__, __separator__) __path__.Right(__path__.GetLength() - __path__.ReverseFind(__separator__) - 1)
 #define CSTRING_GET_PATH(__path__, __separator__) __path__.Left(__path__.ReverseFind(__separator__))
 
@@ -328,43 +327,6 @@ CString hardcoded_BootPathAsc(HARDCODED_PATH BOOT_ARCHIVE_SUFFIX SIGNATURE_FILE_
 
 
 #define FORMAT_STATUS_CANCEL (ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_CANCELLED)
-
-// utility method for quick char* UTF8 conversion to BSTR
-CComBSTR UTF8ToBSTR(const char *txt) {
-	int wchars_num = MultiByteToWideChar(CP_UTF8, 0, txt, -1, NULL, 0);
-	wchar_t* wstr = new wchar_t[wchars_num];
-	MultiByteToWideChar(CP_UTF8, 0, txt, -1, wstr, wchars_num);
-	CComBSTR return_value(wstr);
-	delete[] wstr;
-
-	return return_value;
-}
-
-CString UTF8ToCString(const char *txt) {
-    int wchars_num = MultiByteToWideChar(CP_UTF8, 0, txt, -1, NULL, 0);
-    wchar_t* wstr = new wchar_t[wchars_num];
-    MultiByteToWideChar(CP_UTF8, 0, txt, -1, wstr, wchars_num);
-    CString return_value(wstr);
-    delete[] wstr;
-
-    return return_value;
-}
-
-CStringA ConvertUnicodeToUTF8(const CStringW& uni)
-{
-    if (uni.IsEmpty()) return ""; // nothing to do
-    CStringA utf8;
-    int cc = 0;
-    // get length (cc) of the new multibyte string excluding the \0 terminator first
-    if ((cc = WideCharToMultiByte(CP_UTF8, 0, uni, -1, NULL, 0, 0, 0) - 1) > 0)
-    {
-        // convert
-        char *buf = utf8.GetBuffer(cc);
-        if (buf) WideCharToMultiByte(CP_UTF8, 0, uni, -1, buf, cc, 0, 0);
-        utf8.ReleaseBuffer();
-    }
-    return utf8;
-}
 
 static LPCTSTR OperationToStr(int op)
 {
@@ -497,14 +459,13 @@ END_DISPATCH_MAP()
 CMap<CString, LPCTSTR, uint32_t, uint32_t> CEndlessUsbToolDlg::m_personalityToLocaleMsg;
 CMap<CStringA, LPCSTR, CString, LPCTSTR> CEndlessUsbToolDlg::m_localeToPersonality;
 CMap<CStringA, LPCSTR, CStringA, LPCSTR> CEndlessUsbToolDlg::m_localeToIniLocale;
-CString CEndlessUsbToolDlg::m_appDir;
 
 int CEndlessUsbToolDlg::ImageUnpackOperation;
 int CEndlessUsbToolDlg::ImageUnpackPercentStart;
 int CEndlessUsbToolDlg::ImageUnpackPercentEnd;
 ULONGLONG CEndlessUsbToolDlg::ImageUnpackFileSize;
 
-CEndlessUsbToolDlg::CEndlessUsbToolDlg(UINT globalMessage, bool enableLogDebugging, CWnd* pParent /*=NULL*/)
+CEndlessUsbToolDlg::CEndlessUsbToolDlg(UINT globalMessage, CWnd* pParent /*=NULL*/)
     : CDHtmlDialog(IDD_ENDLESSUSBTOOL_DIALOG, IDR_HTML_ENDLESSUSBTOOL_DIALOG, pParent),
     m_selectedLocale(NULL),
     m_liveInstall(false),
@@ -534,14 +495,11 @@ CEndlessUsbToolDlg::CEndlessUsbToolDlg(UINT globalMessage, bool enableLogDebuggi
     m_ieVersion(0),
     m_globalWndMessage(globalMessage),
     m_isConnected(false),
-    m_enableLogDebugging(enableLogDebugging),
     m_lastErrorCause(ErrorCause_t::ErrorCauseNone),
     m_localFilesScanned(false),
     m_jsonDownloadAttempted(false),
 	m_uninstallMode(false)
 {
-    GlobalLoggingMutex = CreateMutex(NULL, FALSE, NULL);
-
     FUNCTION_ENTER;
     m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);    
 
@@ -569,12 +527,6 @@ CEndlessUsbToolDlg::CEndlessUsbToolDlg(UINT globalMessage, bool enableLogDebuggi
 
 CEndlessUsbToolDlg::~CEndlessUsbToolDlg() {
     FUNCTION_ENTER;
-    if (m_enableLogDebugging) {
-        m_enableLogDebugging = false;
-        m_logFile.Close();
-    }
-
-    if(GlobalLoggingMutex != NULL) CloseHandle(GlobalLoggingMutex);
 }
 
 void CEndlessUsbToolDlg::DoDataExchange(CDataExchange* pDX)
@@ -764,7 +716,7 @@ BOOL CEndlessUsbToolDlg::OnInitDialog()
 
 	CDHtmlDialog::OnInitDialog();
 
-    InitLogging();
+	if(CEndlessUsbToolApp::m_enableLogDebugging) hLog = m_hWnd;
 
     // Set the icon for this dialog.  The framework does this automatically
 	//  when the application's main window is not a dialog
@@ -1066,18 +1018,15 @@ LRESULT CEndlessUsbToolDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lPara
     error:
         uprintf("CEndlessUsbToolDlg::WindowProc called with %d[0x%X] (%d, %d); FAILURE %x", message, message, lParam, wParam, hr);
         return -1;
-    } else if (m_enableLogDebugging && message >= EM_GETSEL && message < EM_GETIMESTATUS) {
+    } else if (message >= EM_GETSEL && message < EM_GETIMESTATUS) {
         // Handle messages sent to the log window
         // Do not use any method that calls _uprintf as it will generate an infinite recursive loop
         // Use OutputDebugString instead.
         switch (message) {
             case EM_SETSEL:
             {
-                static CStringA strMessage;
                 char *logMessage = (char*)lParam;
-                CStringA time(CTime::GetCurrentTime().Format(_T("%H:%M:%S - ")));
-                strMessage = time + CStringA(logMessage);
-                m_logFile.Write(strMessage, strMessage.GetLength());
+				CEndlessUsbToolApp::Log(logMessage);
                 free(logMessage);
                 break;
             }
@@ -2080,7 +2029,7 @@ void CEndlessUsbToolDlg::UpdateFileEntries(bool shouldInit)
     m_localInstallerImage.stillPresent = FALSE;
 
     if (findFilesHandle == INVALID_HANDLE_VALUE) {
-        uprintf("UpdateFileEntries: No files found in current directory [%ls]", m_appDir);
+        uprintf("UpdateFileEntries: No files found in current directory [%ls]", CEndlessUsbToolApp::m_appDir);
         goto checkEntries;
     }
 
@@ -2227,7 +2176,7 @@ DWORD WINAPI CEndlessUsbToolDlg::FileScanThread(void* param)
     //changeNotifyFilter |= FILE_NOTIFY_CHANGE_SIZE;
 
     handlesToWaitFor[0] = dlg->m_closeFileScanThreadEvent;
-    handlesToWaitFor[1] = FindFirstChangeNotification(dlg->m_appDir, FALSE, changeNotifyFilter);
+    handlesToWaitFor[1] = FindFirstChangeNotification(CEndlessUsbToolApp::m_appDir, FALSE, changeNotifyFilter);
     if (handlesToWaitFor[1] == INVALID_HANDLE_VALUE) {
         error = GetLastError();
         uprintf("Error on FindFirstChangeNotificationA error=[%d]", error);
@@ -3892,58 +3841,6 @@ DWORD WINAPI CEndlessUsbToolDlg::CheckInternetConnectionThread(void* param)
 done:
     dlg->m_checkConnectionThread = INVALID_HANDLE_VALUE;
     return 0;
-}
-
-void CEndlessUsbToolDlg::InitLogging()
-{
-    TCHAR *path = m_appDir.GetBufferSetLength(MAX_PATH + 1);
-    // Retrieve the current application directory
-    if (GetModuleFileName(NULL, path, MAX_PATH) == 0) {
-        uprintf("Could not get current directory    : %s", WindowsErrorString());
-        app_dir[0] = 0;
-        m_appDir = _T("");
-    } else {
-        m_appDir = CSTRING_GET_PATH(m_appDir, _T('\\'));
-        strcpy_s(app_dir, sizeof(app_dir) - 1, ConvertUnicodeToUTF8(m_appDir));
-        app_dir[sizeof(app_dir) - 1] = 0;
-    }
-    m_appDir.ReleaseBuffer();
-
-    // Set the Windows version
-    GetWindowsVersion();
-
-    if (!m_enableLogDebugging) {
-        uprintf("Logging not enabled.");
-        return;
-    }
-
-    // Create file name
-    CTime time = CTime::GetCurrentTime();
-    CString s = time.Format(_T("%Y%m%d_%H_%M_%S"));
-    CString fileName(ENDLESS_INSTALLER_TEXT);
-    fileName.Replace(L" ", L"");
-    fileName += s;
-    fileName += L".log";
-    fileName = GET_LOCAL_PATH(fileName);
-
-    try {
-        BOOL result = m_logFile.Open(fileName, CFile::modeWrite | CFile::typeUnicode | CFile::shareDenyWrite | CFile::modeCreate | CFile::osWriteThrough);
-        if (!result) {
-            m_enableLogDebugging = false;
-        } else {
-            hLog = m_hWnd;
-        }
-
-        uprintf("Log original date time %ls\n", s);
-        uprintf("Application version: %s\n", RELEASE_VER_STR);
-        uprintf("Windows version: %s\n", WindowsVersionStr);
-        uprintf("Windows version number: 0x%X\n", nWindowsVersion);
-        uprintf("-----------------------------------\n", s);
-    } catch (CFileException *ex) {
-        m_enableLogDebugging = false;
-        uprintf("CFileException on file [%ls] with cause [%d] and OS error [%d]", fileName, ex->m_cause, ex->m_lOsError);
-        ex->Delete();
-    }
 }
 
 void CEndlessUsbToolDlg::EnableHibernate(bool enable)
