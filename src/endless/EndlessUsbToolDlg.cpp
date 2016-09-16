@@ -4954,8 +4954,6 @@ bool CEndlessUsbToolDlg::SetupEndlessEFI(const CString &systemDriveLetter, const
 	bool retResult = false;
 	BYTE layout[4096] = { 0 };
 	PDRIVE_LAYOUT_INFORMATION_EX DriveLayout = (PDRIVE_LAYOUT_INFORMATION_EX)(void*)layout;
-	DWORD size;
-	BOOL result;
 	CStringA systemDriveA;
 	CString windowsEspDriveLetter;
 	const char *espMountLetter = NULL;
@@ -4963,7 +4961,7 @@ bool CEndlessUsbToolDlg::SetupEndlessEFI(const CString &systemDriveLetter, const
 	hPhysical = GetPhysicalFromDriveLetter(systemDriveLetter);
 	IFFALSE_GOTOERROR(hPhysical != INVALID_HANDLE_VALUE, "Error on acquiring disk handle.");
 
-	IFFALSE_GOTOERROR(MountESPFromDrive(hPhysical, espMountLetter, systemDriveLetter), "Error on MountESPFromDrive");
+	IFFALSE_GOTOERROR(MountESPFromDrive(hPhysical, &espMountLetter, systemDriveLetter), "Error on MountESPFromDrive");
 	windowsEspDriveLetter = UTF8ToCString(espMountLetter);
 
 	IFFALSE_GOTOERROR(CopyMultipleItems(bootFilesPath + EFI_BOOT_SUBDIRECTORY + L"\\" + ALL_FILES, windowsEspDriveLetter + L"\\" + ENDLESS_BOOT_SUBDIRECTORY), "Error copying EFI folder to Windows ESP partition.");
@@ -5419,6 +5417,7 @@ BOOL CEndlessUsbToolDlg::UninstallDualBoot()
 	CString endlessFilesPath = systemDriveLetter + PATH_ENDLESS_SUBDIRECTORY;
 	HANDLE hPhysical = GetPhysicalFromDriveLetter(systemDriveLetter);
 	const char *espMountLetter = NULL;
+	CString exePath = GetExePath();
 
 	if (IsLegacyBIOSBoot()) { // remove MBR entry
 		FAKE_FD fake_fd = { 0 };
@@ -5440,10 +5439,9 @@ BOOL CEndlessUsbToolDlg::UninstallDualBoot()
 		IFFALSE_PRINTERROR(EFIRequireNeededPrivileges(), "Error on EFIRequireNeededPrivileges.")
 		IFFALSE_GOTOERROR(EFIRemoveEntry(ENDLESS_OS_NAME), "Error on EFIRemoveEntry");
 
-		IFFALSE_GOTOERROR(MountESPFromDrive(hPhysical, espMountLetter, systemDriveLetter), "Error on MountESPFromDrive");
+		IFFALSE_GOTOERROR(MountESPFromDrive(hPhysical, &espMountLetter, systemDriveLetter), "Error on MountESPFromDrive");
 		windowsEspDriveLetter = UTF8ToCString(espMountLetter);
 		RemoveNonEmptyDirectory(windowsEspDriveLetter + L"\\" + ENDLESS_BOOT_SUBDIRECTORY);
-
 	}
 
 	// restore the registry key for Windows clock in UTC
@@ -5463,7 +5461,14 @@ BOOL CEndlessUsbToolDlg::UninstallDualBoot()
 	} while (FALSE);
 
 
-	// TODO: remove C:\Endless
+	// remove <SYSDRIVE>:\Endless
+	IFFALSE_PRINTERROR(ChangeAccessPermissions(endlessFilesPath, false), "Error on granting Endless files permissions.");
+	if (exePath.Find(endlessFilesPath) == 0) {
+		// TODO: we need to add a self-delete solution
+
+	} else {
+		RemoveNonEmptyDirectory(endlessFilesPath);
+	}
 
 	// set success message and icon
 	popupMsgId = MSG_362;
@@ -5524,7 +5529,7 @@ error:
 
 }
 
-BOOL CEndlessUsbToolDlg::MountESPFromDrive(HANDLE hPhysical, const char *espMountLetter, const CString &systemDriveLetter)
+BOOL CEndlessUsbToolDlg::MountESPFromDrive(HANDLE hPhysical, const char **espMountLetter, const CString &systemDriveLetter)
 {
 	FUNCTION_ENTER;
 
@@ -5556,8 +5561,8 @@ BOOL CEndlessUsbToolDlg::MountESPFromDrive(HANDLE hPhysical, const char *espMoun
 	// uin8_t that AltMountVolume receives as parameter for partition number
 	IFFALSE_GOTOERROR(efiPartitionNumber <= 0xFF, "EFI partition number is bigger than 255.");
 
-	espMountLetter = AltMountVolume(ConvertUnicodeToUTF8(systemDriveLetter.Left(2)), (uint8_t)efiPartitionNumber);
-	IFFALSE_GOTOERROR(espMountLetter != NULL, "Error assigning a letter to the ESP.");
+	*espMountLetter = AltMountVolume(ConvertUnicodeToUTF8(systemDriveLetter.Left(2)), (uint8_t)efiPartitionNumber);
+	IFFALSE_GOTOERROR(*espMountLetter != NULL, "Error assigning a letter to the ESP.");
 
 	retResult = TRUE;
 error:

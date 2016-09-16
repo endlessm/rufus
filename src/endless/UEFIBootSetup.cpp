@@ -466,7 +466,7 @@ bool EFIRemoveEntry(wchar_t *desc) {
 	wchar_t varname[9];
 	int target = -1;
 
-	print_entries();
+	//print_entries();
 
 	target = EFIGetBootEntryNumber(desc);
 	IFFALSE_RETURN_VALUE(target != -1, "Failed to find EFI entry for Endless OS", false);
@@ -502,7 +502,7 @@ bool EFIRemoveEntry(wchar_t *desc) {
 		uprintf("Our EFI entry %ls was not found in BootOrder list", varname);
 	}
 
-	print_entries();
+	//print_entries();
 
 	return true;
 }
