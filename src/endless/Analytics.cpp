@@ -35,6 +35,9 @@ static UINT threadSendRequest(LPVOID pParam)
 			if (file) {
 				file->SendRequest(headers, (LPVOID)(LPCSTR)bodyUtf8, bodyUtf8.GetLength());
 				uprintf("Analytics req: %s\n", (LPCSTR)bodyUtf8);
+				DWORD responseCode = 0;
+				IFFALSE_PRINTERROR(file->QueryInfoStatusCode(responseCode), "QueryInfoStatusCode failed");
+				uprintf("Analytics: response code %d", responseCode);
 				delete file;
 			}
 			else {
@@ -80,18 +83,20 @@ Analytics *Analytics::instance()
 	return &instance;
 }
 
-void Analytics::sessionControl(BOOL start)
+void Analytics::sessionControl(BOOL start, BOOL uninstall)
 {
 	if (m_disabled) return;
 	FUNCTION_ENTER;
 	CString body;
 	prefixId(body);
 	if (start) {
-		body = body + _T("t=screenview&cd=DualBootInstallPage&sc=start");
+		CString page = uninstall ? _T("Uninstall") : _T("DualBootInstall");
+		body = body + _T("t=screenview&cd=") + page + _T("Page&sc=start");
 		sendRequest(body);
 	}
 	else {
-		body = body + _T("t=screenview&cd=LastPage&sc=end");
+		CString page = uninstall ? _T("UninstallFinished") : _T("LastPage");
+		body = body + _T("t=screenview&cd=") + page + _T("&sc=end");
 		sendRequest(body, TRUE);
 		DWORD ret = WaitForSingleObject(m_workerThread->m_hThread, 4000);
 		if (ret == WAIT_TIMEOUT) {

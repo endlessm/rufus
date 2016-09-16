@@ -124,8 +124,6 @@ BOOL CEndlessUsbToolApp::InitInstance()
 
     UINT wndMsg = RegisterWindowMessage(_T("EndlessUSBToolShow"));
 
-	Analytics::instance()->sessionControl(true);
-
     // check if we are the first instance
     HANDLE singleInstanceMutex = CreateMutex(NULL, TRUE, _T("Global\\EndlessUsbTool"));
 
@@ -160,8 +158,6 @@ BOOL CEndlessUsbToolApp::InitInstance()
 	}
 
     ReleaseMutex(singleInstanceMutex);
-
-	Analytics::instance()->sessionControl(false);
 
 	UninitLogging();
 
