@@ -17,7 +17,7 @@
 
 #define IFTRUE_GOTO(__CONDITION__, __ERRROR_MSG__, __LABEL__) if((__CONDITION__)) { PRINT_ERROR_MSG(__ERRROR_MSG__); goto __LABEL__; }
 #define IFTRUE_GOTOERROR(__CONDITION__, __ERRROR_MSG__) if((__CONDITION__)) { PRINT_ERROR_MSG(__ERRROR_MSG__); goto error; }
-
+#define IFTRUE_RETURN(__CONDITION__, __ERRROR_MSG__) if((__CONDITION__)) { PRINT_ERROR_MSG(__ERRROR_MSG__); return; }
 
 #define safe_closefile(__file__) if (__file__ != NULL) { fclose(__file__); __file__ = NULL; }
 
@@ -125,6 +125,7 @@ static const uint8_t endless_public_key[] = {
 // methods for adding our entry in BIOS EFI
 bool EFIRequireNeededPrivileges();
 bool EFICreateNewEntry(const wchar_t *drive, wchar_t *path, wchar_t *desc);
+bool EFIRemoveEntry(wchar_t *desc);
 #endif
 
 

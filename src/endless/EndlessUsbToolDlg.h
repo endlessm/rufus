@@ -198,6 +198,7 @@ private:
     ErrorCause_t m_lastErrorCause;
     long m_maximumUSBVersion;
 	unsigned long m_cancelImageUnpack;
+	bool m_uninstallMode;
 
     void StartOperationThread(int operation, LPTHREAD_START_ROUTINE threadRoutine, LPVOID param = NULL);
 
@@ -322,4 +323,14 @@ private:
 	static CStringW GetSystemDrive();
 	static BOOL SetEndlessRegistryKey(HKEY parentKey, const CString &keyPath, const CString &keyName, CComVariant keyValue, bool createBackup = true);
 	static BOOL IsBitlockedDrive(const CString &drive);
+
+	static CStringW GetExePath();
+	static BOOL AddUninstallRegistryKeys(const CStringW &uninstallExePath, const CStringW &installPath);
+
+	static BOOL UninstallDualBoot();
+	static BOOL ResetEndlessRegistryKey(HKEY parentKey, const CString &keyPath, const CString &keyName);
+
+	static BOOL MountESPFromDrive(HANDLE hPhysical, const char **espMountLetter, const CString &systemDriveLetter);
+
+	static void DelayDeleteFolder(const CString &folder);
 };

@@ -306,9 +306,12 @@ enum endless_action_type {
 #define EOS_INSTALLER_PRODUCT_TEXT  "eosinstaller"
 #define EOS_NONFREE_PRODUCT_TEXT    "eosnonfree"
 #define EOS_OEM_PRODUCT_TEXT		"eosoem"
-const wchar_t* mainWindowTitle = L"Endless USB Creator";
+const wchar_t* mainWindowTitle = L"Endless Installer";
 
 #define ALL_FILES					L"*.*"
+
+#define ENDLESS_UNINSTALLER_NAME L"endless-uninstaller.exe"
+#define ENDLESS_OS_NAME L"Endless OS"
 
 //#define HARDCODED_PATH L"release/3.0.2/eos-amd64-amd64/base/eos-eos3.0-amd64-amd64.160827-104530.base"
 #define HARDCODED_PATH L"eos-amd64-amd64/eos3.0/base/160906-030224/eos-eos3.0-amd64-amd64.160906-030224.base"
@@ -534,7 +537,8 @@ CEndlessUsbToolDlg::CEndlessUsbToolDlg(UINT globalMessage, bool enableLogDebuggi
     m_enableLogDebugging(enableLogDebugging),
     m_lastErrorCause(ErrorCause_t::ErrorCauseNone),
     m_localFilesScanned(false),
-    m_jsonDownloadAttempted(false)
+    m_jsonDownloadAttempted(false),
+	m_uninstallMode(false)
 {
     GlobalLoggingMutex = CreateMutex(NULL, FALSE, NULL);
 
@@ -593,6 +597,8 @@ void CEndlessUsbToolDlg::OnDocumentComplete(LPDISPATCH pDisp, LPCTSTR szUrl)
 	CDHtmlDialog::OnDocumentComplete(pDisp, szUrl);
 
 	uprintf("OnDocumentComplete '%ls'", szUrl);
+
+	IFTRUE_RETURN(m_uninstallMode, "Returning as we are in uninstall mode");
 
 	if (this->m_spHtmlDoc == NULL) {
 		uprintf("CEndlessUsbToolDlg::OnDocumentComplete m_spHtmlDoc==NULL");
@@ -803,7 +809,6 @@ BOOL CEndlessUsbToolDlg::OnInitDialog()
         SetWindowRgn(static_cast<HRGN>(rgnComp.GetSafeHandle()), TRUE);
     }
 
-
 	// Init localization before doing anything else
 	LoadLocalizationData();
 
@@ -816,6 +821,19 @@ BOOL CEndlessUsbToolDlg::OnInitDialog()
     bool result = m_downloadManager.Init(m_hWnd, WM_FILE_DOWNLOAD_STATUS);
 
     SetWindowTextW(L"");
+
+	CStringW exePath = GetExePath();
+	if (CSTRING_GET_LAST(exePath,'\\') == ENDLESS_UNINSTALLER_NAME) {
+	//if (CSTRING_GET_LAST(exePath, '\\') == L"EndlessUsbTool.exe") { // for debugging
+		m_uninstallMode = true;
+		int selected = AfxMessageBox(UTF8ToCString(lmprintf(MSG_361)), MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2);
+		if (selected == IDYES) {
+			ShowWindow(SW_HIDE);
+			UninstallDualBoot();
+		} else {
+			ExitProcess(0);
+		}
+	}
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -4646,12 +4664,13 @@ DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 	CString endlessImgPath;
 	CString bootFilesPath = GET_LOCAL_PATH(CString(BOOT_COMPONENTS_FOLDER)) + L"\\";
 	wchar_t fileSystemType[MAX_PATH + 1];
+	CStringW exeFilePath = GetExePath();
 
 	systemDriveLetter = GetSystemDrive();
 	endlessFilesPath = systemDriveLetter + PATH_ENDLESS_SUBDIRECTORY;
 	endlessImgPath = endlessFilesPath + ENDLESS_IMG_FILE_NAME;
 
-	// Verify that this is an NTFS C:\ partition
+	// Verify that this is an NTFS partition
 	IFFALSE_GOTOERROR(GetVolumeInformation(systemDriveLetter, NULL, 0, NULL, NULL, NULL, fileSystemType, MAX_PATH + 1) != 0, "Error on GetVolumeInformation.");
 	uprintf("File system type '%ls'", fileSystemType);
 	IFFALSE_GOTO(0 == wcscmp(fileSystemType, L"NTFS"), "File system type is not NTFS", not_ntfs);
@@ -4669,6 +4688,9 @@ DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 	// Create endless folder
 	int createDirResult = SHCreateDirectoryExW(NULL, endlessFilesPath, NULL);
 	IFFALSE_GOTOERROR(createDirResult == ERROR_SUCCESS || createDirResult == ERROR_ALREADY_EXISTS, "Error creating directory on USB drive.");
+
+	// Copy ourseleves to the <SYSDRIVE>:\endless directory
+	IFFALSE_GOTOERROR(0 != CopyFile(exeFilePath, endlessFilesPath + ENDLESS_UNINSTALLER_NAME, FALSE), "Error copying exe uninstaller file.");
 
 	// Unpack img file
 	CEndlessUsbToolDlg::ImageUnpackOperation = OP_SETUP_DUALBOOT;
@@ -4703,6 +4725,9 @@ DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 
 	// disable Fast Start (aka Hiberboot) so that the NTFS partition is always cleanly unmounted at shutdown:
 	IFFALSE_PRINTERROR(SetEndlessRegistryKey(HKEY_LOCAL_MACHINE, REGKEY_FASTBOOT_PATH, REGKEY_FASTBOOT, CComVariant(1)), "Error on disabling fastboot.");
+
+	// Add uninstall entry for Control Panel
+	IFFALSE_GOTOERROR(AddUninstallRegistryKeys(endlessFilesPath + ENDLESS_UNINSTALLER_NAME, endlessFilesPath), "Error on AddUninstallRegistryKeys.");
 
 	UpdateProgress(OP_SETUP_DUALBOOT, DB_PROGRESS_MBR_OR_EFI_SETUP);
 
@@ -4929,8 +4954,6 @@ bool CEndlessUsbToolDlg::SetupEndlessEFI(const CString &systemDriveLetter, const
 	bool retResult = false;
 	BYTE layout[4096] = { 0 };
 	PDRIVE_LAYOUT_INFORMATION_EX DriveLayout = (PDRIVE_LAYOUT_INFORMATION_EX)(void*)layout;
-	DWORD size;
-	BOOL result;
 	CStringA systemDriveA;
 	CString windowsEspDriveLetter;
 	const char *espMountLetter = NULL;
@@ -4938,36 +4961,13 @@ bool CEndlessUsbToolDlg::SetupEndlessEFI(const CString &systemDriveLetter, const
 	hPhysical = GetPhysicalFromDriveLetter(systemDriveLetter);
 	IFFALSE_GOTOERROR(hPhysical != INVALID_HANDLE_VALUE, "Error on acquiring disk handle.");
 
-	// get partition layout
-	result = DeviceIoControl(hPhysical, IOCTL_DISK_GET_DRIVE_LAYOUT_EX, NULL, 0, layout, sizeof(layout), &size, NULL);
-	IFFALSE_GOTOERROR(result != 0 && size > 0, "Error on querying disk layout.");
-	IFFALSE_GOTOERROR(DriveLayout->PartitionStyle == PARTITION_STYLE_GPT, "Unexpected partition type. Partition style is not GPT");
-
-	DWORD efiPartitionNumber = -1;
-	PARTITION_INFORMATION_EX *partition = NULL;
-	for (DWORD index = 0; index < DriveLayout->PartitionCount; index++) {
-		partition = &(DriveLayout->PartitionEntry[index]);
-
-		if (partition->Gpt.PartitionType == PARTITION_SYSTEM_GUID) {
-			uprintf("Found ESP\r\nPartition %d:\r\n  Type: %s\r\n  Name: '%ls'\r\n ID: %s",
-				index + 1, GuidToString(&partition->Gpt.PartitionType), partition->Gpt.Name, GuidToString(&partition->Gpt.PartitionId));
-			efiPartitionNumber = partition->PartitionNumber;
-			break;
-		}
-	}
-	IFFALSE_GOTOERROR(efiPartitionNumber != -1, "ESP not found.");
-	// Fail if EFI partition number is bigger than we can fit in the
-	// uin8_t that AltMountVolume receives as parameter for partition number
-	IFFALSE_GOTOERROR(efiPartitionNumber <= 0xFF, "EFI partition number is bigger than 255.");
-
-	espMountLetter = AltMountVolume(ConvertUnicodeToUTF8(systemDriveLetter.Left(2)), (uint8_t)efiPartitionNumber);
-	IFFALSE_GOTOERROR(espMountLetter != NULL, "Error assigning a letter to the ESP.");
+	IFFALSE_GOTOERROR(MountESPFromDrive(hPhysical, &espMountLetter, systemDriveLetter), "Error on MountESPFromDrive");
 	windowsEspDriveLetter = UTF8ToCString(espMountLetter);
 
 	IFFALSE_GOTOERROR(CopyMultipleItems(bootFilesPath + EFI_BOOT_SUBDIRECTORY + L"\\" + ALL_FILES, windowsEspDriveLetter + L"\\" + ENDLESS_BOOT_SUBDIRECTORY), "Error copying EFI folder to Windows ESP partition.");
 
-	IFFALSE_PRINTERROR(EFIRequireNeededPrivileges(), "Error on EFIRequireNeededPrivileges.")
-	IFFALSE_GOTOERROR(EFICreateNewEntry(windowsEspDriveLetter, CString(L"\\") + ENDLESS_BOOT_SUBDIRECTORY + L"\\" + ENDLESS_BOOT_EFI_FILE, L"Endless OS"), "Error on EFICreateNewEntry");
+	IFFALSE_PRINTERROR(EFIRequireNeededPrivileges(), "Error on EFIRequireNeededPrivileges.");
+	IFFALSE_GOTOERROR(EFICreateNewEntry(windowsEspDriveLetter, CString(L"\\") + ENDLESS_BOOT_SUBDIRECTORY + L"\\" + ENDLESS_BOOT_EFI_FILE, ENDLESS_OS_NAME), "Error on EFICreateNewEntry");
 
 	retResult = true;
 
@@ -5027,7 +5027,7 @@ BOOL CEndlessUsbToolDlg::SetAttributesForFilesInFolder(CString path, bool addAtt
 
 	uprintf("RestrictAccessToFilesInFolder called with '%ls'", path);
 
-	IFFALSE_PRINTERROR(SetFileAttributes(path + findFileData.cFileName, addAttributes ? FILE_ATTRIBUTE_SYSTEM | FILE_ATTRIBUTE_READONLY : FILE_ATTRIBUTE_NORMAL) != 0, "Error on SetFileAttributes");
+	IFFALSE_PRINTERROR(SetFileAttributes(path, addAttributes ? FILE_ATTRIBUTE_SYSTEM | FILE_ATTRIBUTE_READONLY : FILE_ATTRIBUTE_NORMAL) != 0, "Error on SetFileAttributes");
 
 	if (findFilesHandle == INVALID_HANDLE_VALUE) {
 		uprintf("UpdateFileEntries: No files found in current directory [%ls]", path);
@@ -5040,7 +5040,9 @@ BOOL CEndlessUsbToolDlg::SetAttributesForFilesInFolder(CString path, bool addAtt
 				IFFALSE_PRINTERROR(result = SetAttributesForFilesInFolder(newFolder, addAttributes), "Error on setting attributes.");
 				retValue = retValue && result;
 			} else {
-				IFFALSE_PRINTERROR(SetFileAttributes(path + findFileData.cFileName, addAttributes ? FILE_ATTRIBUTE_SYSTEM | FILE_ATTRIBUTE_READONLY | FILE_ATTRIBUTE_HIDDEN : FILE_ATTRIBUTE_NORMAL) != 0, "Error on SetFileAttributes");
+				if (0 != wcscmp(findFileData.cFileName, ENDLESS_UNINSTALLER_NAME)) {
+					IFFALSE_PRINTERROR(SetFileAttributes(path + findFileData.cFileName, addAttributes ? FILE_ATTRIBUTE_SYSTEM | FILE_ATTRIBUTE_READONLY | FILE_ATTRIBUTE_HIDDEN : FILE_ATTRIBUTE_NORMAL) != 0, "Error on SetFileAttributes");
+				}
 			}
 		} while (FindNextFile(findFilesHandle, &findFileData) != 0);
 
@@ -5200,6 +5202,7 @@ CStringW CEndlessUsbToolDlg::GetSystemDrive()
 }
 
 #define REGKEY_BACKUP_PREFIX	L"EndlessBackup"
+#define REGKEY_DWORD_MISSING	DWORD_MAX
 
 BOOL CEndlessUsbToolDlg::SetEndlessRegistryKey(HKEY parentKey, const CString &keyPath, const CString &keyName, CComVariant keyValue, bool createBackup)
 {
@@ -5227,9 +5230,16 @@ BOOL CEndlessUsbToolDlg::SetEndlessRegistryKey(HKEY parentKey, const CString &ke
 
 				result = registryKey.QueryDWORDValue(keyName, dwValue);
 				if (result == ERROR_SUCCESS) backupValue = dwValue;
-				else backupValue = DWORD_MAX;
+				else backupValue = REGKEY_DWORD_MISSING;
 			}
 			result = registryKey.SetDWORDValue(keyName, keyValue.intVal);
+			break;
+		case VT_BSTR:
+			if (createBackup) {
+				uprintf("Error: backup requested and not implemented for type VT_BSTR.");
+				return FALSE;
+			}
+			result = registryKey.SetStringValue(keyName, keyValue.bstrVal);
 			break;
 		default:
 			uprintf("ERROR: variant type %d not handled", keyValue.vt);
@@ -5322,4 +5332,261 @@ error:
 	CoUninitialize();
 
 	return retResult;
+}
+
+CStringW CEndlessUsbToolDlg::GetExePath()
+{
+	wchar_t *exePath = NULL;
+	DWORD neededSize = MAX_PATH;
+	CStringW retValue = L"";
+
+	do {
+		if (exePath != NULL) safe_free(exePath);
+		exePath = (wchar_t*)malloc((neededSize + 1) * sizeof(wchar_t));
+		memset(exePath, 0, (neededSize + 1) * sizeof(wchar_t));
+		DWORD result = GetModuleFileNameW(NULL, exePath, neededSize);
+		IFFALSE_GOTOERROR(result != 0 && (GetLastError() == ERROR_SUCCESS || GetLastError() == ERROR_INSUFFICIENT_BUFFER), "Could not get needed size for module path");
+		neededSize = result;
+		IFFALSE_CONTINUE(GetLastError() != ERROR_INSUFFICIENT_BUFFER, "Not enough memory allocated for buffer. Trying again.");
+		break;
+	} while (TRUE);
+
+	retValue = exePath;
+error:
+	if (exePath != NULL) safe_free(exePath);
+
+	return retValue;
+}
+
+#define REGKEY_WIN_UNINSTALL	L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\"
+#define REGKEY_ENDLESS_OS		ENDLESS_OS_NAME
+#define REGKEY_UNINSTALLENDLESS (REGKEY_WIN_UNINSTALL REGKEY_ENDLESS_OS)
+#define REGKEY_DISPLAYNAME		L"DisplayName"
+#define REGKEY_UNINSTALL_STRING	L"UninstallString"
+#define REGKEY_INSTALL_LOCATION	L"InstallLocation"
+#define REGKEY_PUBLISHER		L"Publisher"
+#define REGKEY_HELP_LINK		L"HelpLink"
+#define REGKEY_NOCHANGE			L"NoChange"
+#define REGKEY_NOMODIFY			L"NoModify"
+
+#define REGKEY_DISPLAYNAME_TEXT	ENDLESS_OS_NAME
+#define REGKEY_PUBLISHER_TEXT	L"Endless Mobile, Inc."
+
+BOOL CEndlessUsbToolDlg::AddUninstallRegistryKeys(const CStringW &uninstallExePath, const CStringW &installPath)
+{
+	CRegKey registryKey;
+	LSTATUS result;
+	BOOL retResult = FALSE;
+	CStringW displayVersion;
+
+	result = registryKey.Create(HKEY_LOCAL_MACHINE, REGKEY_UNINSTALLENDLESS);
+	uprintf("Result %d on creating key '%ls'", result, REGKEY_UNINSTALLENDLESS);
+	IFFALSE_GOTOERROR(result == ERROR_SUCCESS, "Error on CRegKey::Create.");
+
+	IFFALSE_GOTOERROR(SetEndlessRegistryKey(HKEY_LOCAL_MACHINE, REGKEY_UNINSTALLENDLESS, REGKEY_DISPLAYNAME, REGKEY_DISPLAYNAME_TEXT, false), "Error on REGKEY_DISPLAYNAME");
+	IFFALSE_GOTOERROR(SetEndlessRegistryKey(HKEY_LOCAL_MACHINE, REGKEY_UNINSTALLENDLESS, REGKEY_HELP_LINK, UTF8ToBSTR(lmprintf(MSG_314)), false), "Error on REGKEY_HELP_LINK");
+	IFFALSE_GOTOERROR(SetEndlessRegistryKey(HKEY_LOCAL_MACHINE, REGKEY_UNINSTALLENDLESS, REGKEY_UNINSTALL_STRING, CComBSTR(uninstallExePath), false), "Error on REGKEY_UNINSTALL_STRING");
+	IFFALSE_GOTOERROR(SetEndlessRegistryKey(HKEY_LOCAL_MACHINE, REGKEY_UNINSTALLENDLESS, REGKEY_INSTALL_LOCATION, CComBSTR(installPath), false), "Error on REGKEY_INSTALL_LOCATION");
+	IFFALSE_GOTOERROR(SetEndlessRegistryKey(HKEY_LOCAL_MACHINE, REGKEY_UNINSTALLENDLESS, REGKEY_PUBLISHER, REGKEY_PUBLISHER_TEXT, false), "Error on REGKEY_PUBLISHER");
+	IFFALSE_GOTOERROR(SetEndlessRegistryKey(HKEY_LOCAL_MACHINE, REGKEY_UNINSTALLENDLESS, REGKEY_NOCHANGE, 1, false), "Error on REGKEY_NOCHANGE");
+	IFFALSE_GOTOERROR(SetEndlessRegistryKey(HKEY_LOCAL_MACHINE, REGKEY_UNINSTALLENDLESS, REGKEY_NOMODIFY, 1, false), "Error on REGKEY_NOMODIFY");
+
+	retResult = TRUE;
+error:
+
+	return retResult;
+}
+
+BOOL CEndlessUsbToolDlg::UninstallDualBoot()
+{
+	FUNCTION_ENTER;
+
+	BOOL retResult = FALSE;
+	uint32_t popupMsgId = MSG_363;
+	UINT popupStyle = MB_OK | MB_ICONERROR;
+	FILE *boottrackImgFile = NULL;
+
+	CString systemDriveLetter = GetSystemDrive();
+	CString endlessFilesPath = systemDriveLetter + PATH_ENDLESS_SUBDIRECTORY;
+	HANDLE hPhysical = GetPhysicalFromDriveLetter(systemDriveLetter);
+	const char *espMountLetter = NULL;
+	CString exePath = GetExePath();
+
+	if (IsLegacyBIOSBoot()) { // remove MBR entry
+		FAKE_FD fake_fd = { 0 };
+		FILE* fp = (FILE*)&fake_fd;
+		fake_fd._handle = (char*)hPhysical;
+		IFFALSE_GOTOERROR(hPhysical != INVALID_HANDLE_VALUE, "Error on acquiring disk handle.");
+		if (nWindowsVersion >= WINDOWS_7) {
+			IFFALSE_GOTOERROR(write_win7_mbr(fp), "Error on write_win7_mbr");
+		} else if(nWindowsVersion == WINDOWS_VISTA) {
+			IFFALSE_GOTOERROR(write_vista_mbr(fp), "Error on write_vista_mbr");
+		} else if (nWindowsVersion == WINDOWS_2003 || nWindowsVersion == WINDOWS_XP) {
+			IFFALSE_GOTOERROR(write_2000_mbr(fp), "Error on write_2000_mbr");
+		} else {
+			uprintf("Restore MBR not supported for this windows version '%s', ver %d", WindowsVersionStr, nWindowsVersion);
+			goto error;
+		}
+	} else { // remove EFI entry
+		CString windowsEspDriveLetter;
+		IFFALSE_PRINTERROR(EFIRequireNeededPrivileges(), "Error on EFIRequireNeededPrivileges.")
+		IFFALSE_GOTOERROR(EFIRemoveEntry(ENDLESS_OS_NAME), "Error on EFIRemoveEntry");
+
+		IFFALSE_GOTOERROR(MountESPFromDrive(hPhysical, &espMountLetter, systemDriveLetter), "Error on MountESPFromDrive");
+		windowsEspDriveLetter = UTF8ToCString(espMountLetter);
+		RemoveNonEmptyDirectory(windowsEspDriveLetter + L"\\" + ENDLESS_BOOT_SUBDIRECTORY);
+	}
+
+	// restore the registry key for Windows clock in UTC
+	IFFALSE_PRINTERROR(ResetEndlessRegistryKey(HKEY_LOCAL_MACHINE, REGKEY_UTC_TIME_PATH, REGKEY_UTC_TIME), "Error on restoring Windows clock to UTC.");
+
+	// restore Fast Start (aka Hiberboot)
+	IFFALSE_PRINTERROR(ResetEndlessRegistryKey(HKEY_LOCAL_MACHINE, REGKEY_FASTBOOT_PATH, REGKEY_FASTBOOT), "Error on restoring fastboot.");
+
+	// remove uninstall entry from registry
+	do {
+		CRegKey uninstallKey;
+		LSTATUS result = uninstallKey.Open(HKEY_LOCAL_MACHINE, REGKEY_WIN_UNINSTALL, KEY_ALL_ACCESS);
+		IFFALSE_CONTINUE(result == ERROR_SUCCESS, "Error opening uninstall key");
+
+		result = uninstallKey.DeleteSubKey(REGKEY_ENDLESS_OS);
+		IFFALSE_CONTINUE(result == ERROR_SUCCESS, "Error on DeleteSubKey");
+	} while (FALSE);
+
+
+	// remove <SYSDRIVE>:\Endless
+	IFFALSE_PRINTERROR(ChangeAccessPermissions(endlessFilesPath, false), "Error on granting Endless files permissions.");
+	if (exePath.Find(endlessFilesPath) == 0) {
+		DelayDeleteFolder(endlessFilesPath); // maybe we should do the delay delete evrytime to make sure the folder will get deleted?
+	} else {
+		RemoveNonEmptyDirectory(endlessFilesPath);
+	}
+
+	// set success message and icon
+	popupMsgId = MSG_362;
+	popupStyle = MB_OK | MB_ICONINFORMATION;
+	retResult = TRUE;
+
+error:
+	safe_closehandle(hPhysical);
+	if (espMountLetter != NULL) AltUnmountVolume(espMountLetter);
+
+	AfxMessageBox(UTF8ToCString(lmprintf(popupMsgId)), popupStyle);
+	ExitProcess(0);
+
+	return retResult;
+}
+
+BOOL CEndlessUsbToolDlg::ResetEndlessRegistryKey(HKEY parentKey, const CString &keyPath, const CString &keyName)
+{
+	BOOL retResult = FALSE;
+	CRegKey registryKey;
+	LSTATUS result;
+	LONG queryResult;
+	DWORD keyType;
+	ULONG dataSize = 0;
+	uprintf("ResetEndlessRegistryKey called with path '%ls' and key '%ls'", keyPath, keyName);
+
+	result = registryKey.Open(parentKey, keyPath, KEY_ALL_ACCESS);
+	IFFALSE_GOTO(result == ERROR_SUCCESS, "Error opening registry key.", done);
+
+	queryResult = registryKey.QueryValue(CString(REGKEY_BACKUP_PREFIX) + keyName, &keyType, NULL, &dataSize);
+	IFFALSE_GOTO(queryResult == ERROR_SUCCESS, "Error on QueryValue. Backup value doesn't exist", done);
+
+	switch (keyType) {
+	case VT_R4:
+		DWORD dwValue;
+		result = registryKey.QueryDWORDValue(CString(REGKEY_BACKUP_PREFIX) + keyName, dwValue);
+		IFFALSE_BREAK(result == ERROR_SUCCESS, "QueryDWORDValue failed for backup value");
+
+		result = registryKey.DeleteValue(CString(REGKEY_BACKUP_PREFIX) + keyName);
+		IFFALSE_PRINTERROR(result == ERROR_SUCCESS, "Error on deleting backup value.");
+		if (dwValue == REGKEY_DWORD_MISSING) {
+			result = registryKey.DeleteValue(keyName);
+			IFFALSE_PRINTERROR(result == ERROR_SUCCESS, "Error on deleting Endless added value.");
+		} else {
+			result = registryKey.SetDWORDValue(keyName, dwValue);
+			IFFALSE_PRINTERROR(result == ERROR_SUCCESS, "Error on setting key to original value.");
+		}
+		break;
+	default:
+		uprintf("ERROR: registry key type %d not handled", keyType);
+		goto error;
+	}
+
+done:
+	retResult = TRUE;
+error:
+	return retResult;
+
+}
+
+BOOL CEndlessUsbToolDlg::MountESPFromDrive(HANDLE hPhysical, const char **espMountLetter, const CString &systemDriveLetter)
+{
+	FUNCTION_ENTER;
+
+	BOOL retResult = FALSE;
+	BYTE layout[4096] = { 0 };
+	PDRIVE_LAYOUT_INFORMATION_EX DriveLayout = (PDRIVE_LAYOUT_INFORMATION_EX)(void*)layout;
+	DWORD size;
+	BOOL result;
+
+	// get partition layout
+	result = DeviceIoControl(hPhysical, IOCTL_DISK_GET_DRIVE_LAYOUT_EX, NULL, 0, layout, sizeof(layout), &size, NULL);
+	IFFALSE_GOTOERROR(result != 0 && size > 0, "Error on querying disk layout.");
+	IFFALSE_GOTOERROR(DriveLayout->PartitionStyle == PARTITION_STYLE_GPT, "Unexpected partition type. Partition style is not GPT");
+
+	DWORD efiPartitionNumber = -1;
+	PARTITION_INFORMATION_EX *partition = NULL;
+	for (DWORD index = 0; index < DriveLayout->PartitionCount; index++) {
+		partition = &(DriveLayout->PartitionEntry[index]);
+
+		if (partition->Gpt.PartitionType == PARTITION_SYSTEM_GUID) {
+			uprintf("Found ESP\r\nPartition %d:\r\n  Type: %s\r\n  Name: '%ls'\r\n ID: %s",
+				index + 1, GuidToString(&partition->Gpt.PartitionType), partition->Gpt.Name, GuidToString(&partition->Gpt.PartitionId));
+			efiPartitionNumber = partition->PartitionNumber;
+			break;
+		}
+	}
+	IFFALSE_GOTOERROR(efiPartitionNumber != -1, "ESP not found.");
+	// Fail if EFI partition number is bigger than we can fit in the
+	// uin8_t that AltMountVolume receives as parameter for partition number
+	IFFALSE_GOTOERROR(efiPartitionNumber <= 0xFF, "EFI partition number is bigger than 255.");
+
+	*espMountLetter = AltMountVolume(ConvertUnicodeToUTF8(systemDriveLetter.Left(2)), (uint8_t)efiPartitionNumber);
+	IFFALSE_GOTOERROR(*espMountLetter != NULL, "Error assigning a letter to the ESP.");
+
+	retResult = TRUE;
+error:
+	return retResult;
+}
+
+// A combination of 2 of the options found here: http://www.catch22.net/tuts/self-deleting-executables
+// This needs to be tested on all supported OS versions; I tested on Windows 8 and XP and it works
+void CEndlessUsbToolDlg::DelayDeleteFolder(const CString &folder)
+{
+	wchar_t *shortPath = NULL, cmd[MAX_PATH], params[MAX_PATH];
+	int timeoutSeconds = 5;
+
+	long  result = GetShortPathName(folder, shortPath, 0);
+	IFFALSE_GOTOERROR(result != 0, "Error on getting size needed for GetShortPathName");
+	shortPath = new wchar_t[result];
+
+	result = GetShortPathName(folder, shortPath, result);
+	IFFALSE_RETURN(result != 0, "Error on GetShortPathName");
+
+	// cmd.exe /q /c "for /l %N in () do timeout 5 >> NUL & @rmdir /S /Q C:\endless >> NUL & if not exist C:\endless exit"
+	swprintf_s(params, L"/q /c \"for /l %%N in () do timeout %d >> NUL & @rmdir /S /Q %ls >> NUL & if not exist %ls exit\"", timeoutSeconds, shortPath, shortPath);
+
+	IFFALSE_GOTOERROR(GetEnvironmentVariableW(L"ComSpec", cmd, MAX_PATH) != 0, "Error on GetEnvironmentVariableW");
+	uprintf("Running '%ls' with '%ls'", cmd, params);
+	INT execResult = (INT)ShellExecute(0, 0, cmd, params, 0, SW_HIDE);
+	uprintf("ShellExecute returned %d", execResult);
+	IFFALSE_GOTOERROR(execResult > 32, "Error returned by ShellExecute");
+
+error:
+	if (shortPath != NULL) {
+		delete [] shortPath;
+		shortPath = NULL;
+	}
 }
