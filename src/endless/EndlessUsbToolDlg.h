@@ -19,6 +19,8 @@ typedef struct FileImageEntry {
 	BOOL hasBootArchive;
 	BOOL hasBootArchiveSig;
 	BOOL hasUnpackedImgSig;
+	CString version;
+	CString date;
 } FileImageEntry_t, *pFileImageEntry_t;
 
 typedef enum ErrorCause {
@@ -256,7 +258,7 @@ private:
         LPVOID        lpData
     );
 
-    static bool ParseImgFileName(const CString& filename, CString &personality, CString &version, bool &installerImage);
+    static bool ParseImgFileName(const CString& filename, CString &personality, CString &version, CString &date, bool &installerImage);
     void GetImgDisplayName(CString &displayName, const CString &version, const CString &personality, ULONGLONG size = 0);
 
     static ULONGLONG GetExtractedSize(const CString& filename, BOOL isInstallerImage);
@@ -333,4 +335,6 @@ private:
 	static BOOL MountESPFromDrive(HANDLE hPhysical, const char **espMountLetter, const CString &systemDriveLetter);
 
 	static void DelayDeleteFolder(const CString &folder);
+
+	static bool HasVersion2Support(const CString &version, const CString &date);
 };

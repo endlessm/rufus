@@ -2063,7 +2063,7 @@ void CEndlessUsbToolDlg::UpdateFileEntries(bool shouldInit)
         try {
             CString displayName, personality, version;
             bool isInstallerImage = false;
-            if (!ParseImgFileName(currentFile, personality, version, isInstallerImage)) continue;
+            if (!ParseImgFileName(currentFile, personality, version, date, isInstallerImage)) continue;
             if (0 == GetExtractedSize(fullPathFile, isInstallerImage)) continue;
             CFile file(fullPathFile, CFile::modeRead);
             GetImgDisplayName(displayName, version, personality, file.GetLength());
@@ -2076,6 +2076,10 @@ void CEndlessUsbToolDlg::UpdateFileEntries(bool shouldInit)
                     m_localInstallerImage.size = file.GetLength();
                 }
             } else {
+                if (m_dualBootSelected && !HasVersion2Support(version, date)) {
+                    uprintf("Skiping '%ls' because it doesn't have version 2 support.", file.GetFileName());
+                    continue;
+                }
                 // add entry to list or update it
                 pFileImageEntry_t currentEntry = NULL;
                 if (!m_imageFiles.Lookup(file.GetFilePath(), currentEntry)) {
@@ -2083,7 +2087,10 @@ void CEndlessUsbToolDlg::UpdateFileEntries(bool shouldInit)
                     currentEntry->autoAdded = TRUE;
                     currentEntry->filePath = file.GetFilePath();
                     currentEntry->size = file.GetLength();
-					currentEntry->personality = personality;
+                    currentEntry->personality = personality;
+                    currentEntry->version = version;
+                    currentEntry->date = date;
+
                     AddEntryToSelect(selectElement, CComBSTR(currentEntry->filePath), CComBSTR(displayName), &currentEntry->htmlIndex, 0);
                     IFFALSE_RETURN(SUCCEEDED(hr), "Error adding item in image file list.");
 
@@ -2560,7 +2567,7 @@ HRESULT CEndlessUsbToolDlg::OnSelectFileNextClicked(IHTMLElement* pElement)
 	}
 
     // Get display name with actual image size, not compressed
-    CString selectedImage, personality, version, selectedSize;
+    CString selectedImage, personality, version, date, selectedSize;
     ULONGLONG size = 0;
     bool isInstallerImage = false;
     if (m_useLocalFile) {
@@ -2589,7 +2596,7 @@ HRESULT CEndlessUsbToolDlg::OnSelectFileNextClicked(IHTMLElement* pElement)
     }    
 
     selectedSize = SizeToHumanReadable(size, FALSE, use_fake_units);
-    if (ParseImgFileName(selectedImage, personality, version, isInstallerImage)) {
+    if (ParseImgFileName(selectedImage, personality, version, date, isInstallerImage)) {
         if(isInstallerImage) uprintf("ERROR: An installer image has been selected.");
 
         uint32_t headlineMsg;
@@ -3657,7 +3664,7 @@ DWORD CALLBACK CEndlessUsbToolDlg::CopyProgressRoutine(
 
 
 
-bool CEndlessUsbToolDlg::ParseImgFileName(const CString& filename, CString &personality, CString &version, bool &installerImage)
+bool CEndlessUsbToolDlg::ParseImgFileName(const CString& filename, CString &personality, CString &version, CString &date, bool &installerImage)
 {
     FUNCTION_ENTER;
 
@@ -3674,6 +3681,7 @@ bool CEndlessUsbToolDlg::ParseImgFileName(const CString& filename, CString &pers
         switch (elemIndex) {
         case 0: product = resToken; break;
         case 1: version = resToken; break;
+        case 3: date = resToken; break;
         case 4: lastPart = resToken; break;
         }
         resToken = filename.Tokenize(t1, pos);
@@ -3684,6 +3692,8 @@ bool CEndlessUsbToolDlg::ParseImgFileName(const CString& filename, CString &pers
     IFFALSE_GOTOERROR(!version.IsEmpty() && !lastPart.IsEmpty(), "");
     installerImage = product == _T(EOS_INSTALLER_PRODUCT_TEXT);
     IFFALSE_GOTOERROR(product == _T(EOS_PRODUCT_TEXT) || product == _T(EOS_NONFREE_PRODUCT_TEXT) || product == _T(EOS_OEM_PRODUCT_TEXT) || installerImage, "");
+
+    date = date.Right(date.GetLength() - date.Find('.') - 1);
 
     pos = 0;
     resToken = lastPart.Tokenize(t2, pos);
@@ -3917,7 +3927,9 @@ bool CEndlessUsbToolDlg::CanUseLocalFile()
 		CString path;
 		for (POSITION position = m_imageFiles.GetStartPosition(); position != NULL; ) {
 			m_imageFiles.GetNextAssoc(position, path, currentEntry);
-			if (currentEntry->hasBootArchive && currentEntry->hasBootArchiveSig) {
+			bool version2Support = HasVersion2Support(currentEntry->version, currentEntry->date);
+
+			if (version2Support && currentEntry->hasBootArchive && currentEntry->hasBootArchiveSig) {
 				hasFilesForDualBoot = true;
 				break;
 			}
@@ -5521,4 +5533,12 @@ bool CEndlessUsbToolDlg::IsUninstaller()
 	CStringW exePath = GetExePath();
 	return CSTRING_GET_LAST(exePath, '\\') == ENDLESS_UNINSTALLER_NAME;
 	//return CSTRING_GET_LAST(exePath, '\\') == L"EndlessUsbTool.exe";
+}
+
+#define MIN_DATE_DUALBOOT	L"160827"
+
+// Version 2 means support fpr dual boot and new way of creating live images
+bool CEndlessUsbToolDlg::HasVersion2Support(const CString &version, const CString &date)
+{
+	return version[0] >= '3' && date >= MIN_DATE_DUALBOOT;
 }
