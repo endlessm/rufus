@@ -2741,6 +2741,7 @@ HRESULT CEndlessUsbToolDlg::OnDownloadLightButtonClicked(IHTMLElement* pElement)
     FUNCTION_ENTER;
 
     m_selectedRemoteIndex = m_baseImageRemoteIndex;
+	m_useLocalFile = false;
     OnSelectFileNextClicked(pElement);
 
     return S_OK;
@@ -2761,6 +2762,7 @@ HRESULT CEndlessUsbToolDlg::OnDownloadFullButtonClicked(IHTMLElement* pElement)
     VARIANT_BOOL bCancel = VARIANT_FALSE;
     spElem3->fireEvent(L"onchange", &var, &bCancel);
  
+	m_useLocalFile = false;
     OnSelectFileNextClicked(pElement);
 
     return S_OK;
@@ -3542,10 +3544,10 @@ DWORD WINAPI CEndlessUsbToolDlg::FileCopyThread(void* param)
     IFFALSE_GOTOERROR(DriveLayout->PartitionStyle == PARTITION_STYLE_GPT, "Unexpected partition type.");
     IFFALSE_GOTOERROR(DriveLayout->PartitionCount == EXPECTED_NUMBER_OF_PARTITIONS, "Error: Unexpected number of partitions.");
 
-    //uprintf("Partition type: GPT, NB Partitions: %d\n", DriveLayout->PartitionCount);
-    //uprintf("Disk GUID: %s\n", GuidToString(&DriveLayout->Gpt.DiskId));
-    //uprintf("Max parts: %d, Start Offset: %I64i, Usable = %I64i bytes\n",
-    //    DriveLayout->Gpt.MaxPartitionCount, DriveLayout->Gpt.StartingUsableOffset.QuadPart, DriveLayout->Gpt.UsableLength.QuadPart);
+    uprintf("Partition type: GPT, NB Partitions: %d\n", DriveLayout->PartitionCount);
+    uprintf("Disk GUID: %s\n", GuidToString(&DriveLayout->Gpt.DiskId));
+    uprintf("Max parts: %d, Start Offset: %I64i, Usable = %I64i bytes\n",
+        DriveLayout->Gpt.MaxPartitionCount, DriveLayout->Gpt.StartingUsableOffset.QuadPart, DriveLayout->Gpt.UsableLength.QuadPart);
 
     // Move all partitions by one so we can add the exfat to the beginning of the partition table
     for (int index = EXPECTED_NUMBER_OF_PARTITIONS; index > 0 ; index--) {
@@ -3559,7 +3561,7 @@ DWORD WINAPI CEndlessUsbToolDlg::FileCopyThread(void* param)
     newPartition->PartitionStyle = PARTITION_STYLE_GPT;
     newPartition->PartitionNumber = 1;;
     newPartition->StartingOffset.QuadPart = lastPartition->StartingOffset.QuadPart + lastPartition->PartitionLength.QuadPart;    
-    newPartition->PartitionLength.QuadPart = DiskGeometry->DiskSize.QuadPart - newPartition->StartingOffset.QuadPart; //newPartition->PartitionLength.QuadPart = DriveLayout->Gpt.UsableLength.QuadPart - newPartition->StartingOffset.QuadPart;
+    newPartition->PartitionLength.QuadPart = DriveLayout->Gpt.UsableLength.QuadPart - newPartition->StartingOffset.QuadPart;
 
     newPartition->Gpt.PartitionType = PARTITION_BASIC_DATA_GUID;
     IGNORE_RETVAL(CoCreateGuid(&newPartition->Gpt.PartitionId));
