@@ -4173,7 +4173,7 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	IFFALSE_GOTOERROR(hPhysical != INVALID_HANDLE_VALUE, "Error on acquiring disk handle.");
 
 	// fix partition types and layout
-	IFFALSE_GOTOERROR(CreateCorrectPartitionLayout(hPhysical, layout, geometry), "Error on CreateFakePartitionLayout");
+	IFFALSE_GOTOERROR(CreateCorrectPartitionLayout(hPhysical, layout, geometry), "Error on CreateCorrectPartitionLayout");
 	safe_closehandle(hPhysical);
 
 	CHECK_IF_CANCELED;
@@ -4453,6 +4453,8 @@ bool CEndlessUsbToolDlg::CopyFilesToexFAT(CEndlessUsbToolDlg *dlg, const CString
 	bool retResult = false;
 
 	CString usbFilesPath = driveLetter + PATH_ENDLESS_SUBDIRECTORY;
+	CString exePath = GetExePath();
+	CStringA imgSignature = ConvertUnicodeToUTF8(CSTRING_GET_LAST(dlg->m_unpackedImageSig, '\\'));
 
 	int createDirResult = SHCreateDirectoryExW(NULL, usbFilesPath, NULL);
 	IFFALSE_GOTOERROR(createDirResult == ERROR_SUCCESS || createDirResult == ERROR_FILE_EXISTS, "Error creating directory on USB drive.");
@@ -4464,10 +4466,15 @@ bool CEndlessUsbToolDlg::CopyFilesToexFAT(CEndlessUsbToolDlg *dlg, const CString
 
 	FILE *liveFile;
 	IFFALSE_GOTOERROR(0 == _wfopen_s(&liveFile, usbFilesPath + EXFAT_ENDLESS_LIVE_FILE_NAME, L"w"), "Error creating empty live file.");
+	fwrite((const char*)imgSignature, 1, imgSignature.GetLength(), liveFile);
 	fclose(liveFile);
 
 	// copy grub to USB drive
 	IFFALSE_GOTOERROR(CopyMultipleItems(fromFolder + GRUB_BOOT_SUBDIRECTORY, usbFilesPath), "Error copying grub folder to USB drive.");
+
+	IFFALSE_GOTOERROR(0 != CopyFile(dlg->m_bootArchive, usbFilesPath + CSTRING_GET_LAST(dlg->m_bootArchive, '\\'), FALSE), "Error copying boot.zip file to drive.");
+	IFFALSE_GOTOERROR(0 != CopyFile(dlg->m_bootArchiveSig, usbFilesPath + CSTRING_GET_LAST(dlg->m_bootArchiveSig, '\\'), FALSE), "Error copying boot.zip signature file to drive.");
+	IFFALSE_GOTOERROR(0 != CopyFile(exePath, usbFilesPath + CSTRING_GET_LAST(exePath, '\\'), FALSE), "Error copying installer binary to drive.");
 
 	retResult = true;
 
