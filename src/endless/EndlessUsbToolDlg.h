@@ -336,5 +336,5 @@ private:
 
 	static void DelayDeleteFolder(const CString &folder);
 
-	static bool HasVersion2Support(const CString &version, const CString &date);
+	static bool HasImageBootSupport(const CString &version, const CString &date);
 };

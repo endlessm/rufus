@@ -2061,7 +2061,7 @@ void CEndlessUsbToolDlg::UpdateFileEntries(bool shouldInit)
         if (!PathFileExists(fullPathFile + SIGNATURE_FILE_EXT)) continue; // signature file is present
 
         try {
-            CString displayName, personality, version;
+            CString displayName, personality, version, date;
             bool isInstallerImage = false;
             if (!ParseImgFileName(currentFile, personality, version, date, isInstallerImage)) continue;
             if (0 == GetExtractedSize(fullPathFile, isInstallerImage)) continue;
@@ -2076,8 +2076,8 @@ void CEndlessUsbToolDlg::UpdateFileEntries(bool shouldInit)
                     m_localInstallerImage.size = file.GetLength();
                 }
             } else {
-                if (m_dualBootSelected && !HasVersion2Support(version, date)) {
-                    uprintf("Skiping '%ls' because it doesn't have version 2 support.", file.GetFileName());
+                if (m_dualBootSelected && !HasImageBootSupport(version, date)) {
+                    uprintf("Skiping '%ls' because it doesn't have image boot support.", file.GetFileName());
                     continue;
                 }
                 // add entry to list or update it
@@ -3927,9 +3927,9 @@ bool CEndlessUsbToolDlg::CanUseLocalFile()
 		CString path;
 		for (POSITION position = m_imageFiles.GetStartPosition(); position != NULL; ) {
 			m_imageFiles.GetNextAssoc(position, path, currentEntry);
-			bool version2Support = HasVersion2Support(currentEntry->version, currentEntry->date);
+			bool imageBootSupport = HasImageBootSupport(currentEntry->version, currentEntry->date);
 
-			if (version2Support && currentEntry->hasBootArchive && currentEntry->hasBootArchiveSig) {
+			if (imageBootSupport && currentEntry->hasBootArchive && currentEntry->hasBootArchiveSig) {
 				hasFilesForDualBoot = true;
 				break;
 			}
@@ -5535,10 +5535,11 @@ bool CEndlessUsbToolDlg::IsUninstaller()
 	//return CSTRING_GET_LAST(exePath, '\\') == L"EndlessUsbTool.exe";
 }
 
-#define MIN_DATE_DUALBOOT	L"160827"
+#define MIN_DATE_IMAGE_BOOT	L"160827"
 
-// Version 2 means support fpr dual boot and new way of creating live images
-bool CEndlessUsbToolDlg::HasVersion2Support(const CString &version, const CString &date)
+// Image boot means support for booting from endless/endless.img
+// on dual boot (ntfs) and new live USB (exfat)
+bool CEndlessUsbToolDlg::HasImageBootSupport(const CString &version, const CString &date)
 {
-	return version[0] >= '3' && date >= MIN_DATE_DUALBOOT;
+	return version[0] >= '3' && date >= MIN_DATE_IMAGE_BOOT;
 }
