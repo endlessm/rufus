@@ -783,9 +783,7 @@ BOOL CEndlessUsbToolDlg::OnInitDialog()
 
     SetWindowTextW(L"");
 
-	CStringW exePath = GetExePath();
-	if (CSTRING_GET_LAST(exePath,'\\') == ENDLESS_UNINSTALLER_NAME) {
-	//if (CSTRING_GET_LAST(exePath, '\\') == L"EndlessUsbTool.exe") { // for debugging
+	if(IsUninstaller()) {
 		m_uninstallMode = true;
 
 		int selected = AfxMessageBox(UTF8ToCString(lmprintf(MSG_361)), MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2);
@@ -5506,4 +5504,12 @@ error:
 		delete [] shortPath;
 		shortPath = NULL;
 	}
+}
+
+
+bool CEndlessUsbToolDlg::IsUninstaller()
+{
+	CStringW exePath = GetExePath();
+	return CSTRING_GET_LAST(exePath, '\\') == ENDLESS_UNINSTALLER_NAME;
+	//return CSTRING_GET_LAST(exePath, '\\') == L"EndlessUsbTool.exe";
 }

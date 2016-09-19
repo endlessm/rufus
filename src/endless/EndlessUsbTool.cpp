@@ -180,7 +180,16 @@ void CEndlessUsbToolApp::InitLogging()
 	fileName.Replace(L" ", L"");
 	fileName += s;
 	fileName += L".log";
-	fileName = GET_LOCAL_PATH(fileName);
+	if (CEndlessUsbToolDlg::IsUninstaller()) {
+		wchar_t tempPath[MAX_PATH + 1];
+		memset(tempPath, 0, sizeof(tempPath));
+		wcscpy_s(tempPath, m_appDir);
+		GetTempPathW(MAX_PATH + 1, tempPath);
+		CString path = tempPath;
+		fileName = path + fileName;
+	} else {
+		fileName = GET_LOCAL_PATH(fileName);
+	}
 
 	try {
 		BOOL result = m_logFile.Open(fileName, CFile::modeWrite | CFile::typeUnicode | CFile::shareDenyWrite | CFile::modeCreate | CFile::osWriteThrough);
