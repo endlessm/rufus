@@ -27,6 +27,7 @@ public:
 
 	static CString m_appDir;
 	static bool m_enableLogDebugging;
+	static bool m_enableOverwriteMbr;
 
 	static void Log(const char *logMessage);
 

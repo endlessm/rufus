@@ -4818,7 +4818,9 @@ bool CEndlessUsbToolDlg::WriteMBRAndSBRToWinDrive(CEndlessUsbToolDlg *dlg, const
 
 	// Make sure there already is a Windows MBR on this disk
 	fake_fd._handle = (char*)hPhysical;
-	if (!IsWindowsMBR(fp, systemDriveLetter)) {
+	if (CEndlessUsbToolApp::m_enableOverwriteMbr) {
+		uprintf("Not checking for Windows MBRs as /forcembr is enabled.");
+	} else if (!IsWindowsMBR(fp, systemDriveLetter)) {
 		uprintf("Error: no Windows MBR detected, unsupported configuration.");
 		dlg->m_lastErrorCause = ErrorCause_t::ErrorCauseNonWindowsMBR;
 		goto error;
