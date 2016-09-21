@@ -312,20 +312,6 @@ const wchar_t* mainWindowTitle = L"Endless Installer";
 #define ENDLESS_UNINSTALLER_NAME L"endless-uninstaller.exe"
 #define ENDLESS_OS_NAME L"Endless OS"
 
-#define HARDCODED_PATH L"eos-amd64-amd64/eos3.0/base/160906-030224/eos-eos3.0-amd64-amd64.160906-030224.base"
-CString hardcoded_BootPath(HARDCODED_PATH BOOT_ARCHIVE_SUFFIX);
-CString hardcoded_BootPathAsc(HARDCODED_PATH BOOT_ARCHIVE_SUFFIX SIGNATURE_FILE_EXT);
-
-// Endless OS 3.0.2's boot.zip didn't work, we use a later one for that release only.
-// TODO: remove this and the definitions above.
-static BOOL needsHardcodedBoot(CString imagePath) {
-	if (imagePath.Find(L"eos-eos3.0-amd64-amd64.160827") >= 0) {
-		uprintf("%ls needs hardcoded boot blob", imagePath);
-		return true;
-	}
-	return false;
-}
-
 // Radu: How much do we need to reserve for the exfat partition header?
 // reserve 10 mb for now; this will also include the signature file
 #define INSTALLER_DELTA_SIZE (10*1024*1024)
@@ -2099,16 +2085,9 @@ void CEndlessUsbToolDlg::UpdateFileEntries(bool shouldInit)
                 }
                 currentEntry->stillPresent = TRUE;
                 CString basePath = CSTRING_GET_PATH(CSTRING_GET_PATH(fullPathFile, '.'), '.');
-                CString bootArchiveBasePath;
 
-                if (needsHardcodedBoot(basePath)) {
-                    bootArchiveBasePath = GET_LOCAL_PATH(CSTRING_GET_LAST(CString(HARDCODED_PATH), '/'));
-                }
-                else {
-                    bootArchiveBasePath = basePath;
-                }
-                currentEntry->bootArchivePath = bootArchiveBasePath + BOOT_ARCHIVE_SUFFIX;
-                currentEntry->bootArchiveSigPath = bootArchiveBasePath + BOOT_ARCHIVE_SUFFIX + SIGNATURE_FILE_EXT;
+                currentEntry->bootArchivePath = basePath + BOOT_ARCHIVE_SUFFIX;
+                currentEntry->bootArchiveSigPath = basePath + BOOT_ARCHIVE_SUFFIX + SIGNATURE_FILE_EXT;
                 currentEntry->hasBootArchive = PathFileExists(currentEntry->bootArchivePath);
                 currentEntry->hasBootArchiveSig = PathFileExists(currentEntry->bootArchiveSigPath);
                 currentEntry->hasUnpackedImgSig = PathFileExists(basePath + IMAGE_FILE_EXT + SIGNATURE_FILE_EXT);
@@ -2390,18 +2369,10 @@ bool CEndlessUsbToolDlg::ParseJsonFile(LPCTSTR filename, bool isInstallerJson)
             if(remoteImage.extractedSize == 0) remoteImage.extractedSize = remoteImage.compressedSize;            
             remoteImage.urlFile = fullImage[JSON_IMG_URL_FILE].asCString();
             remoteImage.urlSignature = fullImage[JSON_IMG_URL_SIG].asCString();
+            remoteImage.urlBootArchive = CSTRING_GET_PATH(CSTRING_GET_PATH(remoteImage.urlFile, L'.'), L'.') + BOOT_ARCHIVE_SUFFIX;
+            remoteImage.urlBootArchiveSignature = remoteImage.urlBootArchive + SIGNATURE_FILE_EXT;
             remoteImage.personality = persIt->asCString();
             remoteImage.version = latestVersion;
-
-            if (needsHardcodedBoot(remoteImage.urlFile)) {
-                remoteImage.urlBootArchive = hardcoded_BootPath;
-                remoteImage.urlBootArchiveSignature = hardcoded_BootPathAsc;
-            }
-            else {
-                // TODO: get URL from manifest
-                remoteImage.urlBootArchive = CSTRING_GET_PATH(CSTRING_GET_PATH(remoteImage.urlFile, L'.'), L'.') + BOOT_ARCHIVE_SUFFIX;
-                remoteImage.urlBootArchiveSignature = remoteImage.urlBootArchive + SIGNATURE_FILE_EXT;
-            }
 
             if(!isInstallerJson) {
                 // Create display name
