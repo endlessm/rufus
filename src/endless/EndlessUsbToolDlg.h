@@ -16,6 +16,7 @@ typedef struct FileImageEntry {
 	CString personality;
 	CString bootArchivePath;
 	CString bootArchiveSigPath;
+	CString unpackedImgSigPath;
 	BOOL hasBootArchive;
 	BOOL hasBootArchiveSig;
 	BOOL hasUnpackedImgSig;
@@ -44,8 +45,10 @@ typedef struct RemoteImageEntry {
     CString personality;
     CString urlFile;
     CString urlSignature;
+	CString urlUnpackedSignature;
     CString urlBootArchive;
     CString urlBootArchiveSignature;
+	ULONGLONG bootArchiveSize;
     CString displayName;
     CString downloadJobName;
     CString version;
@@ -215,6 +218,7 @@ private:
 
 	void ChangePage(PCTSTR newPage);
 
+	HRESULT UpdateSelectOptionText(CComPtr<IHTMLSelectElement> selectElement, const CString &text, LONG index);
 	HRESULT GetSelectedOptionElementText(CComPtr<IHTMLSelectElement>, CString &text);
     HRESULT GetSelectElement(PCTSTR selectId, CComPtr<IHTMLSelectElement> &selectElem);
     HRESULT ClearSelectElement(PCTSTR selectId);
@@ -337,4 +341,8 @@ private:
 	static void DelayDeleteFolder(const CString &folder);
 
 	static bool HasImageBootSupport(const CString &version, const CString &date);
+
+	static bool PackedImageAlreadyExists(const CString &filePath, ULONGLONG expectedSize, ULONGLONG expectedUnpackedSize, bool isInstaller);
+
+	ULONGLONG GetActualDownloadSize(const RemoteImageEntry &r);
 };

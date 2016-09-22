@@ -1241,7 +1241,7 @@ LRESULT CEndlessUsbToolDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lPara
 
                     RemoteImageEntry_t remote = m_remoteImages.GetAt(m_remoteImages.FindIndex(m_selectedRemoteIndex));
                     // we don't take the signature files into account but we are taking about ~2KB compared to >2GB
-                    ULONGLONG totalSize = remote.compressedSize + (m_liveInstall || m_dualBootSelected ? 0 : m_installerImage.compressedSize);
+                    ULONGLONG totalSize = downloadStatus->progress.BytesTotal; //GetActualDownloadSize(remote);
                     ULONGLONG percent = downloadStatus->progress.BytesTransferred * 100 / totalSize;
                     PostMessage(WM_UPDATE_PROGRESS, (WPARAM)OP_DOWNLOADING_FILES, (LPARAM)percent);
 
@@ -1715,6 +1715,25 @@ error:
 	return hr;
 }
 
+HRESULT CEndlessUsbToolDlg::UpdateSelectOptionText(CComPtr<IHTMLSelectElement> selectElement, const CString &text, LONG index)
+{
+	CComPtr<IDispatch> pDispatch;
+	CComPtr<IHTMLOptionElement> pOption;
+	CComBSTR valueBSTR;
+
+	HRESULT hr = selectElement->item(CComVariant(index), CComVariant(index), &pDispatch);
+	IFFALSE_GOTOERROR(SUCCEEDED(hr) && pDispatch != NULL, "Error when querying for element at requested index.");
+
+	hr = pDispatch.QueryInterface<IHTMLOptionElement>(&pOption);
+	IFFALSE_GOTOERROR(SUCCEEDED(hr), "Error when querying for IHTMLOptionElement interface");
+
+	hr = pOption->put_text(CComBSTR(text));
+	IFFALSE_GOTOERROR(SUCCEEDED(hr), "Error on IHTMLOptionElement::put_text");
+
+error:
+	return hr;
+}
+
 HRESULT CEndlessUsbToolDlg::GetSelectElement(PCTSTR selectId, CComPtr<IHTMLSelectElement> &selectElem)
 {
     CComPtr<IHTMLElement> pElement;
@@ -1904,7 +1923,7 @@ void CEndlessUsbToolDlg::GoToSelectFilePage()
         r = m_remoteImages.GetAt(p);
 
         // Update light download size
-        ULONGLONG size = r.compressedSize + (m_liveInstall || m_dualBootSelected ? 0 : m_installerImage.compressedSize);
+        ULONGLONG size = GetActualDownloadSize(r);
         sizeText = UTF8ToBSTR(lmprintf(MSG_315, SizeToHumanReadable(size, FALSE, use_fake_units)));
         SetElementText(_T(ELEMENT_DOWNLOAD_LIGHT_SIZE), sizeText);
 
@@ -2082,15 +2101,18 @@ void CEndlessUsbToolDlg::UpdateFileEntries(bool shouldInit)
 
                     m_imageFiles.SetAt(currentEntry->filePath, currentEntry);
                     m_imageIndexToPath.AddTail(currentEntry->filePath);
+                } else {
+                    UpdateSelectOptionText(selectElement, displayName, currentEntry->htmlIndex);
                 }
                 currentEntry->stillPresent = TRUE;
                 CString basePath = CSTRING_GET_PATH(CSTRING_GET_PATH(fullPathFile, '.'), '.');
 
                 currentEntry->bootArchivePath = basePath + BOOT_ARCHIVE_SUFFIX;
                 currentEntry->bootArchiveSigPath = basePath + BOOT_ARCHIVE_SUFFIX + SIGNATURE_FILE_EXT;
+                currentEntry->unpackedImgSigPath = basePath + SIGNATURE_FILE_EXT;
                 currentEntry->hasBootArchive = PathFileExists(currentEntry->bootArchivePath);
                 currentEntry->hasBootArchiveSig = PathFileExists(currentEntry->bootArchiveSigPath);
-                currentEntry->hasUnpackedImgSig = PathFileExists(basePath + IMAGE_FILE_EXT + SIGNATURE_FILE_EXT);
+                currentEntry->hasUnpackedImgSig = PathFileExists(currentEntry->unpackedImgSigPath);
             }
 
 			uprintf("Found local image '%ls'", file.GetFilePath());
@@ -2266,11 +2288,13 @@ void CEndlessUsbToolDlg::StartJSONDownload()
 #define JSON_IMG_PLATFORM       "platform"
 #define JSON_IMG_VERSION        "version"
 #define JSON_IMG_FULL           "full"
+#define JSON_IMG_BOOT           "boot"
 
 #define JSON_IMG_COMPRESSED_SIZE    "compressed_size"
 #define JSON_IMG_EXTRACTED_SIZE     "extracted_size"
 #define JSON_IMG_URL_FILE           "file"
 #define JSON_IMG_URL_SIG            "signature"
+#define JSON_IMG_UNPACKED_URL_SIG   "extracted_signature"
 
 #define CHECK_ENTRY(parentValue, tag) \
 do { \
@@ -2298,7 +2322,7 @@ bool CEndlessUsbToolDlg::ParseJsonFile(LPCTSTR filename, bool isInstallerJson)
     FUNCTION_ENTER;
 
     Json::Reader reader;
-    Json::Value rootValue, imagesElem, jsonElem, personalities, persImages, persImage, fullImage, latestEntry;
+    Json::Value rootValue, imagesElem, jsonElem, personalities, persImages, persImage, fullImage, latestEntry, bootImage;
     CString latestVersion("");
 
     std::ifstream jsonStream;
@@ -2359,6 +2383,7 @@ bool CEndlessUsbToolDlg::ParseJsonFile(LPCTSTR filename, bool isInstallerJson)
             CHECK_ENTRY(fullImage, JSON_IMG_EXTRACTED_SIZE);
             CHECK_ENTRY(fullImage, JSON_IMG_URL_FILE);
             CHECK_ENTRY(fullImage, JSON_IMG_URL_SIG);
+            CHECK_ENTRY(fullImage, JSON_IMG_UNPACKED_URL_SIG);
 
             RemoteImageEntry_t remoteImageEntry;
             RemoteImageEntry_t &remoteImage = isInstallerJson ? m_installerImage : remoteImageEntry;
@@ -2373,8 +2398,19 @@ bool CEndlessUsbToolDlg::ParseJsonFile(LPCTSTR filename, bool isInstallerJson)
             remoteImage.urlBootArchiveSignature = remoteImage.urlBootArchive + SIGNATURE_FILE_EXT;
             remoteImage.personality = persIt->asCString();
             remoteImage.version = latestVersion;
+            remoteImage.urlUnpackedSignature = fullImage[JSON_IMG_UNPACKED_URL_SIG].asCString();
 
             if(!isInstallerJson) {
+                bootImage = persImage["boot"];
+                IFFALSE_CONTINUE(!bootImage.isNull(), CString("'boot' entry not found for personality - ") + persIt->asCString());
+                CHECK_ENTRY(bootImage, JSON_IMG_COMPRESSED_SIZE);
+                CHECK_ENTRY(bootImage, JSON_IMG_URL_FILE);
+                CHECK_ENTRY(bootImage, JSON_IMG_URL_SIG);
+
+                remoteImage.urlBootArchive = bootImage[JSON_IMG_URL_FILE].asCString();
+                remoteImage.urlBootArchiveSignature = bootImage[JSON_IMG_URL_SIG].asCString();
+                remoteImage.bootArchiveSize = bootImage[JSON_IMG_COMPRESSED_SIZE].asUInt64();
+
                 // Create display name
                 GetImgDisplayName(remoteImage.displayName, remoteImage.version, remoteImage.personality, remoteImage.compressedSize);
 
@@ -2445,7 +2481,6 @@ void CEndlessUsbToolDlg::AddDownloadOptionsToUI()
     }
 
     // add options to UI
-    bool updatedFullSize = false;
     long selectIndex = -1;
     CallJavascript(_T(JS_ENABLE_BUTTON), CComVariant(HTML_BUTTON_ID(_T(ELEMENT_DOWNLOAD_LIGHT_BUTTON))), CComVariant(FALSE));
     for (POSITION pos = m_remoteImages.GetHeadPosition(); pos != NULL; ) {
@@ -2456,7 +2491,7 @@ void CEndlessUsbToolDlg::AddDownloadOptionsToUI()
         IFFALSE_PRINTERROR(SUCCEEDED(hr), "Error adding remote image to list.");
 
         // option size
-        ULONGLONG size = imageEntry.compressedSize + (m_liveInstall || m_dualBootSelected ? 0 : m_installerImage.compressedSize);
+        ULONGLONG size = GetActualDownloadSize(imageEntry);
         CComBSTR sizeText = UTF8ToBSTR(lmprintf(MSG_315, SizeToHumanReadable(size, FALSE, use_fake_units)));
         const wchar_t *htmlElemId = NULL;
 
@@ -2471,8 +2506,7 @@ void CEndlessUsbToolDlg::AddDownloadOptionsToUI()
             indexStr.Format(L"%d", selectIndex);
             hr = AddEntryToSelect(_T(ELEMENT_SELFILE_DOWN_LANG), CComBSTR(indexStr), CComBSTR(imageLanguage), NULL, matchesLanguage);
             IFFALSE_PRINTERROR(SUCCEEDED(hr), "Error adding remote image to full images list.");
-            if (!updatedFullSize) {
-                updatedFullSize = true;
+            if (matchesLanguage) {
                 htmlElemId = _T(ELEMENT_DOWNLOAD_FULL_SIZE);
             }
         }
@@ -2679,7 +2713,7 @@ HRESULT CEndlessUsbToolDlg::OnSelectedRemoteFileChanged(IHTMLElement* pElement)
     uprintf("OnSelectedRemoteFileChanged to REMOTE [%ls]", r.displayName);
 
     if (r.personality != PERSONALITY_BASE) {
-        ULONGLONG size = r.compressedSize + (m_liveInstall || m_dualBootSelected ? 0 : m_installerImage.compressedSize);
+        ULONGLONG size = GetActualDownloadSize(r);
         CComBSTR sizeText = UTF8ToBSTR(lmprintf(MSG_315, SizeToHumanReadable(size, FALSE, use_fake_units)));
         SetElementText(_T(ELEMENT_DOWNLOAD_FULL_SIZE), sizeText);
     }
@@ -2791,9 +2825,10 @@ void CEndlessUsbToolDlg::StartInstallationProcess()
 	if (m_dualBootSelected && m_useLocalFile) {
 		pFileImageEntry_t localEntry = NULL;
 		CString selectedImage = UTF8ToCString(image_path);
-		if (m_imageFiles.Lookup(selectedImage, localEntry) && localEntry->hasBootArchive && localEntry->hasBootArchiveSig) {
+		if (m_imageFiles.Lookup(selectedImage, localEntry) && localEntry->hasBootArchive && localEntry->hasBootArchiveSig && localEntry->hasUnpackedImgSig) {
 			m_bootArchive = localEntry->bootArchivePath;
 			m_bootArchiveSig = localEntry->bootArchiveSigPath;
+			m_unpackedImageSig = localEntry->unpackedImgSigPath;
 		} else {
 			m_useLocalFile = false;
 		}
@@ -2802,10 +2837,6 @@ void CEndlessUsbToolDlg::StartInstallationProcess()
 	// Radu: we need to download an installer if only a live image is found and full install was selected
 	if (m_useLocalFile) {
 		if (m_dualBootSelected) {
-			// get unpacked image signature file
-			CString basePath = CSTRING_GET_PATH(CSTRING_GET_PATH(UTF8ToCString(image_path), '.'), '.');
-			m_unpackedImageSig = basePath + IMAGE_FILE_EXT + SIGNATURE_FILE_EXT;
-
 			m_localFile = m_bootArchive;
 			m_localFileSig = m_bootArchiveSig;
 		} else {
@@ -2823,13 +2854,10 @@ void CEndlessUsbToolDlg::StartInstallationProcess()
 		// live image file
 		CString url = CString(RELEASE_JSON_URLPATH) + remote.urlFile;
 		m_localFile = GET_LOCAL_PATH(CSTRING_GET_LAST(remote.urlFile, '/'));
+		bool localFileExists = PackedImageAlreadyExists(m_localFile, remote.compressedSize, remote.extractedSize, false);
 		// live image signature file
 		CString urlAsc = CString(RELEASE_JSON_URLPATH) + remote.urlSignature;
 		m_localFileSig = GET_LOCAL_PATH(CSTRING_GET_LAST(remote.urlSignature, '/'));
-
-		// get unpacked image signature file
-		CString basePath = CSTRING_GET_PATH(CSTRING_GET_PATH(remote.urlFile, '.'), '.');
-		m_unpackedImageSig = basePath + IMAGE_FILE_EXT + SIGNATURE_FILE_EXT;
 
 		// add image file path for Rufus
 		safe_free(image_path);
@@ -2846,11 +2874,16 @@ void CEndlessUsbToolDlg::StartInstallationProcess()
 			urlBootFilesAsc = CString(RELEASE_JSON_URLPATH) + remote.urlBootArchiveSignature;
 			m_bootArchiveSig = GET_LOCAL_PATH(CSTRING_GET_LAST(urlBootFilesAsc, '/'));
 
-			urlImageSig = CString(RELEASE_JSON_URLPATH) + m_unpackedImageSig;
-			m_unpackedImageSig = GET_LOCAL_PATH(CSTRING_GET_LAST(m_unpackedImageSig, '/'));
+			urlImageSig = CString(RELEASE_JSON_URLPATH) + remote.urlUnpackedSignature;
+			m_unpackedImageSig = GET_LOCAL_PATH(CSTRING_GET_LAST(urlImageSig, '/'));
 
-			urls = { url, urlAsc, urlBootFiles, urlBootFilesAsc, urlImageSig };
-			files = { m_localFile, m_localFileSig, m_bootArchive, m_bootArchiveSig, m_unpackedImageSig };
+			if (localFileExists) {
+				urls = { urlAsc, urlBootFiles, urlBootFilesAsc, urlImageSig };
+				files = { m_localFileSig, m_bootArchive, m_bootArchiveSig, m_unpackedImageSig };
+			} else {
+				urls = { url, urlAsc, urlBootFiles, urlBootFilesAsc, urlImageSig };
+				files = { m_localFile, m_localFileSig, m_bootArchive, m_bootArchiveSig, m_unpackedImageSig };
+			}
 		} else if (m_liveInstall) {
 			urls = { url, urlAsc };
 			files = { m_localFile, m_localFileSig };
@@ -2858,12 +2891,26 @@ void CEndlessUsbToolDlg::StartInstallationProcess()
 			// installer image file + signature
 			urlInstaller = CString(RELEASE_JSON_URLPATH) + m_installerImage.urlFile;
 			installerFile = GET_LOCAL_PATH(CSTRING_GET_LAST(m_installerImage.urlFile, '/'));
+			bool installerFileExists = PackedImageAlreadyExists(installerFile, m_installerImage.compressedSize, m_installerImage.extractedSize, true);
 
 			urlInstallerAsc = CString(RELEASE_JSON_URLPATH) + m_installerImage.urlSignature;
 			installerAscFile = GET_LOCAL_PATH(CSTRING_GET_LAST(m_installerImage.urlSignature, '/'));
 
-			urls = { url, urlAsc, urlInstaller, urlInstallerAsc };
-			files = { m_localFile, m_localFileSig, installerFile, installerAscFile };
+			if (installerFileExists) {
+				if (localFileExists) {
+					urls = { urlAsc, urlInstallerAsc };
+					files = { m_localFileSig, installerAscFile };
+				} else {
+					urls = { url, urlAsc, urlInstallerAsc };
+					files = { m_localFile, m_localFileSig, installerAscFile };
+				}
+			} else if(localFileExists) {
+				urls = { urlAsc, urlInstaller, urlInstallerAsc };
+				files = { m_localFileSig, installerFile, installerAscFile };
+			} else {
+				urls = { url, urlAsc, urlInstaller, urlInstallerAsc };
+				files = { m_localFile, m_localFileSig, installerFile, installerAscFile };
+			}
 		}
 
 		// Try resuming the download if it exists
@@ -5515,4 +5562,44 @@ bool CEndlessUsbToolDlg::IsUninstaller()
 bool CEndlessUsbToolDlg::HasImageBootSupport(const CString &version, const CString &date)
 {
 	return version[0] >= '3' && date >= MIN_DATE_IMAGE_BOOT;
+}
+
+bool CEndlessUsbToolDlg::PackedImageAlreadyExists(const CString &filePath, ULONGLONG expectedSize, ULONGLONG expectedUnpackedSize, bool isInstaller)
+{
+	bool exists = false;
+	CFile file;
+
+	uprintf("Called with '%ls', expected size = [%I64u] and expected unpacked size = [%I64u]", filePath, expectedSize, expectedUnpackedSize);
+	IFFALSE_GOTOERROR(PathFileExists(filePath), "File doesn't exists");
+
+	ULONGLONG extractedSize = GetExtractedSize(filePath, isInstaller);
+	file.Open(filePath, CFile::modeRead);
+	uprintf("size=%I64u, extracted size=%I64u", file.GetLength(), extractedSize);
+	IFFALSE_GOTOERROR(expectedUnpackedSize == extractedSize, "Extracted size doesn't match");
+	IFFALSE_GOTOERROR(expectedSize == file.GetLength(), "Extracted size doesn't match");
+	exists = true;
+error:
+	return exists;
+}
+
+#define SIGNATURE_FILE_SIZE	819
+
+ULONGLONG CEndlessUsbToolDlg::GetActualDownloadSize(const RemoteImageEntry &r)
+{
+	ULONGLONG size = SIGNATURE_FILE_SIZE; // img.gz.asc
+	CString localFile = GET_LOCAL_PATH(CSTRING_GET_LAST(r.urlFile, '/'));
+	bool localFileExists = PackedImageAlreadyExists(localFile, r.compressedSize, r.extractedSize, false);
+	size += localFileExists ? 0 : r.compressedSize;
+
+	if (m_dualBootSelected) {
+		size += r.bootArchiveSize + SIGNATURE_FILE_SIZE * 2; // img.asc and boot.zip.asc
+	}
+	else if (!m_liveInstall) {
+		CString installerFile = GET_LOCAL_PATH(CSTRING_GET_LAST(m_installerImage.urlFile, '/'));
+		bool installerExists = PackedImageAlreadyExists(installerFile, m_installerImage.compressedSize, m_installerImage.extractedSize, true);
+		size += SIGNATURE_FILE_SIZE; // installer img.gz.asc
+		size += installerExists ? 0 : m_installerImage.compressedSize;
+	}
+
+	return size;
 }
