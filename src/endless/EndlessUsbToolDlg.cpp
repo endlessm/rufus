@@ -3935,7 +3935,7 @@ void CEndlessUsbToolDlg::StartCheckInternetConnectionThread()
 bool CEndlessUsbToolDlg::CanUseLocalFile()
 {
     //RADU: check if installer version matches local images version and display only the images that match?
-    bool hasLocalInstaller = m_liveInstall || (m_localInstallerImage.stillPresent == TRUE);
+    bool hasLocalInstaller = !m_dualBootSelected && (m_liveInstall || (m_localInstallerImage.stillPresent == TRUE));
     bool hasLocalImages = (m_imageFiles.GetCount() != 0);
 
 	// If we have a local entry with all needed files
