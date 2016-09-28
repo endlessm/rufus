@@ -286,10 +286,13 @@ enum endless_action_type {
 
 #define BOOT_COMPONENTS_FOLDER	"EndlessBoot"
 
+#define FILE_GZ_EXTENSION	"gz"
+#define FILE_XZ_EXTENSION	"xz"
+
 #define RELEASE_JSON_URLPATH    _T("https://d1anzknqnc1kmb.cloudfront.net/")
 #define JSON_LIVE_FILE          "releases-eos-3.json"
 #define JSON_INSTALLER_FILE     "releases-eosinstaller-3.json"
-#define JSON_GZIP               ".gz"
+#define JSON_GZIP               "." FILE_GZ_EXTENSION
 #define JSON_PACKED(__file__)   __file__ JSON_GZIP
 #ifdef ENABLE_JSON_COMPRESSION
 #define JSON_URL(__file__)      RELEASE_JSON_URLPATH _T(JSON_PACKED(__file__))
@@ -311,6 +314,9 @@ const wchar_t* mainWindowTitle = L"Endless Installer";
 
 #define ENDLESS_UNINSTALLER_NAME L"endless-uninstaller.exe"
 #define ENDLESS_OS_NAME L"Endless OS"
+
+#define ENDLESS_IMG_FILE_NAME			L"endless.img"
+#define EXFAT_ENDLESS_LIVE_FILE_NAME	L"live"
 
 // Radu: How much do we need to reserve for the exfat partition header?
 // reserve 10 mb for now; this will also include the signature file
@@ -1101,9 +1107,8 @@ LRESULT CEndlessUsbToolDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lPara
         {
             uprintf("Image scanning done.");
             m_operationThread = INVALID_HANDLE_VALUE;
-            if (!img_report.is_bootable_img ||
-                (img_report.compression_type != BLED_COMPRESSION_GZIP && img_report.compression_type != BLED_COMPRESSION_XZ)) {
-                uprintf("FAILURE: selected image is not bootable and compresion is different frome what is expected: xz/gz");
+            if (!img_report.is_bootable_img) {
+                uprintf("FAILURE: selected image is not bootable");
                 ErrorOccured(ErrorCause_t::ErrorCauseVerificationFailed);
             } else {
                 uprintf("Bootable image selected with correct format.");
@@ -1283,7 +1288,7 @@ LRESULT CEndlessUsbToolDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lPara
 					if (verifiedBootFilesZip) {
 						// we checked the boot archive signature, now check the image
 						m_localFile = UTF8ToCString(image_path);
-						m_localFileSig = m_localFile + SIGNATURE_FILE_EXT;
+						GetSignatureForLocalFile(m_localFile, m_localFileSig);
 						StartOperationThread(OP_VERIFYING_SIGNATURE, CEndlessUsbToolDlg::FileVerificationThread);
 					} else {
 						m_cancelImageUnpack = 0;
@@ -2058,19 +2063,39 @@ void CEndlessUsbToolDlg::UpdateFileEntries(bool shouldInit)
     do {
         if ((findFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0) continue;
         CString currentFile = findFileData.cFileName;
-        CString fullPathFile = GET_LOCAL_PATH(findFileData.cFileName);
-        CString extension = CSTRING_GET_LAST(currentFile, '.');
-        if (extension != L"gz" && extension != L"xz") continue;
+		bool isUnpackedFile = false;
+		// support being run from a USB drive 
+		CString liveFilePath = GET_LOCAL_PATH(EXFAT_ENDLESS_LIVE_FILE_NAME);
+		if (currentFile == ENDLESS_IMG_FILE_NAME && PathFileExists(liveFilePath)) {
+			FILE *liveFile = NULL;
+			char originalFileName[MAX_PATH];
+			memset(originalFileName, 0, MAX_PATH);
+			errno_t result = _wfopen_s(&liveFile, liveFilePath, L"r");
+			if (result == 0) {
+				fread(originalFileName, 1, MAX_PATH - 1, liveFile);
+				if (feof(liveFile)) {
+					currentFile = UTF8ToCString(originalFileName);
+					isUnpackedFile = true;
+				}
+				fclose(liveFile);
+			}
+		}
 
-        if (!PathFileExists(fullPathFile)) continue; // file is present
+        CString fullPathFile = GET_LOCAL_PATH(currentFile);
+		CString unpackedFullPathFile = GET_LOCAL_PATH(ENDLESS_IMG_FILE_NAME);
+        CString extension = CSTRING_GET_LAST(currentFile, '.');
+        if (!isUnpackedFile && extension != _T(FILE_GZ_EXTENSION) && extension != _T(FILE_XZ_EXTENSION)) continue;
+
+        if (!isUnpackedFile && !PathFileExists(fullPathFile)) continue; // file is present
         if (!PathFileExists(fullPathFile + SIGNATURE_FILE_EXT)) continue; // signature file is present
 
         try {
             CString displayName, personality, version, date;
             bool isInstallerImage = false;
-            if (!ParseImgFileName(currentFile, personality, version, date, isInstallerImage)) continue;
-            if (0 == GetExtractedSize(fullPathFile, isInstallerImage)) continue;
-            CFile file(fullPathFile, CFile::modeRead);
+			CString fileNameToParse = isUnpackedFile ? (currentFile + L"." + _T(FILE_GZ_EXTENSION)) : currentFile;
+            if (!ParseImgFileName(fileNameToParse, personality, version, date, isInstallerImage)) continue;
+            if (!isUnpackedFile && 0 == GetExtractedSize(fullPathFile, isInstallerImage)) continue;
+            CFile file(isUnpackedFile ? unpackedFullPathFile : fullPathFile, CFile::modeRead);
             GetImgDisplayName(displayName, version, personality, file.GetLength());
 
             if (isInstallerImage) {
@@ -2095,6 +2120,7 @@ void CEndlessUsbToolDlg::UpdateFileEntries(bool shouldInit)
                     currentEntry->personality = personality;
                     currentEntry->version = version;
                     currentEntry->date = date;
+                    currentEntry->isUnpackedImage = isUnpackedFile;
 
                     AddEntryToSelect(selectElement, CComBSTR(currentEntry->filePath), CComBSTR(displayName), &currentEntry->htmlIndex, 0);
                     IFFALSE_RETURN(SUCCEEDED(hr), "Error adding item in image file list.");
@@ -2105,11 +2131,11 @@ void CEndlessUsbToolDlg::UpdateFileEntries(bool shouldInit)
                     UpdateSelectOptionText(selectElement, displayName, currentEntry->htmlIndex);
                 }
                 currentEntry->stillPresent = TRUE;
-                CString basePath = CSTRING_GET_PATH(CSTRING_GET_PATH(fullPathFile, '.'), '.');
+                CString basePath = isUnpackedFile ? CSTRING_GET_PATH(fullPathFile, '.') : CSTRING_GET_PATH(CSTRING_GET_PATH(fullPathFile, '.'), '.');
 
                 currentEntry->bootArchivePath = basePath + BOOT_ARCHIVE_SUFFIX;
                 currentEntry->bootArchiveSigPath = basePath + BOOT_ARCHIVE_SUFFIX + SIGNATURE_FILE_EXT;
-                currentEntry->unpackedImgSigPath = basePath + SIGNATURE_FILE_EXT;
+                currentEntry->unpackedImgSigPath = basePath + IMAGE_FILE_EXT + SIGNATURE_FILE_EXT;
                 currentEntry->hasBootArchive = PathFileExists(currentEntry->bootArchivePath);
                 currentEntry->hasBootArchiveSig = PathFileExists(currentEntry->bootArchiveSigPath);
                 currentEntry->hasUnpackedImgSig = PathFileExists(currentEntry->unpackedImgSigPath);
@@ -2581,7 +2607,11 @@ HRESULT CEndlessUsbToolDlg::OnSelectFileNextClicked(IHTMLElement* pElement)
         if (!m_imageFiles.Lookup(selectedImage, localEntry)) {
             uprintf("ERROR: Selected local file not found.");
         } else {
-            size = m_liveInstall ? GetExtractedSize(selectedImage, FALSE) : localEntry->size;
+            size = m_liveInstall && !localEntry->isUnpackedImage ? GetExtractedSize(selectedImage, FALSE) : localEntry->size;
+
+			if (localEntry->isUnpackedImage) {
+				selectedImage = CSTRING_GET_PATH(localEntry->unpackedImgSigPath, '.');
+			}
         }
         selectedImage = CSTRING_GET_LAST(selectedImage, '\\');
 
@@ -2841,7 +2871,14 @@ void CEndlessUsbToolDlg::StartInstallationProcess()
 			m_localFileSig = m_bootArchiveSig;
 		} else {
 			m_localFile = UTF8ToCString(image_path);
-			m_localFileSig = m_localFile + SIGNATURE_FILE_EXT;
+			if (!GetSignatureForLocalFile(m_localFile, m_localFileSig)) {
+				ChangePage(_T(ELEMENT_INSTALL_PAGE));
+				uprintf("Error: couldn't find local entry for selected local file '%ls'", m_localFile);
+				FormatStatus = FORMAT_STATUS_CANCEL;
+				m_lastErrorCause = ErrorCause_t::ErrorCauseGeneric;
+				PostMessage(WM_FINISHED_ALL_OPERATIONS, 0, 0);
+				return;
+			}
 		}
 
 		StartOperationThread(OP_VERIFYING_SIGNATURE, CEndlessUsbToolDlg::FileVerificationThread);
@@ -3003,9 +3040,11 @@ HRESULT CEndlessUsbToolDlg::OnSelectedUSBDiskChanged(IHTMLElement* pElement)
     if (m_useLocalFile) {
         pFileImageEntry_t localEntry = NULL;
         CString selectedImage = UTF8ToCString(image_path);
+		bool foundLocalEntry = 0 != m_imageFiles.Lookup(selectedImage, localEntry);
 
-        size = GetExtractedSize(selectedImage, FALSE);
-        if (!m_liveInstall && m_imageFiles.Lookup(selectedImage, localEntry)) {
+		if (!foundLocalEntry || (m_liveInstall && !localEntry->isUnpackedImage)) {
+			size = GetExtractedSize(selectedImage, FALSE);
+		} else {
             size = localEntry->size;
         }
     } else {
@@ -3132,12 +3171,12 @@ void CEndlessUsbToolDlg::GoToSelectStoragePage()
 	if (m_useLocalFile) {
 		pFileImageEntry_t localEntry = NULL;
 		CString selectedImage = UTF8ToCString(image_path);
-		neededSize = GetExtractedSize(selectedImage, FALSE);
 
 		if (!m_imageFiles.Lookup(selectedImage, localEntry)) {
 			uprintf("ERROR: Selected local file not found.");
 		} else {
 			isBaseImage = (localEntry->personality == PERSONALITY_BASE);
+			neededSize = localEntry->isUnpackedImage ? localEntry->size : GetExtractedSize(selectedImage, FALSE);
 		}
 	} else {
 		POSITION p = m_remoteImages.FindIndex(m_selectedRemoteIndex);
@@ -3550,7 +3589,7 @@ DWORD WINAPI CEndlessUsbToolDlg::FileCopyThread(void* param)
     BYTE geometry[256] = { 0 }, layout[4096] = { 0 };
     PDISK_GEOMETRY_EX DiskGeometry = (PDISK_GEOMETRY_EX)(void*)geometry;
     PDRIVE_LAYOUT_INFORMATION_EX DriveLayout = (PDRIVE_LAYOUT_INFORMATION_EX)(void*)layout;
-    CString driveDestination, fileDestination;
+    CString driveDestination, fileDestination, liveFileName;
     CStringA iniLanguage = INI_LOCALE_EN;
 
 	// Radu: why do we do this?
@@ -3607,7 +3646,12 @@ DWORD WINAPI CEndlessUsbToolDlg::FileCopyThread(void* param)
 	IFFALSE_GOTOERROR(MountFirstPartitionOnDrive(DriveIndex, driveDestination), "Error on MountFirstPartitionOnDrive");
 
     // Copy Files
-    fileDestination = driveDestination + CSTRING_GET_LAST(dlg->m_LiveFile, L'\\');
+	liveFileName = CSTRING_GET_LAST(dlg->m_LiveFile, L'\\');
+	if (liveFileName == ENDLESS_IMG_FILE_NAME) {
+		fileDestination = driveDestination + CSTRING_GET_PATH(CSTRING_GET_LAST(dlg->m_LiveFileSig, L'\\'), L'.');
+	} else {
+		fileDestination = driveDestination + liveFileName;
+	}
     result = CopyFileEx(dlg->m_LiveFile, fileDestination, CEndlessUsbToolDlg::CopyProgressRoutine, dlg, NULL, 0);
     IFFALSE_GOTOERROR(result, "Copying live image failed/canceled.");
 
@@ -3674,8 +3718,12 @@ DWORD CALLBACK CEndlessUsbToolDlg::CopyProgressRoutine(
         return PROGRESS_CANCEL;
     }
 
-    float current = (float)(TotalBytesTransferred.QuadPart * 100 / TotalFileSize.QuadPart);
-    UpdateProgress(OP_FILE_COPY, current);
+	if (dlg->m_currentStep == OP_SETUP_DUALBOOT) {
+		CEndlessUsbToolDlg::ImageUnpackCallback(TotalBytesTransferred.QuadPart);
+	} else {
+		float current = (float)(TotalBytesTransferred.QuadPart * 100 / TotalFileSize.QuadPart);
+		UpdateProgress(OP_FILE_COPY, current);
+	}
 
     return PROGRESS_CONTINUE;
 }
@@ -4107,8 +4155,6 @@ void CEndlessUsbToolDlg::JSONDownloadFailed()
 #define EFI_BOOT_SUBDIRECTORY			L"EFI\\BOOT"
 #define ENDLESS_BOOT_SUBDIRECTORY		L"EFI\\Endless"
 #define PATH_ENDLESS_SUBDIRECTORY		L"endless\\"
-#define ENDLESS_IMG_FILE_NAME			L"endless.img"
-#define EXFAT_ENDLESS_LIVE_FILE_NAME	L"live"
 #define GRUB_BOOT_SUBDIRECTORY			L"grub"
 #define LIVE_BOOT_IMG_FILE				L"live\\boot.img"
 #define LIVE_CORE_IMG_FILE				L"live\\core.img"
@@ -4143,7 +4189,7 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	BYTE geometry[256] = { 0 }, layout[4096] = { 0 };
 	CREATE_DISK createDiskData;
 	CString driveLetter;
-	CString bootFilesPathGz = GET_LOCAL_PATH(dlg->m_bootArchive);
+	CString bootFilesPathGz = dlg->m_bootArchive;
 	CString bootFilesPath = GET_LOCAL_PATH(CString(BOOT_COMPONENTS_FOLDER)) + L"\\";
 	CString usbFilesPath;
 	PDISK_GEOMETRY_EX DiskGeometry = (PDISK_GEOMETRY_EX)(void*)geometry;
@@ -4484,7 +4530,7 @@ bool CEndlessUsbToolDlg::CopyFilesToexFAT(CEndlessUsbToolDlg *dlg, const CString
 
 	CString usbFilesPath = driveLetter + PATH_ENDLESS_SUBDIRECTORY;
 	CString exePath = GetExePath();
-	CStringA imgSignature = ConvertUnicodeToUTF8(CSTRING_GET_LAST(dlg->m_unpackedImageSig, '\\'));
+	CStringA originalImgFilename = ConvertUnicodeToUTF8(CSTRING_GET_PATH(CSTRING_GET_LAST(dlg->m_unpackedImageSig, '\\'), '.'));
 
 	int createDirResult = SHCreateDirectoryExW(NULL, usbFilesPath, NULL);
 	IFFALSE_GOTOERROR(createDirResult == ERROR_SUCCESS || createDirResult == ERROR_FILE_EXISTS, "Error creating directory on USB drive.");
@@ -4496,7 +4542,7 @@ bool CEndlessUsbToolDlg::CopyFilesToexFAT(CEndlessUsbToolDlg *dlg, const CString
 
 	FILE *liveFile;
 	IFFALSE_GOTOERROR(0 == _wfopen_s(&liveFile, usbFilesPath + EXFAT_ENDLESS_LIVE_FILE_NAME, L"w"), "Error creating empty live file.");
-	fwrite((const char*)imgSignature, 1, imgSignature.GetLength(), liveFile);
+	fwrite((const char*)originalImgFilename, 1, originalImgFilename.GetLength(), liveFile);
 	fclose(liveFile);
 
 	// copy grub to USB drive
@@ -4647,13 +4693,18 @@ DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 	// Copy ourseleves to the <SYSDRIVE>:\endless directory
 	IFFALSE_GOTOERROR(0 != CopyFile(exeFilePath, endlessFilesPath + ENDLESS_UNINSTALLER_NAME, FALSE), "Error copying exe uninstaller file.");
 
-	// Unpack img file
 	CEndlessUsbToolDlg::ImageUnpackOperation = OP_SETUP_DUALBOOT;
 	CEndlessUsbToolDlg::ImageUnpackPercentStart = DB_PROGRESS_CHECK_PARTITION;
 	CEndlessUsbToolDlg::ImageUnpackPercentEnd = DB_PROGRESS_FINISHED_UNPACK;
 	CEndlessUsbToolDlg::ImageUnpackFileSize = dlg->m_selectedFileSize;
-	bool unpackResult = dlg->UnpackFile(ConvertUnicodeToUTF8(dlg->m_localFile), ConvertUnicodeToUTF8(endlessImgPath), BLED_COMPRESSION_GZIP, ImageUnpackCallback, &dlg->m_cancelImageUnpack);
-	IFFALSE_GOTOERROR(unpackResult, "Error unpacking image to endless folder.");
+	if (CSTRING_GET_LAST(dlg->m_localFile, '\\') == ENDLESS_IMG_FILE_NAME) {
+		BOOL result = CopyFileEx(dlg->m_localFile, endlessImgPath, CEndlessUsbToolDlg::CopyProgressRoutine, dlg, NULL, 0);
+		IFFALSE_GOTOERROR(result, "Copying live image failed/canceled.");
+	} else {
+		// Unpack img file
+		bool unpackResult = dlg->UnpackFile(ConvertUnicodeToUTF8(dlg->m_localFile), ConvertUnicodeToUTF8(endlessImgPath), BLED_COMPRESSION_GZIP, ImageUnpackCallback, &dlg->m_cancelImageUnpack);
+		IFFALSE_GOTOERROR(unpackResult, "Error unpacking image to endless folder.");
+	}
 
 	// extend this file so it reaches the required size
 	IFFALSE_GOTOERROR(ExtendImageFile(endlessImgPath, dlg->m_nrGigsSelected), "Error extending Endless image file");
@@ -5602,4 +5653,14 @@ ULONGLONG CEndlessUsbToolDlg::GetActualDownloadSize(const RemoteImageEntry &r)
 	}
 
 	return size;
+}
+
+bool CEndlessUsbToolDlg::GetSignatureForLocalFile(const CString &file, CString &signature)
+{
+	pFileImageEntry_t localEntry = NULL;
+
+	IFFALSE_RETURN_VALUE(0 != m_imageFiles.Lookup(file, localEntry), "Could not find entry for local file.", false);
+	signature = localEntry->isUnpackedImage ? localEntry->unpackedImgSigPath : file + SIGNATURE_FILE_EXT;
+
+	return true;
 }

@@ -20,6 +20,7 @@ typedef struct FileImageEntry {
 	BOOL hasBootArchive;
 	BOOL hasBootArchiveSig;
 	BOOL hasUnpackedImgSig;
+	BOOL isUnpackedImage;
 	CString version;
 	CString date;
 } FileImageEntry_t, *pFileImageEntry_t;
@@ -345,4 +346,5 @@ private:
 	static bool PackedImageAlreadyExists(const CString &filePath, ULONGLONG expectedSize, ULONGLONG expectedUnpackedSize, bool isInstaller);
 
 	ULONGLONG GetActualDownloadSize(const RemoteImageEntry &r);
+	bool GetSignatureForLocalFile(const CString &file, CString &signature);
 };
