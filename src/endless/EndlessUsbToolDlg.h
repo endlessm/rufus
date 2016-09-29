@@ -55,6 +55,15 @@ typedef struct RemoteImageEntry {
     CString version;
 } RemoteImageEntry_t, *pRemoteImageEntry_t;
 
+typedef enum InstallMethod {
+	None,
+	TryEndless,
+	ReflasherDrive,
+	NewLiveEndless,
+	SetupDualBoot,
+	UninstallEndless
+} InstallMethod_t;
+
 // CEndlessUsbToolDlg dialog
 class CEndlessUsbToolDlg : public CDHtmlDialog
 {
@@ -88,6 +97,7 @@ protected:
 	HRESULT OnLinkClicked(IHTMLElement* pElement);
 	HRESULT OnLanguageChanged(IHTMLElement* pElement);
 	HRESULT OnFirstPagePreviousClicked(IHTMLElement* pElement);
+	HRESULT OnCreateEndlessUSBStickClicked(IHTMLElement* pElement);
 
 	// Select File Page Handlers
 	HRESULT OnSelectFilePreviousClicked(IHTMLElement* pElement);
@@ -145,9 +155,7 @@ protected:
 	void OnDocumentComplete(LPDISPATCH pDisp, LPCTSTR szUrl);
 
 private:
-	bool m_dualBootSelected;
 	int m_nrGigsSelected;
-	bool m_liveInstall;
 	loc_cmd* m_selectedLocale;
 	char m_localizationFile[MAX_PATH];
 	ULONG m_shellNotificationsRegister;
@@ -204,7 +212,7 @@ private:
     ErrorCause_t m_lastErrorCause;
     long m_maximumUSBVersion;
 	unsigned long m_cancelImageUnpack;
-	bool m_uninstallMode;
+	InstallMethod_t m_selectedInstallMethod;
 
     void StartOperationThread(int operation, LPTHREAD_START_ROUTINE threadRoutine, LPVOID param = NULL);
 
@@ -348,4 +356,5 @@ private:
 	ULONGLONG GetActualDownloadSize(const RemoteImageEntry &r);
 	bool GetSignatureForLocalFile(const CString &file, CString &signature);
 	bool RemoteMatchesUnpackedImg(const CString &remoteFilePath, CString *unpackedImgSig = NULL);
+	bool IsDualBootOrNewLive();
 };

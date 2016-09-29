@@ -153,8 +153,9 @@ t SelectStoragePreviousButton "Previous"
 t SelectStoragePageTitle "Storage Space for Endless OS"
 t StorageAgreementText "Note: We recommend backing up any important files before continuing. Should you experience any problems with your computer after installation, you can find help at <a id='StorageSupportLink'>Endless Support</a>."
 t DualBootLanguageLabel "Select Language"
-t AdvOptionsLanguageLabel "Select Language"
 t AdvancedInstallReminder "To create an Endless USB Stick you will need a USB device with at least 8 GB of storage space."
+t AdvancedOptionsSubtitle "Creating an <b>Endless USB Stick</b> you can"
+t CreateNewLiveUSB "Create Endless USB stick"
 
 
 # *Short* size names. These can be used as suffixes

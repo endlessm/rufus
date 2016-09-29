@@ -389,7 +389,6 @@ select:disabled {
 /* First page */
 
 #FirstPage .ContentContainer {
-	height: 280px;
 	width: 600px;
 	border: 0;
 }
@@ -398,11 +397,16 @@ select:disabled {
     background: transparent;
 }
 
+ #FirstPage .PageSubtitle {
+     height: 25px;
+     margin-top: 25px;
+ }
+
 .ContentPanel {
 	float: left;
 	width: 45%;
-	height: 270px;
-    margin-top: 20px;
+    margin-top: 45px;
+    padding-bottom: 25px;
 }
 
 #RightPanel {
@@ -427,7 +431,6 @@ select:disabled {
 
 #LeftPaneImage {
 	background-image: url("res:/IMG/#202");
-	height: 124px;
 }
 
 #RightPaneImage {
@@ -455,6 +458,12 @@ select:disabled {
 
 #AdvancedInstallReminder {
     font-size: 13px;
+    padding-top: 20px;
+}
+
+#CreateNewLiveUSBC {
+    margin: 10px auto;
+    width: 200px;
 }
 
 /* Select file Page */
