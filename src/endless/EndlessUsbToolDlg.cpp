@@ -5365,10 +5365,10 @@ BOOL CEndlessUsbToolDlg::IsBitlockedDrive(const CString &drive)
 	);
 	IFFALSE_GOTOERROR(SUCCEEDED(hres), "Error on CoSetProxyBlanket.");
 
-	bitlockerQuery.Format(L"Select * from Win32_EncryptableVolume where ProtectionStatus = 1 and DriveLetter = '%ls'", drive);
+	bitlockerQuery.Format(L"Select * from Win32_EncryptableVolume where ProtectionStatus != 0 and DriveLetter = '%ls'", drive);
 
 	// Use the IWbemServices pointer to make requests of WMI
-	hres = pSvc->ExecQuery(bstr_t("WQL"), bstr_t(bitlockerQuery), WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY, NULL, &pEnumerator);
+	hres = pSvc->ExecQuery(bstr_t("WQL"), bstr_t(bitlockerQuery), WBEM_FLAG_FORWARD_ONLY | WBEM_RETURN_WHEN_COMPLETE, NULL, &pEnumerator);
 	IFFALSE_GOTOERROR(SUCCEEDED(hres), "Error on pSvc->ExecQuery.");
 
 	// Retrieve the objects in the result set.
