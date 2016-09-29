@@ -343,8 +343,9 @@ private:
 
 	static bool HasImageBootSupport(const CString &version, const CString &date);
 
-	static bool PackedImageAlreadyExists(const CString &filePath, ULONGLONG expectedSize, ULONGLONG expectedUnpackedSize, bool isInstaller);
+	bool PackedImageAlreadyExists(const CString &filePath, ULONGLONG expectedSize, ULONGLONG expectedUnpackedSize, bool isInstaller);
 
 	ULONGLONG GetActualDownloadSize(const RemoteImageEntry &r);
 	bool GetSignatureForLocalFile(const CString &file, CString &signature);
+	bool RemoteMatchesUnpackedImg(const CString &remoteFilePath, CString *unpackedImgSig = NULL);
 };

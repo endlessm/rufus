@@ -254,11 +254,6 @@ static_assert(
 #define INI_LOCALE_ZH       "zh_CN.utf8"
 #define INI_LOCALE_BN       "bn_BD.utf8"
 
-
-#define GET_LOCAL_PATH(__filename__) (CEndlessUsbToolApp::m_appDir + "\\" + (__filename__))
-#define CSTRING_GET_LAST(__path__, __separator__) __path__.Right(__path__.GetLength() - __path__.ReverseFind(__separator__) - 1)
-#define CSTRING_GET_PATH(__path__, __separator__) __path__.Left(__path__.ReverseFind(__separator__))
-
 enum custom_message {
     WM_FILES_CHANGED = UM_NO_UPDATE + 1,
     WM_FINISHED_IMG_SCANNING,
@@ -2620,8 +2615,10 @@ HRESULT CEndlessUsbToolDlg::OnSelectFileNextClicked(IHTMLElement* pElement)
         RemoteImageEntry_t remote = m_remoteImages.GetAt(m_remoteImages.FindIndex(m_selectedRemoteIndex));
         //DownloadType_t downloadType = GetSelectedDownloadType();
         selectedImage = CSTRING_GET_LAST(remote.urlFile, '/');
-        size = m_liveInstall ? remote.extractedSize : remote.compressedSize;
-        
+
+		CString selectedImagePath = GET_LOCAL_PATH(selectedImage);
+        size = m_liveInstall || RemoteMatchesUnpackedImg(selectedImagePath) ? remote.extractedSize : remote.compressedSize;
+
         m_selectedFileSize = remote.compressedSize;
     }
 
@@ -2892,9 +2889,15 @@ void CEndlessUsbToolDlg::StartInstallationProcess()
 		CString url = CString(RELEASE_JSON_URLPATH) + remote.urlFile;
 		m_localFile = GET_LOCAL_PATH(CSTRING_GET_LAST(remote.urlFile, '/'));
 		bool localFileExists = PackedImageAlreadyExists(m_localFile, remote.compressedSize, remote.extractedSize, false);
+
 		// live image signature file
 		CString urlAsc = CString(RELEASE_JSON_URLPATH) + remote.urlSignature;
-		m_localFileSig = GET_LOCAL_PATH(CSTRING_GET_LAST(remote.urlSignature, '/'));
+		if(RemoteMatchesUnpackedImg(m_localFile, &m_localFileSig)) {
+			m_localFile = GET_LOCAL_PATH(ENDLESS_IMG_FILE_NAME);
+			urlAsc = CString(RELEASE_JSON_URLPATH) + remote.urlUnpackedSignature;
+		} else {
+			m_localFileSig = GET_LOCAL_PATH(CSTRING_GET_LAST(remote.urlSignature, '/'));
+		}
 
 		// add image file path for Rufus
 		safe_free(image_path);
@@ -5619,15 +5622,24 @@ bool CEndlessUsbToolDlg::PackedImageAlreadyExists(const CString &filePath, ULONG
 {
 	bool exists = false;
 	CFile file;
+	bool isUnpackedImage = false;
 
 	uprintf("Called with '%ls', expected size = [%I64u] and expected unpacked size = [%I64u]", filePath, expectedSize, expectedUnpackedSize);
-	IFFALSE_GOTOERROR(PathFileExists(filePath), "File doesn't exists");
+	if(!isInstaller) {
+		isUnpackedImage = RemoteMatchesUnpackedImg(filePath);
+	}
+	CString actualFile = isUnpackedImage ? GET_LOCAL_PATH(ENDLESS_IMG_FILE_NAME) : filePath;
+	IFFALSE_GOTOERROR(PathFileExists(actualFile), "File doesn't exists");
 
-	ULONGLONG extractedSize = GetExtractedSize(filePath, isInstaller);
-	file.Open(filePath, CFile::modeRead);
+	ULONGLONG extractedSize = GetExtractedSize(actualFile, isInstaller);
+	file.Open(actualFile, CFile::modeRead);
 	uprintf("size=%I64u, extracted size=%I64u", file.GetLength(), extractedSize);
-	IFFALSE_GOTOERROR(expectedUnpackedSize == extractedSize, "Extracted size doesn't match");
-	IFFALSE_GOTOERROR(expectedSize == file.GetLength(), "Extracted size doesn't match");
+	if (isUnpackedImage) {
+		IFFALSE_GOTOERROR(expectedUnpackedSize == file.GetLength(), "Extracted size doesn't match");
+	} else {
+		IFFALSE_GOTOERROR(expectedUnpackedSize == extractedSize, "Extracted size doesn't match");
+		IFFALSE_GOTOERROR(expectedSize == file.GetLength(), "Extracted size doesn't match");
+	}
 	exists = true;
 error:
 	return exists;
@@ -5663,4 +5675,16 @@ bool CEndlessUsbToolDlg::GetSignatureForLocalFile(const CString &file, CString &
 	signature = localEntry->isUnpackedImage ? localEntry->unpackedImgSigPath : file + SIGNATURE_FILE_EXT;
 
 	return true;
+}
+
+bool CEndlessUsbToolDlg::RemoteMatchesUnpackedImg(const CString &remoteFilePath, CString *unpackedImgSig)
+{
+	pFileImageEntry_t localEntry = NULL;
+	if (m_imageFiles.Lookup(GET_LOCAL_PATH(ENDLESS_IMG_FILE_NAME), localEntry)) {
+		if (CSTRING_GET_PATH(localEntry->unpackedImgSigPath, '.') == CSTRING_GET_PATH(remoteFilePath, '.')) {
+			if (unpackedImgSig != NULL) *unpackedImgSig = localEntry->unpackedImgSigPath;
+			return true;
+		}
+	}
+	return false;
 }
