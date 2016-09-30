@@ -5631,7 +5631,7 @@ void CEndlessUsbToolDlg::DelayDeleteFolder(const CString &folder)
 
 	IFFALSE_GOTOERROR(GetEnvironmentVariableW(L"ComSpec", cmd, MAX_PATH) != 0, "Error on GetEnvironmentVariableW");
 	uprintf("Running '%ls' with '%ls'", cmd, params);
-	INT execResult = (INT)ShellExecute(0, 0, cmd, params, 0, SW_HIDE);
+	INT execResult = (INT)ShellExecute(0, 0, cmd, params, GetSystemDrive(), SW_HIDE);
 	uprintf("ShellExecute returned %d", execResult);
 	IFFALSE_GOTOERROR(execResult > 32, "Error returned by ShellExecute");
 
