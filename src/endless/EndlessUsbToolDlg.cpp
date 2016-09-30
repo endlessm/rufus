@@ -543,8 +543,6 @@ void CEndlessUsbToolDlg::OnDocumentComplete(LPDISPATCH pDisp, LPCTSTR szUrl)
 {
     FUNCTION_ENTER;
 
-	CString systemDriveLetter = GetSystemDrive().Left(2);
-
 	CDHtmlDialog::OnDocumentComplete(pDisp, szUrl);
 
 	uprintf("OnDocumentComplete '%ls'", szUrl);
@@ -572,19 +570,6 @@ void CEndlessUsbToolDlg::OnDocumentComplete(LPDISPATCH pDisp, LPCTSTR szUrl)
 
     StartCheckInternetConnectionThread();
     FindMaxUSBSpeed();
-
-	// TODO: Leave the "Dual boot" button enabled, on click check the below and move to proper error page
-	BOOL x64BitSupported = Has64BitSupport() ? TRUE : FALSE;
-	uprintf("HW processor has 64 bit support: %s", x64BitSupported ? "YES" : "NO");
-	if (!x64BitSupported)
-		Analytics::instance()->exceptionTracking(ErrorCauseToStr(ErrorCauseNot64Bit), FALSE);
-
-	BOOL isBitLockerEnabled = IsBitlockedDrive(systemDriveLetter);
-	uprintf("Is bitlocker enabled on '%ls': %s", systemDriveLetter, isBitLockerEnabled ? "YES" : "NO");
-	if (isBitLockerEnabled)
-		Analytics::instance()->exceptionTracking(ErrorCauseToStr(ErrorCauseBitLocker), FALSE);
-
-	CallJavascript(_T(JS_ENABLE_BUTTON), CComVariant(HTML_BUTTON_ID(_T(ELEMENT_DUALBOOT_INSTALL_BUTTON))), CComVariant(x64BitSupported && !isBitLockerEnabled));
 
 	return;
 error:
@@ -1863,8 +1848,26 @@ HRESULT CEndlessUsbToolDlg::OnInstallDualBootClicked(IHTMLElement* pElement)
 
 	FUNCTION_ENTER;
 
-	m_selectedInstallMethod = InstallMethod_t::SetupDualBoot;
-	GoToSelectFilePage();
+	CString systemDriveLetter = GetSystemDrive().Left(2);
+
+	BOOL x64BitSupported = Has64BitSupport() ? TRUE : FALSE;
+	uprintf("HW processor has 64 bit support: %s", x64BitSupported ? "YES" : "NO");
+
+	BOOL isBitLockerEnabled = IsBitlockedDrive(systemDriveLetter);
+	uprintf("Is BitLocker/device encryption enabled on '%ls': %s", systemDriveLetter, isBitLockerEnabled ? "YES" : "NO");
+
+	if (!x64BitSupported) {
+		ErrorOccured(ErrorCauseNot64Bit);
+
+		/* ::ErrorOccured tracks the "main" cause; let's also track this other problem */
+		if (isBitLockerEnabled)
+			Analytics::instance()->exceptionTracking(ErrorCauseToStr(ErrorCauseBitLocker), FALSE);
+	} else if (isBitLockerEnabled) {
+		ErrorOccured(ErrorCauseBitLocker);
+	} else {
+		m_selectedInstallMethod = InstallMethod_t::SetupDualBoot;
+		GoToSelectFilePage();
+	}
 
 	return S_OK;
 }
