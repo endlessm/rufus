@@ -37,6 +37,7 @@ typedef enum ErrorCause {
     ErrorCauseBitLocker,
     ErrorCauseNotNTFS,
     ErrorCauseNonWindowsMBR,
+	ErrorCauseNonEndlessMBR,
     ErrorCauseNone
 } ErrorCause_t;
 
@@ -342,7 +343,7 @@ private:
 	static CStringW GetExePath();
 	static BOOL AddUninstallRegistryKeys(const CStringW &uninstallExePath, const CStringW &installPath);
 
-	static BOOL UninstallDualBoot();
+	static BOOL UninstallDualBoot(CEndlessUsbToolDlg *dlg);
 	static BOOL ResetEndlessRegistryKey(HKEY parentKey, const CString &keyPath, const CString &keyName);
 
 	static BOOL MountESPFromDrive(HANDLE hPhysical, const char **espMountLetter, const CString &systemDriveLetter);
@@ -357,4 +358,7 @@ private:
 	bool GetSignatureForLocalFile(const CString &file, CString &signature);
 	bool RemoteMatchesUnpackedImg(const CString &remoteFilePath, CString *unpackedImgSig = NULL);
 	bool IsDualBootOrNewLive();
+	bool UpdateDualBootTexts();
+	void QueryAndDoUninstall(bool exitOnCancel);
+	static bool IsEndlessMBR(FILE* fp, const CString &systemDriveLetter);
 };

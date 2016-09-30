@@ -116,6 +116,9 @@ DWORD usbDevicesCount;
 #define ELEMENT_DUALBOOT_CLOSE_BUTTON   "DualBootPageCloseButton"
 #define ELEMENT_DUALBOOT_ADVANCED_LINK  "AdvancedOptionsLink"
 #define ELEMENT_DUALBOOT_INSTALL_BUTTON "DualBootInstallButon"
+#define ELEMENT_DUALBOOT_TITLE			"DualBootContentTitle"
+#define ELEMENT_DUALBOOT_DESCRIPTION	"DualBootContentDescription"
+#define ELEMENT_DUALBOOT_RECOMMENDATION	"DualBootRecommendation"
 
 //First page elements
 #define ELEMENT_TRY_BUTTON              "TryEndlessButton"
@@ -315,6 +318,7 @@ const wchar_t* mainWindowTitle = L"Endless Installer";
 
 #define ENDLESS_IMG_FILE_NAME			L"endless.img"
 #define EXFAT_ENDLESS_LIVE_FILE_NAME	L"live"
+#define PATH_ENDLESS_SUBDIRECTORY		L"endless\\"
 
 // Radu: How much do we need to reserve for the exfat partition header?
 // reserve 10 mb for now; this will also include the signature file
@@ -367,6 +371,7 @@ static LPCTSTR ErrorCauseToStr(ErrorCause_t errorCause)
         TOSTR(ErrorCauseBitLocker);
         TOSTR(ErrorCauseNotNTFS);
         TOSTR(ErrorCauseNonWindowsMBR);
+		TOSTR(ErrorCauseNonEndlessMBR);
         TOSTR(ErrorCauseNone);
         default: return _T("Error Cause Unknown");
     }
@@ -571,6 +576,8 @@ void CEndlessUsbToolDlg::OnDocumentComplete(LPDISPATCH pDisp, LPCTSTR szUrl)
     StartCheckInternetConnectionThread();
     FindMaxUSBSpeed();
 
+	UpdateDualBootTexts();
+
 	return;
 error:
 	uprintf("OnDocumentComplete Exit with error");
@@ -759,20 +766,7 @@ BOOL CEndlessUsbToolDlg::OnInitDialog()
     SetWindowTextW(L"");
 
 	if(IsUninstaller()) {
-		m_selectedInstallMethod = InstallMethod_t::UninstallEndless;
-
-		int selected = AfxMessageBox(UTF8ToCString(lmprintf(MSG_361)), MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2);
-		if (selected == IDYES) {
-			Analytics::instance()->sessionControl(true, m_selectedInstallMethod == InstallMethod_t::UninstallEndless);
-
-			ShowWindow(SW_HIDE);
-			if (!UninstallDualBoot())
-				Analytics::instance()->exceptionTracking(_T("UninstallError"), TRUE);
-
-			Analytics::instance()->sessionControl(false, m_selectedInstallMethod == InstallMethod_t::UninstallEndless);
-		}
-
-		ExitProcess(0);
+		QueryAndDoUninstall(true);
 	}
 
 	Analytics::instance()->sessionControl(true, m_selectedInstallMethod == InstallMethod_t::UninstallEndless);
@@ -1856,7 +1850,10 @@ HRESULT CEndlessUsbToolDlg::OnInstallDualBootClicked(IHTMLElement* pElement)
 	BOOL isBitLockerEnabled = IsBitlockedDrive(systemDriveLetter);
 	uprintf("Is BitLocker/device encryption enabled on '%ls': %s", systemDriveLetter, isBitLockerEnabled ? "YES" : "NO");
 
-	if (!x64BitSupported) {
+	if (UpdateDualBootTexts()) {
+		m_selectedInstallMethod = InstallMethod_t::UninstallEndless;
+		QueryAndDoUninstall(false);
+	} else if (!x64BitSupported) {
 		ErrorOccured(ErrorCauseNot64Bit);
 
 		/* ::ErrorOccured tracks the "main" cause; let's also track this other problem */
@@ -2019,6 +2016,8 @@ HRESULT CEndlessUsbToolDlg::OnLanguageChanged(IHTMLElement* pElement)
 
     m_selectedRemoteIndex = -1;
     AddDownloadOptionsToUI();
+
+	UpdateDualBootTexts();
 
 	return S_OK;
 
@@ -4176,7 +4175,6 @@ void CEndlessUsbToolDlg::JSONDownloadFailed()
 
 #define EFI_BOOT_SUBDIRECTORY			L"EFI\\BOOT"
 #define ENDLESS_BOOT_SUBDIRECTORY		L"EFI\\Endless"
-#define PATH_ENDLESS_SUBDIRECTORY		L"endless\\"
 #define GRUB_BOOT_SUBDIRECTORY			L"grub"
 #define LIVE_BOOT_IMG_FILE				L"live\\boot.img"
 #define LIVE_CORE_IMG_FILE				L"live\\core.img"
@@ -4193,6 +4191,7 @@ void CEndlessUsbToolDlg::JSONDownloadFailed()
 #define NTFS_CORE_IMG_FILE				L"ntfs\\core.img"
 #define ENDLESS_BOOT_EFI_FILE			"bootx64.efi"
 #define BACKUP_BOOTTRACK_IMG			L"boottrack.img"
+#define BACKUP_MBR_IMG					L"mbr.img"
 
 /* The offset of BOOT_DRIVE_CHECK.  */
 #define GRUB_BOOT_MACHINE_DRIVE_CHECK	0x66
@@ -4981,6 +4980,11 @@ bool CEndlessUsbToolDlg::WriteMBRAndSBRToWinDrive(CEndlessUsbToolDlg *dlg, const
 	boot_drive_check[0] = 0x90;
 	boot_drive_check[1] = 0x90;
 
+	// reusing boottrackImgFile, saving mbr.img for uninstall purposes
+	IFFALSE_GOTOERROR(0 == _wfopen_s(&boottrackImgFile, endlessFilesPath + BACKUP_MBR_IMG, L"wb"), "Error opening mbr.img file");
+	fwrite(endlessMBRData, 1, MBR_WINDOWS_NT_MAGIC, boottrackImgFile);
+	safe_closefile(boottrackImgFile);
+
 	// write boot.img to disk
 	fake_fd._handle = (char*)hPhysical;
 	set_bytes_per_sector(SelectedDrive.Geometry.BytesPerSector);
@@ -5455,7 +5459,7 @@ error:
 	return retResult;
 }
 
-BOOL CEndlessUsbToolDlg::UninstallDualBoot()
+BOOL CEndlessUsbToolDlg::UninstallDualBoot(CEndlessUsbToolDlg *dlg)
 {
 	FUNCTION_ENTER;
 
@@ -5474,7 +5478,17 @@ BOOL CEndlessUsbToolDlg::UninstallDualBoot()
 		FAKE_FD fake_fd = { 0 };
 		FILE* fp = (FILE*)&fake_fd;
 		fake_fd._handle = (char*)hPhysical;
+
 		IFFALSE_GOTOERROR(hPhysical != INVALID_HANDLE_VALUE, "Error on acquiring disk handle.");
+
+		IFTRUE_GOTO(IsWindowsMBR(fp, systemDriveLetter), "Windows MBR detected so skipping MBR writing", skipmbr);
+		if (!CEndlessUsbToolApp::m_enableOverwriteMbr && !IsEndlessMBR(fp, endlessFilesPath)) {
+			dlg->m_lastErrorCause = ErrorCause_t::ErrorCauseNonEndlessMBR;
+			goto error;
+		}
+
+		// TODO: restore boottrack.img if present and use embedded grub only as fallback
+
 		if (nWindowsVersion >= WINDOWS_7) {
 			IFFALSE_GOTOERROR(write_win7_mbr(fp), "Error on write_win7_mbr");
 		} else if(nWindowsVersion == WINDOWS_VISTA) {
@@ -5495,6 +5509,7 @@ BOOL CEndlessUsbToolDlg::UninstallDualBoot()
 		RemoveNonEmptyDirectory(windowsEspDriveLetter + L"\\" + ENDLESS_BOOT_SUBDIRECTORY);
 	}
 
+skipmbr:
 	// restore the registry key for Windows clock in UTC
 	IFFALSE_PRINTERROR(ResetEndlessRegistryKey(HKEY_LOCAL_MACHINE, REGKEY_UTC_TIME_PATH, REGKEY_UTC_TIME), "Error on restoring Windows clock to UTC.");
 
@@ -5739,4 +5754,58 @@ bool CEndlessUsbToolDlg::RemoteMatchesUnpackedImg(const CString &remoteFilePath,
 bool CEndlessUsbToolDlg::IsDualBootOrNewLive()
 {
 	return m_selectedInstallMethod == InstallMethod_t::SetupDualBoot || m_selectedInstallMethod == InstallMethod_t::NewLiveEndless;
+}
+
+bool CEndlessUsbToolDlg::UpdateDualBootTexts()
+{
+	if (PathFileExists(GetSystemDrive() + PATH_ENDLESS_SUBDIRECTORY + ENDLESS_IMG_FILE_NAME)) {
+		SetElementText(_T(ELEMENT_DUALBOOT_TITLE), UTF8ToBSTR(lmprintf(MSG_364)));
+		SetElementText(_T(ELEMENT_DUALBOOT_DESCRIPTION), UTF8ToBSTR(lmprintf(MSG_365)));
+		SetElementText(_T(ELEMENT_DUALBOOT_INSTALL_BUTTON), UTF8ToBSTR(lmprintf(MSG_366)));
+		SetElementText(_T(ELEMENT_DUALBOOT_RECOMMENDATION), UTF8ToBSTR(lmprintf(MSG_367)));
+		CallJavascript(_T(JS_ENABLE_BUTTON), CComVariant(HTML_BUTTON_ID(_T(ELEMENT_DUALBOOT_INSTALL_BUTTON))), CComVariant(TRUE));
+		return true;
+	}
+
+	return false;
+}
+
+void CEndlessUsbToolDlg::QueryAndDoUninstall(bool exitOnCancel)
+{
+	m_selectedInstallMethod = InstallMethod_t::UninstallEndless;
+
+	int selected = AfxMessageBox(UTF8ToCString(lmprintf(MSG_361)), MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2);
+	if (selected == IDYES) {
+		Analytics::instance()->sessionControl(true, m_selectedInstallMethod == InstallMethod_t::UninstallEndless);
+
+		ShowWindow(SW_HIDE);
+		if (!UninstallDualBoot(this))
+			Analytics::instance()->exceptionTracking(_T("UninstallError"), TRUE);
+
+		Analytics::instance()->sessionControl(false, m_selectedInstallMethod == InstallMethod_t::UninstallEndless);
+	} else if(!exitOnCancel){
+		return;
+	}
+
+	ExitProcess(0);
+}
+
+bool CEndlessUsbToolDlg::IsEndlessMBR(FILE* fp, const CString &endlessPath)
+{
+	bool retResult = false;
+	unsigned char endlessMbrData[MBR_WINDOWS_NT_MAGIC], existingMbrData[MBR_WINDOWS_NT_MAGIC];
+	FILE *mbrFile = NULL;
+
+	memset(endlessMbrData, 0, MBR_WINDOWS_NT_MAGIC);
+	memset(existingMbrData, 0, MBR_WINDOWS_NT_MAGIC);
+	// load backup mbr data
+	IFFALSE_GOTOERROR(0 == _wfopen_s(&mbrFile, endlessPath + BACKUP_MBR_IMG, L"rb"), "Error opening mbr.img file");
+	fread(endlessMbrData, 1, MBR_WINDOWS_NT_MAGIC, mbrFile);
+	safe_closefile(mbrFile);
+	// load current mbr data
+	IFFALSE_GOTOERROR(read_data(fp, 0x0, existingMbrData, MBR_WINDOWS_NT_MAGIC), "Error reading current MBR");
+
+	retResult = (0 == memcmp(existingMbrData, endlessMbrData, MBR_WINDOWS_NT_MAGIC));
+error:
+	return retResult;
 }
