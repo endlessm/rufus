@@ -2661,14 +2661,15 @@ HRESULT CEndlessUsbToolDlg::OnSelectFileNextClicked(IHTMLElement* pElement)
 
         CString finalMessageStr = UTF8ToCString(lmprintf(headlineMsg));
         CString imageLanguage = UTF8ToCString(lmprintf(m_personalityToLocaleMsg[personality]));
-        CString imageType = UTF8ToCString(lmprintf(personality == PERSONALITY_BASE ? MSG_400 : MSG_316)); // Basic or Full
+		CStringA imageTypeA = lmprintf(personality == PERSONALITY_BASE ? MSG_400 : MSG_316); // Basic or Full
+        CString imageType = UTF8ToCString(imageTypeA);
 
         SetElementText(_T(ELEMENT_THANKYOU_MESSAGE), CComBSTR(finalMessageStr));
 
         SetElementText(_T(ELEMENT_INSTALLER_VERSION), CComBSTR(version));
         CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_INSTALLER_LANGUAGE_ROW), CComVariant(personality != PERSONALITY_BASE));
         SetElementText(_T(ELEMENT_INSTALLER_LANGUAGE), CComBSTR(imageLanguage));
-        CString contentStr  = UTF8ToCString(lmprintf(MSG_319, imageType, SizeToHumanReadable(size, FALSE, use_fake_units)));
+        CString contentStr  = UTF8ToCString(lmprintf(MSG_319, imageTypeA, SizeToHumanReadable(size, FALSE, use_fake_units)));
         SetElementText(_T(ELEMENT_INSTALLER_CONTENT), CComBSTR(contentStr));
 
         CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_DUALBOOT_REMINDER), CComVariant(m_selectedInstallMethod == InstallMethod_t::SetupDualBoot));
