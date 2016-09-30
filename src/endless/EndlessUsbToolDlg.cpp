@@ -5395,9 +5395,14 @@ CStringW CEndlessUsbToolDlg::GetExePath()
 		exePath = (wchar_t*)malloc((neededSize + 1) * sizeof(wchar_t));
 		memset(exePath, 0, (neededSize + 1) * sizeof(wchar_t));
 		DWORD result = GetModuleFileNameW(NULL, exePath, neededSize);
-		IFFALSE_GOTOERROR(result != 0 && (GetLastError() == ERROR_SUCCESS || GetLastError() == ERROR_INSUFFICIENT_BUFFER), "Could not get needed size for module path");
-		neededSize = result;
-		IFFALSE_CONTINUE(GetLastError() != ERROR_INSUFFICIENT_BUFFER, "Not enough memory allocated for buffer. Trying again.");
+		if (nWindowsVersion > WINDOWS_XP) {
+			IFFALSE_GOTOERROR(result != 0 && (GetLastError() == ERROR_SUCCESS || GetLastError() == ERROR_INSUFFICIENT_BUFFER), "Could not get needed size for module path");
+			neededSize = result;
+			IFFALSE_CONTINUE(GetLastError() != ERROR_INSUFFICIENT_BUFFER, "Not enough memory allocated for buffer. Trying again.");
+		} else {
+			IFFALSE_GOTOERROR(result != 0, "Windows XP: Could not get needed size for module path");
+		}
+
 		break;
 	} while (TRUE);
 
