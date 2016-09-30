@@ -2943,8 +2943,13 @@ void CEndlessUsbToolDlg::StartInstallationProcess()
 				files = { m_localFile, m_localFileSig, m_bootArchive, m_bootArchiveSig, m_unpackedImageSig };
 			}
 		} else if (m_selectedInstallMethod == InstallMethod_t::TryEndless) {
-			urls = { url, urlAsc };
-			files = { m_localFile, m_localFileSig };
+			if (localFileExists) {
+				urls = { urlAsc };
+				files = { m_localFileSig };
+			} else {
+				urls = { url, urlAsc };
+				files = { m_localFile, m_localFileSig };
+			}
 		} else {
 			// installer image file + signature
 			urlInstaller = CString(RELEASE_JSON_URLPATH) + m_installerImage.urlFile;
