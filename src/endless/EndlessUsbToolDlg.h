@@ -361,4 +361,5 @@ private:
 	bool UpdateDualBootTexts();
 	void QueryAndDoUninstall(bool exitOnCancel);
 	static bool IsEndlessMBR(FILE* fp, const CString &systemDriveLetter);
+	static bool RestoreOriginalBoottrack(const CString &endlessPath, HANDLE hPhysical, FILE *fp);
 };

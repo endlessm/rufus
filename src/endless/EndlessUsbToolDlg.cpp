@@ -5481,13 +5481,15 @@ BOOL CEndlessUsbToolDlg::UninstallDualBoot(CEndlessUsbToolDlg *dlg)
 
 		IFFALSE_GOTOERROR(hPhysical != INVALID_HANDLE_VALUE, "Error on acquiring disk handle.");
 
-		IFTRUE_GOTO(IsWindowsMBR(fp, systemDriveLetter), "Windows MBR detected so skipping MBR writing", skipmbr);
+		IFTRUE_GOTO(IsWindowsMBR(fp, systemDriveLetter), "Windows MBR detected so skipping MBR writing", done_with_mbr);
 		if (!CEndlessUsbToolApp::m_enableOverwriteMbr && !IsEndlessMBR(fp, endlessFilesPath)) {
 			dlg->m_lastErrorCause = ErrorCause_t::ErrorCauseNonEndlessMBR;
 			goto error;
 		}
 
-		// TODO: restore boottrack.img if present and use embedded grub only as fallback
+		// restore boottrack.img if present and use embedded grub only as fallback
+		IFTRUE_GOTO(RestoreOriginalBoottrack(endlessFilesPath, hPhysical, fp), "Success on restoring original boottrack", done_with_mbr);
+		uprintf("Failure on restoring original boottrack, faaling back to embedded MBRs.");
 
 		if (nWindowsVersion >= WINDOWS_7) {
 			IFFALSE_GOTOERROR(write_win7_mbr(fp), "Error on write_win7_mbr");
@@ -5509,7 +5511,7 @@ BOOL CEndlessUsbToolDlg::UninstallDualBoot(CEndlessUsbToolDlg *dlg)
 		RemoveNonEmptyDirectory(windowsEspDriveLetter + L"\\" + ENDLESS_BOOT_SUBDIRECTORY);
 	}
 
-skipmbr:
+done_with_mbr:
 	// restore the registry key for Windows clock in UTC
 	IFFALSE_PRINTERROR(ResetEndlessRegistryKey(HKEY_LOCAL_MACHINE, REGKEY_UTC_TIME_PATH, REGKEY_UTC_TIME), "Error on restoring Windows clock to UTC.");
 
@@ -5807,5 +5809,31 @@ bool CEndlessUsbToolDlg::IsEndlessMBR(FILE* fp, const CString &endlessPath)
 
 	retResult = (0 == memcmp(existingMbrData, endlessMbrData, MBR_WINDOWS_NT_MAGIC));
 error:
+	return retResult;
+}
+
+bool CEndlessUsbToolDlg::RestoreOriginalBoottrack(const CString &endlessPath, HANDLE hPhysical, FILE *fp)
+{
+	bool retResult = false;
+	DWORD size;
+	BYTE geometry[256] = { 0 };
+	PDISK_GEOMETRY_EX DiskGeometry = (PDISK_GEOMETRY_EX)(void*)geometry;
+	FILE *boottrackImgFile = NULL;
+	unsigned char *boottrackData[MBR_WINDOWS_NT_MAGIC];
+
+	memset(boottrackData, 0, MBR_WINDOWS_NT_MAGIC);
+
+	BOOL result = DeviceIoControl(hPhysical, IOCTL_DISK_GET_DRIVE_GEOMETRY_EX, NULL, 0, geometry, sizeof(geometry), &size, NULL);
+	IFFALSE_GOTOERROR(result != 0 && size > 0, "Error on querying disk geometry.");
+
+	set_bytes_per_sector(SelectedDrive.Geometry.BytesPerSector);
+
+	IFFALSE_GOTOERROR(0 == _wfopen_s(&boottrackImgFile, endlessPath + BACKUP_BOOTTRACK_IMG, L"rb"), "Error opening boottrack.img file");
+	IFFALSE_GOTOERROR(fread(boottrackData, 1, MBR_WINDOWS_NT_MAGIC, boottrackImgFile), "Error reading from boottrack.img");
+	IFFALSE_GOTOERROR(write_data(fp, 0x0, boottrackData, MBR_WINDOWS_NT_MAGIC), "Error writing boottrack.img data to MBR");
+
+	retResult = true;
+error:
+	safe_closefile(boottrackImgFile);
 	return retResult;
 }
