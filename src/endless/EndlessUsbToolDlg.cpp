@@ -5511,11 +5511,8 @@ BOOL CEndlessUsbToolDlg::UninstallDualBoot()
 
 	// remove <SYSDRIVE>:\Endless
 	IFFALSE_PRINTERROR(ChangeAccessPermissions(endlessFilesPath, false), "Error on granting Endless files permissions.");
-	if (exePath.Find(endlessFilesPath) == 0) {
-		DelayDeleteFolder(endlessFilesPath); // maybe we should do the delay delete evrytime to make sure the folder will get deleted?
-	} else {
-		RemoveNonEmptyDirectory(endlessFilesPath);
-	}
+	uprintf("exePath=%ls, endless=%ls", exePath, endlessFilesPath);
+	DelayDeleteFolder(endlessFilesPath);
 
 	// set success message and icon
 	popupMsgId = MSG_362;
