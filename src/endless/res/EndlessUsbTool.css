@@ -500,6 +500,10 @@ select:disabled {
 	width: 460px;
 }
 
+#NewDiskNameContainer {
+    height: 100px;
+}
+
 #SelectFilePage .ContentTitle {
 	margin-left: 20px;
 }
@@ -551,6 +555,7 @@ select:disabled {
 	font-family: LatoLight;
 	color: #000000;	
 	margin-top: -18px;
+    zoom: 1; /* Fix for IE7 clipping the top of the title */
 }
 
 #SelectFilePage .Fieldset .FieldsetTitle span {
@@ -634,10 +639,6 @@ select:disabled {
 #NewDiskSize{
 	float: right;
 	clear: both;
-}
-
-.AgreementContainer {
-	margin-top: 100px !important;
 }
 
 .AgreementContainer b {
