@@ -5709,8 +5709,12 @@ bool CEndlessUsbToolDlg::GetSignatureForLocalFile(const CString &file, CString &
 {
 	pFileImageEntry_t localEntry = NULL;
 
-	IFFALSE_RETURN_VALUE(0 != m_imageFiles.Lookup(file, localEntry), "Could not find entry for local file.", false);
-	signature = localEntry->isUnpackedImage ? localEntry->unpackedImgSigPath : file + SIGNATURE_FILE_EXT;
+	if (0 == m_imageFiles.Lookup(file, localEntry) && localEntry->isUnpackedImage) {
+		signature = localEntry->unpackedImgSigPath;
+	} else {
+		uprintf("Could not find entry for local file '%ls'", file);
+		signature = file + SIGNATURE_FILE_EXT;
+	}
 
 	return true;
 }
