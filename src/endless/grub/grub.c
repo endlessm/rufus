@@ -387,12 +387,12 @@ int grub_util_bios_setup(const wchar_t *core_path, HANDLE dest_dev, grub_disk_ad
 
 	uprintf("nsec*GRUB_DISK_SECTOR_SIZE = %u, core_size=%u", nsec * GRUB_DISK_SECTOR_SIZE, core_size);
 
-	grub_size_t redudancy = grub_host_to_target32(nsec * GRUB_DISK_SECTOR_SIZE - core_size);
+	grub_size_t redundancy = grub_host_to_target32(nsec * GRUB_DISK_SECTOR_SIZE - core_size);
 	grub_size_t data_size = core_size - no_rs_length - GRUB_DISK_SECTOR_SIZE;
 	void *buffer_start = core_img + no_rs_length + GRUB_DISK_SECTOR_SIZE;
 
-	uprintf("calling grub_reed_solomon_add_redundancy with buffer=0x%08X, data_size=%"PRIu64", redudancy=%"PRIu64, buffer_start, data_size, redudancy);
-	grub_reed_solomon_add_redundancy(buffer_start, data_size, redudancy);
+	uprintf("calling grub_reed_solomon_add_redundancy with buffer=0x%08X, data_size=%"PRIu64", redundancy=%"PRIu64, buffer_start, data_size, redundancy);
+	grub_reed_solomon_add_redundancy(buffer_start, data_size, redundancy);
 
 	/* Write the core image onto the disk.  */
 	for (size_t i = 0; i < nsec; i++) {
