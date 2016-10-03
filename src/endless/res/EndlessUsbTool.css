@@ -666,6 +666,7 @@ select:disabled {
     padding-top: 10px;
     font-size: 13px;
 	font-family: Lato;
+    margin-top: 100px !important;
 }
 
 #SelectStoragePage .ContentTitle {
