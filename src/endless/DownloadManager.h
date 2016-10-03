@@ -63,7 +63,7 @@ public:
     static bool GetDownloadProgress(CComPtr<IBackgroundCopyJob> &currentJob, DownloadStatus_t *downloadStatus, const CString &jobName);
     static HRESULT GetExistingJob(CComPtr<IBackgroundCopyManager> &bcManager, LPCWSTR jobName, CComPtr<IBackgroundCopyJob> &existingJob);
 
-    void ClearExtraDownloadJobs();
+    void ClearExtraDownloadJobs(bool forceCancel = false);
 
     // IUnknown implementation
     DECLARE_IUNKNOWN;

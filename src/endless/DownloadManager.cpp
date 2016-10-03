@@ -434,7 +434,7 @@ error:
     return E_FAIL;
 }
 
-void DownloadManager::ClearExtraDownloadJobs()
+void DownloadManager::ClearExtraDownloadJobs(bool forceCancel)
 {
     FUNCTION_ENTER;
 
@@ -463,7 +463,7 @@ void DownloadManager::ClearExtraDownloadJobs()
         hr = job->GetDisplayName(&displayName);
         IFFALSE_CONTINUE(SUCCEEDED(hr), "Error querying for display name.");
         if (displayName == _tcsstr(displayName, DOWNLOAD_JOB_PREFIX)) {
-            bool cancelJob = m_latestEosVersion != _T("") && NULL == _tcsstr(displayName, m_latestEosVersion);
+            bool cancelJob = forceCancel || (m_latestEosVersion != _T("") && NULL == _tcsstr(displayName, m_latestEosVersion));
             if (!cancelJob && NULL == foundJobs.Find(displayName)) {
                 foundJobs.AddTail(displayName);
                 job->Suspend();
