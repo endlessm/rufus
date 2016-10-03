@@ -5863,5 +5863,5 @@ CComBSTR CEndlessUsbToolDlg::GetDownloadString(const RemoteImageEntry &imageEntr
 	CStringA sizeT = SizeToHumanReadable(size, FALSE, use_fake_units);
 	ULONGLONG fullSize = GetActualDownloadSize(imageEntry, true);
 	CStringA fullSizeT = SizeToHumanReadable(fullSize, FALSE, use_fake_units);
-	return UTF8ToBSTR(lmprintf(MSG_315, sizeT, fullSizeT));
+	return UTF8ToBSTR(size == fullSize ? lmprintf(MSG_369, fullSizeT) : lmprintf(MSG_315, sizeT, fullSizeT));
 }

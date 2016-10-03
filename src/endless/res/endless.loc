@@ -266,6 +266,7 @@ t MSG_365 "FIXME: Description on uninstall steps and result"
 t MSG_366 "FIXME: Uninstall"
 t MSG_367 "FIXME: Some other warning on what will happen during uninstall"
 t MSG_368 "Internet Explorer %d is not supported. Please click OK to download Internet Explorer %d, install it, then run the Endless Installer again."
+t MSG_369 "%s Download"
 
 t MSG_400 "Basic"
 t MSG_401 "English"
