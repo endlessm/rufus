@@ -4969,7 +4969,7 @@ bool CEndlessUsbToolDlg::WriteMBRAndSBRToWinDrive(CEndlessUsbToolDlg *dlg, const
 	PARTITION_INFORMATION_EX *partition = NULL;
 	for (DWORD index = 0; index < DriveLayout->PartitionCount; index++) {
 		partition = &(DriveLayout->PartitionEntry[index]);
-		uprintf("Partition %d starting offset = I64i", index, partition->StartingOffset.QuadPart);
+		uprintf("Partition %d starting offset = %I64i", index, partition->StartingOffset.QuadPart);
 		if(partition->StartingOffset.QuadPart < minStartingOffset) minStartingOffset = partition->StartingOffset.QuadPart;
 	}
 
@@ -5508,7 +5508,7 @@ BOOL CEndlessUsbToolDlg::UninstallDualBoot(CEndlessUsbToolDlg *dlg)
 
 		// restore boottrack.img if present and use embedded grub only as fallback
 		IFTRUE_GOTO(RestoreOriginalBoottrack(endlessFilesPath, hPhysical, fp), "Success on restoring original boottrack", done_with_mbr);
-		uprintf("Failure on restoring original boottrack, faaling back to embedded MBRs.");
+		uprintf("Failure on restoring original boottrack, falling back to embedded MBRs.");
 
 		if (nWindowsVersion >= WINDOWS_7) {
 			IFFALSE_GOTOERROR(write_win7_mbr(fp), "Error on write_win7_mbr");
@@ -5750,7 +5750,7 @@ bool CEndlessUsbToolDlg::GetSignatureForLocalFile(const CString &file, CString &
 {
 	pFileImageEntry_t localEntry = NULL;
 
-	if (0 == m_imageFiles.Lookup(file, localEntry) && localEntry->isUnpackedImage) {
+	if (0 != m_imageFiles.Lookup(file, localEntry) && localEntry->isUnpackedImage) {
 		signature = localEntry->unpackedImgSigPath;
 	} else {
 		uprintf("Could not find entry for local file '%ls'", file);
@@ -5813,6 +5813,7 @@ void CEndlessUsbToolDlg::QueryAndDoUninstall(bool exitOnCancel)
 
 bool CEndlessUsbToolDlg::IsEndlessMBR(FILE* fp, const CString &endlessPath)
 {
+	CString mbrImgPath = endlessPath + BACKUP_MBR_IMG;
 	bool retResult = false;
 	unsigned char endlessMbrData[MBR_WINDOWS_NT_MAGIC], existingMbrData[MBR_WINDOWS_NT_MAGIC];
 	FILE *mbrFile = NULL;
@@ -5820,7 +5821,13 @@ bool CEndlessUsbToolDlg::IsEndlessMBR(FILE* fp, const CString &endlessPath)
 	memset(endlessMbrData, 0, MBR_WINDOWS_NT_MAGIC);
 	memset(existingMbrData, 0, MBR_WINDOWS_NT_MAGIC);
 	// load backup mbr data
-	IFFALSE_GOTOERROR(0 == _wfopen_s(&mbrFile, endlessPath + BACKUP_MBR_IMG, L"rb"), "Error opening mbr.img file");
+	errno_t openRet = _wfopen_s(&mbrFile, mbrImgPath, L"rb");
+	if (openRet == ENOENT) {
+		uprintf("%ls missing; assuming the Endless OS GRUB MBR is installed", mbrImgPath);
+		return TRUE;
+	} else {
+		IFFALSE_GOTOERROR(0 == openRet, "Error opening mbr.img file");
+	}
 	fread(endlessMbrData, 1, MBR_WINDOWS_NT_MAGIC, mbrFile);
 	safe_closefile(mbrFile);
 	// load current mbr data
