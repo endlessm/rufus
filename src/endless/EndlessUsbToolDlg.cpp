@@ -4202,6 +4202,7 @@ void CEndlessUsbToolDlg::JSONDownloadFailed()
 #define ENDLESS_BOOT_EFI_FILE			"bootx64.efi"
 #define BACKUP_BOOTTRACK_IMG			L"boottrack.img"
 #define BACKUP_MBR_IMG					L"mbr.img"
+#define MAX_BOOTTRACK_SIZE				(4 * 1024 * 1024) // 4Mb
 
 /* The offset of BOOT_DRIVE_CHECK.  */
 #define GRUB_BOOT_MACHINE_DRIVE_CHECK	0x66
@@ -4964,9 +4965,17 @@ bool CEndlessUsbToolDlg::WriteMBRAndSBRToWinDrive(CEndlessUsbToolDlg *dlg, const
 
 	// preserve boot track before writing anything to disk
 	// Jira https://movial.atlassian.net/browse/EOIFT-169
+	LONGLONG minStartingOffset = MAX_BOOTTRACK_SIZE;
+	PARTITION_INFORMATION_EX *partition = NULL;
+	for (DWORD index = 0; index < DriveLayout->PartitionCount; index++) {
+		partition = &(DriveLayout->PartitionEntry[index]);
+		uprintf("Partition %d starting offset = I64i", index, partition->StartingOffset.QuadPart);
+		if(partition->StartingOffset.QuadPart < minStartingOffset) minStartingOffset = partition->StartingOffset.QuadPart;
+	}
+
 	IFFALSE_GOTOERROR(0 == _wfopen_s(&boottrackImgFile, endlessFilesPath + BACKUP_BOOTTRACK_IMG, L"wb"), "Error opening boottrack.img file");
 	boottrackData = (unsigned char*)malloc(DiskGeometry->Geometry.BytesPerSector);
-	LONGLONG boottrackNrSectors = DriveLayout->PartitionEntry[0].StartingOffset.QuadPart / DiskGeometry->Geometry.BytesPerSector;
+	LONGLONG boottrackNrSectors = minStartingOffset / DiskGeometry->Geometry.BytesPerSector;
 	uprintf("Trying to save %I64i sectors in file %ls", boottrackNrSectors, endlessFilesPath + BACKUP_BOOTTRACK_IMG);
 	for (LONGLONG i = 0; i < boottrackNrSectors; i++) {
 		int64_t result = read_sectors(hPhysical, DiskGeometry->Geometry.BytesPerSector, i, 1, boottrackData);
