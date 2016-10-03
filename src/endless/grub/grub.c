@@ -379,19 +379,19 @@ int grub_util_bios_setup(const wchar_t *core_path, HANDLE dest_dev, grub_disk_ad
 
 	grub_size_t no_rs_length;
 	no_rs_length = grub_target_to_host16(grub_get_unaligned16(core_img + GRUB_DISK_SECTOR_SIZE + GRUB_KERNEL_I386_PC_NO_REED_SOLOMON_LENGTH));
-	uprintf("no_rs_length=%"PRIu64, no_rs_length);
+	uprintf("no_rs_length=%zu", no_rs_length);
 
 	if (no_rs_length == 0xffff) uprintf("core.img version mismatch");
 
 	grub_set_unaligned32((core_img + GRUB_DISK_SECTOR_SIZE + GRUB_KERNEL_I386_PC_REED_SOLOMON_REDUNDANCY), nsec * GRUB_DISK_SECTOR_SIZE - core_size);
 
-	uprintf("nsec*GRUB_DISK_SECTOR_SIZE = %u, core_size=%u", nsec * GRUB_DISK_SECTOR_SIZE, core_size);
+	uprintf("nsec*GRUB_DISK_SECTOR_SIZE = %u, core_size=%zu", nsec * GRUB_DISK_SECTOR_SIZE, core_size);
 
 	grub_size_t redundancy = grub_host_to_target32(nsec * GRUB_DISK_SECTOR_SIZE - core_size);
 	grub_size_t data_size = core_size - no_rs_length - GRUB_DISK_SECTOR_SIZE;
 	void *buffer_start = core_img + no_rs_length + GRUB_DISK_SECTOR_SIZE;
 
-	uprintf("calling grub_reed_solomon_add_redundancy with buffer=0x%08X, data_size=%"PRIu64", redundancy=%"PRIu64, buffer_start, data_size, redundancy);
+	uprintf("calling grub_reed_solomon_add_redundancy with buffer=0x%08X, data_size=%zu, redundancy=%zu", buffer_start, data_size, redundancy);
 	grub_reed_solomon_add_redundancy(buffer_start, data_size, redundancy);
 
 	/* Write the core image onto the disk.  */
