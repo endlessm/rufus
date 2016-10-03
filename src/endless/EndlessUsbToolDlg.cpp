@@ -4022,7 +4022,7 @@ bool CEndlessUsbToolDlg::CanUseLocalFile()
 			m_imageFiles.GetNextAssoc(position, path, currentEntry);
 			bool imageBootSupport = HasImageBootSupport(currentEntry->version, currentEntry->date);
 
-			if (imageBootSupport && currentEntry->hasBootArchive && currentEntry->hasBootArchiveSig) {
+			if (imageBootSupport && currentEntry->hasBootArchive && currentEntry->hasBootArchiveSig &&currentEntry->hasUnpackedImgSig) {
 				hasFilesForDualBoot = true;
 				break;
 			}
