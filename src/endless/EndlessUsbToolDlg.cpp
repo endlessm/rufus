@@ -1940,9 +1940,7 @@ void CEndlessUsbToolDlg::GoToSelectFilePage()
         r = m_remoteImages.GetAt(p);
 
         // Update light download size
-        ULONGLONG size = GetActualDownloadSize(r);
-        sizeText = UTF8ToBSTR(lmprintf(MSG_315, SizeToHumanReadable(size, FALSE, use_fake_units)));
-        SetElementText(_T(ELEMENT_DOWNLOAD_LIGHT_SIZE), sizeText);
+        SetElementText(_T(ELEMENT_DOWNLOAD_LIGHT_SIZE), GetDownloadString(r));
 
         // Update full download size
         HRESULT hr = GetElement(_T(ELEMENT_REMOTE_SELECT), &selectElem);
@@ -2531,8 +2529,7 @@ void CEndlessUsbToolDlg::AddDownloadOptionsToUI()
         IFFALSE_PRINTERROR(SUCCEEDED(hr), "Error adding remote image to list.");
 
         // option size
-        ULONGLONG size = GetActualDownloadSize(imageEntry);
-        CComBSTR sizeText = UTF8ToBSTR(lmprintf(MSG_315, SizeToHumanReadable(size, FALSE, use_fake_units)));
+		CComBSTR sizeText = GetDownloadString(imageEntry);
         const wchar_t *htmlElemId = NULL;
 
         if (imageEntry.personality == PERSONALITY_BASE) {
@@ -2767,9 +2764,7 @@ HRESULT CEndlessUsbToolDlg::OnSelectedRemoteFileChanged(IHTMLElement* pElement)
     uprintf("OnSelectedRemoteFileChanged to REMOTE [%ls]", r.displayName);
 
     if (r.personality != PERSONALITY_BASE) {
-        ULONGLONG size = GetActualDownloadSize(r);
-        CComBSTR sizeText = UTF8ToBSTR(lmprintf(MSG_315, SizeToHumanReadable(size, FALSE, use_fake_units)));
-        SetElementText(_T(ELEMENT_DOWNLOAD_FULL_SIZE), sizeText);
+        SetElementText(_T(ELEMENT_DOWNLOAD_FULL_SIZE), GetDownloadString(r));
     }
 
     m_useLocalFile = false;
@@ -5723,20 +5718,20 @@ error:
 
 #define SIGNATURE_FILE_SIZE	819
 
-ULONGLONG CEndlessUsbToolDlg::GetActualDownloadSize(const RemoteImageEntry &r)
+ULONGLONG CEndlessUsbToolDlg::GetActualDownloadSize(const RemoteImageEntry &r, bool fullSize)
 {
 	ULONGLONG size = SIGNATURE_FILE_SIZE; // img.gz.asc
 	CString localFile = GET_LOCAL_PATH(CSTRING_GET_LAST(r.urlFile, '/'));
 	bool localFileExists = PackedImageAlreadyExists(localFile, r.compressedSize, r.extractedSize, false);
-	size += localFileExists ? 0 : r.compressedSize;
+	size += !fullSize && localFileExists ? 0 : r.compressedSize;
 
-	if (m_selectedInstallMethod == InstallMethod_t::SetupDualBoot) {
+	if (IsDualBootOrNewLive()) {
 		size += r.bootArchiveSize + SIGNATURE_FILE_SIZE * 2; // img.asc and boot.zip.asc
 	} else if (m_selectedInstallMethod == InstallMethod_t::ReflasherDrive) {
 		CString installerFile = GET_LOCAL_PATH(CSTRING_GET_LAST(m_installerImage.urlFile, '/'));
 		bool installerExists = PackedImageAlreadyExists(installerFile, m_installerImage.compressedSize, m_installerImage.extractedSize, true);
 		size += SIGNATURE_FILE_SIZE; // installer img.gz.asc
-		size += installerExists ? 0 : m_installerImage.compressedSize;
+		size += !fullSize && installerExists ? 0 : m_installerImage.compressedSize;
 	}
 
 	return size;
@@ -5851,4 +5846,13 @@ bool CEndlessUsbToolDlg::RestoreOriginalBoottrack(const CString &endlessPath, HA
 error:
 	safe_closefile(boottrackImgFile);
 	return retResult;
+}
+
+CComBSTR CEndlessUsbToolDlg::GetDownloadString(const RemoteImageEntry &imageEntry)
+{
+	ULONGLONG size = GetActualDownloadSize(imageEntry);
+	CStringA sizeT = SizeToHumanReadable(size, FALSE, use_fake_units);
+	ULONGLONG fullSize = GetActualDownloadSize(imageEntry, true);
+	CStringA fullSizeT = SizeToHumanReadable(fullSize, FALSE, use_fake_units);
+	return UTF8ToBSTR(lmprintf(MSG_315, sizeT, fullSizeT));
 }

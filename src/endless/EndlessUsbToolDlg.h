@@ -354,7 +354,7 @@ private:
 
 	bool PackedImageAlreadyExists(const CString &filePath, ULONGLONG expectedSize, ULONGLONG expectedUnpackedSize, bool isInstaller);
 
-	ULONGLONG GetActualDownloadSize(const RemoteImageEntry &r);
+	ULONGLONG GetActualDownloadSize(const RemoteImageEntry &r, bool fullSize = false);
 	bool GetSignatureForLocalFile(const CString &file, CString &signature);
 	bool RemoteMatchesUnpackedImg(const CString &remoteFilePath, CString *unpackedImgSig = NULL);
 	bool IsDualBootOrNewLive();
@@ -362,4 +362,6 @@ private:
 	void QueryAndDoUninstall(bool exitOnCancel);
 	static bool IsEndlessMBR(FILE* fp, const CString &systemDriveLetter);
 	static bool RestoreOriginalBoottrack(const CString &endlessPath, HANDLE hPhysical, FILE *fp);
+
+	CComBSTR GetDownloadString(const RemoteImageEntry &imageEntry);
 };
