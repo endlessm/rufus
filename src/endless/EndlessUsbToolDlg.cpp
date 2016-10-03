@@ -328,6 +328,7 @@ const wchar_t* mainWindowTitle = L"Endless Installer";
 #define UPDATE_DOWNLOAD_PROGRESS_TIME       2000
 #define CHECK_INTERNET_CONNECTION_TIME      2000
 
+#define MIN_SUPPORTED_IE_VERSION		7
 
 #define FORMAT_STATUS_CANCEL (ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_CANCELLED)
 
@@ -770,6 +771,14 @@ BOOL CEndlessUsbToolDlg::OnInitDialog()
 	}
 
 	Analytics::instance()->sessionControl(true, m_selectedInstallMethod == InstallMethod_t::UninstallEndless);
+
+	if (m_ieVersion < MIN_SUPPORTED_IE_VERSION) {
+		int result = AfxMessageBox(UTF8ToCString(lmprintf(MSG_368, m_ieVersion, MIN_SUPPORTED_IE_VERSION)), MB_OKCANCEL | MB_ICONERROR);
+		if (result == IDOK) {
+			ShellExecute(NULL, L"open", L"https://www.microsoft.com/en-us/download/details.aspx?id=32072", NULL, NULL, SW_SHOWNORMAL);
+		}
+		ExitProcess(0);
+	}
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
