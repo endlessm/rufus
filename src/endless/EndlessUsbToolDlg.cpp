@@ -3999,7 +3999,7 @@ void CEndlessUsbToolDlg::CancelRunningOperation()
 
     FormatStatus = FORMAT_STATUS_CANCEL;
     if (m_currentStep != OP_FLASHING_DEVICE) {
-        m_downloadManager.ClearExtraDownloadJobs();
+        m_downloadManager.ClearExtraDownloadJobs(true);
         PostMessage(WM_FINISHED_ALL_OPERATIONS, (WPARAM)FALSE, 0);
     }
 }
