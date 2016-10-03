@@ -4969,8 +4969,13 @@ bool CEndlessUsbToolDlg::WriteMBRAndSBRToWinDrive(CEndlessUsbToolDlg *dlg, const
 	PARTITION_INFORMATION_EX *partition = NULL;
 	for (DWORD index = 0; index < DriveLayout->PartitionCount; index++) {
 		partition = &(DriveLayout->PartitionEntry[index]);
-		uprintf("Partition %d starting offset = %I64i", index, partition->StartingOffset.QuadPart);
-		if(partition->StartingOffset.QuadPart < minStartingOffset) minStartingOffset = partition->StartingOffset.QuadPart;
+		IFFALSE_GOTOERROR(partition->PartitionStyle == PARTITION_STYLE_MBR, "non-MBR partition in supposedly-MBR table(?)");
+		if (partition->Mbr.PartitionType == PARTITION_ENTRY_UNUSED) {
+			uprintf("Partition %d is unused", index);
+		} else {
+			uprintf("Partition %d starting offset = %I64i", index, partition->StartingOffset.QuadPart);
+			minStartingOffset = min(minStartingOffset, partition->StartingOffset.QuadPart);
+		}
 	}
 
 	IFFALSE_GOTOERROR(0 == _wfopen_s(&boottrackImgFile, endlessFilesPath + BACKUP_BOOTTRACK_IMG, L"wb"), "Error opening boottrack.img file");
