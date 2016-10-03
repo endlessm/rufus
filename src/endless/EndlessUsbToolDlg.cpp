@@ -4985,7 +4985,7 @@ bool CEndlessUsbToolDlg::WriteMBRAndSBRToWinDrive(CEndlessUsbToolDlg *dlg, const
 	safe_closefile(boottrackImgFile);
 
 	// Write core.img
-	IFFALSE_GOTOERROR(grub_util_bios_setup(coreImgFilePath, hPhysical, DriveLayout->PartitionEntry[0].StartingOffset.QuadPart / DiskGeometry->Geometry.BytesPerSector), "Error writing SBR to disk");
+	IFFALSE_GOTOERROR(grub_util_bios_setup(coreImgFilePath, hPhysical, boottrackNrSectors), "Error writing SBR to disk");
 
 	// Load boot.img from file
 	IFFALSE_GOTOERROR(0 == _wfopen_s(&bootImgFile, bootImgFilePath, L"rb"), "Error opening boot.img file");
