@@ -1840,14 +1840,20 @@ bool CEndlessUsbToolDlg::IsButtonDisabled(IHTMLElement *pElement)
 //	return S_FALSE;
 //}
 
+#define DISABLE_NEW_LIVE_FEATURE
+
 #define KEY_PRESSED 0x8000
 // Dual Boot Page Handlers
 HRESULT CEndlessUsbToolDlg::OnAdvancedOptionsClicked(IHTMLElement* pElement)
 {
 	FUNCTION_ENTER;
 
+#ifdef DISABLE_NEW_LIVE_FEATURE
+	bool oldStyleUSB = true;
+#else
 	SHORT keyState = GetKeyState(VK_CONTROL);
 	bool oldStyleUSB = ((keyState & KEY_PRESSED) != 0) || (nWindowsVersion == WINDOWS_XP);
+#endif
 
 	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_ADVOPT_SUBTITLE), CComVariant(!oldStyleUSB));
 	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(HTML_BUTTON_ID(ELEMENT_CREATE_NEW_LIVE_BUTTON)), CComVariant(!oldStyleUSB));
