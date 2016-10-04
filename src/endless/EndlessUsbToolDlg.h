@@ -38,6 +38,7 @@ typedef enum ErrorCause {
     ErrorCauseNotNTFS,
     ErrorCauseNonWindowsMBR,
 	ErrorCauseNonEndlessMBR,
+	ErrorCauseInstallFailedDiskFull,
     ErrorCauseNone
 } ErrorCause_t;
 
@@ -364,4 +365,6 @@ private:
 	static bool RestoreOriginalBoottrack(const CString &endlessPath, HANDLE hPhysical, FILE *fp);
 
 	CComBSTR GetDownloadString(const RemoteImageEntry &imageEntry);
+
+	ULONGLONG GetNeededSpaceForDualBoot(int &neededGigs, bool *isBaseImage = NULL);
 };

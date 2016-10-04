@@ -1570,7 +1570,8 @@ void CEndlessUsbToolDlg::ChangePage(PCTSTR newPage)
 
 void CEndlessUsbToolDlg::ErrorOccured(ErrorCause_t errorCause)
 {
-    uint32_t buttonMsgId = 0, suggestionMsgId = 0;
+    uint32_t buttonMsgId = 0, suggestionMsgId = 0, headlineMsgId = 0;
+    bool driveLetterInHeading = false;
 
     switch (errorCause) {
     case ErrorCause_t::ErrorCauseDownloadFailed:
@@ -1579,9 +1580,12 @@ void CEndlessUsbToolDlg::ErrorOccured(ErrorCause_t errorCause)
         break;
     case ErrorCause_t::ErrorCauseDownloadFailedDiskFull:
         buttonMsgId = MSG_326;
-        // TODO: distinguish between "not enough space to download" and "not enough space to install",
-        // use MSG_350 / MSG_351 in the latter case
+        headlineMsgId = MSG_350;
         suggestionMsgId = MSG_334;
+    case ErrorCause_t::ErrorCauseInstallFailedDiskFull:
+        buttonMsgId = MSG_326;
+        headlineMsgId = MSG_350;
+        suggestionMsgId = MSG_351;
         break;
     case ErrorCause_t::ErrorCauseJSONDownloadFailed:
     case ErrorCause_t::ErrorCauseVerificationFailed:
@@ -1596,22 +1600,24 @@ void CEndlessUsbToolDlg::ErrorOccured(ErrorCause_t errorCause)
         break;
     case ErrorCause_t::ErrorCauseNot64Bit:
         buttonMsgId = MSG_328;
-        // TODO: headline should be MSG_354
+        headlineMsgId = MSG_354;
         suggestionMsgId = MSG_355;
         break;
     case ErrorCause_t::ErrorCauseBitLocker:
         buttonMsgId = MSG_328;
-        // TODO: headline should be MSG_356, with system drive letter
+        headlineMsgId = MSG_356;
+        driveLetterInHeading = true;
         suggestionMsgId = MSG_357;
         break;
     case ErrorCause_t::ErrorCauseNotNTFS:
         buttonMsgId = MSG_328;
-        // TODO: headline should be MSG_352, with system drive letter
+        headlineMsgId = MSG_352;
+        driveLetterInHeading = true;
         suggestionMsgId = MSG_353;
         break;
     case ErrorCause_t::ErrorCauseNonWindowsMBR:
         buttonMsgId = MSG_328;
-        // TODO: headline should be MSG_359
+        headlineMsgId = MSG_359;
         suggestionMsgId = MSG_360;
         break;
     default:
@@ -1625,6 +1631,13 @@ void CEndlessUsbToolDlg::ErrorOccured(ErrorCause_t errorCause)
         CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(HTML_BUTTON_ID(ELEMENT_ERROR_BUTTON)), CComVariant(TRUE));
     } else {
         CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(HTML_BUTTON_ID(ELEMENT_ERROR_BUTTON)), CComVariant(FALSE));
+    }
+
+    if (headlineMsgId != 0) {
+        CComBSTR headlineMsg;
+        if (driveLetterInHeading) headlineMsg = UTF8ToBSTR(lmprintf(headlineMsgId, ConvertUnicodeToUTF8(GetSystemDrive())));
+        else headlineMsg = UTF8ToBSTR(lmprintf(headlineMsgId));
+        SetElementText(_T(ELEMENT_ERROR_MESSAGE), headlineMsg);
     }
 
     // Ask user to delete the file that didn't pass signature verification
@@ -1655,6 +1668,10 @@ void CEndlessUsbToolDlg::ErrorOccured(ErrorCause_t errorCause)
             // we don't take the signature files into account but we are taking about ~2KB compared to >2GB
             ULONGLONG totalSize = size + (m_selectedInstallMethod == InstallMethod_t::ReflasherDrive ? m_installerImage.compressedSize : 0);
             message = UTF8ToBSTR(lmprintf(suggestionMsgId, SizeToHumanReadable(totalSize, FALSE, use_fake_units)));
+        } else if(suggestionMsgId == MSG_351) {
+            int nrGigsNeeded;
+            ULONGLONG neededSize = GetNeededSpaceForDualBoot(nrGigsNeeded);
+            message = UTF8ToBSTR(lmprintf(suggestionMsgId, SizeToHumanReadable(neededSize, FALSE, use_fake_units), ConvertUnicodeToUTF8(GetSystemDrive())));
         } else {
             message = UTF8ToBSTR(lmprintf(suggestionMsgId));
         }
@@ -1851,13 +1868,34 @@ HRESULT CEndlessUsbToolDlg::OnInstallDualBootClicked(IHTMLElement* pElement)
 
 	FUNCTION_ENTER;
 
-	CString systemDriveLetter = GetSystemDrive().Left(2);
+	CString systemDriveLetter = GetSystemDrive();
 
 	BOOL x64BitSupported = Has64BitSupport() ? TRUE : FALSE;
 	uprintf("HW processor has 64 bit support: %s", x64BitSupported ? "YES" : "NO");
 
-	BOOL isBitLockerEnabled = IsBitlockedDrive(systemDriveLetter);
+	BOOL isBitLockerEnabled = IsBitlockedDrive(systemDriveLetter.Left(2));
 	uprintf("Is BitLocker/device encryption enabled on '%ls': %s", systemDriveLetter, isBitLockerEnabled ? "YES" : "NO");
+
+	// Verify that this is an NTFS partition
+	BOOL isNtfsPartition = FALSE;
+	wchar_t fileSystemType[MAX_PATH + 1];
+	if (GetVolumeInformation(systemDriveLetter, NULL, 0, NULL, NULL, NULL, fileSystemType, MAX_PATH + 1)) {
+		uprintf("File system type '%ls'", fileSystemType);
+		isNtfsPartition = (0 == wcscmp(fileSystemType, L"NTFS"));
+	}
+
+	// check if windows MBR
+	BOOL isWindowsMBR = CEndlessUsbToolApp::m_enableOverwriteMbr;
+	if(!isWindowsMBR) {
+		HANDLE hPhysical = GetPhysicalFromDriveLetter(systemDriveLetter);
+		if (hPhysical != INVALID_HANDLE_VALUE) {
+			FAKE_FD fake_fd = { 0 };
+			FILE* fp = (FILE*)&fake_fd;
+			fake_fd._handle = (char*)hPhysical;
+
+			isWindowsMBR = IsWindowsMBR(fp, systemDriveLetter);
+		}
+	}
 
 	if (UpdateDualBootTexts()) {
 		m_selectedInstallMethod = InstallMethod_t::UninstallEndless;
@@ -1870,6 +1908,10 @@ HRESULT CEndlessUsbToolDlg::OnInstallDualBootClicked(IHTMLElement* pElement)
 			Analytics::instance()->exceptionTracking(ErrorCauseToStr(ErrorCauseBitLocker), FALSE);
 	} else if (isBitLockerEnabled) {
 		ErrorOccured(ErrorCauseBitLocker);
+	} else if (!isNtfsPartition) {
+		ErrorOccured(ErrorCauseNotNTFS);
+	} else if (!isWindowsMBR) {
+		ErrorOccured(ErrorCauseNonWindowsMBR);
 	} else {
 		m_selectedInstallMethod = InstallMethod_t::SetupDualBoot;
 		GoToSelectFilePage();
@@ -3186,15 +3228,9 @@ HRESULT CEndlessUsbToolDlg::OnSelectedStorageSizeChanged(IHTMLElement* pElement)
 
 #define BYTES_IN_GIGABYTE		(1024 *  1024 * 1024)
 
-void CEndlessUsbToolDlg::GoToSelectStoragePage()
+ULONGLONG CEndlessUsbToolDlg::GetNeededSpaceForDualBoot(int &neededGigs, bool *isBaseImage)
 {
-	ULARGE_INTEGER freeBytesAvailable, totalNumberOfBytes, totalNumberOfFreeBytes;
-	CComPtr<IHTMLSelectElement> selectElement;
-	HRESULT hr;
-	int maxAvailableGigs = 0;
-	CStringA freeSize, totalSize;
-	bool isBaseImage = true;
-
+	if(isBaseImage != NULL)  *isBaseImage = true;
 	// figure out how much space we need
 	ULONGLONG neededSize = 0;
 	ULONGLONG bytesInGig = BYTES_IN_GIGABYTE;
@@ -3205,7 +3241,7 @@ void CEndlessUsbToolDlg::GoToSelectStoragePage()
 		if (!m_imageFiles.Lookup(selectedImage, localEntry)) {
 			uprintf("ERROR: Selected local file not found.");
 		} else {
-			isBaseImage = (localEntry->personality == PERSONALITY_BASE);
+			if (isBaseImage != NULL)  *isBaseImage = (localEntry->personality == PERSONALITY_BASE);
 			neededSize = localEntry->isUnpackedImage ? localEntry->size : GetExtractedSize(selectedImage, FALSE);
 		}
 	} else {
@@ -3213,11 +3249,29 @@ void CEndlessUsbToolDlg::GoToSelectStoragePage()
 		if (p != NULL) {
 			RemoteImageEntry_t remote = m_remoteImages.GetAt(p);
 			neededSize = remote.extractedSize;
-			isBaseImage = (remote.personality == PERSONALITY_BASE);
+			if (GetExePath().Left(3) == GetSystemDrive()) {
+				neededSize += remote.compressedSize + remote.bootArchiveSize;
+			}
+			if (isBaseImage != NULL)  *isBaseImage = (remote.personality == PERSONALITY_BASE);
 		}
 	}
 	neededSize += bytesInGig;
-	int neededGigs = (int) (neededSize / bytesInGig);
+	neededGigs = (int)(neededSize / bytesInGig);
+	return neededSize;
+}
+
+void CEndlessUsbToolDlg::GoToSelectStoragePage()
+{
+	ULARGE_INTEGER freeBytesAvailable, totalNumberOfBytes, totalNumberOfFreeBytes;
+	CComPtr<IHTMLSelectElement> selectElement;
+	HRESULT hr;
+	int maxAvailableGigs = 0;
+	CStringA freeSize, totalSize;
+	bool isBaseImage = true;
+
+	ULONGLONG bytesInGig = BYTES_IN_GIGABYTE;
+	int neededGigs = 0;
+	ULONGLONG neededSize = GetNeededSpaceForDualBoot(neededGigs, &isBaseImage);
 
 	CStringW systemDrive = GetSystemDrive();
 	CStringA systemDriveA = ConvertUnicodeToUTF8(systemDrive);
@@ -3366,6 +3420,7 @@ HRESULT CEndlessUsbToolDlg::OnRecoverErrorButtonClicked(IHTMLElement* pElement)
     case ErrorCause_t::ErrorCauseCanceled:
     case ErrorCause_t::ErrorCauseJSONDownloadFailed:
     default:
+		ApplyRufusLocalization();
         ChangePage(_T(ELEMENT_DUALBOOT_PAGE));
         break;
     }
@@ -4798,6 +4853,10 @@ not_ntfs:
     dlg->m_lastErrorCause = ErrorCause_t::ErrorCauseNotNTFS;
 
 error:
+	if (GetLastError() == ERROR_DISK_FULL) {
+		dlg->m_lastErrorCause = ErrorCause_t::ErrorCauseInstallFailedDiskFull;
+	}
+
 	uprintf("SetupDualBoot exited with error.");
 	if (dlg->m_lastErrorCause == ErrorCause_t::ErrorCauseNone) {
 		dlg->m_lastErrorCause = ErrorCause_t::ErrorCauseWriteFailed;
