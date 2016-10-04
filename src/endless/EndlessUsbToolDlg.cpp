@@ -1570,7 +1570,7 @@ void CEndlessUsbToolDlg::ChangePage(PCTSTR newPage)
 
 void CEndlessUsbToolDlg::ErrorOccured(ErrorCause_t errorCause)
 {
-    uint32_t buttonMsgId = 0, suggestionMsgId = 0, headlineMsgId = 0;
+    uint32_t buttonMsgId = 0, suggestionMsgId = 0, headlineMsgId = MSG_370;
     bool driveLetterInHeading = false;
 
     switch (errorCause) {
@@ -3420,7 +3420,6 @@ HRESULT CEndlessUsbToolDlg::OnRecoverErrorButtonClicked(IHTMLElement* pElement)
     case ErrorCause_t::ErrorCauseCanceled:
     case ErrorCause_t::ErrorCauseJSONDownloadFailed:
     default:
-		ApplyRufusLocalization();
         ChangePage(_T(ELEMENT_DUALBOOT_PAGE));
         break;
     }
