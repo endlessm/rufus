@@ -1901,6 +1901,7 @@ HRESULT CEndlessUsbToolDlg::OnInstallDualBootClicked(IHTMLElement* pElement)
 
 			isWindowsMBR = IsWindowsMBR(fp, systemDriveLetter);
 		}
+		safe_closehandle(hPhysical);
 	}
 
 	if (UpdateDualBootTexts()) {
