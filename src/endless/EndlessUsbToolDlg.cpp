@@ -1891,15 +1891,18 @@ HRESULT CEndlessUsbToolDlg::OnInstallDualBootClicked(IHTMLElement* pElement)
 	}
 
 	// check if windows MBR
-	BOOL isWindowsMBR = CEndlessUsbToolApp::m_enableOverwriteMbr;
-	if(!isWindowsMBR) {
+	BOOL hasNonWindowsMBR = false;
+	if(IsLegacyBIOSBoot() && !CEndlessUsbToolApp::m_enableOverwriteMbr) {
 		HANDLE hPhysical = GetPhysicalFromDriveLetter(systemDriveLetter);
 		if (hPhysical != INVALID_HANDLE_VALUE) {
 			FAKE_FD fake_fd = { 0 };
 			FILE* fp = (FILE*)&fake_fd;
 			fake_fd._handle = (char*)hPhysical;
 
-			isWindowsMBR = IsWindowsMBR(fp, systemDriveLetter);
+			hasNonWindowsMBR = !IsWindowsMBR(fp, systemDriveLetter);
+		} else {
+			PRINT_ERROR_MSG("can't check MBR, assuming non-Windows");
+			hasNonWindowsMBR = true;
 		}
 		safe_closehandle(hPhysical);
 	}
@@ -1917,7 +1920,7 @@ HRESULT CEndlessUsbToolDlg::OnInstallDualBootClicked(IHTMLElement* pElement)
 		ErrorOccured(ErrorCauseBitLocker);
 	} else if (!isNtfsPartition) {
 		ErrorOccured(ErrorCauseNotNTFS);
-	} else if (!isWindowsMBR) {
+	} else if (hasNonWindowsMBR) {
 		ErrorOccured(ErrorCauseNonWindowsMBR);
 	} else {
 		m_selectedInstallMethod = InstallMethod_t::SetupDualBoot;
