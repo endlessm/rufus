@@ -5174,6 +5174,8 @@ bool CEndlessUsbToolDlg::WriteMBRAndSBRToWinDrive(CEndlessUsbToolDlg *dlg, const
 		}
 	}
 
+	dlg->TrackEvent(_T("BootTrackSize"), _T(""), minStartingOffset);
+
 	IFFALSE_GOTOERROR(0 == _wfopen_s(&boottrackImgFile, endlessFilesPath + BACKUP_BOOTTRACK_IMG, L"wb"), "Error opening boottrack.img file");
 	boottrackData = (unsigned char*)malloc(DiskGeometry->Geometry.BytesPerSector);
 	LONGLONG boottrackNrSectors = minStartingOffset / DiskGeometry->Geometry.BytesPerSector;
