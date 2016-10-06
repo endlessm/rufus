@@ -325,6 +325,8 @@ const wchar_t* mainWindowTitle = L"Endless Installer";
 // reserve 10 mb for now; this will also include the signature file
 #define INSTALLER_DELTA_SIZE (10*1024*1024)
 
+#define BYTES_IN_MEGABYTE		(1024 *  1024)
+#define BYTES_IN_GIGABYTE		(1024 *  1024 * 1024)
 
 #define UPDATE_DOWNLOAD_PROGRESS_TIME       2000
 #define CHECK_INTERNET_CONNECTION_TIME      2000
@@ -2965,16 +2967,8 @@ HRESULT CEndlessUsbToolDlg::OnSelectUSBNextClicked(IHTMLElement* pElement)
 
     FUNCTION_ENTER;
 
-	CComPtr<IHTMLSelectElement> selElem;
-	HRESULT hr;
-
-	hr = GetSelectElement(_T(ELEMENT_SELUSB_USB_DRIVES), selElem);
-	if (hr == S_OK) {
-		CString selUSBDrive;
-		hr = GetSelectedOptionElementText(selElem, selUSBDrive);
-		if (hr == S_OK)
-			Analytics::instance()->eventTracking(_T(ELEMENT_USB_PAGE), _T("USBDisk"), selUSBDrive);
-	}
+	int size = SelectedDrive.DiskSize / BYTES_IN_MEGABYTE;
+	TrackEvent(_T("USBSizeMB"), _T(""), size);
 
 	LeavingDevicesPage();
 	StartInstallationProcess();
@@ -3267,9 +3261,7 @@ HRESULT CEndlessUsbToolDlg::OnSelectStorageNextClicked(IHTMLElement *pElement)
 
 	FUNCTION_ENTER;
 
-	CString selSpace;
-	selSpace.Format(_T("%d Gb"), m_nrGigsSelected);
-	Analytics::instance()->eventTracking(_T(ELEMENT_STORAGE_PAGE), _T("StorageSize"), selSpace);
+	TrackEvent(_T("StorageSizeGB"), _T(""), m_nrGigsSelected);
 
 	StartInstallationProcess();
 
@@ -3302,8 +3294,6 @@ HRESULT CEndlessUsbToolDlg::OnSelectedStorageSizeChanged(IHTMLElement* pElement)
 #define IS_MINIMUM_VALUE		1
 #define IS_MAXIMUM_VALUE		2
 #define IS_BASE_IMAGE			3
-
-#define BYTES_IN_GIGABYTE		(1024 *  1024 * 1024)
 
 ULONGLONG CEndlessUsbToolDlg::GetNeededSpaceForDualBoot(int &neededGigs, bool *isBaseImage)
 {
