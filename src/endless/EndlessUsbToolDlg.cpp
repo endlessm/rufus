@@ -1900,6 +1900,13 @@ void CEndlessUsbToolDlg::TrackEvent(const CString &action, const CString &label,
 	Analytics::instance()->eventTracking(InstallMethodToStr(m_selectedInstallMethod), action, label, value);
 }
 
+void CEndlessUsbToolDlg::SetSelectedInstallMethod(InstallMethod_t method)
+{
+	if (m_selectedInstallMethod == method) return;
+	m_selectedInstallMethod = method;
+	TrackEvent(_T("Selected"));
+}
+
 #define KEY_PRESSED 0x8000
 // Dual Boot Page Handlers
 HRESULT CEndlessUsbToolDlg::OnAdvancedOptionsClicked(IHTMLElement* pElement)
@@ -1917,7 +1924,6 @@ HRESULT CEndlessUsbToolDlg::OnAdvancedOptionsClicked(IHTMLElement* pElement)
 	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(HTML_BUTTON_ID(ELEMENT_TRY_BUTTON)), CComVariant(oldStyleUSB));
 	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_COMPARE_OPTIONS), CComVariant(oldStyleUSB));
 
-	m_selectedInstallMethod = oldStyleUSB ? InstallMethod_t::TryEndless : InstallMethod_t::NewLiveEndless;
 	ChangePage(_T(ELEMENT_FIRST_PAGE));
 
 	return S_OK;
@@ -1963,9 +1969,15 @@ HRESULT CEndlessUsbToolDlg::OnInstallDualBootClicked(IHTMLElement* pElement)
 	}
 
 	if (UpdateDualBootTexts()) {
-		m_selectedInstallMethod = InstallMethod_t::UninstallEndless;
+		SetSelectedInstallMethod(InstallMethod_t::UninstallEndless);
+
 		QueryAndDoUninstall(false);
-	} else if (!x64BitSupported) {
+		return S_OK;
+	}
+
+	SetSelectedInstallMethod(InstallMethod_t::SetupDualBoot);
+
+	if (!x64BitSupported) {
 		ErrorOccured(ErrorCauseNot64Bit);
 	} else if (isBitLockerEnabled) {
 		ErrorOccured(ErrorCauseBitLocker);
@@ -1974,7 +1986,6 @@ HRESULT CEndlessUsbToolDlg::OnInstallDualBootClicked(IHTMLElement* pElement)
 	} else if (hasNonWindowsMBR) {
 		ErrorOccured(ErrorCauseNonWindowsMBR);
 	} else {
-		m_selectedInstallMethod = InstallMethod_t::SetupDualBoot;
 		GoToSelectFilePage();
 	}
 
@@ -1986,9 +1997,8 @@ HRESULT CEndlessUsbToolDlg::OnTryEndlessSelected(IHTMLElement* pElement)
 {
     FUNCTION_ENTER;
 
-	Analytics::instance()->eventTracking(_T(ELEMENT_FIRST_PAGE), _T("USBType"), _T("Live"));
+	SetSelectedInstallMethod(InstallMethod_t::TryEndless);
 
-	m_selectedInstallMethod = InstallMethod_t::TryEndless;
     GoToSelectFilePage();
 
 	return S_OK;
@@ -2000,9 +2010,8 @@ HRESULT CEndlessUsbToolDlg::OnInstallEndlessSelected(IHTMLElement* pElement)
 
     FUNCTION_ENTER;
 
-	Analytics::instance()->eventTracking(_T(ELEMENT_FIRST_PAGE), _T("USBType"), _T("Installer"));
+	SetSelectedInstallMethod(InstallMethod_t::ReflasherDrive);
 
-	m_selectedInstallMethod = InstallMethod_t::ReflasherDrive;
     GoToSelectFilePage();
 
 	return S_OK;
@@ -2676,6 +2685,10 @@ HRESULT CEndlessUsbToolDlg::OnFirstPagePreviousClicked(IHTMLElement* pElement)
 
 HRESULT CEndlessUsbToolDlg::OnCreateEndlessUSBStickClicked(IHTMLElement* pElement)
 {
+    FUNCTION_ENTER;
+
+	SetSelectedInstallMethod(InstallMethod_t::NewLiveEndless);
+
 	GoToSelectFilePage();
 
 	return S_OK;

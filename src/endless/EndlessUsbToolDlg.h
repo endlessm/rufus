@@ -221,6 +221,7 @@ private:
 	InstallMethod_t m_selectedInstallMethod;
 
 	void TrackEvent(const CString &action, const CString &label = CString(), int value = -1);
+	void SetSelectedInstallMethod(InstallMethod_t method);
 
     void StartOperationThread(int operation, LPTHREAD_START_ROUTINE threadRoutine, LPVOID param = NULL);
 
