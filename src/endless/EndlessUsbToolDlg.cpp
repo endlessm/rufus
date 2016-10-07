@@ -1912,10 +1912,6 @@ HRESULT CEndlessUsbToolDlg::OnInstallDualBootClicked(IHTMLElement* pElement)
 		QueryAndDoUninstall(false);
 	} else if (!x64BitSupported) {
 		ErrorOccured(ErrorCauseNot64Bit);
-
-		/* ::ErrorOccured tracks the "main" cause; let's also track this other problem */
-		if (isBitLockerEnabled)
-			Analytics::instance()->exceptionTracking(ErrorCauseToStr(ErrorCauseBitLocker), FALSE);
 	} else if (isBitLockerEnabled) {
 		ErrorOccured(ErrorCauseBitLocker);
 	} else if (!isNtfsPartition) {
