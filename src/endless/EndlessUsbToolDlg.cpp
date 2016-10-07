@@ -129,6 +129,7 @@ DWORD usbDevicesCount;
 
 #define ELEMENT_ADVOPT_SUBTITLE			"AdvOptSubtitleContainer"
 #define ELEMENT_CREATE_NEW_LIVE_BUTTON	"CreateNewLiveUSB"
+#define ELEMENT_USB_LEARN_MORE			"USBLearnMore"
 
 //Select File page elements
 #define ELEMENT_SELFILE_PREV_BUTTON     "SelectFilePreviousButton"
@@ -1851,6 +1852,7 @@ HRESULT CEndlessUsbToolDlg::OnAdvancedOptionsClicked(IHTMLElement* pElement)
 
 	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_ADVOPT_SUBTITLE), CComVariant(!oldStyleUSB));
 	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(HTML_BUTTON_ID(ELEMENT_CREATE_NEW_LIVE_BUTTON)), CComVariant(!oldStyleUSB));
+	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_USB_LEARN_MORE), CComVariant(!oldStyleUSB));
 
 	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(HTML_BUTTON_ID(ELEMENT_INSTALL_BUTTON)), CComVariant(oldStyleUSB));
 	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(HTML_BUTTON_ID(ELEMENT_TRY_BUTTON)), CComVariant(oldStyleUSB));
@@ -2026,6 +2028,8 @@ HRESULT CEndlessUsbToolDlg::OnLinkClicked(IHTMLElement* pElement)
         WinExec("c:\\windows\\system32\\control.exe ncpa.cpl", SW_NORMAL);
 	} else if (id == _T(ELEMENT_USBBOOT_HOWTO)) {
 		msg_id = MSG_329;
+	} else if (id == _T(ELEMENT_USB_LEARN_MORE)) {
+		msg_id = MSG_371;
     } else {
         msg_id = 0;
         uprintf("Unknown link clicked %ls", id);
