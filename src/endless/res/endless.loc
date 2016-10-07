@@ -101,8 +101,8 @@ g IDD_ENDLESSUSBTOOL_DIALOG
 t FirstPageTitle "Advanced Install Options"
 t TryEndlessButton "Create Live USB"
 t TryEndlessText "Try Endless OS by running it from a USB stick."
-t InstallEndlessButton "Create Reflasher USB"
-t InstallEndlessText "Install Endless OS on any computer using a USB stick."
+t InstallEndlessButton "Create Reformatter USB"
+t InstallEndlessText "Reformat any computer with Endless OS using a USB stick."
 t CompareOptionsLink "Compare the two options"
 t SelectFilePreviousButton "Previous"
 t SelectFileNextButton "Next"
@@ -154,9 +154,8 @@ t SelectStoragePageTitle "Storage Space for Endless OS"
 t StorageAgreementText "Note: We recommend backing up any important files before continuing. Should you experience any problems with your computer after installation, you can find help at <a id='StorageSupportLink'>Endless Support</a>."
 t DualBootLanguageLabel "Select Language"
 t AdvancedInstallReminder "To create an Endless USB Stick you will need a USB device with at least 8 GB of storage space."
-t AdvancedOptionsSubtitle "Creating an <b>Endless USB Stick</b> you can"
-t CreateNewLiveUSB "Create Endless USB stick"
-
+t AdvancedOptionsSubtitle "With an <b>Endless USB Stick</b> you can:"
+t CreateNewLiveUSB "Create Endless USB Stick"
 
 # *Short* size names. These can be used as suffixes
 t MSG_020 "bytes"
