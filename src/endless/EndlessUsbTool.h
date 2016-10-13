@@ -30,6 +30,7 @@ public:
 	static bool m_enableOverwriteMbr;
 
 	static void Log(const char *logMessage);
+	static CString TempFilePath(CString filename);
 
 // Implementation
 

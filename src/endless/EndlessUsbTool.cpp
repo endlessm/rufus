@@ -173,6 +173,16 @@ BOOL CEndlessUsbToolApp::InitInstance()
 	return FALSE;
 }
 
+CString CEndlessUsbToolApp::TempFilePath(CString fileName)
+{
+	wchar_t tempPath[MAX_PATH + 1];
+	memset(tempPath, 0, sizeof(tempPath));
+	wcscpy_s(tempPath, m_appDir);
+	GetTempPathW(MAX_PATH + 1, tempPath);
+	CString path = tempPath;
+	return path + fileName;
+}
+
 void CEndlessUsbToolApp::InitLogging()
 {
 	if (!m_enableLogDebugging) {
@@ -188,12 +198,7 @@ void CEndlessUsbToolApp::InitLogging()
 	fileName += s;
 	fileName += L".log";
 	if (CEndlessUsbToolDlg::IsUninstaller()) {
-		wchar_t tempPath[MAX_PATH + 1];
-		memset(tempPath, 0, sizeof(tempPath));
-		wcscpy_s(tempPath, m_appDir);
-		GetTempPathW(MAX_PATH + 1, tempPath);
-		CString path = tempPath;
-		fileName = path + fileName;
+		fileName = TempFilePath(fileName);
 	} else {
 		fileName = GET_LOCAL_PATH(fileName);
 	}
