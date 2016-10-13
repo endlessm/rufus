@@ -4667,7 +4667,7 @@ bool CEndlessUsbToolDlg::CopyFilesToexFAT(CEndlessUsbToolDlg *dlg, const CString
 
 	IFFALSE_PRINTERROR(SetAttributesForFilesInFolder(usbFilesPath, true), "Error on SetFileAttributes");
 
-	IFFALSE_GOTOERROR(0 != CopyFile(exePath, usbFilesPath + CSTRING_GET_LAST(exePath, '\\'), FALSE), "Error copying installer binary to drive.");
+	IFFALSE_GOTOERROR(0 != CopyFile(exePath, driveLetter + CSTRING_GET_LAST(exePath, '\\'), FALSE), "Error copying installer binary to drive.");
 
 	retResult = true;
 
