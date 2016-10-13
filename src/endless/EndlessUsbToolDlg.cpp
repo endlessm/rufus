@@ -4399,6 +4399,15 @@ bool CEndlessUsbToolDlg::CreateFakePartitionLayout(HANDLE hPhysical, PBYTE layou
 	PDRIVE_LAYOUT_INFORMATION_EX DriveLayout = (PDRIVE_LAYOUT_INFORMATION_EX)(void*)layout;
 	PDISK_GEOMETRY_EX DiskGeometry = (PDISK_GEOMETRY_EX)(void*)geometry;
 	PARTITION_INFORMATION_EX *currentPartition;
+	// the EFI spec says the GPT will take the first and last two sectors of
+	// the disk, plus however much is allocated for partition entries. there
+	// must be at least 128 entries of at least 128 in size - in practice this
+	// is what everyone uses. 128 * 128 is 16k which will always be aligned to
+	// sector size which is at least 512, but a hypothetical GIANT SECTOR disk
+	// would need three sectors reserved for the whole partition table, so we
+	// use max()
+	LONGLONG gptLength = (2 * DiskGeometry->Geometry.BytesPerSector) +
+		max((128 * 128), DiskGeometry->Geometry.BytesPerSector);
 	bool returnValue = false;
 
 	DriveLayout->PartitionStyle = PARTITION_STYLE_GPT;
@@ -4410,8 +4419,18 @@ bool CEndlessUsbToolDlg::CreateFakePartitionLayout(HANDLE hPhysical, PBYTE layou
 		MBR_PART_STARTING_SECTOR * DiskGeometry->Geometry.BytesPerSector,
 		EXFAT_PART_STARTING_SECTOR * DiskGeometry->Geometry.BytesPerSector
 	};
-	LONGLONG partitionSize[EXPECTED_NUMBER_OF_PARTITIONS] = { ESP_PART_LENGTH_BYTES, MBR_PART_LENGTH_BYTES, DiskGeometry->DiskSize.QuadPart - partitionStart[2] };
-	GUID partitionType[EXPECTED_NUMBER_OF_PARTITIONS] = { PARTITION_BASIC_DATA_GUID/*PARTITION_SYSTEM_GUID*/, PARTITION_BIOS_BOOT_GUID, PARTITION_BASIC_DATA_GUID };
+	LONGLONG partitionSize[EXPECTED_NUMBER_OF_PARTITIONS] = {
+		ESP_PART_LENGTH_BYTES,
+		MBR_PART_LENGTH_BYTES,
+		// there is a 2nd copy of the GPT at the end of the disk so we
+		// subtract the length here to avoid the operation failing
+		DiskGeometry->DiskSize.QuadPart - gptLength - partitionStart[2]
+	};
+	GUID partitionType[EXPECTED_NUMBER_OF_PARTITIONS] = {
+		PARTITION_BASIC_DATA_GUID, // will become PARTITION_SYSTEM_GUID later
+		PARTITION_BIOS_BOOT_GUID,
+		PARTITION_BASIC_DATA_GUID
+	};
 
 	for (int partIndex = 0; partIndex < EXPECTED_NUMBER_OF_PARTITIONS; partIndex++) {
 		currentPartition = &(DriveLayout->PartitionEntry[partIndex]);
