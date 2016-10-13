@@ -2349,8 +2349,8 @@ void CEndlessUsbToolDlg::StartJSONDownload()
     CString installerJson(JSON_INSTALLER_FILE);
 #endif // ENABLE_JSON_COMPRESSION
 
-    liveJson = GET_LOCAL_PATH(liveJson);
-    installerJson = GET_LOCAL_PATH(installerJson);
+    liveJson = CEndlessUsbToolApp::TempFilePath(liveJson);
+    installerJson = CEndlessUsbToolApp::TempFilePath(installerJson);
 
     ListOfStrings urls = { JSON_URL(JSON_LIVE_FILE), JSON_URL(JSON_INSTALLER_FILE) };
     ListOfStrings files = { liveJson, installerJson };
@@ -2526,17 +2526,17 @@ void CEndlessUsbToolDlg::UpdateDownloadOptions()
     m_remoteImages.RemoveAll();
 
     // Parse JSON with normal images
-    filePath = GET_LOCAL_PATH(CString(JSON_LIVE_FILE));
+    filePath = CEndlessUsbToolApp::TempFilePath(CString(JSON_LIVE_FILE));
 #ifdef ENABLE_JSON_COMPRESSION
-    filePathGz = GET_LOCAL_PATH(CString(JSON_PACKED(JSON_LIVE_FILE)));
+    filePathGz = CEndlessUsbToolApp::TempFilePath(CString(JSON_PACKED(JSON_LIVE_FILE)));
     IFFALSE_GOTOERROR(UnpackFile(ConvertUnicodeToUTF8(filePathGz), ConvertUnicodeToUTF8(filePath), BLED_COMPRESSION_GZIP), "Error uncompressing eos JSON file.");
 #endif // ENABLE_JSON_COMPRESSION
     IFFALSE_GOTOERROR(ParseJsonFile(filePath, false), "Error parsing eos JSON file.");
 
     // Parse JSON with installer images
-    filePath = GET_LOCAL_PATH(CString(JSON_INSTALLER_FILE));
+    filePath = CEndlessUsbToolApp::TempFilePath(CString(JSON_INSTALLER_FILE));
 #ifdef ENABLE_JSON_COMPRESSION
-    filePathGz = GET_LOCAL_PATH(CString(JSON_PACKED(JSON_INSTALLER_FILE)));
+    filePathGz = CEndlessUsbToolApp::TempFilePath(CString(JSON_PACKED(JSON_INSTALLER_FILE)));
     IFFALSE_GOTOERROR(UnpackFile(ConvertUnicodeToUTF8(filePathGz), ConvertUnicodeToUTF8(filePath), BLED_COMPRESSION_GZIP), "Error uncompressing eosinstaller JSON file.");
 #endif // ENABLE_JSON_COMPRESSION
     IFFALSE_GOTOERROR(ParseJsonFile(filePath, true), "Error parsing eosinstaller JSON file.");
