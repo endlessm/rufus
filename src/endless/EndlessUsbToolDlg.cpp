@@ -2133,6 +2133,7 @@ void CEndlessUsbToolDlg::UpdateFileEntries(bool shouldInit)
 				fread(originalFileName, 1, MAX_PATH - 1, liveFile);
 				if (feof(liveFile)) {
 					currentFile = UTF8ToCString(originalFileName);
+					currentFile.TrimRight();
 					isUnpackedFile = true;
 				}
 				fclose(liveFile);
