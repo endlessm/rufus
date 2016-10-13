@@ -4663,6 +4663,9 @@ bool CEndlessUsbToolDlg::CopyFilesToexFAT(CEndlessUsbToolDlg *dlg, const CString
 
 	IFFALSE_GOTOERROR(0 != CopyFile(dlg->m_bootArchive, usbFilesPath + CSTRING_GET_LAST(dlg->m_bootArchive, '\\'), FALSE), "Error copying boot.zip file to drive.");
 	IFFALSE_GOTOERROR(0 != CopyFile(dlg->m_bootArchiveSig, usbFilesPath + CSTRING_GET_LAST(dlg->m_bootArchiveSig, '\\'), FALSE), "Error copying boot.zip signature file to drive.");
+
+	IFFALSE_PRINTERROR(SetAttributesForFilesInFolder(usbFilesPath, true), "Error on SetFileAttributes");
+
 	IFFALSE_GOTOERROR(0 != CopyFile(exePath, usbFilesPath + CSTRING_GET_LAST(exePath, '\\'), FALSE), "Error copying installer binary to drive.");
 
 	retResult = true;
