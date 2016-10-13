@@ -319,7 +319,6 @@ const wchar_t* mainWindowTitle = L"Endless Installer";
 
 #define ENDLESS_IMG_FILE_NAME			L"endless.img"
 #define EXFAT_ENDLESS_LIVE_FILE_NAME	L"live"
-#define PATH_ENDLESS_SUBDIRECTORY		L"endless\\"
 
 // Radu: How much do we need to reserve for the exfat partition header?
 // reserve 10 mb for now; this will also include the signature file

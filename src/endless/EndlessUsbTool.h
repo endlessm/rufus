@@ -10,7 +10,8 @@
 
 #include "resource.h"		// main symbols
 
-#define ENDLESS_INSTALLER_TEXT L"Endless Installer"
+#define ENDLESS_INSTALLER_TEXT 		L"Endless Installer"
+#define PATH_ENDLESS_SUBDIRECTORY	L"endless\\"
 
 // CEndlessUsbToolApp:
 // See EndlessUsbTool.cpp for the implementation of this class
@@ -26,6 +27,7 @@ public:
 	virtual BOOL InitInstance();
 
 	static CString m_appDir;
+	static CString m_imageDir;
 	static bool m_enableLogDebugging;
 	static bool m_enableOverwriteMbr;
 

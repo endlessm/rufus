@@ -51,6 +51,7 @@ BEGIN_MESSAGE_MAP(CEndlessUsbToolApp, CWinApp)
 END_MESSAGE_MAP()
 
 CString CEndlessUsbToolApp::m_appDir = L"";
+CString CEndlessUsbToolApp::m_imageDir = L"";
 bool CEndlessUsbToolApp::m_enableLogDebugging = false;
 bool CEndlessUsbToolApp::m_enableOverwriteMbr = false;
 CFile CEndlessUsbToolApp::m_logFile;
@@ -107,6 +108,13 @@ BOOL CEndlessUsbToolApp::InitInstance()
 		app_dir[sizeof(app_dir) - 1] = 0;
 	}
 	m_appDir.ReleaseBuffer();
+
+	// set image dir to endless if it exists, otherwise use app dir
+	CString endlessDir = GET_LOCAL_PATH(PATH_ENDLESS_SUBDIRECTORY);
+	if (PathIsDirectory(endlessDir))
+		m_imageDir = endlessDir;
+	else
+		m_imageDir = m_appDir;
 
 	// Set the Windows version
 	GetWindowsVersion();
