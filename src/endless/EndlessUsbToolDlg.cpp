@@ -4288,7 +4288,7 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	CREATE_DISK createDiskData;
 	CString driveLetter;
 	CString bootFilesPathGz = dlg->m_bootArchive;
-	CString bootFilesPath = GET_LOCAL_PATH(CString(BOOT_COMPONENTS_FOLDER)) + L"\\";
+	CString bootFilesPath = CEndlessUsbToolApp::TempFilePath(CString(BOOT_COMPONENTS_FOLDER)) + L"\\";
 	CString usbFilesPath;
 	PDISK_GEOMETRY_EX DiskGeometry = (PDISK_GEOMETRY_EX)(void*)geometry;
 
@@ -4779,7 +4779,7 @@ DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 	CString systemDriveLetter;
 	CString endlessFilesPath;
 	CString endlessImgPath;
-	CString bootFilesPath = GET_LOCAL_PATH(CString(BOOT_COMPONENTS_FOLDER)) + L"\\";
+	CString bootFilesPath = CEndlessUsbToolApp::TempFilePath(CString(BOOT_COMPONENTS_FOLDER)) + L"\\";
 	wchar_t fileSystemType[MAX_PATH + 1];
 	CStringW exeFilePath = GetExePath();
 
