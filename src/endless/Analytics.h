@@ -17,6 +17,7 @@ public:
 
 private:
 	void sendRequest(const CString &body, BOOL lastRequest = FALSE);
+	BOOL debug();
 	BOOL disabled();
 	void loadUuid(CString &uuid);
 	void createUuid(CString &uuid);

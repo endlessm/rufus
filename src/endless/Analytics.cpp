@@ -13,6 +13,7 @@ extern "C" {
 #define REG_SECTION "Analytics"
 #define REG_KEY_CLIENT_ID "ClientID"
 #define REG_KEY_DISABLED "Disabled"
+#define REG_KEY_DEBUG "Debug"
 
 #define SERVER_NAME "www.google-analytics.com"
 #define SERVER_PORT 80
@@ -20,6 +21,8 @@ extern "C" {
 static UINT threadSendRequest(LPVOID pParam)
 {
 	FUNCTION_ENTER;
+
+	BOOL debug = (BOOL) pParam;
 
 	CInternetSession session(_T("Endless Installer"));
 	MSG msg;
@@ -31,7 +34,8 @@ static UINT threadSendRequest(LPVOID pParam)
 		try {
 			CString headers = _T("Content-type: application/x-www-form-urlencoded");
 			CHttpConnection *conn = session.GetHttpConnection(_T(SERVER_NAME), (INTERNET_PORT)SERVER_PORT);
-			CHttpFile *file = conn->OpenRequest(CHttpConnection::HTTP_VERB_POST, _T("collect"));
+			CString path = debug ? _T("debug/collect") : _T("collect");
+			CHttpFile *file = conn->OpenRequest(CHttpConnection::HTTP_VERB_POST, path);
 			if (file) {
 				file->SendRequest(headers, (LPVOID)(LPCSTR)bodyUtf8, bodyUtf8.GetLength());
 				uprintf("Analytics req: %s\n", (LPCSTR)bodyUtf8);
@@ -70,7 +74,7 @@ Analytics::Analytics()
 	loadUuid(m_clientId);
 	m_language = "en-US";
 	urlEncode(CString(WindowsVersionStr), m_windowsVersion);
-	m_workerThread = AfxBeginThread(threadSendRequest, NULL);
+	m_workerThread = AfxBeginThread(threadSendRequest, (LPVOID) debug());
 }
 
 Analytics::~Analytics()
@@ -161,6 +165,13 @@ void Analytics::sendRequest(const CString &body, BOOL lastRequest)
 	UINT msgType = WM_APP;
 	if (lastRequest) msgType = WM_APP+1;
 	m_workerThread->PostThreadMessage(msgType, (WPARAM)pBody, 0);
+}
+
+BOOL Analytics::debug()
+{
+	CWinApp *pApp = AfxGetApp();
+	int debug = pApp->GetProfileInt(_T(REG_SECTION), _T(REG_KEY_DEBUG), 0);
+	return (debug == 1);
 }
 
 BOOL Analytics::disabled()
