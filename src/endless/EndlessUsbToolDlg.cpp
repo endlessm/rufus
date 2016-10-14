@@ -379,6 +379,19 @@ static LPCTSTR ErrorCauseToStr(ErrorCause_t errorCause)
     }
 }
 
+static LPCTSTR InstallMethodToStr(InstallMethod_t installMethod)
+{
+    switch (installMethod)
+    {
+        TOSTR(None);
+        TOSTR(TryEndless);
+        TOSTR(ReflasherDrive);
+        TOSTR(NewLiveEndless);
+        TOSTR(SetupDualBoot);
+        TOSTR(UninstallEndless);
+        default: return _T("Unknown");
+    }
+}
 
 extern "C" void UpdateProgress(int op, float percent)
 {
