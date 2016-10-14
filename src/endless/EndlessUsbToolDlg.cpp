@@ -1895,6 +1895,11 @@ bool CEndlessUsbToolDlg::IsButtonDisabled(IHTMLElement *pElement)
 //	return S_FALSE;
 //}
 
+void CEndlessUsbToolDlg::TrackEvent(const CString &action, const CString &label, int value)
+{
+	Analytics::instance()->eventTracking(InstallMethodToStr(m_selectedInstallMethod), action, label, value);
+}
+
 #define KEY_PRESSED 0x8000
 // Dual Boot Page Handlers
 HRESULT CEndlessUsbToolDlg::OnAdvancedOptionsClicked(IHTMLElement* pElement)

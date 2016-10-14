@@ -220,6 +220,8 @@ private:
 	unsigned long m_cancelImageUnpack;
 	InstallMethod_t m_selectedInstallMethod;
 
+	void TrackEvent(const CString &action, const CString &label = CString(), int value = -1);
+
     void StartOperationThread(int operation, LPTHREAD_START_ROUTINE threadRoutine, LPVOID param = NULL);
 
 	void StartInstallationProcess();
