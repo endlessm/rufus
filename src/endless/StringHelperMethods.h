@@ -2,6 +2,7 @@
 #define __stringhelpermethods_header__
 
 #define GET_LOCAL_PATH(__filename__) (CEndlessUsbToolApp::m_appDir + L"\\" + (__filename__))
+#define GET_IMAGE_PATH(__filename__) (CEndlessUsbToolApp::m_imageDir + L"\\" + (__filename__))
 #define CSTRING_GET_LAST(__path__, __separator__) __path__.Right(__path__.GetLength() - __path__.ReverseFind(__separator__) - 1)
 #define CSTRING_GET_PATH(__path__, __separator__) __path__.Left(__path__.ReverseFind(__separator__))
 

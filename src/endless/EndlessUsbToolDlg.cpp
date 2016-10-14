@@ -319,7 +319,6 @@ const wchar_t* mainWindowTitle = L"Endless Installer";
 
 #define ENDLESS_IMG_FILE_NAME			L"endless.img"
 #define EXFAT_ENDLESS_LIVE_FILE_NAME	L"live"
-#define PATH_ENDLESS_SUBDIRECTORY		L"endless\\"
 
 // Radu: How much do we need to reserve for the exfat partition header?
 // reserve 10 mb for now; this will also include the signature file
@@ -2092,7 +2091,7 @@ void CEndlessUsbToolDlg::UpdateFileEntries(bool shouldInit)
     CString currentPath;
     BOOL fileAccessException = false;
     CString currentInstallerVersion;
-    CString searchPath = GET_LOCAL_PATH(ALL_FILES);
+	CString searchPath = GET_IMAGE_PATH(ALL_FILES);
     HANDLE findFilesHandle = FindFirstFile(searchPath, &findFileData);
 
     m_localFilesScanned = true;
@@ -2123,7 +2122,7 @@ void CEndlessUsbToolDlg::UpdateFileEntries(bool shouldInit)
         CString currentFile = findFileData.cFileName;
 		bool isUnpackedFile = false;
 		// support being run from a USB drive 
-		CString liveFilePath = GET_LOCAL_PATH(EXFAT_ENDLESS_LIVE_FILE_NAME);
+		CString liveFilePath = GET_IMAGE_PATH(EXFAT_ENDLESS_LIVE_FILE_NAME);
 		if (currentFile == ENDLESS_IMG_FILE_NAME && PathFileExists(liveFilePath)) {
 			FILE *liveFile = NULL;
 			char originalFileName[MAX_PATH];
@@ -2133,14 +2132,15 @@ void CEndlessUsbToolDlg::UpdateFileEntries(bool shouldInit)
 				fread(originalFileName, 1, MAX_PATH - 1, liveFile);
 				if (feof(liveFile)) {
 					currentFile = UTF8ToCString(originalFileName);
+					currentFile.TrimRight();
 					isUnpackedFile = true;
 				}
 				fclose(liveFile);
 			}
 		}
 
-        CString fullPathFile = GET_LOCAL_PATH(currentFile);
-		CString unpackedFullPathFile = GET_LOCAL_PATH(ENDLESS_IMG_FILE_NAME);
+        CString fullPathFile = GET_IMAGE_PATH(currentFile);
+		CString unpackedFullPathFile = GET_IMAGE_PATH(ENDLESS_IMG_FILE_NAME);
         CString extension = CSTRING_GET_LAST(currentFile, '.');
         if (!isUnpackedFile && extension != _T(FILE_GZ_EXTENSION) && extension != _T(FILE_XZ_EXTENSION)) continue;
 
@@ -2348,8 +2348,8 @@ void CEndlessUsbToolDlg::StartJSONDownload()
     CString installerJson(JSON_INSTALLER_FILE);
 #endif // ENABLE_JSON_COMPRESSION
 
-    liveJson = GET_LOCAL_PATH(liveJson);
-    installerJson = GET_LOCAL_PATH(installerJson);
+    liveJson = CEndlessUsbToolApp::TempFilePath(liveJson);
+    installerJson = CEndlessUsbToolApp::TempFilePath(installerJson);
 
     ListOfStrings urls = { JSON_URL(JSON_LIVE_FILE), JSON_URL(JSON_INSTALLER_FILE) };
     ListOfStrings files = { liveJson, installerJson };
@@ -2525,17 +2525,17 @@ void CEndlessUsbToolDlg::UpdateDownloadOptions()
     m_remoteImages.RemoveAll();
 
     // Parse JSON with normal images
-    filePath = GET_LOCAL_PATH(CString(JSON_LIVE_FILE));
+    filePath = CEndlessUsbToolApp::TempFilePath(CString(JSON_LIVE_FILE));
 #ifdef ENABLE_JSON_COMPRESSION
-    filePathGz = GET_LOCAL_PATH(CString(JSON_PACKED(JSON_LIVE_FILE)));
+    filePathGz = CEndlessUsbToolApp::TempFilePath(CString(JSON_PACKED(JSON_LIVE_FILE)));
     IFFALSE_GOTOERROR(UnpackFile(ConvertUnicodeToUTF8(filePathGz), ConvertUnicodeToUTF8(filePath), BLED_COMPRESSION_GZIP), "Error uncompressing eos JSON file.");
 #endif // ENABLE_JSON_COMPRESSION
     IFFALSE_GOTOERROR(ParseJsonFile(filePath, false), "Error parsing eos JSON file.");
 
     // Parse JSON with installer images
-    filePath = GET_LOCAL_PATH(CString(JSON_INSTALLER_FILE));
+    filePath = CEndlessUsbToolApp::TempFilePath(CString(JSON_INSTALLER_FILE));
 #ifdef ENABLE_JSON_COMPRESSION
-    filePathGz = GET_LOCAL_PATH(CString(JSON_PACKED(JSON_INSTALLER_FILE)));
+    filePathGz = CEndlessUsbToolApp::TempFilePath(CString(JSON_PACKED(JSON_INSTALLER_FILE)));
     IFFALSE_GOTOERROR(UnpackFile(ConvertUnicodeToUTF8(filePathGz), ConvertUnicodeToUTF8(filePath), BLED_COMPRESSION_GZIP), "Error uncompressing eosinstaller JSON file.");
 #endif // ENABLE_JSON_COMPRESSION
     IFFALSE_GOTOERROR(ParseJsonFile(filePath, true), "Error parsing eosinstaller JSON file.");
@@ -2685,7 +2685,7 @@ HRESULT CEndlessUsbToolDlg::OnSelectFileNextClicked(IHTMLElement* pElement)
         //DownloadType_t downloadType = GetSelectedDownloadType();
         selectedImage = CSTRING_GET_LAST(remote.urlFile, '/');
 
-		CString selectedImagePath = GET_LOCAL_PATH(selectedImage);
+		CString selectedImagePath = GET_IMAGE_PATH(selectedImage);
         size = m_selectedInstallMethod == InstallMethod_t::TryEndless || RemoteMatchesUnpackedImg(selectedImagePath) ? remote.extractedSize : remote.compressedSize;
 
 		m_selectedFileSize = remote.compressedSize;
@@ -2955,16 +2955,16 @@ void CEndlessUsbToolDlg::StartInstallationProcess()
 
 		// live image file
 		CString url = CString(RELEASE_JSON_URLPATH) + remote.urlFile;
-		m_localFile = GET_LOCAL_PATH(CSTRING_GET_LAST(remote.urlFile, '/'));
+		m_localFile = GET_IMAGE_PATH(CSTRING_GET_LAST(remote.urlFile, '/'));
 		bool localFileExists = PackedImageAlreadyExists(m_localFile, remote.compressedSize, remote.extractedSize, false);
 
 		// live image signature file
 		CString urlAsc = CString(RELEASE_JSON_URLPATH) + remote.urlSignature;
 		if(RemoteMatchesUnpackedImg(m_localFile, &m_localFileSig)) {
-			m_localFile = GET_LOCAL_PATH(ENDLESS_IMG_FILE_NAME);
+			m_localFile = GET_IMAGE_PATH(ENDLESS_IMG_FILE_NAME);
 			urlAsc = CString(RELEASE_JSON_URLPATH) + remote.urlUnpackedSignature;
 		} else {
-			m_localFileSig = GET_LOCAL_PATH(CSTRING_GET_LAST(remote.urlSignature, '/'));
+			m_localFileSig = GET_IMAGE_PATH(CSTRING_GET_LAST(remote.urlSignature, '/'));
 		}
 
 		// add image file path for Rufus
@@ -2977,13 +2977,13 @@ void CEndlessUsbToolDlg::StartInstallationProcess()
 		CString urlBootFiles, urlBootFilesAsc, urlImageSig;
 		if (IsDualBootOrNewLive()) {
 			urlBootFiles = CString(RELEASE_JSON_URLPATH) +  remote.urlBootArchive;
-			m_bootArchive = GET_LOCAL_PATH(CSTRING_GET_LAST(urlBootFiles, '/'));
+			m_bootArchive = GET_IMAGE_PATH(CSTRING_GET_LAST(urlBootFiles, '/'));
 
 			urlBootFilesAsc = CString(RELEASE_JSON_URLPATH) + remote.urlBootArchiveSignature;
-			m_bootArchiveSig = GET_LOCAL_PATH(CSTRING_GET_LAST(urlBootFilesAsc, '/'));
+			m_bootArchiveSig = GET_IMAGE_PATH(CSTRING_GET_LAST(urlBootFilesAsc, '/'));
 
 			urlImageSig = CString(RELEASE_JSON_URLPATH) + remote.urlUnpackedSignature;
-			m_unpackedImageSig = GET_LOCAL_PATH(CSTRING_GET_LAST(urlImageSig, '/'));
+			m_unpackedImageSig = GET_IMAGE_PATH(CSTRING_GET_LAST(urlImageSig, '/'));
 
 			if (localFileExists) {
 				urls = { urlAsc, urlBootFiles, urlBootFilesAsc, urlImageSig };
@@ -3003,11 +3003,11 @@ void CEndlessUsbToolDlg::StartInstallationProcess()
 		} else {
 			// installer image file + signature
 			urlInstaller = CString(RELEASE_JSON_URLPATH) + m_installerImage.urlFile;
-			installerFile = GET_LOCAL_PATH(CSTRING_GET_LAST(m_installerImage.urlFile, '/'));
+			installerFile = GET_IMAGE_PATH(CSTRING_GET_LAST(m_installerImage.urlFile, '/'));
 			bool installerFileExists = PackedImageAlreadyExists(installerFile, m_installerImage.compressedSize, m_installerImage.extractedSize, true);
 
 			urlInstallerAsc = CString(RELEASE_JSON_URLPATH) + m_installerImage.urlSignature;
-			installerAscFile = GET_LOCAL_PATH(CSTRING_GET_LAST(m_installerImage.urlSignature, '/'));
+			installerAscFile = GET_IMAGE_PATH(CSTRING_GET_LAST(m_installerImage.urlSignature, '/'));
 
 			if (installerFileExists) {
 				if (localFileExists) {
@@ -3049,7 +3049,7 @@ void CEndlessUsbToolDlg::StartInstallationProcess()
 
 		// add remote installer data to local installer data
 		m_localInstallerImage.stillPresent = TRUE;
-		m_localInstallerImage.filePath = GET_LOCAL_PATH(CSTRING_GET_LAST(m_installerImage.urlFile, '/'));
+		m_localInstallerImage.filePath = GET_IMAGE_PATH(CSTRING_GET_LAST(m_installerImage.urlFile, '/'));
 		m_localInstallerImage.size = m_installerImage.compressedSize;
 
 		if (IsDualBootOrNewLive()) {
@@ -4288,7 +4288,7 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	CREATE_DISK createDiskData;
 	CString driveLetter;
 	CString bootFilesPathGz = dlg->m_bootArchive;
-	CString bootFilesPath = GET_LOCAL_PATH(CString(BOOT_COMPONENTS_FOLDER)) + L"\\";
+	CString bootFilesPath = CEndlessUsbToolApp::TempFilePath(CString(BOOT_COMPONENTS_FOLDER)) + L"\\";
 	CString usbFilesPath;
 	PDISK_GEOMETRY_EX DiskGeometry = (PDISK_GEOMETRY_EX)(void*)geometry;
 
@@ -4682,7 +4682,10 @@ bool CEndlessUsbToolDlg::CopyFilesToexFAT(CEndlessUsbToolDlg *dlg, const CString
 
 	IFFALSE_GOTOERROR(0 != CopyFile(dlg->m_bootArchive, usbFilesPath + CSTRING_GET_LAST(dlg->m_bootArchive, '\\'), FALSE), "Error copying boot.zip file to drive.");
 	IFFALSE_GOTOERROR(0 != CopyFile(dlg->m_bootArchiveSig, usbFilesPath + CSTRING_GET_LAST(dlg->m_bootArchiveSig, '\\'), FALSE), "Error copying boot.zip signature file to drive.");
-	IFFALSE_GOTOERROR(0 != CopyFile(exePath, usbFilesPath + CSTRING_GET_LAST(exePath, '\\'), FALSE), "Error copying installer binary to drive.");
+
+	IFFALSE_PRINTERROR(SetAttributesForFilesInFolder(usbFilesPath, true), "Error on SetFileAttributes");
+
+	IFFALSE_GOTOERROR(0 != CopyFile(exePath, driveLetter + CSTRING_GET_LAST(exePath, '\\'), FALSE), "Error copying installer binary to drive.");
 
 	retResult = true;
 
@@ -4795,7 +4798,7 @@ DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 	CString systemDriveLetter;
 	CString endlessFilesPath;
 	CString endlessImgPath;
-	CString bootFilesPath = GET_LOCAL_PATH(CString(BOOT_COMPONENTS_FOLDER)) + L"\\";
+	CString bootFilesPath = CEndlessUsbToolApp::TempFilePath(CString(BOOT_COMPONENTS_FOLDER)) + L"\\";
 	wchar_t fileSystemType[MAX_PATH + 1];
 	CStringW exeFilePath = GetExePath();
 
@@ -5794,7 +5797,7 @@ bool CEndlessUsbToolDlg::PackedImageAlreadyExists(const CString &filePath, ULONG
 	if(!isInstaller) {
 		isUnpackedImage = RemoteMatchesUnpackedImg(filePath);
 	}
-	CString actualFile = isUnpackedImage ? GET_LOCAL_PATH(ENDLESS_IMG_FILE_NAME) : filePath;
+	CString actualFile = isUnpackedImage ? GET_IMAGE_PATH(ENDLESS_IMG_FILE_NAME) : filePath;
 	IFFALSE_GOTOERROR(PathFileExists(actualFile), "File doesn't exists");
 
 	ULONGLONG extractedSize = GetExtractedSize(actualFile, isInstaller);
@@ -5816,14 +5819,14 @@ error:
 ULONGLONG CEndlessUsbToolDlg::GetActualDownloadSize(const RemoteImageEntry &r, bool fullSize)
 {
 	ULONGLONG size = SIGNATURE_FILE_SIZE; // img.gz.asc
-	CString localFile = GET_LOCAL_PATH(CSTRING_GET_LAST(r.urlFile, '/'));
+	CString localFile = GET_IMAGE_PATH(CSTRING_GET_LAST(r.urlFile, '/'));
 	bool localFileExists = PackedImageAlreadyExists(localFile, r.compressedSize, r.extractedSize, false);
 	size += !fullSize && localFileExists ? 0 : r.compressedSize;
 
 	if (IsDualBootOrNewLive()) {
 		size += r.bootArchiveSize + SIGNATURE_FILE_SIZE * 2; // img.asc and boot.zip.asc
 	} else if (m_selectedInstallMethod == InstallMethod_t::ReflasherDrive) {
-		CString installerFile = GET_LOCAL_PATH(CSTRING_GET_LAST(m_installerImage.urlFile, '/'));
+		CString installerFile = GET_IMAGE_PATH(CSTRING_GET_LAST(m_installerImage.urlFile, '/'));
 		bool installerExists = PackedImageAlreadyExists(installerFile, m_installerImage.compressedSize, m_installerImage.extractedSize, true);
 		size += SIGNATURE_FILE_SIZE; // installer img.gz.asc
 		size += !fullSize && installerExists ? 0 : m_installerImage.compressedSize;
@@ -5849,7 +5852,7 @@ bool CEndlessUsbToolDlg::GetSignatureForLocalFile(const CString &file, CString &
 bool CEndlessUsbToolDlg::RemoteMatchesUnpackedImg(const CString &remoteFilePath, CString *unpackedImgSig)
 {
 	pFileImageEntry_t localEntry = NULL;
-	if (m_imageFiles.Lookup(GET_LOCAL_PATH(ENDLESS_IMG_FILE_NAME), localEntry)) {
+	if (m_imageFiles.Lookup(GET_IMAGE_PATH(ENDLESS_IMG_FILE_NAME), localEntry)) {
 		if (CSTRING_GET_PATH(localEntry->unpackedImgSigPath, '.') == CSTRING_GET_PATH(remoteFilePath, '.')) {
 			if (unpackedImgSig != NULL) *unpackedImgSig = localEntry->unpackedImgSigPath;
 			return true;

@@ -51,6 +51,7 @@ BEGIN_MESSAGE_MAP(CEndlessUsbToolApp, CWinApp)
 END_MESSAGE_MAP()
 
 CString CEndlessUsbToolApp::m_appDir = L"";
+CString CEndlessUsbToolApp::m_imageDir = L"";
 bool CEndlessUsbToolApp::m_enableLogDebugging = false;
 bool CEndlessUsbToolApp::m_enableOverwriteMbr = false;
 CFile CEndlessUsbToolApp::m_logFile;
@@ -107,6 +108,13 @@ BOOL CEndlessUsbToolApp::InitInstance()
 		app_dir[sizeof(app_dir) - 1] = 0;
 	}
 	m_appDir.ReleaseBuffer();
+
+	// set image dir to endless if it exists, otherwise use app dir
+	CString endlessDir = GET_LOCAL_PATH(PATH_ENDLESS_SUBDIRECTORY);
+	if (PathIsDirectory(endlessDir))
+		m_imageDir = CSTRING_GET_PATH(endlessDir, _T('\\'));
+	else
+		m_imageDir = m_appDir;
 
 	// Set the Windows version
 	GetWindowsVersion();
@@ -173,6 +181,16 @@ BOOL CEndlessUsbToolApp::InitInstance()
 	return FALSE;
 }
 
+CString CEndlessUsbToolApp::TempFilePath(CString fileName)
+{
+	wchar_t tempPath[MAX_PATH + 1];
+	memset(tempPath, 0, sizeof(tempPath));
+	wcscpy_s(tempPath, m_appDir);
+	GetTempPathW(MAX_PATH + 1, tempPath);
+	CString path = tempPath;
+	return path + fileName;
+}
+
 void CEndlessUsbToolApp::InitLogging()
 {
 	if (!m_enableLogDebugging) {
@@ -188,12 +206,7 @@ void CEndlessUsbToolApp::InitLogging()
 	fileName += s;
 	fileName += L".log";
 	if (CEndlessUsbToolDlg::IsUninstaller()) {
-		wchar_t tempPath[MAX_PATH + 1];
-		memset(tempPath, 0, sizeof(tempPath));
-		wcscpy_s(tempPath, m_appDir);
-		GetTempPathW(MAX_PATH + 1, tempPath);
-		CString path = tempPath;
-		fileName = path + fileName;
+		fileName = TempFilePath(fileName);
 	} else {
 		fileName = GET_LOCAL_PATH(fileName);
 	}
