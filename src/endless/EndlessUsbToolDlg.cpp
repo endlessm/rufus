@@ -2814,9 +2814,11 @@ HRESULT CEndlessUsbToolDlg::OnSelectFileNextClicked(IHTMLElement* pElement)
 		GoToSelectStoragePage();
 	}
 
-	CString imageType = _T("RemoteImage");
-	if (m_useLocalFile) imageType = _T("LocalImage");
-	Analytics::instance()->eventTracking(_T(ELEMENT_FILE_PAGE), imageType, selectedImage);
+	CString imageSource = _T("Remote");
+	if (m_useLocalFile) imageSource = _T("Local");
+	TrackEvent(_T("ImageSource"), imageSource);
+	TrackEvent(_T("Version"), version);
+	TrackEvent(_T("Personality"), personality);
 
 	return S_OK;
 }
