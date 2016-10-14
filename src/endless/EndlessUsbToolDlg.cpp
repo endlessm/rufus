@@ -135,7 +135,6 @@ DWORD usbDevicesCount;
 //Select File page elements
 #define ELEMENT_SELFILE_PREV_BUTTON     "SelectFilePreviousButton"
 #define ELEMENT_SELFILE_NEXT_BUTTON     "SelectFileNextButton"
-#define ELEMENT_SELFILE_BUTTON          "SelectFileButton"
 #define ELEMENT_FILES_SELECT            "LocalImagesSelect"
 #define ELEMENT_REMOTE_SELECT           "OnlineImagesSelect"
 #define ELEMENT_IMAGE_TYPE_LOCAL        "OperatingSystemTypeLocal"
@@ -422,7 +421,6 @@ BEGIN_DHTML_EVENT_MAP(CEndlessUsbToolDlg)
 	// Select File Page handlers
 	DHTML_EVENT_ONCLICK(_T(ELEMENT_SELFILE_PREV_BUTTON), OnSelectFilePreviousClicked)
 	DHTML_EVENT_ONCLICK(_T(ELEMENT_SELFILE_NEXT_BUTTON), OnSelectFileNextClicked)
-	DHTML_EVENT_ONCLICK(_T(ELEMENT_SELFILE_BUTTON), OnSelectFileButtonClicked)
     DHTML_EVENT_ONCHANGE(_T(ELEMENT_FILES_SELECT), OnSelectedImageFileChanged)
     DHTML_EVENT_ONCHANGE(_T(ELEMENT_REMOTE_SELECT), OnSelectedRemoteFileChanged)
     DHTML_EVENT_ONCHANGE(_T(ELEMENT_IMAGE_TYPE_LOCAL), OnSelectedImageTypeChanged)
@@ -2789,23 +2787,6 @@ HRESULT CEndlessUsbToolDlg::OnSelectFileNextClicked(IHTMLElement* pElement)
 	CString imageType = _T("RemoteImage");
 	if (m_useLocalFile) imageType = _T("LocalImage");
 	Analytics::instance()->eventTracking(_T(ELEMENT_FILE_PAGE), imageType, selectedImage);
-
-	return S_OK;
-}
-
-HRESULT CEndlessUsbToolDlg::OnSelectFileButtonClicked(IHTMLElement* pElement)
-{
-    AfxMessageBox(_T("Not implemented yet."));
-    //EXT_DECL(img_ext, NULL, __VA_GROUP__("*.img;*.gz;*.xz"), __VA_GROUP__(lmprintf(MSG_095)));
-
-    //char *image_path = FileDialog(FALSE, NULL, &img_ext, 0);
-    //CString selectedFilePath = Utf8ToCString(image_path);
-
-    //CFile file(selectedFilePath, CFile::modeRead);
-
-    //CString displayText = file.GetFileName() + " - ";
-    //displayText += SizeToHumanReadable(file.GetLength(), FALSE, use_fake_units);
-    //AddEntryToSelect(_T(ELEMENT_FILES_SELECT), CComBSTR(selectedFilePath), CComBSTR(displayText), NULL, 1);
 
 	return S_OK;
 }

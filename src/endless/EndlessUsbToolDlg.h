@@ -104,7 +104,6 @@ protected:
 	// Select File Page Handlers
 	HRESULT OnSelectFilePreviousClicked(IHTMLElement* pElement);
 	HRESULT OnSelectFileNextClicked(IHTMLElement* pElement);
-	HRESULT OnSelectFileButtonClicked(IHTMLElement* pElement);
     HRESULT OnSelectedImageFileChanged(IHTMLElement* pElement);
     HRESULT OnSelectedRemoteFileChanged(IHTMLElement* pElement);
     HRESULT OnSelectedImageTypeChanged(IHTMLElement* pElement);
