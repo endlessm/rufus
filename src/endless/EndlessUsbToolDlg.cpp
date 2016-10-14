@@ -2737,29 +2737,29 @@ HRESULT CEndlessUsbToolDlg::OnSelectFileNextClicked(IHTMLElement* pElement)
 	}
 
     // Get display name with actual image size, not compressed
-    CString selectedImage, personality, version, date, selectedSize;
+    CString selectedImage, personality, version;
     ULONGLONG size = 0;
-    bool isInstallerImage = false;
+
     if (m_useLocalFile) {
         selectedImage = UTF8ToCString(image_path);
         pFileImageEntry_t localEntry = NULL;
         if (!m_imageFiles.Lookup(selectedImage, localEntry)) {
             uprintf("ERROR: Selected local file not found.");
-        } else {
-            size = m_selectedInstallMethod == InstallMethod_t::TryEndless && !localEntry->isUnpackedImage ? GetExtractedSize(selectedImage, FALSE) : localEntry->size;
-
-			if (localEntry->isUnpackedImage) {
-				selectedImage = CSTRING_GET_PATH(localEntry->unpackedImgSigPath, '.');
-			}
         }
-        selectedImage = CSTRING_GET_LAST(selectedImage, '\\');
+
+		personality = localEntry->personality;
+		version = localEntry->version;
+
+		size = m_selectedInstallMethod == InstallMethod_t::TryEndless && !localEntry->isUnpackedImage ? GetExtractedSize(selectedImage, FALSE) : localEntry->size;
 
         m_selectedFileSize = localEntry->size;
     } else {
         RemoteImageEntry_t remote = m_remoteImages.GetAt(m_remoteImages.FindIndex(m_selectedRemoteIndex));
-        //DownloadType_t downloadType = GetSelectedDownloadType();
-        selectedImage = CSTRING_GET_LAST(remote.urlFile, '/');
 
+		personality = remote.personality;
+		version = remote.version;
+
+        selectedImage = CSTRING_GET_LAST(remote.urlFile, '/');
 		CString selectedImagePath = GET_IMAGE_PATH(selectedImage);
         size = m_selectedInstallMethod == InstallMethod_t::TryEndless || RemoteMatchesUnpackedImg(selectedImagePath) ? remote.extractedSize : remote.compressedSize;
 
@@ -2769,49 +2769,44 @@ HRESULT CEndlessUsbToolDlg::OnSelectFileNextClicked(IHTMLElement* pElement)
     // add the installer size if this is not a live image
     if (m_selectedInstallMethod == InstallMethod_t::ReflasherDrive) {
         size += INSTALLER_DELTA_SIZE + m_installerImage.extractedSize;
-    }    
-
-    selectedSize = SizeToHumanReadable(size, FALSE, use_fake_units);
-    if (ParseImgFileName(selectedImage, personality, version, date, isInstallerImage)) {
-        if(isInstallerImage) uprintf("ERROR: An installer image has been selected.");
-
-        uint32_t headlineMsg;
-        if (m_selectedInstallMethod == InstallMethod_t::SetupDualBoot) {
-            headlineMsg = MSG_320;
-        }
-        else if (m_selectedInstallMethod == InstallMethod_t::TryEndless) {
-            headlineMsg = MSG_343;
-        }
-        else {
-            headlineMsg = MSG_344;
-        }
-
-        CString finalMessageStr = UTF8ToCString(lmprintf(headlineMsg));
-        CString imageLanguage = UTF8ToCString(lmprintf(m_personalityToLocaleMsg[personality]));
-		CStringA imageTypeA = lmprintf(personality == PERSONALITY_BASE ? MSG_400 : MSG_316); // Basic or Full
-        CString imageType = UTF8ToCString(imageTypeA);
-
-        SetElementText(_T(ELEMENT_THANKYOU_MESSAGE), CComBSTR(finalMessageStr));
-
-        SetElementText(_T(ELEMENT_INSTALLER_VERSION), CComBSTR(version));
-        CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_INSTALLER_LANGUAGE_ROW), CComVariant(personality != PERSONALITY_BASE));
-        SetElementText(_T(ELEMENT_INSTALLER_LANGUAGE), CComBSTR(imageLanguage));
-        CString contentStr  = UTF8ToCString(lmprintf(MSG_319, imageTypeA, SizeToHumanReadable(size, FALSE, use_fake_units)));
-        SetElementText(_T(ELEMENT_INSTALLER_CONTENT), CComBSTR(contentStr));
-
-        CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_DUALBOOT_REMINDER), CComVariant(m_selectedInstallMethod == InstallMethod_t::SetupDualBoot));
-        CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_LIVE_REMINDER), CComVariant(m_selectedInstallMethod == InstallMethod_t::TryEndless));
-        CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_REFLASHER_REMINDER), CComVariant(m_selectedInstallMethod == InstallMethod_t::ReflasherDrive));
-        CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_USBBOOT_HOWTO), CComVariant(m_selectedInstallMethod != InstallMethod_t::SetupDualBoot));
-
-        GetImgDisplayName(selectedImage, version, personality, 0);
-    } else {
-        uprintf("Cannot parse data from file name %ls; using default %s", selectedImage, ENDLESS_OS);
-        selectedImage = _T(ENDLESS_OS);
     }
 
+	// update Thank You page fields with the selected image data
+	uint32_t headlineMsg;
+	if (m_selectedInstallMethod == InstallMethod_t::SetupDualBoot) {
+		headlineMsg = MSG_320;
+	}
+	else if (m_selectedInstallMethod == InstallMethod_t::TryEndless) {
+		headlineMsg = MSG_343;
+	}
+	else {
+		headlineMsg = MSG_344;
+	}
+
+	CString finalMessageStr = UTF8ToCString(lmprintf(headlineMsg));
+	CString imageLanguage = UTF8ToCString(lmprintf(m_personalityToLocaleMsg[personality]));
+	CStringA imageTypeA = lmprintf(personality == PERSONALITY_BASE ? MSG_400 : MSG_316); // Basic or Full
+	CString imageType = UTF8ToCString(imageTypeA);
+
+	SetElementText(_T(ELEMENT_THANKYOU_MESSAGE), CComBSTR(finalMessageStr));
+
+	SetElementText(_T(ELEMENT_INSTALLER_VERSION), CComBSTR(version));
+	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_INSTALLER_LANGUAGE_ROW), CComVariant(personality != PERSONALITY_BASE));
+	SetElementText(_T(ELEMENT_INSTALLER_LANGUAGE), CComBSTR(imageLanguage));
+	CString contentStr  = UTF8ToCString(lmprintf(MSG_319, imageTypeA, SizeToHumanReadable(size, FALSE, use_fake_units)));
+	SetElementText(_T(ELEMENT_INSTALLER_CONTENT), CComBSTR(contentStr));
+
+	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_DUALBOOT_REMINDER), CComVariant(m_selectedInstallMethod == InstallMethod_t::SetupDualBoot));
+	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_LIVE_REMINDER), CComVariant(m_selectedInstallMethod == InstallMethod_t::TryEndless));
+	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_REFLASHER_REMINDER), CComVariant(m_selectedInstallMethod == InstallMethod_t::ReflasherDrive));
+	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_USBBOOT_HOWTO), CComVariant(m_selectedInstallMethod != InstallMethod_t::SetupDualBoot));
+
 	if (m_selectedInstallMethod != InstallMethod_t::SetupDualBoot) {
-		SetElementText(_T(ELEMENT_SELUSB_NEW_DISK_NAME), CComBSTR(selectedImage));
+		CString displayName;
+        GetImgDisplayName(displayName, version, personality, 0);
+		SetElementText(_T(ELEMENT_SELUSB_NEW_DISK_NAME), CComBSTR(displayName));
+
+        CString selectedSize = UTF8ToCString(SizeToHumanReadable(size, FALSE, use_fake_units));
 		SetElementText(_T(ELEMENT_SELUSB_NEW_DISK_SIZE), CComBSTR(selectedSize));
 
 		ChangePage(_T(ELEMENT_USB_PAGE));
