@@ -128,7 +128,7 @@ bootstrap</Command>
       </Command>
     </PreLinkEvent>
     <PostBuildEvent>
-      <Command>b2.exe -j$(NUMBER_OF_PROCESSORS)  --stagedir=$(OutDir) --build-dir=$(IntermediateOutputPath) --toolset=msvc --build-type=minimal variant=debug link=static threading=multi runtime-link=static stage</Command>
+      <Command>b2.exe -j$(NUMBER_OF_PROCESSORS)  --stagedir=$(OutDir) --build-dir=$(IntermediateOutputPath) --toolset=msvc --build-type=minimal architecture=x86 address-model=64 variant=debug link=static threading=multi runtime-link=static stage</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

@@ -113,6 +113,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)\src\endless\boost;$(SolutionDir)\src\endless\libtorrent\include;$(SolutionDir)\src\endless\openssl-1.0.1t\inc32;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
