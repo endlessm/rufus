@@ -269,12 +269,14 @@ error:
 static BYTE vardata[10000];
 static BYTE vardata1[1000];
 
-int EFIGetBootEntryNumber(const wchar_t *desc) {
+int EFIGetBootEntryNumber(const wchar_t *desc, bool &isNewEntry) {
 	DWORD size;
 	WORD *bootorder;
 	int i;
 	int lowestfree = 0, target = -1;
 	wchar_t varname[9];
+
+	isNewEntry = true;
 
 	size = GetFirmwareEnvironmentVariable(UEFI_VAR_BOOTORDER, UEFI_BOOT_NAMESPACE, vardata, sizeof(vardata));
 	if (size > 0) {
@@ -289,6 +291,7 @@ int EFIGetBootEntryNumber(const wchar_t *desc) {
 			if (0 == wcscmp(desc, description)) {
 				target = bootorder[i];
 				lowestfree = 0x10000;
+				isNewEntry = false;
 				break;
 			}
 
@@ -339,10 +342,12 @@ bool EFICreateNewEntry(const wchar_t *drive, wchar_t *path, wchar_t *desc) {
 	STORAGE_ACCESS_ALIGNMENT_DESCRIPTOR alignment;
 
 	bool retResult = false;
+	bool isNewEntry = true;
 
 	//print_entries();
 
-	target = EFIGetBootEntryNumber(desc);
+	target = EFIGetBootEntryNumber(desc, isNewEntry);
+	uprintf("Returned EFI entry (%d) is free: %s", target, isNewEntry ? "yes" : "no");
 	IFFALSE_GOTOERROR(target != -1, "Failed to find a free boot variable");
 
 	/* Ensure that strings are in UTF-16 */
@@ -465,11 +470,13 @@ error:
 bool EFIRemoveEntry(wchar_t *desc) {
 	wchar_t varname[9];
 	int target = -1;
+	bool isNewEntry = true;
 
 	//print_entries();
 
-	target = EFIGetBootEntryNumber(desc);
-	IFFALSE_RETURN_VALUE(target != -1, "Failed to find EFI entry for Endless OS", false);
+	target = EFIGetBootEntryNumber(desc, isNewEntry);
+	uprintf("Returned EFI entry (%d) is free: %s", target, isNewEntry ? "yes" : "no");
+	IFFALSE_RETURN_VALUE(target != -1 && !isNewEntry, "Failed to find EFI entry for Endless OS", false);
 
 	swprintf(varname, sizeof(varname), UEFI_VAR_BOOT_ENTRY_FORMAT, target);
 	/* Writing a zero length variable deletes it */

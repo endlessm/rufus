@@ -30,6 +30,7 @@ public:
 	static CString m_imageDir;
 	static bool m_enableLogDebugging;
 	static bool m_enableOverwriteMbr;
+	static bool m_enableIgnoreEFIError;
 
 	static void Log(const char *logMessage);
 	static CString TempFilePath(CString filename);
