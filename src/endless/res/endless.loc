@@ -269,6 +269,7 @@ t MSG_368 "Internet Explorer %d is not supported. Please click OK to download In
 t MSG_369 "%s Download"
 t MSG_370 "Oops, something went wrong setting up Endless OS."
 t MSG_371 "https://support.endlessm.com/hc/en-us/articles/213585826"
+t MSG_372 "No USB device found. If you've inserted one, try a different USB port or a different USB device."
 
 t MSG_400 "Basic"
 t MSG_401 "English"

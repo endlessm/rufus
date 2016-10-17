@@ -292,7 +292,7 @@ private:
     bool CanUseRemoteFile();
     void FindMaxUSBSpeed();
     void CheckUSBHub(LPCTSTR devicePath);
-    void UpdateUSBSpeedMessage(DWORD deviceIndex);
+    void UpdateUSBSpeedMessage(int deviceIndex);
     void JSONDownloadFailed();
 
 	void GoToSelectStoragePage();

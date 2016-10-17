@@ -3102,13 +3102,13 @@ HRESULT CEndlessUsbToolDlg::OnSelectedUSBDiskChanged(IHTMLElement* pElement)
     char fs_type[32];
     int deviceIndex = ComboBox_GetCurSel(hDeviceList);
 
+	UpdateUSBSpeedMessage(deviceIndex);
+
     IFFALSE_GOTOERROR(deviceIndex >= 0, "Selected drive index is invalid.");
 
     memset(&SelectedDrive, 0, sizeof(SelectedDrive));
     SelectedDrive.DeviceNumber = (DWORD)ComboBox_GetItemData(hDeviceList, deviceIndex);
     GetDrivePartitionData(SelectedDrive.DeviceNumber, fs_type, sizeof(fs_type), FALSE);
-
-    UpdateUSBSpeedMessage(deviceIndex);
     
     // Radu: same code found in OnSelectFileNextClicked, move to new method
     // check if final image will fit in the disk
@@ -4201,8 +4201,13 @@ void CEndlessUsbToolDlg::CheckUSBHub(LPCTSTR devicePath)
     safe_closehandle(usbHubHandle);
 }
 
-void CEndlessUsbToolDlg::UpdateUSBSpeedMessage(DWORD deviceIndex)
+void CEndlessUsbToolDlg::UpdateUSBSpeedMessage(int deviceIndex)
 {
+	if (deviceIndex < 0) {
+		SetElementText(_T(ELEMENT_SELUSB_SPEEDWARNING), UTF8ToBSTR(lmprintf(MSG_372)));
+		return;
+	}
+
     DWORD speed = usbDeviceSpeed[deviceIndex];
     BOOL isLowerSpeed = usbDeviceSpeedIsLower[deviceIndex];
     DWORD msgId = 0;
