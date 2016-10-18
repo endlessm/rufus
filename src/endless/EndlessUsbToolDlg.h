@@ -94,12 +94,12 @@ protected:
 	HRESULT OnAdvancedOptionsClicked(IHTMLElement* pElement);
 	HRESULT OnInstallDualBootClicked(IHTMLElement* pElement);
 
-	// First Page Handlers
+	// Advanced Page Handlers
 	HRESULT OnTryEndlessSelected(IHTMLElement* pElement);
 	HRESULT OnInstallEndlessSelected(IHTMLElement* pElement);
 	HRESULT OnLinkClicked(IHTMLElement* pElement);
 	HRESULT OnLanguageChanged(IHTMLElement* pElement);
-	HRESULT OnFirstPagePreviousClicked(IHTMLElement* pElement);
+	HRESULT OnAdvancedPagePreviousClicked(IHTMLElement* pElement);
 	HRESULT OnCreateEndlessUSBStickClicked(IHTMLElement* pElement);
 
 	// Select File Page Handlers

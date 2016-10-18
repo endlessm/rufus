@@ -98,7 +98,7 @@ v 1.0.19
 
 # Main dialog
 g IDD_ENDLESSUSBTOOL_DIALOG
-t FirstPageTitle "Advanced Install Options"
+t AdvancedPageTitle "Advanced Install Options"
 t TryEndlessButton "Create Live USB"
 t TryEndlessText "Try Endless OS by running it from a USB stick."
 t InstallEndlessButton "Create Reformatter USB"
@@ -294,7 +294,7 @@ v 1.0.19
 b "en-US"
 
 g IDD_ENDLESSUSBTOOL_DIALOG
-t FirstPageTitle "خيارات التثبيت المتقدمة"
+t AdvancedPageTitle "خيارات التثبيت المتقدمة"
 t TryEndlessButton "إنشاء فلاشة USB حية"
 t TryEndlessText "جرِّب نظام تشغيل Endless OS من خلال تشغيله من فلاشة USB."
 t InstallEndlessButton "إنشاء Reflasher USB"
@@ -427,7 +427,7 @@ v 1.0.19
 b "en-US"
 
 g IDD_ENDLESSUSBTOOL_DIALOG
-t FirstPageTitle "সংস্থাপনের উন্নত বিকল্পসমূহ"
+t AdvancedPageTitle "সংস্থাপনের উন্নত বিকল্পসমূহ"
 t TryEndlessButton "সক্রিয় USB তৈরি"
 t TryEndlessText "USB স্টিক থেকে এন্ডলেস OS চালানোর চেষ্টা করুন।"
 t InstallEndlessButton "রিফ্ল্যাশার USB তৈরি"
@@ -560,7 +560,7 @@ v 1.0.19
 b "en-US"
 
 g IDD_ENDLESSUSBTOOL_DIALOG
-t FirstPageTitle "Opciones avanzadas de instalación"
+t AdvancedPageTitle "Opciones avanzadas de instalación"
 t TryEndlessButton "Crear Live USB"
 t TryEndlessText "Prueba Endless OS usando un dispositivo USB. "
 t InstallEndlessButton "Crear Instalador USB "
@@ -694,7 +694,7 @@ v 1.0.19
 b "en-US"
 
 g IDD_ENDLESSUSBTOOL_DIALOG
-t FirstPageTitle "Options d'installation avancées "
+t AdvancedPageTitle "Options d'installation avancées "
 t TryEndlessButton "Créer Live USB"
 t TryEndlessText "Essayez Endless OS en l'exécutant à partir d'une clé USB."
 t InstallEndlessButton "Créer une clé USB Reflasher"
@@ -827,7 +827,7 @@ v 1.0.19
 b "en-US"
 
 g IDD_ENDLESSUSBTOOL_DIALOG
-t FirstPageTitle "ऐडवांस्ड इंस्टॉल विकल्प"
+t AdvancedPageTitle "ऐडवांस्ड इंस्टॉल विकल्प"
 t TryEndlessButton "लाइव USB क्रिएट करें"
 t TryEndlessText "किसी USB स्टिक से रन कर Endless OS आजमाएं।"
 t InstallEndlessButton "Reflasher USB क्रिएट करें"
@@ -960,7 +960,7 @@ v 1.0.19
 b "en-US"
 
 g IDD_ENDLESSUSBTOOL_DIALOG
-t FirstPageTitle "Opsi Instal Lanjutan"
+t AdvancedPageTitle "Opsi Instal Lanjutan"
 t TryEndlessButton "Buat Live USB"
 t TryEndlessText "Cobalah Endless OS dengan menjalankannya dari USB stick."
 t InstallEndlessButton "Buat Reflasher USB"
@@ -1093,7 +1093,7 @@ v 1.0.19
 b "en-US"
 
 g IDD_ENDLESSUSBTOOL_DIALOG
-t FirstPageTitle "Opções avançadas de instalação"
+t AdvancedPageTitle "Opções avançadas de instalação"
 t TryEndlessButton "Criar Live USB"
 t TryEndlessText "Experimente o Endless OS inicializando por um pendrive USB."
 t InstallEndlessButton "Criar USB Bootável"
@@ -1227,7 +1227,7 @@ v 1.0.19
 b "en-US"
 
 g IDD_ENDLESSUSBTOOL_DIALOG
-t FirstPageTitle "ตัวเลือกการติดตั้งขั้นสูง"
+t AdvancedPageTitle "ตัวเลือกการติดตั้งขั้นสูง"
 t TryEndlessButton "สร้าง Live USB"
 t TryEndlessText "ทดลอง Endless OS โดยเปิดใช้งานจากยูเอสบีแฟลชไดรฟ์"
 t InstallEndlessButton "สร้าง Reflasher USB"
@@ -1360,7 +1360,7 @@ v 1.0.19
 b "en-US"
 
 g IDD_ENDLESSUSBTOOL_DIALOG
-t FirstPageTitle "Tùy chọn cài đặt nâng cao"
+t AdvancedPageTitle "Tùy chọn cài đặt nâng cao"
 t TryEndlessButton "Tạo USB trực tiếp"
 t TryEndlessText "Hãy thử Hệ điều hành Endless bằng cách chạy nó từ ổ đĩa USB."
 t InstallEndlessButton "Tạo USB phân phối lại"
@@ -1493,7 +1493,7 @@ v 1.0.19
 b "en-US"
 
 g IDD_ENDLESSUSBTOOL_DIALOG
-t FirstPageTitle "高级安装选项"
+t AdvancedPageTitle "高级安装选项"
 t TryEndlessButton "创建Live USB"
 t TryEndlessText "请从USB闪存盘中运行，开始试用Endless操作系统。"
 t InstallEndlessButton "创建Reflasher USB"

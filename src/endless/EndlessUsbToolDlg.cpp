@@ -99,7 +99,7 @@ DWORD usbDevicesCount;
 // HTML element ids and classes
 // pages
 #define ELEMENT_DUALBOOT_PAGE           "DualBootInstallPage"
-#define ELEMENT_FIRST_PAGE              "FirstPage"
+#define ELEMENT_ADVANCED_PAGE           "AdvancedPage"
 #define ELEMENT_FILE_PAGE               "SelectFilePage"
 #define ELEMENT_USB_PAGE                "SelectUSBPage"
 #define ELEMENT_STORAGE_PAGE            "SelectStoragePage"
@@ -122,12 +122,12 @@ DWORD usbDevicesCount;
 #define ELEMENT_DUALBOOT_DESCRIPTION	"DualBootContentDescription"
 #define ELEMENT_DUALBOOT_RECOMMENDATION	"DualBootRecommendation"
 
-//First page elements
+//Advanced page elements
 #define ELEMENT_TRY_BUTTON              "TryEndlessButton"
 #define ELEMENT_INSTALL_BUTTON          "InstallEndlessButton"
 #define ELEMENT_COMPARE_OPTIONS         "CompareOptionsLink"
-#define ELEMENT_FIRST_CLOSE_BUTTON      "FirstPageCloseButton"
-#define ELEMENT_FIRST_PREV_BUTTON       "FirstPagePreviousButton"
+#define ELEMENT_ADVANCED_CLOSE_BUTTON   "AdvancedPageCloseButton"
+#define ELEMENT_ADVANCED_PREV_BUTTON    "AdvancedPagePreviousButton"
 
 #define ELEMENT_ADVOPT_SUBTITLE			"AdvOptSubtitleContainer"
 #define ELEMENT_CREATE_NEW_LIVE_BUTTON	"CreateNewLiveUSB"
@@ -427,12 +427,12 @@ BEGIN_DHTML_EVENT_MAP(CEndlessUsbToolDlg)
 	DHTML_EVENT_ONCLICK(_T(ELEMENT_DUALBOOT_ADVANCED_LINK), OnAdvancedOptionsClicked)
 	DHTML_EVENT_ONCLICK(_T(ELEMENT_DUALBOOT_INSTALL_BUTTON), OnInstallDualBootClicked)
 
-	// First Page Handlers		
+	// Advanced Page Handlers
     DHTML_EVENT_ONCLICK(_T(ELEMENT_TRY_BUTTON), OnTryEndlessSelected)
     DHTML_EVENT_ONCLICK(_T(ELEMENT_INSTALL_BUTTON), OnInstallEndlessSelected)
 	DHTML_EVENT_ONCLICK(_T(ELEMENT_COMPARE_OPTIONS), OnLinkClicked)
-    DHTML_EVENT_ONCLICK(_T(ELEMENT_FIRST_CLOSE_BUTTON), OnCloseAppClicked)
-	DHTML_EVENT_ONCLICK(_T(ELEMENT_FIRST_PREV_BUTTON), OnFirstPagePreviousClicked)
+    DHTML_EVENT_ONCLICK(_T(ELEMENT_ADVANCED_CLOSE_BUTTON), OnCloseAppClicked)
+	DHTML_EVENT_ONCLICK(_T(ELEMENT_ADVANCED_PREV_BUTTON), OnAdvancedPagePreviousClicked)
 	DHTML_EVENT_ONCLICK(_T(ELEMENT_CREATE_NEW_LIVE_BUTTON), OnCreateEndlessUSBStickClicked)
 
 	// Select File Page handlers
@@ -1923,7 +1923,7 @@ HRESULT CEndlessUsbToolDlg::OnAdvancedOptionsClicked(IHTMLElement* pElement)
 	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(HTML_BUTTON_ID(ELEMENT_TRY_BUTTON)), CComVariant(oldStyleUSB));
 	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_COMPARE_OPTIONS), CComVariant(oldStyleUSB));
 
-	ChangePage(_T(ELEMENT_FIRST_PAGE));
+	ChangePage(_T(ELEMENT_ADVANCED_PAGE));
 
 	return S_OK;
 }
@@ -1989,7 +1989,7 @@ HRESULT CEndlessUsbToolDlg::OnInstallDualBootClicked(IHTMLElement* pElement)
 	return S_OK;
 }
 
-// First Page Handlers
+// Advanced Page Handlers
 HRESULT CEndlessUsbToolDlg::OnTryEndlessSelected(IHTMLElement* pElement)
 {
     FUNCTION_ENTER;
@@ -2673,7 +2673,7 @@ void CEndlessUsbToolDlg::AddDownloadOptionsToUI()
     }
 }
 
-HRESULT CEndlessUsbToolDlg::OnFirstPagePreviousClicked(IHTMLElement* pElement)
+HRESULT CEndlessUsbToolDlg::OnAdvancedPagePreviousClicked(IHTMLElement* pElement)
 {
 	ChangePage(_T(ELEMENT_DUALBOOT_PAGE));
 
@@ -2696,7 +2696,7 @@ HRESULT CEndlessUsbToolDlg::OnSelectFilePreviousClicked(IHTMLElement* pElement)
 {
     FUNCTION_ENTER;
 
-    ChangePage(m_selectedInstallMethod == InstallMethod_t::InstallDualBoot ? _T(ELEMENT_DUALBOOT_PAGE) : _T(ELEMENT_FIRST_PAGE));
+    ChangePage(m_selectedInstallMethod == InstallMethod_t::InstallDualBoot ? _T(ELEMENT_DUALBOOT_PAGE) : _T(ELEMENT_ADVANCED_PAGE));
 
 	return S_OK;
 }
@@ -3484,7 +3484,7 @@ HRESULT CEndlessUsbToolDlg::OnRecoverErrorButtonClicked(IHTMLElement* pElement)
         SetLastError(ERROR_SUCCESS);
         result = DeleteFile(m_localFileSig);
         uprintf("%s on deleting file '%ls' - %s", result ? "Success" : "Error", m_localFileSig, WindowsErrorString());
-        ChangePage(_T(ELEMENT_FIRST_PAGE));
+        ChangePage(_T(ELEMENT_ADVANCED_PAGE));
         break;
     }
     case ErrorCause_t::ErrorCauseCanceled:

@@ -30,7 +30,7 @@ const loc_control_id control_id[] = {
 	// The dialog IDs must come first
 	LOC_CTRL(IDD_DIALOG),
 	LOC_CTRL(IDD_ENDLESSUSBTOOL_DIALOG),
-	LOC_CTRL_HTML(FirstPageTitle),
+	LOC_CTRL_HTML(AdvancedPageTitle),
 	LOC_CTRL_HTML(TryEndlessButton),
 	LOC_CTRL_HTML(TryEndlessText),
 	LOC_CTRL_HTML(InstallEndlessButton),
