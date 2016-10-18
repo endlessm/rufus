@@ -117,7 +117,7 @@ DWORD usbDevicesCount;
 #define ELEMENT_DUALBOOT_CLOSE_BUTTON   "DualBootPageCloseButton"
 #define ELEMENT_DUALBOOT_ADVANCED_TEXT	"AdvancedOptionsText"
 #define ELEMENT_DUALBOOT_ADVANCED_LINK  "AdvancedOptionsLink"
-#define ELEMENT_DUALBOOT_INSTALL_BUTTON "DualBootInstallButon"
+#define ELEMENT_DUALBOOT_INSTALL_BUTTON "DualBootInstallButton"
 #define ELEMENT_DUALBOOT_TITLE			"DualBootContentTitle"
 #define ELEMENT_DUALBOOT_DESCRIPTION	"DualBootContentDescription"
 #define ELEMENT_DUALBOOT_RECOMMENDATION	"DualBootRecommendation"
