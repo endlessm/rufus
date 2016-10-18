@@ -87,20 +87,18 @@ Analytics *Analytics::instance()
 	return &instance;
 }
 
-void Analytics::sessionControl(BOOL start, BOOL uninstall)
+void Analytics::sessionControl(BOOL start)
 {
 	if (m_disabled) return;
 	FUNCTION_ENTER;
 	CString body;
 	prefixId(body);
 	if (start) {
-		CString page = uninstall ? _T("Uninstall") : _T("DualBootInstall");
-		body = body + _T("t=screenview&cd=") + page + _T("Page&sc=start");
+		body = body + _T("t=screenview&cd=DualBootInstallPage&sc=start");
 		sendRequest(body);
 	}
 	else {
-		CString page = uninstall ? _T("UninstallFinished") : _T("LastPage");
-		body = body + _T("t=screenview&cd=") + page + _T("&sc=end");
+		body = body + _T("t=screenview&cd=LastPage&sc=end");
 		sendRequest(body, TRUE);
 		DWORD ret = WaitForSingleObject(m_workerThread->m_hThread, 4000);
 		if (ret == WAIT_TIMEOUT) {

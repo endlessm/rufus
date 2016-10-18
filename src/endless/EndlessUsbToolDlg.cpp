@@ -115,6 +115,7 @@ DWORD usbDevicesCount;
 //Dual boot elements
 #define ELEMENT_LANGUAGE_DUALBOOT       "LanguageSelectDualBoot"
 #define ELEMENT_DUALBOOT_CLOSE_BUTTON   "DualBootPageCloseButton"
+#define ELEMENT_DUALBOOT_ADVANCED_TEXT	"AdvancedOptionsText"
 #define ELEMENT_DUALBOOT_ADVANCED_LINK  "AdvancedOptionsLink"
 #define ELEMENT_DUALBOOT_INSTALL_BUTTON "DualBootInstallButon"
 #define ELEMENT_DUALBOOT_TITLE			"DualBootContentTitle"
@@ -807,11 +808,7 @@ BOOL CEndlessUsbToolDlg::OnInitDialog()
 
     SetWindowTextW(L"");
 
-	if(IsUninstaller()) {
-		QueryAndDoUninstall(true);
-	}
-
-	Analytics::instance()->sessionControl(true, m_selectedInstallMethod == InstallMethod_t::UninstallEndless);
+	Analytics::instance()->sessionControl(true);
 
 	if (m_ieVersion < MIN_SUPPORTED_IE_VERSION) {
 		int result = AfxMessageBox(UTF8ToCString(lmprintf(MSG_368, m_ieVersion, MIN_SUPPORTED_IE_VERSION)), MB_OKCANCEL | MB_ICONERROR);
@@ -832,7 +829,7 @@ void CEndlessUsbToolDlg::Uninit()
     int handlesCount = 0;
     HANDLE handlesToWaitFor[4];
     
-	Analytics::instance()->sessionControl(false, m_selectedInstallMethod == InstallMethod_t::UninstallEndless);
+	Analytics::instance()->sessionControl(false);
 
     if (m_fileScanThread != INVALID_HANDLE_VALUE) handlesToWaitFor[handlesCount++] = m_fileScanThread;
     if (m_operationThread != INVALID_HANDLE_VALUE) handlesToWaitFor[handlesCount++] = m_operationThread;
@@ -1970,10 +1967,8 @@ HRESULT CEndlessUsbToolDlg::OnInstallDualBootClicked(IHTMLElement* pElement)
 		safe_closehandle(hPhysical);
 	}
 
-	if (UpdateDualBootTexts()) {
-		SetSelectedInstallMethod(InstallMethod_t::UninstallEndless);
-
-		QueryAndDoUninstall(false);
+	if (ShouldUninstall()) {
+		QueryAndDoUninstall();
 		return S_OK;
 	}
 
@@ -5901,7 +5896,12 @@ bool CEndlessUsbToolDlg::IsUninstaller()
 {
 	CStringW exePath = GetExePath();
 	return CSTRING_GET_LAST(exePath, '\\') == ENDLESS_UNINSTALLER_NAME;
-	//return CSTRING_GET_LAST(exePath, '\\') == L"EndlessUsbTool.exe";
+}
+
+bool CEndlessUsbToolDlg::ShouldUninstall()
+{
+	return (PathFileExists(GetSystemDrive() + PATH_ENDLESS_SUBDIRECTORY + ENDLESS_IMG_FILE_NAME)
+		|| IsUninstaller());
 }
 
 #define MIN_DATE_IMAGE_BOOT	L"160917"
@@ -5992,36 +5992,37 @@ bool CEndlessUsbToolDlg::IsDualBootOrNewLive()
 	return m_selectedInstallMethod == InstallMethod_t::SetupDualBoot || m_selectedInstallMethod == InstallMethod_t::NewLiveEndless;
 }
 
-bool CEndlessUsbToolDlg::UpdateDualBootTexts()
+void CEndlessUsbToolDlg::UpdateDualBootTexts()
 {
-	if (PathFileExists(GetSystemDrive() + PATH_ENDLESS_SUBDIRECTORY + ENDLESS_IMG_FILE_NAME)) {
+	if (ShouldUninstall()) {
 		SetElementText(_T(ELEMENT_DUALBOOT_TITLE), UTF8ToBSTR(lmprintf(MSG_364)));
 		SetElementText(_T(ELEMENT_DUALBOOT_DESCRIPTION), UTF8ToBSTR(lmprintf(MSG_365)));
 		SetElementText(_T(ELEMENT_DUALBOOT_INSTALL_BUTTON), UTF8ToBSTR(lmprintf(MSG_366)));
 		SetElementText(_T(ELEMENT_DUALBOOT_RECOMMENDATION), UTF8ToBSTR(lmprintf(MSG_367)));
 		CallJavascript(_T(JS_ENABLE_BUTTON), CComVariant(HTML_BUTTON_ID(_T(ELEMENT_DUALBOOT_INSTALL_BUTTON))), CComVariant(TRUE));
-		return true;
 	}
 
-	return false;
+	if (IsUninstaller()) {
+		CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_DUALBOOT_ADVANCED_TEXT), CComVariant(FALSE));
+	}
 }
 
-void CEndlessUsbToolDlg::QueryAndDoUninstall(bool exitOnCancel)
+void CEndlessUsbToolDlg::QueryAndDoUninstall()
 {
-	m_selectedInstallMethod = InstallMethod_t::UninstallEndless;
-
 	int selected = AfxMessageBox(UTF8ToCString(lmprintf(MSG_361)), MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2);
-	if (selected == IDYES) {
-		Analytics::instance()->sessionControl(true, m_selectedInstallMethod == InstallMethod_t::UninstallEndless);
 
-		ShowWindow(SW_HIDE);
-		if (!UninstallDualBoot(this))
-			Analytics::instance()->exceptionTracking(_T("UninstallError"), TRUE);
-
-		Analytics::instance()->sessionControl(false, m_selectedInstallMethod == InstallMethod_t::UninstallEndless);
-	} else if(!exitOnCancel){
+	if (selected != IDYES)
 		return;
-	}
+
+	SetSelectedInstallMethod(InstallMethod_t::UninstallEndless);
+
+	Analytics::instance()->screenTracking(_T("UninstallPage"));
+
+	ShowWindow(SW_HIDE);
+	if (!UninstallDualBoot(this))
+		Analytics::instance()->exceptionTracking(_T("UninstallError"), TRUE);
+
+	Analytics::instance()->sessionControl(false);
 
 	ExitProcess(0);
 }

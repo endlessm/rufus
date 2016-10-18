@@ -75,6 +75,7 @@ public:
     ~CEndlessUsbToolDlg();
 
 	static bool IsUninstaller();
+	static bool ShouldUninstall();
 
 // Dialog Data
 #ifdef AFX_DESIGN_TIME
@@ -367,8 +368,8 @@ private:
 	bool GetSignatureForLocalFile(const CString &file, CString &signature);
 	bool RemoteMatchesUnpackedImg(const CString &remoteFilePath, CString *unpackedImgSig = NULL);
 	bool IsDualBootOrNewLive();
-	bool UpdateDualBootTexts();
-	void QueryAndDoUninstall(bool exitOnCancel);
+	void UpdateDualBootTexts();
+	void QueryAndDoUninstall();
 	static bool IsEndlessMBR(FILE* fp, const CString &systemDriveLetter);
 	static bool RestoreOriginalBoottrack(const CString &endlessPath, HANDLE hPhysical, FILE *fp);
 
