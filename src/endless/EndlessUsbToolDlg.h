@@ -156,6 +156,8 @@ protected:
 	// Browse navigation handling methods
 	void OnDocumentComplete(LPDISPATCH pDisp, LPCTSTR szUrl);
 
+	LRESULT OnTaskbarBtnCreated(WPARAM wParam, LPARAM lParam);
+
 private:
 	int m_nrGigsSelected;
 	loc_cmd* m_selectedLocale;
@@ -206,6 +208,8 @@ private:
     CComPtr<IHTMLWindow2> m_spWindowElem;
     CComDispatchDriver m_dispWindow;
     CComPtr<IDispatchEx> m_dispexWindow;
+
+	CComPtr<ITaskbarList3> m_taskbarProgress;
 
     DownloadManager m_downloadManager;
     DWORD m_ieVersion;
@@ -367,4 +371,6 @@ private:
 	CComBSTR GetDownloadString(const RemoteImageEntry &imageEntry);
 
 	ULONGLONG GetNeededSpaceForDualBoot(int &neededGigs, bool *isBaseImage = NULL);
+
+	static const UINT m_uTaskbarBtnCreatedMsg;
 };

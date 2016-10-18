@@ -74,6 +74,7 @@ int dialog_showing = 0;
 
 PF_TYPE_DECL(WINAPI, BOOL, SHChangeNotifyDeregister, (ULONG));
 PF_TYPE_DECL(WINAPI, ULONG, SHChangeNotifyRegister, (HWND, int, LONG, UINT, int, const SHChangeNotifyEntry *));
+PF_TYPE_DECL(WINAPI, BOOL, ChangeWindowMessageFilterEx, (HWND, UINT, DWORD, PCHANGEFILTERSTRUCT));
 
 BOOL FormatDrive(DWORD DriveIndex, int fsToUse, const wchar_t *partLabel);
 
@@ -471,6 +472,8 @@ int CEndlessUsbToolDlg::ImageUnpackPercentStart;
 int CEndlessUsbToolDlg::ImageUnpackPercentEnd;
 ULONGLONG CEndlessUsbToolDlg::ImageUnpackFileSize;
 
+const UINT CEndlessUsbToolDlg::m_uTaskbarBtnCreatedMsg = RegisterWindowMessage(_T("TaskbarButtonCreated"));
+
 CEndlessUsbToolDlg::CEndlessUsbToolDlg(UINT globalMessage, CWnd* pParent /*=NULL*/)
     : CDHtmlDialog(IDD_ENDLESSUSBTOOL_DIALOG, IDR_HTML_ENDLESSUSBTOOL_DIALOG, pParent),
     m_selectedLocale(NULL),
@@ -543,6 +546,23 @@ BEGIN_MESSAGE_MAP(CEndlessUsbToolDlg, CDHtmlDialog)
 	ON_WM_CLOSE()
 END_MESSAGE_MAP()
 
+const IID my_IID_ITaskbarList3 =
+{ 0xea1afb91, 0x9e28, 0x4b86,{ 0x90, 0xe9, 0x9e, 0x9f, 0x8a, 0x5e, 0xef, 0xaf } };
+const IID my_CLSID_TaskbarList =
+{ 0x56fdf344, 0xfd6d, 0x11d0,{ 0x95, 0x8a ,0x0, 0x60, 0x97, 0xc9, 0xa0 ,0x90 } };
+
+LRESULT CEndlessUsbToolDlg::OnTaskbarBtnCreated(WPARAM wParam, LPARAM lParam)
+{
+	if (nWindowsVersion >= WINDOWS_7) {
+		m_taskbarProgress.Release();
+		//CoCreateInstance(my_CLSID_TaskbarList, NULL, CLSCTX_ALL, my_IID_ITaskbarList3, (void**)&m_taskbarProgress);
+		HRESULT hr = m_taskbarProgress.CoCreateInstance(my_CLSID_TaskbarList);
+		IFFALSE_GOTO(SUCCEEDED(hr), "Error creating progressbar.", done);
+	}
+
+done:
+	return 0;
+}
 
 // Browse navigation handling methods
 void CEndlessUsbToolDlg::OnDocumentComplete(LPDISPATCH pDisp, LPCTSTR szUrl)
@@ -699,7 +719,6 @@ out:
     ExitThread(0);
 }
 
-
 // CEndlessUsbToolDlg message handlers
 
 BOOL CEndlessUsbToolDlg::OnInitDialog()
@@ -707,6 +726,13 @@ BOOL CEndlessUsbToolDlg::OnInitDialog()
     FUNCTION_ENTER;
 
 	CDHtmlDialog::OnInitDialog();
+
+	CHANGEFILTERSTRUCT cfs = { sizeof(CHANGEFILTERSTRUCT) };
+
+	PF_INIT(ChangeWindowMessageFilterEx, user32);
+	if (nWindowsVersion >= WINDOWS_7 && pfChangeWindowMessageFilterEx != NULL) {
+		pfChangeWindowMessageFilterEx(m_hWnd, m_uTaskbarBtnCreatedMsg, MSGFLT_ALLOW, &cfs);
+	}
 
 	if(CEndlessUsbToolApp::m_enableLogDebugging) hLog = m_hWnd;
 
@@ -918,7 +944,9 @@ void CALLBACK CEndlessUsbToolDlg::RefreshTimer(HWND hWnd, UINT uMsg, UINT_PTR id
 
 LRESULT CEndlessUsbToolDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 {
-    if (message >= CB_GETEDITSEL && message < CB_MSGMAX) {
+    if (message == m_uTaskbarBtnCreatedMsg) {
+        OnTaskbarBtnCreated(wParam, lParam);
+    } else if (message >= CB_GETEDITSEL && message < CB_MSGMAX) {
         CComPtr<IHTMLSelectElement> selectElement;
         CComPtr<IHTMLOptionElement> optionElement;
         HRESULT hr;
@@ -1155,6 +1183,11 @@ LRESULT CEndlessUsbToolDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lPara
             if (percent >= 0 && percent <= 100) {
                 hr = CallJavascript(_T(JS_SET_PROGRESS), CComVariant(percent));
                 IFFALSE_BREAK(SUCCEEDED(hr), "Error when calling set progress.");
+
+				if (m_taskbarProgress != NULL) {
+					m_taskbarProgress->SetProgressState(m_hWnd, TBPF_NORMAL);
+					m_taskbarProgress->SetProgressValue(m_hWnd, percent, 100);
+				}
             }
 
             if (op == OP_VERIFYING_SIGNATURE || op == OP_FORMAT || op == OP_FILE_COPY || op == OP_SETUP_DUALBOOT || op == OP_NEW_LIVE_CREATION) {
@@ -1331,6 +1364,10 @@ LRESULT CEndlessUsbToolDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lPara
             case ErrorCause_t::ErrorCauseNone:
                 PrintInfo(0, MSG_210);
                 m_operationThread = INVALID_HANDLE_VALUE;
+				if (m_taskbarProgress != NULL) {
+					m_taskbarProgress->SetProgressState(m_hWnd, TBPF_NOPROGRESS);
+					m_taskbarProgress->SetProgressValue(m_hWnd, 0, 100);
+				}
                 ChangePage(_T(ELEMENT_SUCCESS_PAGE));
                 break;
             default:
@@ -1677,6 +1714,11 @@ void CEndlessUsbToolDlg::ErrorOccured(ErrorCause_t errorCause)
         }
         SetElementText(_T(ELEMENT_ERROR_SUGGESTION), message);
     }
+
+	if (m_taskbarProgress != NULL) {
+		m_taskbarProgress->SetProgressState(m_hWnd, TBPF_ERROR);
+		m_taskbarProgress->SetProgressValue(m_hWnd, 100, 100);
+	}
 
     ChangePage(_T(ELEMENT_ERROR_PAGE));
 
@@ -3427,6 +3469,11 @@ HRESULT CEndlessUsbToolDlg::OnRecoverErrorButtonClicked(IHTMLElement* pElement)
         ChangePage(_T(ELEMENT_DUALBOOT_PAGE));
         break;
     }
+
+	if (m_taskbarProgress != NULL) {
+		m_taskbarProgress->SetProgressState(m_hWnd, TBPF_NORMAL);
+		m_taskbarProgress->SetProgressValue(m_hWnd, 0, 100);
+	}
 
     return S_OK;
 }
