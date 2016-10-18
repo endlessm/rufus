@@ -33,5 +33,6 @@ after_build:
   - 7z a endless-installer-%EI_VERSION%.zip %PLATFORM%\%CONFIGURATION%\EndlessUsbTool.exe
   - 7z a endless-installer-%EI_VERSION%.zip %PLATFORM%\%CONFIGURATION%\EndlessUsbTool.pdb
   - upx.exe -9 -o endless-installer-%EI_VERSION%.exe %PLATFORM%\%CONFIGURATION%\EndlessUsbTool.exe
+  - appveyor PushArtifact %APPVEYOR_BUILD_FOLDER%\endless-installer-%EI_VERSION%.exe
   - 7z a endless-installer-%EI_VERSION%.zip %APPVEYOR_BUILD_FOLDER%\endless-installer-%EI_VERSION%.exe
   - appveyor PushArtifact endless-installer-%EI_VERSION%.zip
