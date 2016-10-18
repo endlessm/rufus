@@ -95,12 +95,12 @@ protected:
 	HRESULT OnInstallDualBootClicked(IHTMLElement* pElement);
 
 	// Advanced Page Handlers
-	HRESULT OnTryEndlessSelected(IHTMLElement* pElement);
-	HRESULT OnInstallEndlessSelected(IHTMLElement* pElement);
+	HRESULT OnLiveUsbClicked(IHTMLElement* pElement);
+	HRESULT OnReformatterUsbClicked(IHTMLElement* pElement);
 	HRESULT OnLinkClicked(IHTMLElement* pElement);
 	HRESULT OnLanguageChanged(IHTMLElement* pElement);
 	HRESULT OnAdvancedPagePreviousClicked(IHTMLElement* pElement);
-	HRESULT OnCreateEndlessUSBStickClicked(IHTMLElement* pElement);
+	HRESULT OnCombinedUsbButtonClicked(IHTMLElement* pElement);
 
 	// Select File Page Handlers
 	HRESULT OnSelectFilePreviousClicked(IHTMLElement* pElement);
@@ -367,7 +367,7 @@ private:
 	ULONGLONG GetActualDownloadSize(const RemoteImageEntry &r, bool fullSize = false);
 	bool GetSignatureForLocalFile(const CString &file, CString &signature);
 	bool RemoteMatchesUnpackedImg(const CString &remoteFilePath, CString *unpackedImgSig = NULL);
-	bool IsDualBootOrNewLive();
+	bool IsDualBootOrCombinedUsb();
 	void UpdateDualBootTexts();
 	void QueryAndDoUninstall();
 	static bool IsEndlessMBR(FILE* fp, const CString &systemDriveLetter);

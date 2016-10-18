@@ -123,14 +123,14 @@ DWORD usbDevicesCount;
 #define ELEMENT_DUALBOOT_RECOMMENDATION	"DualBootRecommendation"
 
 //Advanced page elements
-#define ELEMENT_TRY_BUTTON              "TryEndlessButton"
-#define ELEMENT_INSTALL_BUTTON          "InstallEndlessButton"
+#define ELEMENT_LIVE_USB_BUTTON         "LiveUsbButton"
+#define ELEMENT_REFORMATTER_USB_BUTTON  "ReformatterUsbButton"
 #define ELEMENT_COMPARE_OPTIONS         "CompareOptionsLink"
 #define ELEMENT_ADVANCED_CLOSE_BUTTON   "AdvancedPageCloseButton"
 #define ELEMENT_ADVANCED_PREV_BUTTON    "AdvancedPagePreviousButton"
 
 #define ELEMENT_ADVOPT_SUBTITLE			"AdvOptSubtitleContainer"
-#define ELEMENT_CREATE_NEW_LIVE_BUTTON	"CreateNewLiveUSB"
+#define ELEMENT_COMBINED_USB_BUTTON		"CombinedUsbButton"
 #define ELEMENT_USB_LEARN_MORE			"USBLearnMore"
 
 //Select File page elements
@@ -428,12 +428,12 @@ BEGIN_DHTML_EVENT_MAP(CEndlessUsbToolDlg)
 	DHTML_EVENT_ONCLICK(_T(ELEMENT_DUALBOOT_INSTALL_BUTTON), OnInstallDualBootClicked)
 
 	// Advanced Page Handlers
-    DHTML_EVENT_ONCLICK(_T(ELEMENT_TRY_BUTTON), OnTryEndlessSelected)
-    DHTML_EVENT_ONCLICK(_T(ELEMENT_INSTALL_BUTTON), OnInstallEndlessSelected)
+    DHTML_EVENT_ONCLICK(_T(ELEMENT_LIVE_USB_BUTTON), OnLiveUsbClicked)
+    DHTML_EVENT_ONCLICK(_T(ELEMENT_REFORMATTER_USB_BUTTON), OnReformatterUsbClicked)
 	DHTML_EVENT_ONCLICK(_T(ELEMENT_COMPARE_OPTIONS), OnLinkClicked)
     DHTML_EVENT_ONCLICK(_T(ELEMENT_ADVANCED_CLOSE_BUTTON), OnCloseAppClicked)
 	DHTML_EVENT_ONCLICK(_T(ELEMENT_ADVANCED_PREV_BUTTON), OnAdvancedPagePreviousClicked)
-	DHTML_EVENT_ONCLICK(_T(ELEMENT_CREATE_NEW_LIVE_BUTTON), OnCreateEndlessUSBStickClicked)
+	DHTML_EVENT_ONCLICK(_T(ELEMENT_COMBINED_USB_BUTTON), OnCombinedUsbButtonClicked)
 
 	// Select File Page handlers
 	DHTML_EVENT_ONCLICK(_T(ELEMENT_SELFILE_PREV_BUTTON), OnSelectFilePreviousClicked)
@@ -605,7 +605,7 @@ void CEndlessUsbToolDlg::OnDocumentComplete(LPDISPATCH pDisp, LPCTSTR szUrl)
 	ApplyRufusLocalization(); //apply_localization(IDD_ENDLESSUSBTOOL_DIALOG, GetSafeHwnd());
 
     if (nWindowsVersion == WINDOWS_XP) {
-        CallJavascript(_T(JS_ENABLE_BUTTON), CComVariant(HTML_BUTTON_ID(_T(ELEMENT_INSTALL_BUTTON))), CComVariant(FALSE));
+        CallJavascript(_T(JS_ENABLE_BUTTON), CComVariant(HTML_BUTTON_ID(_T(ELEMENT_REFORMATTER_USB_BUTTON))), CComVariant(FALSE));
     }
 
     SetElementText(_T(ELEMENT_VERSION_CONTAINER), CComBSTR(RELEASE_VER_STR));
@@ -1165,7 +1165,7 @@ LRESULT CEndlessUsbToolDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lPara
             // Radu: pass all the files to be verified to verfication thread and do the percent calculation there
             // Not very happy about this but eh, needs refactoring
             if (op == OP_VERIFYING_SIGNATURE) {
-				if (IsDualBootOrNewLive()) {
+				if (IsDualBootOrCombinedUsb()) {
 					// Radu: do we need to do anything special here?
 					// Does it make sense to add the boot archive signature verification to the percentage calculation also?
 					// We are talking about 6 MB compared to more than 2 GB
@@ -1315,7 +1315,7 @@ LRESULT CEndlessUsbToolDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lPara
                 bool verifiedInstallerImage = (m_localFile == m_localInstallerImage.filePath);
 				bool verifiedBootFilesZip = (m_localFile == m_bootArchive);
 
-				if (IsDualBootOrNewLive()) {
+				if (IsDualBootOrCombinedUsb()) {
 					if (verifiedBootFilesZip) {
 						// we checked the boot archive signature, now check the image
 						m_localFile = UTF8ToCString(image_path);
@@ -1916,11 +1916,11 @@ HRESULT CEndlessUsbToolDlg::OnAdvancedOptionsClicked(IHTMLElement* pElement)
 	bool oldStyleUSB = ((keyState & KEY_PRESSED) != 0) || (nWindowsVersion == WINDOWS_XP);
 
 	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_ADVOPT_SUBTITLE), CComVariant(!oldStyleUSB));
-	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(HTML_BUTTON_ID(ELEMENT_CREATE_NEW_LIVE_BUTTON)), CComVariant(!oldStyleUSB));
+	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(HTML_BUTTON_ID(ELEMENT_COMBINED_USB_BUTTON)), CComVariant(!oldStyleUSB));
 	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_USB_LEARN_MORE), CComVariant(!oldStyleUSB));
 
-	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(HTML_BUTTON_ID(ELEMENT_INSTALL_BUTTON)), CComVariant(oldStyleUSB));
-	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(HTML_BUTTON_ID(ELEMENT_TRY_BUTTON)), CComVariant(oldStyleUSB));
+	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(HTML_BUTTON_ID(ELEMENT_REFORMATTER_USB_BUTTON)), CComVariant(oldStyleUSB));
+	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(HTML_BUTTON_ID(ELEMENT_LIVE_USB_BUTTON)), CComVariant(oldStyleUSB));
 	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_COMPARE_OPTIONS), CComVariant(oldStyleUSB));
 
 	ChangePage(_T(ELEMENT_ADVANCED_PAGE));
@@ -1990,7 +1990,7 @@ HRESULT CEndlessUsbToolDlg::OnInstallDualBootClicked(IHTMLElement* pElement)
 }
 
 // Advanced Page Handlers
-HRESULT CEndlessUsbToolDlg::OnTryEndlessSelected(IHTMLElement* pElement)
+HRESULT CEndlessUsbToolDlg::OnLiveUsbClicked(IHTMLElement* pElement)
 {
     FUNCTION_ENTER;
 
@@ -2001,9 +2001,9 @@ HRESULT CEndlessUsbToolDlg::OnTryEndlessSelected(IHTMLElement* pElement)
 	return S_OK;
 }
 
-HRESULT CEndlessUsbToolDlg::OnInstallEndlessSelected(IHTMLElement* pElement)
+HRESULT CEndlessUsbToolDlg::OnReformatterUsbClicked(IHTMLElement* pElement)
 {
-    IFFALSE_RETURN_VALUE(!IsButtonDisabled(pElement), "OnInstallEndlessSelected: Button is disabled. ", S_OK);
+    IFFALSE_RETURN_VALUE(!IsButtonDisabled(pElement), "OnReformatterUsbClicked: Button is disabled. ", S_OK);
 
     FUNCTION_ENTER;
 
@@ -2230,7 +2230,7 @@ void CEndlessUsbToolDlg::UpdateFileEntries(bool shouldInit)
                     m_localInstallerImage.size = file.GetLength();
                 }
             } else {
-                if (IsDualBootOrNewLive() && !HasImageBootSupport(version, date)) {
+                if (IsDualBootOrCombinedUsb() && !HasImageBootSupport(version, date)) {
                     uprintf("Skiping '%ls' because it doesn't have image boot support.", file.GetFileName());
                     continue;
                 }
@@ -2680,7 +2680,7 @@ HRESULT CEndlessUsbToolDlg::OnAdvancedPagePreviousClicked(IHTMLElement* pElement
 	return S_OK;
 }
 
-HRESULT CEndlessUsbToolDlg::OnCreateEndlessUSBStickClicked(IHTMLElement* pElement)
+HRESULT CEndlessUsbToolDlg::OnCombinedUsbButtonClicked(IHTMLElement* pElement)
 {
     FUNCTION_ENTER;
 
@@ -2987,7 +2987,7 @@ void CEndlessUsbToolDlg::StartInstallationProcess()
 
 	if(m_selectedInstallMethod != InstallMethod_t::InstallDualBoot) ChangeDriveAutoRunAndMount(true);
 
-	if (IsDualBootOrNewLive() && m_useLocalFile) {
+	if (IsDualBootOrCombinedUsb() && m_useLocalFile) {
 		pFileImageEntry_t localEntry = NULL;
 		CString selectedImage = UTF8ToCString(image_path);
 		if (m_imageFiles.Lookup(selectedImage, localEntry) && localEntry->hasBootArchive && localEntry->hasBootArchiveSig && localEntry->hasUnpackedImgSig) {
@@ -3001,7 +3001,7 @@ void CEndlessUsbToolDlg::StartInstallationProcess()
 
 	// Radu: we need to download an installer if only a live image is found and full install was selected
 	if (m_useLocalFile) {
-		if (IsDualBootOrNewLive()) {
+		if (IsDualBootOrCombinedUsb()) {
 			m_localFile = m_bootArchive;
 			m_localFileSig = m_bootArchiveSig;
 		} else {
@@ -3045,7 +3045,7 @@ void CEndlessUsbToolDlg::StartInstallationProcess()
 		ListOfStrings urls, files;
 		CString urlInstaller, urlInstallerAsc, installerFile, installerAscFile;
 		CString urlBootFiles, urlBootFilesAsc, urlImageSig;
-		if (IsDualBootOrNewLive()) {
+		if (IsDualBootOrCombinedUsb()) {
 			urlBootFiles = CString(RELEASE_JSON_URLPATH) +  remote.urlBootArchive;
 			m_bootArchive = GET_IMAGE_PATH(CSTRING_GET_LAST(urlBootFiles, '/'));
 
@@ -3122,7 +3122,7 @@ void CEndlessUsbToolDlg::StartInstallationProcess()
 		m_localInstallerImage.filePath = GET_IMAGE_PATH(CSTRING_GET_LAST(m_installerImage.urlFile, '/'));
 		m_localInstallerImage.size = m_installerImage.compressedSize;
 
-		if (IsDualBootOrNewLive()) {
+		if (IsDualBootOrCombinedUsb()) {
 			m_localFile = m_bootArchive;
 			m_localFileSig = m_bootArchiveSig;
 		}
@@ -3545,7 +3545,7 @@ bool CEndlessUsbToolDlg::CancelInstall()
 
 DownloadType_t CEndlessUsbToolDlg::GetSelectedDownloadType()
 {
-	if (IsDualBootOrNewLive()) {
+	if (IsDualBootOrCombinedUsb()) {
 		return DownloadType_t::DownloadTypeDualBootFiles;
 	} else {
 		return m_selectedInstallMethod == InstallMethod_t::LiveUsb ? DownloadType_t::DownloadTypeLiveImage : DownloadType_t::DownloadTypeInstallerImage;
@@ -4148,7 +4148,7 @@ bool CEndlessUsbToolDlg::CanUseLocalFile()
 
 	// If we have a local entry with all needed files
 	bool hasFilesForDualBoot = false;
-	if (IsDualBootOrNewLive() && hasLocalImages) {
+	if (IsDualBootOrCombinedUsb() && hasLocalImages) {
 		pFileImageEntry_t currentEntry = NULL;
 		CString path;
 		for (POSITION position = m_imageFiles.GetStartPosition(); position != NULL; ) {
@@ -5907,7 +5907,7 @@ bool CEndlessUsbToolDlg::ShouldUninstall()
 #define MIN_DATE_IMAGE_BOOT	L"160917"
 
 // Image boot means support for booting from endless/endless.img
-// on dual boot (ntfs) and new live USB (exfat)
+// on dual boot (ntfs) and combined USB (exfat)
 bool CEndlessUsbToolDlg::HasImageBootSupport(const CString &version, const CString &date)
 {
 	return version[0] >= '3' && date >= MIN_DATE_IMAGE_BOOT;
@@ -5949,7 +5949,7 @@ ULONGLONG CEndlessUsbToolDlg::GetActualDownloadSize(const RemoteImageEntry &r, b
 	bool localFileExists = PackedImageAlreadyExists(localFile, r.compressedSize, r.extractedSize, false);
 	size += !fullSize && localFileExists ? 0 : r.compressedSize;
 
-	if (IsDualBootOrNewLive()) {
+	if (IsDualBootOrCombinedUsb()) {
 		size += r.bootArchiveSize + SIGNATURE_FILE_SIZE * 2; // img.asc and boot.zip.asc
 	} else if (m_selectedInstallMethod == InstallMethod_t::ReformatterUsb) {
 		CString installerFile = GET_IMAGE_PATH(CSTRING_GET_LAST(m_installerImage.urlFile, '/'));
@@ -5987,7 +5987,7 @@ bool CEndlessUsbToolDlg::RemoteMatchesUnpackedImg(const CString &remoteFilePath,
 	return false;
 }
 
-bool CEndlessUsbToolDlg::IsDualBootOrNewLive()
+bool CEndlessUsbToolDlg::IsDualBootOrCombinedUsb()
 {
 	return m_selectedInstallMethod == InstallMethod_t::InstallDualBoot || m_selectedInstallMethod == InstallMethod_t::CombinedUsb;
 }
