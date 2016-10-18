@@ -2715,27 +2715,6 @@ HRESULT CEndlessUsbToolDlg::OnSelectFileNextClicked(IHTMLElement* pElement)
     
     IFFALSE_RETURN_VALUE(!IsButtonDisabled(pElement), "OnSelectFileNextClicked: Button is disabled. ", S_OK);
 
-	if (m_selectedInstallMethod != InstallMethod_t::SetupDualBoot) {
-		CallJavascript(_T(JS_RESET_CHECK), CComVariant(_T(ELEMENT_SELUSB_AGREEMENT)));
-		m_usbDeleteAgreement = false;
-
-		// RADU: move this to another thread
-		GetUSBDevices(0);
-		OnSelectedUSBDiskChanged(NULL);
-
-		PF_INIT(SHChangeNotifyRegister, shell32);
-
-		// Register MEDIA_INSERTED/MEDIA_REMOVED notifications for card readers
-		if (pfSHChangeNotifyRegister && SUCCEEDED(SHGetSpecialFolderLocation(0, CSIDL_DESKTOP, &pidlDesktop))) {
-			NotifyEntry.pidl = pidlDesktop;
-			NotifyEntry.fRecursive = TRUE;
-			// NB: The following only works if the media is already formatted.
-			// If you insert a blank card, notifications will not be sent... :(
-			m_shellNotificationsRegister = pfSHChangeNotifyRegister(m_hWnd, 0x0001 | 0x0002 | 0x8000,
-				SHCNE_MEDIAINSERTED | SHCNE_MEDIAREMOVED, UM_MEDIA_CHANGE, 1, &NotifyEntry);
-		}
-	}
-
     // Get display name with actual image size, not compressed
     CString selectedImage, personality, version;
     ULONGLONG size = 0;
@@ -2743,9 +2722,13 @@ HRESULT CEndlessUsbToolDlg::OnSelectFileNextClicked(IHTMLElement* pElement)
     if (m_useLocalFile) {
         selectedImage = UTF8ToCString(image_path);
         pFileImageEntry_t localEntry = NULL;
-        if (!m_imageFiles.Lookup(selectedImage, localEntry)) {
-            uprintf("ERROR: Selected local file not found.");
-        }
+
+		m_imageFiles.Lookup(selectedImage, localEntry);
+		if (localEntry == NULL) {
+			uprintf("ERROR: Selected local file not found.");
+			ErrorOccured(ErrorCause_t::ErrorCauseGeneric);
+			return S_OK;
+		}
 
 		personality = localEntry->personality;
 		version = localEntry->version;
@@ -2754,7 +2737,14 @@ HRESULT CEndlessUsbToolDlg::OnSelectFileNextClicked(IHTMLElement* pElement)
 
         m_selectedFileSize = localEntry->size;
     } else {
-        RemoteImageEntry_t remote = m_remoteImages.GetAt(m_remoteImages.FindIndex(m_selectedRemoteIndex));
+		POSITION p = m_remoteImages.FindIndex(m_selectedRemoteIndex);
+		if (p == NULL) {
+			uprintf("Remote index value not valid.");
+			ErrorOccured(ErrorCause_t::ErrorCauseGeneric);
+			return S_OK;
+		}
+
+		RemoteImageEntry_t remote = m_remoteImages.GetAt(p);
 
 		personality = remote.personality;
 		version = remote.version;
@@ -2800,6 +2790,27 @@ HRESULT CEndlessUsbToolDlg::OnSelectFileNextClicked(IHTMLElement* pElement)
 	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_LIVE_REMINDER), CComVariant(m_selectedInstallMethod == InstallMethod_t::TryEndless));
 	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_REFLASHER_REMINDER), CComVariant(m_selectedInstallMethod == InstallMethod_t::ReflasherDrive));
 	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_USBBOOT_HOWTO), CComVariant(m_selectedInstallMethod != InstallMethod_t::SetupDualBoot));
+
+	if (m_selectedInstallMethod != InstallMethod_t::SetupDualBoot) {
+		CallJavascript(_T(JS_RESET_CHECK), CComVariant(_T(ELEMENT_SELUSB_AGREEMENT)));
+		m_usbDeleteAgreement = false;
+
+		// RADU: move this to another thread
+		GetUSBDevices(0);
+		OnSelectedUSBDiskChanged(NULL);
+
+		PF_INIT(SHChangeNotifyRegister, shell32);
+
+		// Register MEDIA_INSERTED/MEDIA_REMOVED notifications for card readers
+		if (pfSHChangeNotifyRegister && SUCCEEDED(SHGetSpecialFolderLocation(0, CSIDL_DESKTOP, &pidlDesktop))) {
+			NotifyEntry.pidl = pidlDesktop;
+			NotifyEntry.fRecursive = TRUE;
+			// NB: The following only works if the media is already formatted.
+			// If you insert a blank card, notifications will not be sent... :(
+			m_shellNotificationsRegister = pfSHChangeNotifyRegister(m_hWnd, 0x0001 | 0x0002 | 0x8000,
+				SHCNE_MEDIAINSERTED | SHCNE_MEDIAREMOVED, UM_MEDIA_CHANGE, 1, &NotifyEntry);
+		}
+	}
 
 	if (m_selectedInstallMethod != InstallMethod_t::SetupDualBoot) {
 		CString displayName;
