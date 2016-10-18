@@ -4877,6 +4877,12 @@ DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 	int createDirResult = SHCreateDirectoryExW(NULL, endlessFilesPath, NULL);
 	IFFALSE_GOTOERROR(createDirResult == ERROR_SUCCESS || createDirResult == ERROR_ALREADY_EXISTS, "Error creating directory on USB drive.");
 
+	// Check folder is not set to compressed
+	{
+		CString folderName = CSTRING_GET_PATH(endlessFilesPath, L'\\');
+		IFFALSE_GOTOERROR(EnsureUncompressed(folderName), "Error setting folder to uncompressed.");
+	}
+
 	// Copy ourseleves to the <SYSDRIVE>:\endless directory
 	IFFALSE_GOTOERROR(0 != CopyFile(exeFilePath, endlessFilesPath + ENDLESS_UNINSTALLER_NAME, FALSE), "Error copying exe uninstaller file.");
 
@@ -4947,6 +4953,39 @@ done:
 	return 0;
 }
 
+bool CEndlessUsbToolDlg::EnsureUncompressed(const CString &filePath)
+{
+	FUNCTION_ENTER;
+	bool success = false;
+	HANDLE hFile = INVALID_HANDLE_VALUE;
+	USHORT compression;
+	DWORD size = 0;
+	BOOL result;
+
+	hFile = CreateFile(filePath, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE,
+		NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
+	IFFALSE_GOTOERROR(hFile != INVALID_HANDLE_VALUE, "CreateFile returned INVALID_HANDLE_VALUE.");
+
+	result = DeviceIoControl(hFile, FSCTL_GET_COMPRESSION, NULL, 0, &compression, sizeof(compression), &size, NULL);
+	IFFALSE_GOTOERROR(result != 0 && size > 0, "Error on querying compression status.");
+
+	uprintf("Path %ls has compression status %hu.", filePath, compression);
+
+	if (compression != COMPRESSION_FORMAT_NONE) {
+		compression = COMPRESSION_FORMAT_NONE;
+		result = DeviceIoControl(hFile, FSCTL_SET_COMPRESSION, &compression, sizeof(compression), NULL, 0, &size, NULL);
+		IFFALSE_GOTOERROR(result != 0, "Error on setting compression status.");
+
+		uprintf ("Set %ls to uncompressed.", filePath);
+	}
+
+	success = true;
+
+error:
+	safe_closehandle(hFile);
+
+	return success;
+}
 
 bool CEndlessUsbToolDlg::ExtendImageFile(const CString &endlessImgPath, ULONGLONG selectedGigs)
 {
