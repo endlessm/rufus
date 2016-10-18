@@ -59,11 +59,11 @@ typedef struct RemoteImageEntry {
 
 typedef enum InstallMethod {
 	None,
-	TryEndless,
-	ReflasherDrive,
-	NewLiveEndless,
-	SetupDualBoot,
-	UninstallEndless
+	LiveUsb,
+	ReformatterUsb,
+	CombinedUsb,
+	InstallDualBoot,
+	UninstallDualBoot
 } InstallMethod_t;
 
 // CEndlessUsbToolDlg dialog
