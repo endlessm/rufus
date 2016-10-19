@@ -6030,7 +6030,12 @@ void CEndlessUsbToolDlg::QueryAndDoUninstall()
 	Analytics::instance()->screenTracking(_T("UninstallPage"));
 
 	ShowWindow(SW_HIDE);
-	if (!UninstallDualBoot(this)) {
+
+	TrackEvent(_T("Started"));
+
+	if (UninstallDualBoot(this)) {
+		TrackEvent(_T("Completed"));
+	} else {
 		TrackEvent(_T("Failed"), ErrorCauseToStr(m_lastErrorCause));
 		Analytics::instance()->exceptionTracking(_T("UninstallError"), TRUE);
 	}
