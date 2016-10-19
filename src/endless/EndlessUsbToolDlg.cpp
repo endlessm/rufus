@@ -366,7 +366,7 @@ static LPCTSTR ErrorCauseToStr(ErrorCause_t errorCause)
     switch (errorCause)
     {
         TOSTR(ErrorCauseGeneric);
-        TOSTR(ErrorCauseCanceled);
+        TOSTR(ErrorCauseCancelled);
         TOSTR(ErrorCauseJSONDownloadFailed);
         TOSTR(ErrorCauseDownloadFailed);
         TOSTR(ErrorCauseDownloadFailedDiskFull);
@@ -1642,7 +1642,7 @@ void CEndlessUsbToolDlg::ErrorOccured(ErrorCause_t errorCause)
         buttonMsgId = MSG_327;
         suggestionMsgId = MSG_324;
         break;
-    case ErrorCause_t::ErrorCauseCanceled:
+    case ErrorCause_t::ErrorCauseCancelled:
     case ErrorCause_t::ErrorCauseGeneric:
     case ErrorCause_t::ErrorCauseWriteFailed:
         buttonMsgId = MSG_328;
@@ -1735,7 +1735,7 @@ void CEndlessUsbToolDlg::ErrorOccured(ErrorCause_t errorCause)
 
     ChangePage(_T(ELEMENT_ERROR_PAGE));
 
-	if (errorCause == ErrorCause_t::ErrorCauseCanceled)
+	if (errorCause == ErrorCause_t::ErrorCauseCancelled)
 		TrackEvent(_T("Cancelled"));
 	else
 		TrackEvent(_T("Failed"), ErrorCauseToStr(errorCause));
@@ -3443,7 +3443,7 @@ HRESULT CEndlessUsbToolDlg::OnInstallCancelClicked(IHTMLElement* pElement)
         return S_OK;
     }
 
-    m_lastErrorCause = ErrorCause_t::ErrorCauseCanceled;
+    m_lastErrorCause = ErrorCause_t::ErrorCauseCancelled;
     CancelRunningOperation();
 
     return S_OK;
@@ -3498,7 +3498,7 @@ HRESULT CEndlessUsbToolDlg::OnRecoverErrorButtonClicked(IHTMLElement* pElement)
         ChangePage(_T(ELEMENT_DUALBOOT_PAGE));
         break;
     }
-    case ErrorCause_t::ErrorCauseCanceled:
+    case ErrorCause_t::ErrorCauseCancelled:
     case ErrorCause_t::ErrorCauseJSONDownloadFailed:
     default:
         ChangePage(_T(ELEMENT_DUALBOOT_PAGE));
@@ -3543,7 +3543,7 @@ bool CEndlessUsbToolDlg::CancelInstall()
                 CallJavascript(_T(JS_ENABLE_BUTTON), CComVariant(HTML_BUTTON_ID(_T(ELEMENT_INSTALL_CANCEL))), CComVariant(FALSE));
                 FormatStatus = FORMAT_STATUS_CANCEL;
 				m_cancelImageUnpack = 1;
-                m_lastErrorCause = ErrorCause_t::ErrorCauseCanceled;
+                m_lastErrorCause = ErrorCause_t::ErrorCauseCancelled;
                 uprintf("Cancelling current operation.");
                 CString str = UTF8ToCString(lmprintf(MSG_201));
                 SetElementText(_T(ELEMENT_INSTALL_STATUS), CComBSTR(""));
@@ -3809,7 +3809,7 @@ DWORD WINAPI CEndlessUsbToolDlg::FileCopyThread(void* param)
     result = RefreshDriveLayout(hPhysical);
     safe_closehandle(hPhysical);
 
-    // Check if user canceled
+    // Check if user cancelled
     IFFALSE_GOTOERROR(WaitForSingleObject(dlg->m_cancelOperationEvent, 0) == WAIT_TIMEOUT, "User cancel.");
 	// Format the partition
 	IFFALSE_GOTOERROR(FormatFirstPartitionOnDrive(DriveIndex, FS_EXFAT, dlg->m_cancelOperationEvent, EXFAT_PARTITION_NAME_IMAGES), "Error on FormatFirstPartitionOnDrive");
@@ -3824,7 +3824,7 @@ DWORD WINAPI CEndlessUsbToolDlg::FileCopyThread(void* param)
 		fileDestination = driveDestination + liveFileName;
 	}
     result = CopyFileEx(dlg->m_LiveFile, fileDestination, CEndlessUsbToolDlg::CopyProgressRoutine, dlg, NULL, 0);
-    IFFALSE_GOTOERROR(result, "Copying live image failed/canceled.");
+    IFFALSE_GOTOERROR(result, "Copying live image failed/cancelled.");
 
     fileDestination = driveDestination + CSTRING_GET_LAST(dlg->m_LiveFileSig, L'\\');
     result = CopyFileEx(dlg->m_LiveFileSig, fileDestination, NULL, NULL, NULL, 0);
@@ -4360,7 +4360,7 @@ void CEndlessUsbToolDlg::JSONDownloadFailed()
 #define USB_PROGRESS_IMG_COPY_DONE			98
 #define USB_PROGRESS_ALL_DONE				100
 
-#define CHECK_IF_CANCELED IFFALSE_GOTOERROR(dlg->m_cancelImageUnpack == 0 && WaitForSingleObject((HANDLE)dlg->m_cancelOperationEvent, 0) != WAIT_OBJECT_0, "Operation has been canceled")
+#define CHECK_IF_CANCELLED IFFALSE_GOTOERROR(dlg->m_cancelImageUnpack == 0 && WaitForSingleObject((HANDLE)dlg->m_cancelOperationEvent, 0) != WAIT_OBJECT_0, "Operation has been cancelled")
 
 DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 {
@@ -4384,7 +4384,7 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	IFFALSE_GOTOERROR(UnpackBootComponents(bootFilesPathGz, bootFilesPath), "Error unpacking boot components.");
 
 	UpdateProgress(OP_NEW_LIVE_CREATION, USB_PROGRESS_UNPACK_BOOT_ZIP);
-	CHECK_IF_CANCELED;
+	CHECK_IF_CANCELLED;
 
 	// initialize create disk data
 	memset(&createDiskData, 0, sizeof(createDiskData));
@@ -4407,7 +4407,7 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	memset(layout, 0, sizeof(layout));
 	IFFALSE_GOTOERROR(CreateFakePartitionLayout(hPhysical, layout, geometry), "Error on CreateFakePartitionLayout");
 
-	CHECK_IF_CANCELED;
+	CHECK_IF_CANCELLED;
 
 	// Write MBR and SBR to disk
 	IFFALSE_GOTOERROR(WriteMBRAndSBRToUSB(hPhysical, bootFilesPath, DiskGeometry->Geometry.BytesPerSector), "Error on WriteMBRAndSBRToUSB");
@@ -4415,12 +4415,12 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	safe_closehandle(hPhysical);
 
 	UpdateProgress(OP_NEW_LIVE_CREATION, USB_PROGRESS_MBR_SBR_DONE);
-	CHECK_IF_CANCELED;
+	CHECK_IF_CANCELLED;
 
 	// Format and mount ESP
 	IFFALSE_GOTOERROR(FormatFirstPartitionOnDrive(DriveIndex, FS_FAT32, dlg->m_cancelOperationEvent, L""), "Error on FormatFirstPartitionOnDrive");
 
-	CHECK_IF_CANCELED;
+	CHECK_IF_CANCELLED;
 
 	IFFALSE_GOTOERROR(MountFirstPartitionOnDrive(DriveIndex, driveLetter), "Error on MountFirstPartitionOnDrive");
 
@@ -4431,7 +4431,7 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	if (!DeleteVolumeMountPoint(driveLetter)) uprintf("Failed to unmount volume: %s", WindowsErrorString());
 
 	UpdateProgress(OP_NEW_LIVE_CREATION, USB_PROGRESS_ESP_CREATION_DONE);
-	CHECK_IF_CANCELED;
+	CHECK_IF_CANCELLED;
 
 	// get disk handle again
 	hPhysical = GetPhysicalHandle(DriveIndex, TRUE, TRUE);
@@ -4441,12 +4441,12 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	IFFALSE_GOTOERROR(CreateCorrectPartitionLayout(hPhysical, layout, geometry), "Error on CreateCorrectPartitionLayout");
 	safe_closehandle(hPhysical);
 
-	CHECK_IF_CANCELED;
+	CHECK_IF_CANCELLED;
 
 	// Format and mount exFAT
 	IFFALSE_GOTOERROR(FormatFirstPartitionOnDrive(DriveIndex, FS_EXFAT, dlg->m_cancelOperationEvent, EXFAT_PARTITION_NAME_LIVE), "Error on FormatFirstPartitionOnDrive");
 
-	CHECK_IF_CANCELED;
+	CHECK_IF_CANCELLED;
 
 	IFFALSE_GOTOERROR(MountFirstPartitionOnDrive(DriveIndex, driveLetter), "Error on MountFirstPartitionOnDrive");
 
@@ -4458,7 +4458,7 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	if (!DeleteVolumeMountPoint(driveLetter)) uprintf("Failed to unmount volume: %s", WindowsErrorString());
 
 	UpdateProgress(OP_NEW_LIVE_CREATION, USB_PROGRESS_ALL_DONE);
-	CHECK_IF_CANCELED;
+	CHECK_IF_CANCELLED;
 
 	goto done;
 
@@ -4590,7 +4590,7 @@ bool CEndlessUsbToolDlg::FormatFirstPartitionOnDrive(DWORD DriveIndex, int fsToU
 
 	while (formatRetries-- > 0 && !(result = FormatDrive(DriveIndex, fsToUse, partLabel))) {
 		Sleep(200); // Radu: check if this is needed, that's what rufus does; I hate sync using sleep
-		// Check if user canceled
+		// Check if user cancelled
 		IFFALSE_GOTOERROR(WaitForSingleObject(cancelEvent, 0) == WAIT_TIMEOUT, "User cancel.");
 	}
 	IFFALSE_GOTOERROR(result, "Format error.");
@@ -4751,7 +4751,7 @@ bool CEndlessUsbToolDlg::CopyFilesToexFAT(CEndlessUsbToolDlg *dlg, const CString
 	CEndlessUsbToolDlg::ImageUnpackFileSize = dlg->m_selectedFileSize;
 	if (CSTRING_GET_LAST(dlg->m_localFile, '\\') == ENDLESS_IMG_FILE_NAME) {
 		BOOL result = CopyFileEx(dlg->m_localFile, usbFilesPath + ENDLESS_IMG_FILE_NAME, CEndlessUsbToolDlg::CopyProgressRoutine, dlg, NULL, 0);
-		IFFALSE_GOTOERROR(result, "Copying live image failed/canceled.");
+		IFFALSE_GOTOERROR(result, "Copying live image failed/cancelled.");
 	} else {
 		bool unpackResult = dlg->UnpackFile(ConvertUnicodeToUTF8(dlg->m_localFile), ConvertUnicodeToUTF8(usbFilesPath + ENDLESS_IMG_FILE_NAME), BLED_COMPRESSION_GZIP, ImageUnpackCallback, &dlg->m_cancelImageUnpack);
 		IFFALSE_GOTOERROR(unpackResult, "Error unpacking image to USB drive");
@@ -4906,7 +4906,7 @@ DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 	IFFALSE_GOTOERROR(UnpackBootComponents(dlg->m_bootArchive, bootFilesPath), "Error unpacking boot components.");
 
 	UpdateProgress(OP_SETUP_DUALBOOT, DB_PROGRESS_UNPACK_BOOT_ZIP);
-	CHECK_IF_CANCELED;
+	CHECK_IF_CANCELLED;
 
 	// Create endless folder
 	int createDirResult = SHCreateDirectoryExW(NULL, endlessFilesPath, NULL);
@@ -4927,7 +4927,7 @@ DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 	CEndlessUsbToolDlg::ImageUnpackFileSize = dlg->m_selectedFileSize;
 	if (CSTRING_GET_LAST(dlg->m_localFile, '\\') == ENDLESS_IMG_FILE_NAME) {
 		BOOL result = CopyFileEx(dlg->m_localFile, endlessImgPath, CEndlessUsbToolDlg::CopyProgressRoutine, dlg, NULL, 0);
-		IFFALSE_GOTOERROR(result, "Copying live image failed/canceled.");
+		IFFALSE_GOTOERROR(result, "Copying live image failed/cancelled.");
 	} else {
 		// Unpack img file
 		bool unpackResult = dlg->UnpackFile(ConvertUnicodeToUTF8(dlg->m_localFile), ConvertUnicodeToUTF8(endlessImgPath), BLED_COMPRESSION_GZIP, ImageUnpackCallback, &dlg->m_cancelImageUnpack);
@@ -4938,12 +4938,12 @@ DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 	IFFALSE_GOTOERROR(ExtendImageFile(endlessImgPath, dlg->m_nrGigsSelected), "Error extending Endless image file");
 
 	UpdateProgress(OP_SETUP_DUALBOOT, DB_PROGRESS_FINISHED_UNPACK);
-	CHECK_IF_CANCELED;
+	CHECK_IF_CANCELLED;
 
 	// Copy grub
 	IFFALSE_GOTOERROR(CopyMultipleItems(bootFilesPath + GRUB_BOOT_SUBDIRECTORY, endlessFilesPath), "Error copying grub folder to USB drive.");
 	UpdateProgress(OP_SETUP_DUALBOOT, DB_PROGRESS_COPY_GRUB_FOLDER);
-	CHECK_IF_CANCELED;
+	CHECK_IF_CANCELLED;
 
 	if (IsLegacyBIOSBoot()) {
 		IFFALSE_GOTOERROR(WriteMBRAndSBRToWinDrive(dlg, systemDriveLetter, bootFilesPath, endlessFilesPath), "Error on WriteMBRAndSBRToWinDrive");
