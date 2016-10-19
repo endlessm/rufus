@@ -251,7 +251,7 @@ private:
 
     void StartJSONDownload();
     void UpdateDownloadOptions();
-    bool UnpackFile(LPCSTR archive, LPCSTR destination, int compressionType, void* progress_function = NULL, unsigned long* cancel_request = NULL);
+    bool UnpackFile(const CString &archive, const CString &destination, int compressionType = 0, void* progress_function = NULL, unsigned long* cancel_request = NULL);
     bool ParseJsonFile(LPCTSTR filename, bool isInstallerJson);
     void AddDownloadOptionsToUI();
 
@@ -282,7 +282,7 @@ private:
 
     static bool ParseImgFileName(const CString& filename, CString &personality, CString &version, CString &date, bool &installerImage);
     void GetImgDisplayName(CString &displayName, const CString &version, const CString &personality, ULONGLONG size = 0);
-
+	static int GetCompressionType(const CString& filename);
     static ULONGLONG GetExtractedSize(const CString& filename, BOOL isInstallerImage);
 
     void GetIEVersion();
