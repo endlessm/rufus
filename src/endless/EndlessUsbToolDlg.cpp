@@ -2458,18 +2458,25 @@ do { \
     uprintf("\t\t %s=%s", tag, parentValue[tag].toStyledString().c_str()); \
 } while(false);
 
-bool CEndlessUsbToolDlg::UnpackFile(LPCSTR archive, LPCSTR destination, int compressionType, void* progress_function, unsigned long* cancel_request)
+bool CEndlessUsbToolDlg::UnpackFile(const CString &archive, const CString &destination, int compressionType, void* progress_function, unsigned long* cancel_request)
 {
     FUNCTION_ENTER;
 
-    int64_t result = 0;
+    int64_t result = -1;
+
+	if (compressionType == 0) {
+		compressionType = GetCompressionType(archive);
+		IFFALSE_GOTOERROR(compressionType != BLED_COMPRESSION_NONE, "can't determine compression type");
+	}
 
     // RADU: provide a progress function and move this from UI thread
     // For initial release this is ok as the operation should be very fast for the JSON
     // Unpack the file
     result = bled_init(_uprintf, (progress_t)progress_function, cancel_request);
-    result = bled_uncompress(archive, destination, compressionType);
+    result = bled_uncompress(ConvertUnicodeToUTF8(archive), ConvertUnicodeToUTF8(destination), compressionType);
     bled_exit();
+
+error:
     return result >= 0;
 }
 
@@ -2600,7 +2607,7 @@ void CEndlessUsbToolDlg::UpdateDownloadOptions()
     filePath = CEndlessUsbToolApp::TempFilePath(CString(JSON_LIVE_FILE));
 #ifdef ENABLE_JSON_COMPRESSION
     filePathGz = CEndlessUsbToolApp::TempFilePath(CString(JSON_PACKED(JSON_LIVE_FILE)));
-    IFFALSE_GOTOERROR(UnpackFile(ConvertUnicodeToUTF8(filePathGz), ConvertUnicodeToUTF8(filePath), BLED_COMPRESSION_GZIP), "Error uncompressing eos JSON file.");
+    IFFALSE_GOTOERROR(UnpackFile(filePathGz, filePath, BLED_COMPRESSION_GZIP), "Error uncompressing eos JSON file.");
 #endif // ENABLE_JSON_COMPRESSION
     IFFALSE_GOTOERROR(ParseJsonFile(filePath, false), "Error parsing eos JSON file.");
 
@@ -2608,7 +2615,7 @@ void CEndlessUsbToolDlg::UpdateDownloadOptions()
     filePath = CEndlessUsbToolApp::TempFilePath(CString(JSON_INSTALLER_FILE));
 #ifdef ENABLE_JSON_COMPRESSION
     filePathGz = CEndlessUsbToolApp::TempFilePath(CString(JSON_PACKED(JSON_INSTALLER_FILE)));
-    IFFALSE_GOTOERROR(UnpackFile(ConvertUnicodeToUTF8(filePathGz), ConvertUnicodeToUTF8(filePath), BLED_COMPRESSION_GZIP), "Error uncompressing eosinstaller JSON file.");
+    IFFALSE_GOTOERROR(UnpackFile(filePathGz, filePath, BLED_COMPRESSION_GZIP), "Error uncompressing eosinstaller JSON file.");
 #endif // ENABLE_JSON_COMPRESSION
     IFFALSE_GOTOERROR(ParseJsonFile(filePath, true), "Error parsing eosinstaller JSON file.");
 
@@ -3953,15 +3960,25 @@ void CEndlessUsbToolDlg::GetImgDisplayName(CString &displayName, const CString &
     }
 }
 
+int CEndlessUsbToolDlg::GetCompressionType(const CString& filename)
+{
+	FUNCTION_ENTER;
+
+	CString ext = CSTRING_GET_LAST(filename, '.');
+	if (ext == "gz") return BLED_COMPRESSION_GZIP;
+	if (ext == "xz") return BLED_COMPRESSION_XZ;
+
+	uprintf("%ls has unknown compression type %ls", filename, ext);
+	return 0;
+}
+
+
 ULONGLONG CEndlessUsbToolDlg::GetExtractedSize(const CString& filename, BOOL isInstallerImage)
 {
     FUNCTION_ENTER;
 
-    CString ext = CSTRING_GET_LAST(filename, '.');
-    int compression_type;
-    if (ext == "gz") compression_type = BLED_COMPRESSION_GZIP;
-    else if (ext == "xz") compression_type = BLED_COMPRESSION_XZ;
-    else return 0;
+	int compression_type = GetCompressionType(filename);
+	IFFALSE_RETURN_VALUE(compression_type > BLED_COMPRESSION_NONE && compression_type < BLED_COMPRESSION_MAX, "unknown compression", 0);
 
     CStringA asciiFileName = ConvertUnicodeToUTF8(filename);
     return get_eos_archive_disk_image_size(asciiFileName, compression_type, isInstallerImage);
@@ -4734,7 +4751,7 @@ bool CEndlessUsbToolDlg::CopyFilesToexFAT(CEndlessUsbToolDlg *dlg, const CString
 		BOOL result = CopyFileEx(dlg->m_localFile, usbFilesPath + ENDLESS_IMG_FILE_NAME, CEndlessUsbToolDlg::CopyProgressRoutine, dlg, NULL, 0);
 		IFFALSE_GOTOERROR(result, "Copying live image failed/cancelled.");
 	} else {
-		bool unpackResult = dlg->UnpackFile(ConvertUnicodeToUTF8(dlg->m_localFile), ConvertUnicodeToUTF8(usbFilesPath + ENDLESS_IMG_FILE_NAME), BLED_COMPRESSION_GZIP, ImageUnpackCallback, &dlg->m_cancelImageUnpack);
+		bool unpackResult = dlg->UnpackFile(dlg->m_localFile, (usbFilesPath + ENDLESS_IMG_FILE_NAME), 0, ImageUnpackCallback, &dlg->m_cancelImageUnpack);
 		IFFALSE_GOTOERROR(unpackResult, "Error unpacking image to USB drive");
 	}
 
@@ -4911,7 +4928,7 @@ DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 		IFFALSE_GOTOERROR(result, "Copying live image failed/cancelled.");
 	} else {
 		// Unpack img file
-		bool unpackResult = dlg->UnpackFile(ConvertUnicodeToUTF8(dlg->m_localFile), ConvertUnicodeToUTF8(endlessImgPath), BLED_COMPRESSION_GZIP, ImageUnpackCallback, &dlg->m_cancelImageUnpack);
+		bool unpackResult = dlg->UnpackFile(dlg->m_localFile, endlessImgPath, 0, ImageUnpackCallback, &dlg->m_cancelImageUnpack);
 		IFFALSE_GOTOERROR(unpackResult, "Error unpacking image to endless folder.");
 	}
 
