@@ -508,23 +508,6 @@ select:disabled {
 	margin-left: 20px;
 }
 
-#ExistingImageFile {
-	width: 410px;
-	float: left;	
-}
-
-#SelectFileButton {
-	margin-top: 40px; /* must match .ContentPanel margin-top */
-	margin-right: 48px; /* must match .ContentPanel margin-top */
-	width: 25px;
-	height: 30px;
-	float: right;
-	background-repeat: no-repeat;
-	background-image: url("res:/IMG/#204");
-	cursor: pointer;
-	clear: right;
-}
-
 #DownloadNewImage {
 	margin-top: 60px;
 }
