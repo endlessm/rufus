@@ -1374,6 +1374,7 @@ LRESULT CEndlessUsbToolDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lPara
 
             switch (m_lastErrorCause) {
             case ErrorCause_t::ErrorCauseNone:
+                TrackEvent(_T("Completed"));
                 PrintInfo(0, MSG_210);
                 m_operationThread = INVALID_HANDLE_VALUE;
 				if (m_taskbarProgress != NULL) {
@@ -1733,6 +1734,11 @@ void CEndlessUsbToolDlg::ErrorOccured(ErrorCause_t errorCause)
 	}
 
     ChangePage(_T(ELEMENT_ERROR_PAGE));
+
+	if (errorCause == ErrorCause_t::ErrorCauseCanceled)
+		TrackEvent(_T("Cancelled"));
+	else
+		TrackEvent(_T("Failed"), ErrorCauseToStr(errorCause));
 
 	bool fatal = FALSE;
 	switch (errorCause) {
@@ -2985,6 +2991,8 @@ void CEndlessUsbToolDlg::StartInstallationProcess()
 {
 	SetElementText(_T(ELEMENT_INSTALL_STATUS), CComBSTR(""));
 
+	TrackEvent(_T("Started"));
+
 	EnableHibernate(false);
 
 	if(m_selectedInstallMethod != InstallMethod_t::InstallDualBoot) ChangeDriveAutoRunAndMount(true);
@@ -3444,6 +3452,7 @@ HRESULT CEndlessUsbToolDlg::OnInstallCancelClicked(IHTMLElement* pElement)
 // Error/Thank You Page Handlers
 HRESULT CEndlessUsbToolDlg::OnCloseAppClicked(IHTMLElement* pElement)
 {
+	TrackEvent(_T("Closed"));
     Uninit();
     AfxPostQuitMessage(0);
 
