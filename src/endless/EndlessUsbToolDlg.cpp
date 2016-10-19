@@ -1740,8 +1740,10 @@ void CEndlessUsbToolDlg::ErrorOccured(ErrorCause_t errorCause)
 	case ErrorCause_t::ErrorCauseVerificationFailed:
 	case ErrorCause_t::ErrorCauseWriteFailed:
 		fatal = FALSE;
+		break;
 	default:
 		fatal = TRUE;
+		break;
 	}
 	Analytics::instance()->exceptionTracking(ErrorCauseToStr(errorCause), fatal);
 }
