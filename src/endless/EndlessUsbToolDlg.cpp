@@ -3484,7 +3484,7 @@ HRESULT CEndlessUsbToolDlg::OnRecoverErrorButtonClicked(IHTMLElement* pElement)
         SetLastError(ERROR_SUCCESS);
         result = DeleteFile(m_localFileSig);
         uprintf("%s on deleting file '%ls' - %s", result ? "Success" : "Error", m_localFileSig, WindowsErrorString());
-        ChangePage(_T(ELEMENT_ADVANCED_PAGE));
+        ChangePage(_T(ELEMENT_DUALBOOT_PAGE));
         break;
     }
     case ErrorCause_t::ErrorCauseCanceled:
