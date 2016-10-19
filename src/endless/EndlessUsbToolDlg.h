@@ -27,7 +27,7 @@ typedef struct FileImageEntry {
 
 typedef enum ErrorCause {
     ErrorCauseGeneric,
-    ErrorCauseCanceled,
+    ErrorCauseCancelled,
     ErrorCauseJSONDownloadFailed,
     ErrorCauseDownloadFailed,
     ErrorCauseDownloadFailedDiskFull,
@@ -59,11 +59,11 @@ typedef struct RemoteImageEntry {
 
 typedef enum InstallMethod {
 	None,
-	TryEndless,
-	ReflasherDrive,
-	NewLiveEndless,
-	SetupDualBoot,
-	UninstallEndless
+	LiveUsb,
+	ReformatterUsb,
+	CombinedUsb,
+	InstallDualBoot,
+	UninstallDualBoot
 } InstallMethod_t;
 
 // CEndlessUsbToolDlg dialog
@@ -75,6 +75,7 @@ public:
     ~CEndlessUsbToolDlg();
 
 	static bool IsUninstaller();
+	static bool ShouldUninstall();
 
 // Dialog Data
 #ifdef AFX_DESIGN_TIME
@@ -93,13 +94,13 @@ protected:
 	HRESULT OnAdvancedOptionsClicked(IHTMLElement* pElement);
 	HRESULT OnInstallDualBootClicked(IHTMLElement* pElement);
 
-	// First Page Handlers
-	HRESULT OnTryEndlessSelected(IHTMLElement* pElement);
-	HRESULT OnInstallEndlessSelected(IHTMLElement* pElement);
+	// Advanced Page Handlers
+	HRESULT OnLiveUsbClicked(IHTMLElement* pElement);
+	HRESULT OnReformatterUsbClicked(IHTMLElement* pElement);
 	HRESULT OnLinkClicked(IHTMLElement* pElement);
 	HRESULT OnLanguageChanged(IHTMLElement* pElement);
-	HRESULT OnFirstPagePreviousClicked(IHTMLElement* pElement);
-	HRESULT OnCreateEndlessUSBStickClicked(IHTMLElement* pElement);
+	HRESULT OnAdvancedPagePreviousClicked(IHTMLElement* pElement);
+	HRESULT OnCombinedUsbButtonClicked(IHTMLElement* pElement);
 
 	// Select File Page Handlers
 	HRESULT OnSelectFilePreviousClicked(IHTMLElement* pElement);
@@ -218,6 +219,9 @@ private:
     long m_maximumUSBVersion;
 	unsigned long m_cancelImageUnpack;
 	InstallMethod_t m_selectedInstallMethod;
+
+	void TrackEvent(const CString &action, const CString &label = CString(), int value = -1);
+	void SetSelectedInstallMethod(InstallMethod_t method);
 
     void StartOperationThread(int operation, LPTHREAD_START_ROUTINE threadRoutine, LPVOID param = NULL);
 
@@ -362,9 +366,9 @@ private:
 	ULONGLONG GetActualDownloadSize(const RemoteImageEntry &r, bool fullSize = false);
 	bool GetSignatureForLocalFile(const CString &file, CString &signature);
 	bool RemoteMatchesUnpackedImg(const CString &remoteFilePath, CString *unpackedImgSig = NULL);
-	bool IsDualBootOrNewLive();
-	bool UpdateDualBootTexts();
-	void QueryAndDoUninstall(bool exitOnCancel);
+	bool IsDualBootOrCombinedUsb();
+	void UpdateDualBootTexts();
+	void QueryAndDoUninstall();
 	static bool IsEndlessMBR(FILE* fp, const CString &systemDriveLetter);
 	static bool RestoreOriginalBoottrack(const CString &endlessPath, HANDLE hPhysical, FILE *fp);
 

@@ -369,7 +369,7 @@ select:disabled {
 	text-align: center;
 }
 
-#DualBootInstallButonC {
+#DualBootInstallButtonC {
 	margin: 20px auto;
 }
 
@@ -386,21 +386,21 @@ select:disabled {
 }
 
 
-/* First page */
+/* Advanced page */
 
-#FirstPage .ContentContainer {
+#AdvancedPage .ContentContainer {
 	width: 600px;
 	border: 0;
 }
 
-#FirstPage .RoundedCornersContainer {
+#AdvancedPage .RoundedCornersContainer {
     background: transparent;
 }
 
- #FirstPage .PageSubtitle {
-     height: 25px;
-     margin-top: 25px;
- }
+#AdvancedPage .PageSubtitle {
+    height: 25px;
+    margin-top: 25px;
+}
 
 .ContentPanel {
 	float: left;
@@ -446,7 +446,7 @@ select:disabled {
     font-family: LatoBold;
 }
 
-#FirstPage .PageContent .FullWidthContent {
+#AdvancedPage .PageContent .FullWidthContent {
 	/*height: 25px;*/
 	text-align: center;
 	padding-top: 10px;
@@ -461,7 +461,7 @@ select:disabled {
     padding-top: 20px;
 }
 
-#CreateNewLiveUSBC {
+#CombinedUsbButtonC {
     margin: 10px auto;
     width: 200px;
 }

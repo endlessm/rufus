@@ -8,7 +8,7 @@ public:
 
 	static Analytics *instance();
 
-	void sessionControl(BOOL start, BOOL uninstall);
+	void sessionControl(BOOL start);
 	void screenTracking(const CString &name);
 	void eventTracking(const CString &category, const CString &action, const CString &label = CString(), int value = -1);
 	void exceptionTracking(const CString &description, BOOL fatal);
@@ -17,6 +17,7 @@ public:
 
 private:
 	void sendRequest(const CString &body, BOOL lastRequest = FALSE);
+	BOOL debug();
 	BOOL disabled();
 	void loadUuid(CString &uuid);
 	void createUuid(CString &uuid);

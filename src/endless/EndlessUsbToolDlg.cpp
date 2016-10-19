@@ -99,7 +99,7 @@ DWORD usbDevicesCount;
 // HTML element ids and classes
 // pages
 #define ELEMENT_DUALBOOT_PAGE           "DualBootInstallPage"
-#define ELEMENT_FIRST_PAGE              "FirstPage"
+#define ELEMENT_ADVANCED_PAGE           "AdvancedPage"
 #define ELEMENT_FILE_PAGE               "SelectFilePage"
 #define ELEMENT_USB_PAGE                "SelectUSBPage"
 #define ELEMENT_STORAGE_PAGE            "SelectStoragePage"
@@ -115,21 +115,22 @@ DWORD usbDevicesCount;
 //Dual boot elements
 #define ELEMENT_LANGUAGE_DUALBOOT       "LanguageSelectDualBoot"
 #define ELEMENT_DUALBOOT_CLOSE_BUTTON   "DualBootPageCloseButton"
+#define ELEMENT_DUALBOOT_ADVANCED_TEXT	"AdvancedOptionsText"
 #define ELEMENT_DUALBOOT_ADVANCED_LINK  "AdvancedOptionsLink"
-#define ELEMENT_DUALBOOT_INSTALL_BUTTON "DualBootInstallButon"
+#define ELEMENT_DUALBOOT_INSTALL_BUTTON "DualBootInstallButton"
 #define ELEMENT_DUALBOOT_TITLE			"DualBootContentTitle"
 #define ELEMENT_DUALBOOT_DESCRIPTION	"DualBootContentDescription"
 #define ELEMENT_DUALBOOT_RECOMMENDATION	"DualBootRecommendation"
 
-//First page elements
-#define ELEMENT_TRY_BUTTON              "TryEndlessButton"
-#define ELEMENT_INSTALL_BUTTON          "InstallEndlessButton"
+//Advanced page elements
+#define ELEMENT_LIVE_USB_BUTTON         "LiveUsbButton"
+#define ELEMENT_REFORMATTER_USB_BUTTON  "ReformatterUsbButton"
 #define ELEMENT_COMPARE_OPTIONS         "CompareOptionsLink"
-#define ELEMENT_FIRST_CLOSE_BUTTON      "FirstPageCloseButton"
-#define ELEMENT_FIRST_PREV_BUTTON       "FirstPagePreviousButton"
+#define ELEMENT_ADVANCED_CLOSE_BUTTON   "AdvancedPageCloseButton"
+#define ELEMENT_ADVANCED_PREV_BUTTON    "AdvancedPagePreviousButton"
 
 #define ELEMENT_ADVOPT_SUBTITLE			"AdvOptSubtitleContainer"
-#define ELEMENT_CREATE_NEW_LIVE_BUTTON	"CreateNewLiveUSB"
+#define ELEMENT_COMBINED_USB_BUTTON		"CombinedUsbButton"
 #define ELEMENT_USB_LEARN_MORE			"USBLearnMore"
 
 //Select File page elements
@@ -324,6 +325,8 @@ const wchar_t* mainWindowTitle = L"Endless Installer";
 // reserve 10 mb for now; this will also include the signature file
 #define INSTALLER_DELTA_SIZE (10*1024*1024)
 
+#define BYTES_IN_MEGABYTE		(1024 *  1024)
+#define BYTES_IN_GIGABYTE		(1024 *  1024 * 1024)
 
 #define UPDATE_DOWNLOAD_PROGRESS_TIME       2000
 #define CHECK_INTERNET_CONNECTION_TIME      2000
@@ -362,7 +365,7 @@ static LPCTSTR ErrorCauseToStr(ErrorCause_t errorCause)
     switch (errorCause)
     {
         TOSTR(ErrorCauseGeneric);
-        TOSTR(ErrorCauseCanceled);
+        TOSTR(ErrorCauseCancelled);
         TOSTR(ErrorCauseJSONDownloadFailed);
         TOSTR(ErrorCauseDownloadFailed);
         TOSTR(ErrorCauseDownloadFailedDiskFull);
@@ -378,6 +381,19 @@ static LPCTSTR ErrorCauseToStr(ErrorCause_t errorCause)
     }
 }
 
+static LPCTSTR InstallMethodToStr(InstallMethod_t installMethod)
+{
+    switch (installMethod)
+    {
+        TOSTR(None);
+        TOSTR(LiveUsb);
+        TOSTR(ReformatterUsb);
+        TOSTR(CombinedUsb);
+        TOSTR(InstallDualBoot);
+        TOSTR(UninstallDualBoot);
+        default: return _T("Unknown");
+    }
+}
 
 extern "C" void UpdateProgress(int op, float percent)
 {
@@ -410,13 +426,13 @@ BEGIN_DHTML_EVENT_MAP(CEndlessUsbToolDlg)
 	DHTML_EVENT_ONCLICK(_T(ELEMENT_DUALBOOT_ADVANCED_LINK), OnAdvancedOptionsClicked)
 	DHTML_EVENT_ONCLICK(_T(ELEMENT_DUALBOOT_INSTALL_BUTTON), OnInstallDualBootClicked)
 
-	// First Page Handlers		
-    DHTML_EVENT_ONCLICK(_T(ELEMENT_TRY_BUTTON), OnTryEndlessSelected)
-    DHTML_EVENT_ONCLICK(_T(ELEMENT_INSTALL_BUTTON), OnInstallEndlessSelected)
+	// Advanced Page Handlers
+    DHTML_EVENT_ONCLICK(_T(ELEMENT_LIVE_USB_BUTTON), OnLiveUsbClicked)
+    DHTML_EVENT_ONCLICK(_T(ELEMENT_REFORMATTER_USB_BUTTON), OnReformatterUsbClicked)
 	DHTML_EVENT_ONCLICK(_T(ELEMENT_COMPARE_OPTIONS), OnLinkClicked)
-    DHTML_EVENT_ONCLICK(_T(ELEMENT_FIRST_CLOSE_BUTTON), OnCloseAppClicked)
-	DHTML_EVENT_ONCLICK(_T(ELEMENT_FIRST_PREV_BUTTON), OnFirstPagePreviousClicked)
-	DHTML_EVENT_ONCLICK(_T(ELEMENT_CREATE_NEW_LIVE_BUTTON), OnCreateEndlessUSBStickClicked)
+    DHTML_EVENT_ONCLICK(_T(ELEMENT_ADVANCED_CLOSE_BUTTON), OnCloseAppClicked)
+	DHTML_EVENT_ONCLICK(_T(ELEMENT_ADVANCED_PREV_BUTTON), OnAdvancedPagePreviousClicked)
+	DHTML_EVENT_ONCLICK(_T(ELEMENT_COMBINED_USB_BUTTON), OnCombinedUsbButtonClicked)
 
 	// Select File Page handlers
 	DHTML_EVENT_ONCLICK(_T(ELEMENT_SELFILE_PREV_BUTTON), OnSelectFilePreviousClicked)
@@ -571,7 +587,7 @@ void CEndlessUsbToolDlg::OnDocumentComplete(LPDISPATCH pDisp, LPCTSTR szUrl)
 
 	uprintf("OnDocumentComplete '%ls'", szUrl);
 
-	IFTRUE_RETURN(m_selectedInstallMethod == InstallMethod_t::UninstallEndless, "Returning as we are in uninstall mode");
+	IFTRUE_RETURN(m_selectedInstallMethod == InstallMethod_t::UninstallDualBoot, "Returning as we are in uninstall mode");
 
 	if (this->m_spHtmlDoc == NULL) {
 		uprintf("CEndlessUsbToolDlg::OnDocumentComplete m_spHtmlDoc==NULL");
@@ -587,7 +603,7 @@ void CEndlessUsbToolDlg::OnDocumentComplete(LPDISPATCH pDisp, LPCTSTR szUrl)
 	ApplyRufusLocalization(); //apply_localization(IDD_ENDLESSUSBTOOL_DIALOG, GetSafeHwnd());
 
     if (nWindowsVersion == WINDOWS_XP) {
-        CallJavascript(_T(JS_ENABLE_BUTTON), CComVariant(HTML_BUTTON_ID(_T(ELEMENT_INSTALL_BUTTON))), CComVariant(FALSE));
+        CallJavascript(_T(JS_ENABLE_BUTTON), CComVariant(HTML_BUTTON_ID(_T(ELEMENT_REFORMATTER_USB_BUTTON))), CComVariant(FALSE));
     }
 
     SetElementText(_T(ELEMENT_VERSION_CONTAINER), CComBSTR(RELEASE_VER_STR));
@@ -790,11 +806,7 @@ BOOL CEndlessUsbToolDlg::OnInitDialog()
 
     SetWindowTextW(L"");
 
-	if(IsUninstaller()) {
-		QueryAndDoUninstall(true);
-	}
-
-	Analytics::instance()->sessionControl(true, m_selectedInstallMethod == InstallMethod_t::UninstallEndless);
+	Analytics::instance()->sessionControl(true);
 
 	if (m_ieVersion < MIN_SUPPORTED_IE_VERSION) {
 		int result = AfxMessageBox(UTF8ToCString(lmprintf(MSG_368, m_ieVersion, MIN_SUPPORTED_IE_VERSION)), MB_OKCANCEL | MB_ICONERROR);
@@ -815,7 +827,7 @@ void CEndlessUsbToolDlg::Uninit()
     int handlesCount = 0;
     HANDLE handlesToWaitFor[4];
     
-	Analytics::instance()->sessionControl(false, m_selectedInstallMethod == InstallMethod_t::UninstallEndless);
+	Analytics::instance()->sessionControl(false);
 
     if (m_fileScanThread != INVALID_HANDLE_VALUE) handlesToWaitFor[handlesCount++] = m_fileScanThread;
     if (m_operationThread != INVALID_HANDLE_VALUE) handlesToWaitFor[handlesCount++] = m_operationThread;
@@ -1151,12 +1163,12 @@ LRESULT CEndlessUsbToolDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lPara
             // Radu: pass all the files to be verified to verfication thread and do the percent calculation there
             // Not very happy about this but eh, needs refactoring
             if (op == OP_VERIFYING_SIGNATURE) {
-				if (IsDualBootOrNewLive()) {
+				if (IsDualBootOrCombinedUsb()) {
 					// Radu: do we need to do anything special here?
 					// Does it make sense to add the boot archive signature verification to the percentage calculation also?
 					// We are talking about 6 MB compared to more than 2 GB
 				} else {
-					if (m_selectedInstallMethod == InstallMethod_t::ReflasherDrive) {
+					if (m_selectedInstallMethod == InstallMethod_t::ReformatterUsb) {
 						ULONGLONG totalSize = m_selectedFileSize + m_localInstallerImage.size;
 						ULONGLONG currentSize = 0;
 						bool isInstallerImage = (m_localFile == m_localInstallerImage.filePath);
@@ -1172,7 +1184,7 @@ LRESULT CEndlessUsbToolDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lPara
             }
             
             // Radu: maybe divide the progress bar also based on the size of the image to be copied to disk after format is complete
-            if (op == OP_FORMAT && m_selectedInstallMethod == InstallMethod_t::ReflasherDrive) {
+            if (op == OP_FORMAT && m_selectedInstallMethod == InstallMethod_t::ReformatterUsb) {
                 percent = percent / 2;
             } else if (op == OP_FILE_COPY) {
                 percent = 50 + percent / 2;
@@ -1203,7 +1215,7 @@ LRESULT CEndlessUsbToolDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lPara
         case UM_FORMAT_COMPLETED:
         {
             m_operationThread = INVALID_HANDLE_VALUE;
-            if (!IS_ERROR(FormatStatus) && m_selectedInstallMethod == InstallMethod_t::ReflasherDrive) {
+            if (!IS_ERROR(FormatStatus) && m_selectedInstallMethod == InstallMethod_t::ReformatterUsb) {
                 StartOperationThread(OP_FILE_COPY, CEndlessUsbToolDlg::FileCopyThread);
             } else {
                 if (IS_ERROR(FormatStatus) && m_lastErrorCause == ErrorCause_t::ErrorCauseNone) {
@@ -1301,7 +1313,7 @@ LRESULT CEndlessUsbToolDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lPara
                 bool verifiedInstallerImage = (m_localFile == m_localInstallerImage.filePath);
 				bool verifiedBootFilesZip = (m_localFile == m_bootArchive);
 
-				if (IsDualBootOrNewLive()) {
+				if (IsDualBootOrCombinedUsb()) {
 					if (verifiedBootFilesZip) {
 						// we checked the boot archive signature, now check the image
 						m_localFile = UTF8ToCString(image_path);
@@ -1309,13 +1321,13 @@ LRESULT CEndlessUsbToolDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lPara
 						StartOperationThread(OP_VERIFYING_SIGNATURE, CEndlessUsbToolDlg::FileVerificationThread);
 					} else {
 						m_cancelImageUnpack = 0;
-						if (m_selectedInstallMethod == InstallMethod_t::NewLiveEndless) {
+						if (m_selectedInstallMethod == InstallMethod_t::CombinedUsb) {
 							StartOperationThread(OP_NEW_LIVE_CREATION, CEndlessUsbToolDlg::CreateUSBStick);
 						} else {
 							StartOperationThread(OP_SETUP_DUALBOOT, CEndlessUsbToolDlg::SetupDualBoot);
 						}
 					}
-				} else if (m_selectedInstallMethod == InstallMethod_t::ReflasherDrive && !verifiedInstallerImage) {
+				} else if (m_selectedInstallMethod == InstallMethod_t::ReformatterUsb && !verifiedInstallerImage) {
                     safe_free(image_path);
                     image_path = wchar_to_utf8(m_localInstallerImage.filePath);
 
@@ -1356,10 +1368,11 @@ LRESULT CEndlessUsbToolDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lPara
 
             EnableHibernate();
 
-			if (m_selectedInstallMethod != InstallMethod_t::SetupDualBoot) ChangeDriveAutoRunAndMount(false);
+			if (m_selectedInstallMethod != InstallMethod_t::InstallDualBoot) ChangeDriveAutoRunAndMount(false);
 
             switch (m_lastErrorCause) {
             case ErrorCause_t::ErrorCauseNone:
+                TrackEvent(_T("Completed"));
                 PrintInfo(0, MSG_210);
                 m_operationThread = INVALID_HANDLE_VALUE;
 				if (m_taskbarProgress != NULL) {
@@ -1627,11 +1640,11 @@ void CEndlessUsbToolDlg::ErrorOccured(ErrorCause_t errorCause)
         buttonMsgId = MSG_327;
         suggestionMsgId = MSG_324;
         break;
-    case ErrorCause_t::ErrorCauseCanceled:
+    case ErrorCause_t::ErrorCauseCancelled:
     case ErrorCause_t::ErrorCauseGeneric:
     case ErrorCause_t::ErrorCauseWriteFailed:
         buttonMsgId = MSG_328;
-        suggestionMsgId = m_selectedInstallMethod == InstallMethod_t::SetupDualBoot ? MSG_358 : MSG_325;
+        suggestionMsgId = m_selectedInstallMethod == InstallMethod_t::InstallDualBoot ? MSG_358 : MSG_325;
         break;
     case ErrorCause_t::ErrorCauseNot64Bit:
         buttonMsgId = MSG_328;
@@ -1701,7 +1714,7 @@ void CEndlessUsbToolDlg::ErrorOccured(ErrorCause_t errorCause)
                 size = remote.compressedSize;
             }
             // we don't take the signature files into account but we are taking about ~2KB compared to >2GB
-            ULONGLONG totalSize = size + (m_selectedInstallMethod == InstallMethod_t::ReflasherDrive ? m_installerImage.compressedSize : 0);
+            ULONGLONG totalSize = size + (m_selectedInstallMethod == InstallMethod_t::ReformatterUsb ? m_installerImage.compressedSize : 0);
             message = UTF8ToBSTR(lmprintf(suggestionMsgId, SizeToHumanReadable(totalSize, FALSE, use_fake_units)));
         } else if(suggestionMsgId == MSG_351) {
             int nrGigsNeeded;
@@ -1720,14 +1733,21 @@ void CEndlessUsbToolDlg::ErrorOccured(ErrorCause_t errorCause)
 
     ChangePage(_T(ELEMENT_ERROR_PAGE));
 
+	if (errorCause == ErrorCause_t::ErrorCauseCancelled)
+		TrackEvent(_T("Cancelled"));
+	else
+		TrackEvent(_T("Failed"), ErrorCauseToStr(errorCause));
+
 	bool fatal = FALSE;
 	switch (errorCause) {
 	case ErrorCause_t::ErrorCauseDownloadFailed:
 	case ErrorCause_t::ErrorCauseVerificationFailed:
 	case ErrorCause_t::ErrorCauseWriteFailed:
 		fatal = FALSE;
+		break;
 	default:
 		fatal = TRUE;
+		break;
 	}
 	Analytics::instance()->exceptionTracking(ErrorCauseToStr(errorCause), fatal);
 }
@@ -1880,6 +1900,18 @@ bool CEndlessUsbToolDlg::IsButtonDisabled(IHTMLElement *pElement)
 //	return S_FALSE;
 //}
 
+void CEndlessUsbToolDlg::TrackEvent(const CString &action, const CString &label, int value)
+{
+	Analytics::instance()->eventTracking(InstallMethodToStr(m_selectedInstallMethod), action, label, value);
+}
+
+void CEndlessUsbToolDlg::SetSelectedInstallMethod(InstallMethod_t method)
+{
+	if (m_selectedInstallMethod == method) return;
+	m_selectedInstallMethod = method;
+	TrackEvent(_T("Selected"));
+}
+
 #define KEY_PRESSED 0x8000
 // Dual Boot Page Handlers
 HRESULT CEndlessUsbToolDlg::OnAdvancedOptionsClicked(IHTMLElement* pElement)
@@ -1890,15 +1922,14 @@ HRESULT CEndlessUsbToolDlg::OnAdvancedOptionsClicked(IHTMLElement* pElement)
 	bool oldStyleUSB = ((keyState & KEY_PRESSED) != 0) || (nWindowsVersion == WINDOWS_XP);
 
 	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_ADVOPT_SUBTITLE), CComVariant(!oldStyleUSB));
-	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(HTML_BUTTON_ID(ELEMENT_CREATE_NEW_LIVE_BUTTON)), CComVariant(!oldStyleUSB));
+	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(HTML_BUTTON_ID(ELEMENT_COMBINED_USB_BUTTON)), CComVariant(!oldStyleUSB));
 	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_USB_LEARN_MORE), CComVariant(!oldStyleUSB));
 
-	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(HTML_BUTTON_ID(ELEMENT_INSTALL_BUTTON)), CComVariant(oldStyleUSB));
-	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(HTML_BUTTON_ID(ELEMENT_TRY_BUTTON)), CComVariant(oldStyleUSB));
+	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(HTML_BUTTON_ID(ELEMENT_REFORMATTER_USB_BUTTON)), CComVariant(oldStyleUSB));
+	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(HTML_BUTTON_ID(ELEMENT_LIVE_USB_BUTTON)), CComVariant(oldStyleUSB));
 	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_COMPARE_OPTIONS), CComVariant(oldStyleUSB));
 
-	m_selectedInstallMethod = oldStyleUSB ? InstallMethod_t::TryEndless : InstallMethod_t::NewLiveEndless;
-	ChangePage(_T(ELEMENT_FIRST_PAGE));
+	ChangePage(_T(ELEMENT_ADVANCED_PAGE));
 
 	return S_OK;
 }
@@ -1942,10 +1973,14 @@ HRESULT CEndlessUsbToolDlg::OnInstallDualBootClicked(IHTMLElement* pElement)
 		safe_closehandle(hPhysical);
 	}
 
-	if (UpdateDualBootTexts()) {
-		m_selectedInstallMethod = InstallMethod_t::UninstallEndless;
-		QueryAndDoUninstall(false);
-	} else if (!x64BitSupported) {
+	if (ShouldUninstall()) {
+		QueryAndDoUninstall();
+		return S_OK;
+	}
+
+	SetSelectedInstallMethod(InstallMethod_t::InstallDualBoot);
+
+	if (!x64BitSupported) {
 		ErrorOccured(ErrorCauseNot64Bit);
 	} else if (isBitLockerEnabled) {
 		ErrorOccured(ErrorCauseBitLocker);
@@ -1954,35 +1989,32 @@ HRESULT CEndlessUsbToolDlg::OnInstallDualBootClicked(IHTMLElement* pElement)
 	} else if (hasNonWindowsMBR) {
 		ErrorOccured(ErrorCauseNonWindowsMBR);
 	} else {
-		m_selectedInstallMethod = InstallMethod_t::SetupDualBoot;
 		GoToSelectFilePage();
 	}
 
 	return S_OK;
 }
 
-// First Page Handlers
-HRESULT CEndlessUsbToolDlg::OnTryEndlessSelected(IHTMLElement* pElement)
+// Advanced Page Handlers
+HRESULT CEndlessUsbToolDlg::OnLiveUsbClicked(IHTMLElement* pElement)
 {
     FUNCTION_ENTER;
 
-	Analytics::instance()->eventTracking(_T(ELEMENT_FIRST_PAGE), _T("USBType"), _T("Live"));
+	SetSelectedInstallMethod(InstallMethod_t::LiveUsb);
 
-	m_selectedInstallMethod = InstallMethod_t::TryEndless;
     GoToSelectFilePage();
 
 	return S_OK;
 }
 
-HRESULT CEndlessUsbToolDlg::OnInstallEndlessSelected(IHTMLElement* pElement)
+HRESULT CEndlessUsbToolDlg::OnReformatterUsbClicked(IHTMLElement* pElement)
 {
-    IFFALSE_RETURN_VALUE(!IsButtonDisabled(pElement), "OnInstallEndlessSelected: Button is disabled. ", S_OK);
+    IFFALSE_RETURN_VALUE(!IsButtonDisabled(pElement), "OnReformatterUsbClicked: Button is disabled. ", S_OK);
 
     FUNCTION_ENTER;
 
-	Analytics::instance()->eventTracking(_T(ELEMENT_FIRST_PAGE), _T("USBType"), _T("Installer"));
+	SetSelectedInstallMethod(InstallMethod_t::ReformatterUsb);
 
-	m_selectedInstallMethod = InstallMethod_t::ReflasherDrive;
     GoToSelectFilePage();
 
 	return S_OK;
@@ -2204,7 +2236,7 @@ void CEndlessUsbToolDlg::UpdateFileEntries(bool shouldInit)
                     m_localInstallerImage.size = file.GetLength();
                 }
             } else {
-                if (IsDualBootOrNewLive() && !HasImageBootSupport(version, date)) {
+                if (IsDualBootOrCombinedUsb() && !HasImageBootSupport(version, date)) {
                     uprintf("Skiping '%ls' because it doesn't have image boot support.", file.GetFileName());
                     continue;
                 }
@@ -2647,15 +2679,19 @@ void CEndlessUsbToolDlg::AddDownloadOptionsToUI()
     }
 }
 
-HRESULT CEndlessUsbToolDlg::OnFirstPagePreviousClicked(IHTMLElement* pElement)
+HRESULT CEndlessUsbToolDlg::OnAdvancedPagePreviousClicked(IHTMLElement* pElement)
 {
 	ChangePage(_T(ELEMENT_DUALBOOT_PAGE));
 
 	return S_OK;
 }
 
-HRESULT CEndlessUsbToolDlg::OnCreateEndlessUSBStickClicked(IHTMLElement* pElement)
+HRESULT CEndlessUsbToolDlg::OnCombinedUsbButtonClicked(IHTMLElement* pElement)
 {
+    FUNCTION_ENTER;
+
+	SetSelectedInstallMethod(InstallMethod_t::CombinedUsb);
+
 	GoToSelectFilePage();
 
 	return S_OK;
@@ -2666,7 +2702,7 @@ HRESULT CEndlessUsbToolDlg::OnSelectFilePreviousClicked(IHTMLElement* pElement)
 {
     FUNCTION_ENTER;
 
-    ChangePage(m_selectedInstallMethod == InstallMethod_t::SetupDualBoot ? _T(ELEMENT_DUALBOOT_PAGE) : _T(ELEMENT_FIRST_PAGE));
+    ChangePage(m_selectedInstallMethod == InstallMethod_t::InstallDualBoot ? _T(ELEMENT_DUALBOOT_PAGE) : _T(ELEMENT_ADVANCED_PAGE));
 
 	return S_OK;
 }
@@ -2680,7 +2716,83 @@ HRESULT CEndlessUsbToolDlg::OnSelectFileNextClicked(IHTMLElement* pElement)
     
     IFFALSE_RETURN_VALUE(!IsButtonDisabled(pElement), "OnSelectFileNextClicked: Button is disabled. ", S_OK);
 
-	if (m_selectedInstallMethod != InstallMethod_t::SetupDualBoot) {
+    // Get display name with actual image size, not compressed
+    CString selectedImage, personality, version;
+    ULONGLONG size = 0;
+
+    if (m_useLocalFile) {
+        selectedImage = UTF8ToCString(image_path);
+        pFileImageEntry_t localEntry = NULL;
+
+		m_imageFiles.Lookup(selectedImage, localEntry);
+		if (localEntry == NULL) {
+			uprintf("ERROR: Selected local file not found.");
+			ErrorOccured(ErrorCause_t::ErrorCauseGeneric);
+			return S_OK;
+		}
+
+		personality = localEntry->personality;
+		version = localEntry->version;
+
+		size = m_selectedInstallMethod == InstallMethod_t::LiveUsb && !localEntry->isUnpackedImage ? GetExtractedSize(selectedImage, FALSE) : localEntry->size;
+
+        m_selectedFileSize = localEntry->size;
+    } else {
+		POSITION p = m_remoteImages.FindIndex(m_selectedRemoteIndex);
+		if (p == NULL) {
+			uprintf("Remote index value not valid.");
+			ErrorOccured(ErrorCause_t::ErrorCauseGeneric);
+			return S_OK;
+		}
+
+		RemoteImageEntry_t remote = m_remoteImages.GetAt(p);
+
+		personality = remote.personality;
+		version = remote.version;
+
+        selectedImage = CSTRING_GET_LAST(remote.urlFile, '/');
+		CString selectedImagePath = GET_IMAGE_PATH(selectedImage);
+        size = m_selectedInstallMethod == InstallMethod_t::LiveUsb || RemoteMatchesUnpackedImg(selectedImagePath) ? remote.extractedSize : remote.compressedSize;
+
+		m_selectedFileSize = remote.compressedSize;
+    }
+
+    // add the installer size if this is not a live image
+    if (m_selectedInstallMethod == InstallMethod_t::ReformatterUsb) {
+        size += INSTALLER_DELTA_SIZE + m_installerImage.extractedSize;
+    }
+
+	// update Thank You page fields with the selected image data
+	uint32_t headlineMsg;
+	if (m_selectedInstallMethod == InstallMethod_t::InstallDualBoot) {
+		headlineMsg = MSG_320;
+	}
+	else if (m_selectedInstallMethod == InstallMethod_t::LiveUsb) {
+		headlineMsg = MSG_343;
+	}
+	else {
+		headlineMsg = MSG_344;
+	}
+
+	CString finalMessageStr = UTF8ToCString(lmprintf(headlineMsg));
+	CString imageLanguage = UTF8ToCString(lmprintf(m_personalityToLocaleMsg[personality]));
+	CStringA imageTypeA = lmprintf(personality == PERSONALITY_BASE ? MSG_400 : MSG_316); // Basic or Full
+	CString imageType = UTF8ToCString(imageTypeA);
+
+	SetElementText(_T(ELEMENT_THANKYOU_MESSAGE), CComBSTR(finalMessageStr));
+
+	SetElementText(_T(ELEMENT_INSTALLER_VERSION), CComBSTR(version));
+	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_INSTALLER_LANGUAGE_ROW), CComVariant(personality != PERSONALITY_BASE));
+	SetElementText(_T(ELEMENT_INSTALLER_LANGUAGE), CComBSTR(imageLanguage));
+	CString contentStr  = UTF8ToCString(lmprintf(MSG_319, imageTypeA, SizeToHumanReadable(size, FALSE, use_fake_units)));
+	SetElementText(_T(ELEMENT_INSTALLER_CONTENT), CComBSTR(contentStr));
+
+	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_DUALBOOT_REMINDER), CComVariant(m_selectedInstallMethod == InstallMethod_t::InstallDualBoot));
+	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_LIVE_REMINDER), CComVariant(m_selectedInstallMethod == InstallMethod_t::LiveUsb));
+	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_REFLASHER_REMINDER), CComVariant(m_selectedInstallMethod == InstallMethod_t::ReformatterUsb));
+	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_USBBOOT_HOWTO), CComVariant(m_selectedInstallMethod != InstallMethod_t::InstallDualBoot));
+
+	if (m_selectedInstallMethod != InstallMethod_t::InstallDualBoot) {
 		CallJavascript(_T(JS_RESET_CHECK), CComVariant(_T(ELEMENT_SELUSB_AGREEMENT)));
 		m_usbDeleteAgreement = false;
 
@@ -2701,82 +2813,12 @@ HRESULT CEndlessUsbToolDlg::OnSelectFileNextClicked(IHTMLElement* pElement)
 		}
 	}
 
-    // Get display name with actual image size, not compressed
-    CString selectedImage, personality, version, date, selectedSize;
-    ULONGLONG size = 0;
-    bool isInstallerImage = false;
-    if (m_useLocalFile) {
-        selectedImage = UTF8ToCString(image_path);
-        pFileImageEntry_t localEntry = NULL;
-        if (!m_imageFiles.Lookup(selectedImage, localEntry)) {
-            uprintf("ERROR: Selected local file not found.");
-        } else {
-            size = m_selectedInstallMethod == InstallMethod_t::TryEndless && !localEntry->isUnpackedImage ? GetExtractedSize(selectedImage, FALSE) : localEntry->size;
+	if (m_selectedInstallMethod != InstallMethod_t::InstallDualBoot) {
+		CString displayName;
+        GetImgDisplayName(displayName, version, personality, 0);
+		SetElementText(_T(ELEMENT_SELUSB_NEW_DISK_NAME), CComBSTR(displayName));
 
-			if (localEntry->isUnpackedImage) {
-				selectedImage = CSTRING_GET_PATH(localEntry->unpackedImgSigPath, '.');
-			}
-        }
-        selectedImage = CSTRING_GET_LAST(selectedImage, '\\');
-
-        m_selectedFileSize = localEntry->size;
-    } else {
-        RemoteImageEntry_t remote = m_remoteImages.GetAt(m_remoteImages.FindIndex(m_selectedRemoteIndex));
-        //DownloadType_t downloadType = GetSelectedDownloadType();
-        selectedImage = CSTRING_GET_LAST(remote.urlFile, '/');
-
-		CString selectedImagePath = GET_IMAGE_PATH(selectedImage);
-        size = m_selectedInstallMethod == InstallMethod_t::TryEndless || RemoteMatchesUnpackedImg(selectedImagePath) ? remote.extractedSize : remote.compressedSize;
-
-		m_selectedFileSize = remote.compressedSize;
-    }
-
-    // add the installer size if this is not a live image
-    if (m_selectedInstallMethod == InstallMethod_t::ReflasherDrive) {
-        size += INSTALLER_DELTA_SIZE + m_installerImage.extractedSize;
-    }    
-
-    selectedSize = SizeToHumanReadable(size, FALSE, use_fake_units);
-    if (ParseImgFileName(selectedImage, personality, version, date, isInstallerImage)) {
-        if(isInstallerImage) uprintf("ERROR: An installer image has been selected.");
-
-        uint32_t headlineMsg;
-        if (m_selectedInstallMethod == InstallMethod_t::SetupDualBoot) {
-            headlineMsg = MSG_320;
-        }
-        else if (m_selectedInstallMethod == InstallMethod_t::TryEndless) {
-            headlineMsg = MSG_343;
-        }
-        else {
-            headlineMsg = MSG_344;
-        }
-
-        CString finalMessageStr = UTF8ToCString(lmprintf(headlineMsg));
-        CString imageLanguage = UTF8ToCString(lmprintf(m_personalityToLocaleMsg[personality]));
-		CStringA imageTypeA = lmprintf(personality == PERSONALITY_BASE ? MSG_400 : MSG_316); // Basic or Full
-        CString imageType = UTF8ToCString(imageTypeA);
-
-        SetElementText(_T(ELEMENT_THANKYOU_MESSAGE), CComBSTR(finalMessageStr));
-
-        SetElementText(_T(ELEMENT_INSTALLER_VERSION), CComBSTR(version));
-        CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_INSTALLER_LANGUAGE_ROW), CComVariant(personality != PERSONALITY_BASE));
-        SetElementText(_T(ELEMENT_INSTALLER_LANGUAGE), CComBSTR(imageLanguage));
-        CString contentStr  = UTF8ToCString(lmprintf(MSG_319, imageTypeA, SizeToHumanReadable(size, FALSE, use_fake_units)));
-        SetElementText(_T(ELEMENT_INSTALLER_CONTENT), CComBSTR(contentStr));
-
-        CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_DUALBOOT_REMINDER), CComVariant(m_selectedInstallMethod == InstallMethod_t::SetupDualBoot));
-        CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_LIVE_REMINDER), CComVariant(m_selectedInstallMethod == InstallMethod_t::TryEndless));
-        CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_REFLASHER_REMINDER), CComVariant(m_selectedInstallMethod == InstallMethod_t::ReflasherDrive));
-        CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_USBBOOT_HOWTO), CComVariant(m_selectedInstallMethod != InstallMethod_t::SetupDualBoot));
-
-        GetImgDisplayName(selectedImage, version, personality, 0);
-    } else {
-        uprintf("Cannot parse data from file name %ls; using default %s", selectedImage, ENDLESS_OS);
-        selectedImage = _T(ENDLESS_OS);
-    }
-
-	if (m_selectedInstallMethod != InstallMethod_t::SetupDualBoot) {
-		SetElementText(_T(ELEMENT_SELUSB_NEW_DISK_NAME), CComBSTR(selectedImage));
+        CString selectedSize = UTF8ToCString(SizeToHumanReadable(size, FALSE, use_fake_units));
 		SetElementText(_T(ELEMENT_SELUSB_NEW_DISK_SIZE), CComBSTR(selectedSize));
 
 		ChangePage(_T(ELEMENT_USB_PAGE));
@@ -2784,9 +2826,11 @@ HRESULT CEndlessUsbToolDlg::OnSelectFileNextClicked(IHTMLElement* pElement)
 		GoToSelectStoragePage();
 	}
 
-	CString imageType = _T("RemoteImage");
-	if (m_useLocalFile) imageType = _T("LocalImage");
-	Analytics::instance()->eventTracking(_T(ELEMENT_FILE_PAGE), imageType, selectedImage);
+	CString imageSource = _T("Remote");
+	if (m_useLocalFile) imageSource = _T("Local");
+	TrackEvent(_T("ImageSource"), imageSource);
+	TrackEvent(_T("Version"), version);
+	TrackEvent(_T("Personality"), personality);
 
 	return S_OK;
 }
@@ -2915,16 +2959,8 @@ HRESULT CEndlessUsbToolDlg::OnSelectUSBNextClicked(IHTMLElement* pElement)
 
     FUNCTION_ENTER;
 
-	CComPtr<IHTMLSelectElement> selElem;
-	HRESULT hr;
-
-	hr = GetSelectElement(_T(ELEMENT_SELUSB_USB_DRIVES), selElem);
-	if (hr == S_OK) {
-		CString selUSBDrive;
-		hr = GetSelectedOptionElementText(selElem, selUSBDrive);
-		if (hr == S_OK)
-			Analytics::instance()->eventTracking(_T(ELEMENT_USB_PAGE), _T("USBDisk"), selUSBDrive);
-	}
+	int size = SelectedDrive.DiskSize / BYTES_IN_MEGABYTE;
+	TrackEvent(_T("USBSizeMB"), _T(""), size);
 
 	LeavingDevicesPage();
 	StartInstallationProcess();
@@ -2936,11 +2972,13 @@ void CEndlessUsbToolDlg::StartInstallationProcess()
 {
 	SetElementText(_T(ELEMENT_INSTALL_STATUS), CComBSTR(""));
 
+	TrackEvent(_T("Started"));
+
 	EnableHibernate(false);
 
-	if(m_selectedInstallMethod != InstallMethod_t::SetupDualBoot) ChangeDriveAutoRunAndMount(true);
+	if(m_selectedInstallMethod != InstallMethod_t::InstallDualBoot) ChangeDriveAutoRunAndMount(true);
 
-	if (IsDualBootOrNewLive() && m_useLocalFile) {
+	if (IsDualBootOrCombinedUsb() && m_useLocalFile) {
 		pFileImageEntry_t localEntry = NULL;
 		CString selectedImage = UTF8ToCString(image_path);
 		if (m_imageFiles.Lookup(selectedImage, localEntry) && localEntry->hasBootArchive && localEntry->hasBootArchiveSig && localEntry->hasUnpackedImgSig) {
@@ -2954,7 +2992,7 @@ void CEndlessUsbToolDlg::StartInstallationProcess()
 
 	// Radu: we need to download an installer if only a live image is found and full install was selected
 	if (m_useLocalFile) {
-		if (IsDualBootOrNewLive()) {
+		if (IsDualBootOrCombinedUsb()) {
 			m_localFile = m_bootArchive;
 			m_localFileSig = m_bootArchiveSig;
 		} else {
@@ -2998,7 +3036,7 @@ void CEndlessUsbToolDlg::StartInstallationProcess()
 		ListOfStrings urls, files;
 		CString urlInstaller, urlInstallerAsc, installerFile, installerAscFile;
 		CString urlBootFiles, urlBootFilesAsc, urlImageSig;
-		if (IsDualBootOrNewLive()) {
+		if (IsDualBootOrCombinedUsb()) {
 			urlBootFiles = CString(RELEASE_JSON_URLPATH) +  remote.urlBootArchive;
 			m_bootArchive = GET_IMAGE_PATH(CSTRING_GET_LAST(urlBootFiles, '/'));
 
@@ -3015,7 +3053,7 @@ void CEndlessUsbToolDlg::StartInstallationProcess()
 				urls = { url, urlAsc, urlBootFiles, urlBootFilesAsc, urlImageSig };
 				files = { m_localFile, m_localFileSig, m_bootArchive, m_bootArchiveSig, m_unpackedImageSig };
 			}
-		} else if (m_selectedInstallMethod == InstallMethod_t::TryEndless) {
+		} else if (m_selectedInstallMethod == InstallMethod_t::LiveUsb) {
 			if (localFileExists) {
 				urls = { urlAsc };
 				files = { m_localFileSig };
@@ -3075,7 +3113,7 @@ void CEndlessUsbToolDlg::StartInstallationProcess()
 		m_localInstallerImage.filePath = GET_IMAGE_PATH(CSTRING_GET_LAST(m_installerImage.urlFile, '/'));
 		m_localInstallerImage.size = m_installerImage.compressedSize;
 
-		if (IsDualBootOrNewLive()) {
+		if (IsDualBootOrCombinedUsb()) {
 			m_localFile = m_bootArchive;
 			m_localFileSig = m_bootArchiveSig;
 		}
@@ -3141,7 +3179,7 @@ HRESULT CEndlessUsbToolDlg::OnSelectedUSBDiskChanged(IHTMLElement* pElement)
         CString selectedImage = UTF8ToCString(image_path);
 		bool foundLocalEntry = 0 != m_imageFiles.Lookup(selectedImage, localEntry);
 
-		if (!foundLocalEntry || (m_selectedInstallMethod == InstallMethod_t::TryEndless && !localEntry->isUnpackedImage)) {
+		if (!foundLocalEntry || (m_selectedInstallMethod == InstallMethod_t::LiveUsb && !localEntry->isUnpackedImage)) {
 			size = GetExtractedSize(selectedImage, FALSE);
 		} else {
             size = localEntry->size;
@@ -3150,12 +3188,12 @@ HRESULT CEndlessUsbToolDlg::OnSelectedUSBDiskChanged(IHTMLElement* pElement)
         POSITION p = m_remoteImages.FindIndex(m_selectedRemoteIndex);
         if (p != NULL) {
             RemoteImageEntry_t remote = m_remoteImages.GetAt(p);
-            size = m_selectedInstallMethod == InstallMethod_t::TryEndless ? remote.extractedSize : remote.compressedSize;
+            size = m_selectedInstallMethod == InstallMethod_t::LiveUsb ? remote.extractedSize : remote.compressedSize;
         }
     }
 
     // add the installer size if this is not a live image
-    if (m_selectedInstallMethod == InstallMethod_t::ReflasherDrive) {
+    if (m_selectedInstallMethod == InstallMethod_t::ReformatterUsb) {
         size += INSTALLER_DELTA_SIZE + m_installerImage.extractedSize;
     }
 
@@ -3217,9 +3255,7 @@ HRESULT CEndlessUsbToolDlg::OnSelectStorageNextClicked(IHTMLElement *pElement)
 
 	FUNCTION_ENTER;
 
-	CString selSpace;
-	selSpace.Format(_T("%d Gb"), m_nrGigsSelected);
-	Analytics::instance()->eventTracking(_T(ELEMENT_STORAGE_PAGE), _T("StorageSize"), selSpace);
+	TrackEvent(_T("StorageSizeGB"), _T(""), m_nrGigsSelected);
 
 	StartInstallationProcess();
 
@@ -3252,8 +3288,6 @@ HRESULT CEndlessUsbToolDlg::OnSelectedStorageSizeChanged(IHTMLElement* pElement)
 #define IS_MINIMUM_VALUE		1
 #define IS_MAXIMUM_VALUE		2
 #define IS_BASE_IMAGE			3
-
-#define BYTES_IN_GIGABYTE		(1024 *  1024 * 1024)
 
 ULONGLONG CEndlessUsbToolDlg::GetNeededSpaceForDualBoot(int &neededGigs, bool *isBaseImage)
 {
@@ -3390,7 +3424,7 @@ HRESULT CEndlessUsbToolDlg::OnInstallCancelClicked(IHTMLElement* pElement)
         return S_OK;
     }
 
-    m_lastErrorCause = ErrorCause_t::ErrorCauseCanceled;
+    m_lastErrorCause = ErrorCause_t::ErrorCauseCancelled;
     CancelRunningOperation();
 
     return S_OK;
@@ -3399,6 +3433,7 @@ HRESULT CEndlessUsbToolDlg::OnInstallCancelClicked(IHTMLElement* pElement)
 // Error/Thank You Page Handlers
 HRESULT CEndlessUsbToolDlg::OnCloseAppClicked(IHTMLElement* pElement)
 {
+	TrackEvent(_T("Closed"));
     Uninit();
     AfxPostQuitMessage(0);
 
@@ -3428,7 +3463,7 @@ HRESULT CEndlessUsbToolDlg::OnRecoverErrorButtonClicked(IHTMLElement* pElement)
         StartInstallationProcess();
         break;
     case ErrorCause_t::ErrorCauseWriteFailed:
-        if (m_selectedInstallMethod == InstallMethod_t::ReflasherDrive) {
+        if (m_selectedInstallMethod == InstallMethod_t::ReformatterUsb) {
             safe_free(image_path);
             image_path = wchar_to_utf8(m_LiveFile);
         }
@@ -3441,10 +3476,10 @@ HRESULT CEndlessUsbToolDlg::OnRecoverErrorButtonClicked(IHTMLElement* pElement)
         SetLastError(ERROR_SUCCESS);
         result = DeleteFile(m_localFileSig);
         uprintf("%s on deleting file '%ls' - %s", result ? "Success" : "Error", m_localFileSig, WindowsErrorString());
-        ChangePage(_T(ELEMENT_FIRST_PAGE));
+        ChangePage(_T(ELEMENT_DUALBOOT_PAGE));
         break;
     }
-    case ErrorCause_t::ErrorCauseCanceled:
+    case ErrorCause_t::ErrorCauseCancelled:
     case ErrorCause_t::ErrorCauseJSONDownloadFailed:
     default:
         ChangePage(_T(ELEMENT_DUALBOOT_PAGE));
@@ -3489,7 +3524,7 @@ bool CEndlessUsbToolDlg::CancelInstall()
                 CallJavascript(_T(JS_ENABLE_BUTTON), CComVariant(HTML_BUTTON_ID(_T(ELEMENT_INSTALL_CANCEL))), CComVariant(FALSE));
                 FormatStatus = FORMAT_STATUS_CANCEL;
 				m_cancelImageUnpack = 1;
-                m_lastErrorCause = ErrorCause_t::ErrorCauseCanceled;
+                m_lastErrorCause = ErrorCause_t::ErrorCauseCancelled;
                 uprintf("Cancelling current operation.");
                 CString str = UTF8ToCString(lmprintf(MSG_201));
                 SetElementText(_T(ELEMENT_INSTALL_STATUS), CComBSTR(""));
@@ -3502,10 +3537,10 @@ bool CEndlessUsbToolDlg::CancelInstall()
 
 DownloadType_t CEndlessUsbToolDlg::GetSelectedDownloadType()
 {
-	if (IsDualBootOrNewLive()) {
+	if (IsDualBootOrCombinedUsb()) {
 		return DownloadType_t::DownloadTypeDualBootFiles;
 	} else {
-		return m_selectedInstallMethod == InstallMethod_t::TryEndless ? DownloadType_t::DownloadTypeLiveImage : DownloadType_t::DownloadTypeInstallerImage;
+		return m_selectedInstallMethod == InstallMethod_t::LiveUsb ? DownloadType_t::DownloadTypeLiveImage : DownloadType_t::DownloadTypeInstallerImage;
 	}
 }
 
@@ -3755,7 +3790,7 @@ DWORD WINAPI CEndlessUsbToolDlg::FileCopyThread(void* param)
     result = RefreshDriveLayout(hPhysical);
     safe_closehandle(hPhysical);
 
-    // Check if user canceled
+    // Check if user cancelled
     IFFALSE_GOTOERROR(WaitForSingleObject(dlg->m_cancelOperationEvent, 0) == WAIT_TIMEOUT, "User cancel.");
 	// Format the partition
 	IFFALSE_GOTOERROR(FormatFirstPartitionOnDrive(DriveIndex, FS_EXFAT, dlg->m_cancelOperationEvent, EXFAT_PARTITION_NAME_IMAGES), "Error on FormatFirstPartitionOnDrive");
@@ -3770,7 +3805,7 @@ DWORD WINAPI CEndlessUsbToolDlg::FileCopyThread(void* param)
 		fileDestination = driveDestination + liveFileName;
 	}
     result = CopyFileEx(dlg->m_LiveFile, fileDestination, CEndlessUsbToolDlg::CopyProgressRoutine, dlg, NULL, 0);
-    IFFALSE_GOTOERROR(result, "Copying live image failed/canceled.");
+    IFFALSE_GOTOERROR(result, "Copying live image failed/cancelled.");
 
     fileDestination = driveDestination + CSTRING_GET_LAST(dlg->m_LiveFileSig, L'\\');
     result = CopyFileEx(dlg->m_LiveFileSig, fileDestination, NULL, NULL, NULL, 0);
@@ -3901,7 +3936,7 @@ void CEndlessUsbToolDlg::GetImgDisplayName(CString &displayName, const CString &
 {
     FUNCTION_ENTER;
 
-    ULONGLONG actualsize = m_selectedInstallMethod == InstallMethod_t::ReflasherDrive ? (size + m_installerImage.compressedSize) : size;
+    ULONGLONG actualsize = m_selectedInstallMethod == InstallMethod_t::ReformatterUsb ? (size + m_installerImage.compressedSize) : size;
     // Create display name
     displayName = _T(ENDLESS_OS);
     displayName += " ";
@@ -4100,12 +4135,12 @@ void CEndlessUsbToolDlg::StartCheckInternetConnectionThread()
 bool CEndlessUsbToolDlg::CanUseLocalFile()
 {
     //RADU: check if installer version matches local images version and display only the images that match?
-    bool hasLocalInstaller = m_selectedInstallMethod == InstallMethod_t::TryEndless || (m_selectedInstallMethod == InstallMethod_t::ReflasherDrive && m_localInstallerImage.stillPresent == TRUE);
+    bool hasLocalInstaller = m_selectedInstallMethod == InstallMethod_t::LiveUsb || (m_selectedInstallMethod == InstallMethod_t::ReformatterUsb && m_localInstallerImage.stillPresent == TRUE);
     bool hasLocalImages = (m_imageFiles.GetCount() != 0);
 
 	// If we have a local entry with all needed files
 	bool hasFilesForDualBoot = false;
-	if (IsDualBootOrNewLive() && hasLocalImages) {
+	if (IsDualBootOrCombinedUsb() && hasLocalImages) {
 		pFileImageEntry_t currentEntry = NULL;
 		CString path;
 		for (POSITION position = m_imageFiles.GetStartPosition(); position != NULL; ) {
@@ -4306,7 +4341,7 @@ void CEndlessUsbToolDlg::JSONDownloadFailed()
 #define USB_PROGRESS_IMG_COPY_DONE			98
 #define USB_PROGRESS_ALL_DONE				100
 
-#define CHECK_IF_CANCELED IFFALSE_GOTOERROR(dlg->m_cancelImageUnpack == 0 && WaitForSingleObject((HANDLE)dlg->m_cancelOperationEvent, 0) != WAIT_OBJECT_0, "Operation has been canceled")
+#define CHECK_IF_CANCELLED IFFALSE_GOTOERROR(dlg->m_cancelImageUnpack == 0 && WaitForSingleObject((HANDLE)dlg->m_cancelOperationEvent, 0) != WAIT_OBJECT_0, "Operation has been cancelled")
 
 DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 {
@@ -4330,7 +4365,7 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	IFFALSE_GOTOERROR(UnpackBootComponents(bootFilesPathGz, bootFilesPath), "Error unpacking boot components.");
 
 	UpdateProgress(OP_NEW_LIVE_CREATION, USB_PROGRESS_UNPACK_BOOT_ZIP);
-	CHECK_IF_CANCELED;
+	CHECK_IF_CANCELLED;
 
 	// initialize create disk data
 	memset(&createDiskData, 0, sizeof(createDiskData));
@@ -4353,7 +4388,7 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	memset(layout, 0, sizeof(layout));
 	IFFALSE_GOTOERROR(CreateFakePartitionLayout(hPhysical, layout, geometry), "Error on CreateFakePartitionLayout");
 
-	CHECK_IF_CANCELED;
+	CHECK_IF_CANCELLED;
 
 	// Write MBR and SBR to disk
 	IFFALSE_GOTOERROR(WriteMBRAndSBRToUSB(hPhysical, bootFilesPath, DiskGeometry->Geometry.BytesPerSector), "Error on WriteMBRAndSBRToUSB");
@@ -4361,12 +4396,12 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	safe_closehandle(hPhysical);
 
 	UpdateProgress(OP_NEW_LIVE_CREATION, USB_PROGRESS_MBR_SBR_DONE);
-	CHECK_IF_CANCELED;
+	CHECK_IF_CANCELLED;
 
 	// Format and mount ESP
 	IFFALSE_GOTOERROR(FormatFirstPartitionOnDrive(DriveIndex, FS_FAT32, dlg->m_cancelOperationEvent, L""), "Error on FormatFirstPartitionOnDrive");
 
-	CHECK_IF_CANCELED;
+	CHECK_IF_CANCELLED;
 
 	IFFALSE_GOTOERROR(MountFirstPartitionOnDrive(DriveIndex, driveLetter), "Error on MountFirstPartitionOnDrive");
 
@@ -4377,7 +4412,7 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	if (!DeleteVolumeMountPoint(driveLetter)) uprintf("Failed to unmount volume: %s", WindowsErrorString());
 
 	UpdateProgress(OP_NEW_LIVE_CREATION, USB_PROGRESS_ESP_CREATION_DONE);
-	CHECK_IF_CANCELED;
+	CHECK_IF_CANCELLED;
 
 	// get disk handle again
 	hPhysical = GetPhysicalHandle(DriveIndex, TRUE, TRUE);
@@ -4387,12 +4422,12 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	IFFALSE_GOTOERROR(CreateCorrectPartitionLayout(hPhysical, layout, geometry), "Error on CreateCorrectPartitionLayout");
 	safe_closehandle(hPhysical);
 
-	CHECK_IF_CANCELED;
+	CHECK_IF_CANCELLED;
 
 	// Format and mount exFAT
 	IFFALSE_GOTOERROR(FormatFirstPartitionOnDrive(DriveIndex, FS_EXFAT, dlg->m_cancelOperationEvent, EXFAT_PARTITION_NAME_LIVE), "Error on FormatFirstPartitionOnDrive");
 
-	CHECK_IF_CANCELED;
+	CHECK_IF_CANCELLED;
 
 	IFFALSE_GOTOERROR(MountFirstPartitionOnDrive(DriveIndex, driveLetter), "Error on MountFirstPartitionOnDrive");
 
@@ -4404,7 +4439,7 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	if (!DeleteVolumeMountPoint(driveLetter)) uprintf("Failed to unmount volume: %s", WindowsErrorString());
 
 	UpdateProgress(OP_NEW_LIVE_CREATION, USB_PROGRESS_ALL_DONE);
-	CHECK_IF_CANCELED;
+	CHECK_IF_CANCELLED;
 
 	goto done;
 
@@ -4536,7 +4571,7 @@ bool CEndlessUsbToolDlg::FormatFirstPartitionOnDrive(DWORD DriveIndex, int fsToU
 
 	while (formatRetries-- > 0 && !(result = FormatDrive(DriveIndex, fsToUse, partLabel))) {
 		Sleep(200); // Radu: check if this is needed, that's what rufus does; I hate sync using sleep
-		// Check if user canceled
+		// Check if user cancelled
 		IFFALSE_GOTOERROR(WaitForSingleObject(cancelEvent, 0) == WAIT_TIMEOUT, "User cancel.");
 	}
 	IFFALSE_GOTOERROR(result, "Format error.");
@@ -4697,7 +4732,7 @@ bool CEndlessUsbToolDlg::CopyFilesToexFAT(CEndlessUsbToolDlg *dlg, const CString
 	CEndlessUsbToolDlg::ImageUnpackFileSize = dlg->m_selectedFileSize;
 	if (CSTRING_GET_LAST(dlg->m_localFile, '\\') == ENDLESS_IMG_FILE_NAME) {
 		BOOL result = CopyFileEx(dlg->m_localFile, usbFilesPath + ENDLESS_IMG_FILE_NAME, CEndlessUsbToolDlg::CopyProgressRoutine, dlg, NULL, 0);
-		IFFALSE_GOTOERROR(result, "Copying live image failed/canceled.");
+		IFFALSE_GOTOERROR(result, "Copying live image failed/cancelled.");
 	} else {
 		bool unpackResult = dlg->UnpackFile(ConvertUnicodeToUTF8(dlg->m_localFile), ConvertUnicodeToUTF8(usbFilesPath + ENDLESS_IMG_FILE_NAME), BLED_COMPRESSION_GZIP, ImageUnpackCallback, &dlg->m_cancelImageUnpack);
 		IFFALSE_GOTOERROR(unpackResult, "Error unpacking image to USB drive");
@@ -4852,7 +4887,7 @@ DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 	IFFALSE_GOTOERROR(UnpackBootComponents(dlg->m_bootArchive, bootFilesPath), "Error unpacking boot components.");
 
 	UpdateProgress(OP_SETUP_DUALBOOT, DB_PROGRESS_UNPACK_BOOT_ZIP);
-	CHECK_IF_CANCELED;
+	CHECK_IF_CANCELLED;
 
 	// Create endless folder
 	int createDirResult = SHCreateDirectoryExW(NULL, endlessFilesPath, NULL);
@@ -4873,7 +4908,7 @@ DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 	CEndlessUsbToolDlg::ImageUnpackFileSize = dlg->m_selectedFileSize;
 	if (CSTRING_GET_LAST(dlg->m_localFile, '\\') == ENDLESS_IMG_FILE_NAME) {
 		BOOL result = CopyFileEx(dlg->m_localFile, endlessImgPath, CEndlessUsbToolDlg::CopyProgressRoutine, dlg, NULL, 0);
-		IFFALSE_GOTOERROR(result, "Copying live image failed/canceled.");
+		IFFALSE_GOTOERROR(result, "Copying live image failed/cancelled.");
 	} else {
 		// Unpack img file
 		bool unpackResult = dlg->UnpackFile(ConvertUnicodeToUTF8(dlg->m_localFile), ConvertUnicodeToUTF8(endlessImgPath), BLED_COMPRESSION_GZIP, ImageUnpackCallback, &dlg->m_cancelImageUnpack);
@@ -4884,12 +4919,12 @@ DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 	IFFALSE_GOTOERROR(ExtendImageFile(endlessImgPath, dlg->m_nrGigsSelected), "Error extending Endless image file");
 
 	UpdateProgress(OP_SETUP_DUALBOOT, DB_PROGRESS_FINISHED_UNPACK);
-	CHECK_IF_CANCELED;
+	CHECK_IF_CANCELLED;
 
 	// Copy grub
 	IFFALSE_GOTOERROR(CopyMultipleItems(bootFilesPath + GRUB_BOOT_SUBDIRECTORY, endlessFilesPath), "Error copying grub folder to USB drive.");
 	UpdateProgress(OP_SETUP_DUALBOOT, DB_PROGRESS_COPY_GRUB_FOLDER);
-	CHECK_IF_CANCELED;
+	CHECK_IF_CANCELLED;
 
 	if (IsLegacyBIOSBoot()) {
 		IFFALSE_GOTOERROR(WriteMBRAndSBRToWinDrive(dlg, systemDriveLetter, bootFilesPath, endlessFilesPath), "Error on WriteMBRAndSBRToWinDrive");
@@ -5133,6 +5168,8 @@ bool CEndlessUsbToolDlg::WriteMBRAndSBRToWinDrive(CEndlessUsbToolDlg *dlg, const
 			minStartingOffset = min(minStartingOffset, partition->StartingOffset.QuadPart);
 		}
 	}
+
+	dlg->TrackEvent(_T("BootTrackSize"), _T(""), minStartingOffset);
 
 	IFFALSE_GOTOERROR(0 == _wfopen_s(&boottrackImgFile, endlessFilesPath + BACKUP_BOOTTRACK_IMG, L"wb"), "Error opening boottrack.img file");
 	boottrackData = (unsigned char*)malloc(DiskGeometry->Geometry.BytesPerSector);
@@ -5851,13 +5888,18 @@ bool CEndlessUsbToolDlg::IsUninstaller()
 {
 	CStringW exePath = GetExePath();
 	return CSTRING_GET_LAST(exePath, '\\') == ENDLESS_UNINSTALLER_NAME;
-	//return CSTRING_GET_LAST(exePath, '\\') == L"EndlessUsbTool.exe";
+}
+
+bool CEndlessUsbToolDlg::ShouldUninstall()
+{
+	return (PathFileExists(GetSystemDrive() + PATH_ENDLESS_SUBDIRECTORY + ENDLESS_IMG_FILE_NAME)
+		|| IsUninstaller());
 }
 
 #define MIN_DATE_IMAGE_BOOT	L"160917"
 
 // Image boot means support for booting from endless/endless.img
-// on dual boot (ntfs) and new live USB (exfat)
+// on dual boot (ntfs) and combined USB (exfat)
 bool CEndlessUsbToolDlg::HasImageBootSupport(const CString &version, const CString &date)
 {
 	return version[0] >= '3' && date >= MIN_DATE_IMAGE_BOOT;
@@ -5899,9 +5941,9 @@ ULONGLONG CEndlessUsbToolDlg::GetActualDownloadSize(const RemoteImageEntry &r, b
 	bool localFileExists = PackedImageAlreadyExists(localFile, r.compressedSize, r.extractedSize, false);
 	size += !fullSize && localFileExists ? 0 : r.compressedSize;
 
-	if (IsDualBootOrNewLive()) {
+	if (IsDualBootOrCombinedUsb()) {
 		size += r.bootArchiveSize + SIGNATURE_FILE_SIZE * 2; // img.asc and boot.zip.asc
-	} else if (m_selectedInstallMethod == InstallMethod_t::ReflasherDrive) {
+	} else if (m_selectedInstallMethod == InstallMethod_t::ReformatterUsb) {
 		CString installerFile = GET_IMAGE_PATH(CSTRING_GET_LAST(m_installerImage.urlFile, '/'));
 		bool installerExists = PackedImageAlreadyExists(installerFile, m_installerImage.compressedSize, m_installerImage.extractedSize, true);
 		size += SIGNATURE_FILE_SIZE; // installer img.gz.asc
@@ -5937,41 +5979,49 @@ bool CEndlessUsbToolDlg::RemoteMatchesUnpackedImg(const CString &remoteFilePath,
 	return false;
 }
 
-bool CEndlessUsbToolDlg::IsDualBootOrNewLive()
+bool CEndlessUsbToolDlg::IsDualBootOrCombinedUsb()
 {
-	return m_selectedInstallMethod == InstallMethod_t::SetupDualBoot || m_selectedInstallMethod == InstallMethod_t::NewLiveEndless;
+	return m_selectedInstallMethod == InstallMethod_t::InstallDualBoot || m_selectedInstallMethod == InstallMethod_t::CombinedUsb;
 }
 
-bool CEndlessUsbToolDlg::UpdateDualBootTexts()
+void CEndlessUsbToolDlg::UpdateDualBootTexts()
 {
-	if (PathFileExists(GetSystemDrive() + PATH_ENDLESS_SUBDIRECTORY + ENDLESS_IMG_FILE_NAME)) {
+	if (ShouldUninstall()) {
 		SetElementText(_T(ELEMENT_DUALBOOT_TITLE), UTF8ToBSTR(lmprintf(MSG_364)));
 		SetElementText(_T(ELEMENT_DUALBOOT_DESCRIPTION), UTF8ToBSTR(lmprintf(MSG_365)));
 		SetElementText(_T(ELEMENT_DUALBOOT_INSTALL_BUTTON), UTF8ToBSTR(lmprintf(MSG_366)));
 		SetElementText(_T(ELEMENT_DUALBOOT_RECOMMENDATION), UTF8ToBSTR(lmprintf(MSG_367)));
 		CallJavascript(_T(JS_ENABLE_BUTTON), CComVariant(HTML_BUTTON_ID(_T(ELEMENT_DUALBOOT_INSTALL_BUTTON))), CComVariant(TRUE));
-		return true;
 	}
 
-	return false;
+	if (IsUninstaller()) {
+		CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_DUALBOOT_ADVANCED_TEXT), CComVariant(FALSE));
+	}
 }
 
-void CEndlessUsbToolDlg::QueryAndDoUninstall(bool exitOnCancel)
+void CEndlessUsbToolDlg::QueryAndDoUninstall()
 {
-	m_selectedInstallMethod = InstallMethod_t::UninstallEndless;
-
 	int selected = AfxMessageBox(UTF8ToCString(lmprintf(MSG_361)), MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2);
-	if (selected == IDYES) {
-		Analytics::instance()->sessionControl(true, m_selectedInstallMethod == InstallMethod_t::UninstallEndless);
 
-		ShowWindow(SW_HIDE);
-		if (!UninstallDualBoot(this))
-			Analytics::instance()->exceptionTracking(_T("UninstallError"), TRUE);
-
-		Analytics::instance()->sessionControl(false, m_selectedInstallMethod == InstallMethod_t::UninstallEndless);
-	} else if(!exitOnCancel){
+	if (selected != IDYES)
 		return;
+
+	SetSelectedInstallMethod(InstallMethod_t::UninstallDualBoot);
+
+	Analytics::instance()->screenTracking(_T("UninstallPage"));
+
+	ShowWindow(SW_HIDE);
+
+	TrackEvent(_T("Started"));
+
+	if (UninstallDualBoot(this)) {
+		TrackEvent(_T("Completed"));
+	} else {
+		TrackEvent(_T("Failed"), ErrorCauseToStr(m_lastErrorCause));
+		Analytics::instance()->exceptionTracking(_T("UninstallError"), TRUE);
 	}
+
+	Analytics::instance()->sessionControl(false);
 
 	ExitProcess(0);
 }
