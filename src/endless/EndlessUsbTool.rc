@@ -128,8 +128,6 @@ IDR_IMG_LEFT_PANEL_IMAGE IMG                     "res/images/left_panel_image.pn
 
 IDR_IMG_RIGHT_PANEL_IMAGE IMG                     "res/images/right_panel_image.png"
 
-IDR_IMG_MAGNIFYING_GLASS IMG                     "res/images/magnifying_glass.png"
-
 IDR_IMG_SOFTWARE_SCREENS     IMG                     "res/images/software_screens.png"
 
 IDR_IMG_CHECKED         IMG                     "res/images/checked_sign.png"

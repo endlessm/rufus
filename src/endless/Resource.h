@@ -27,7 +27,6 @@
 #define IDR_IMG_PAGE_INDICATOR_SEL      201
 #define IDR_IMG_LEFT_PANEL_IMAGE        202
 #define IDR_IMG_RIGHT_PANEL_IMAGE       203
-#define IDR_IMG_MAGNIFYING_GLASS        204
 #define IDR_IMG_SOFTWARE_SCREENS        205
 #define IDR_IMG_CHECKED                 206
 #define IDR_IMG_WARNING 				207
