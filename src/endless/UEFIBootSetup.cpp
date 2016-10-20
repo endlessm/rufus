@@ -468,6 +468,7 @@ error:
 bool EFIRemoveEntry(wchar_t *desc) {
 	wchar_t varname[9];
 	int target = -1;
+	bool result = true;
 
 	//print_entries();
 
@@ -476,7 +477,10 @@ bool EFIRemoveEntry(wchar_t *desc) {
 
 	swprintf(varname, sizeof(varname), UEFI_VAR_BOOT_ENTRY_FORMAT, target);
 	/* Writing a zero length variable deletes it */
-	IFFALSE_RETURN_VALUE(SetFirmwareEnvironmentVariable(varname, UEFI_BOOT_NAMESPACE, NULL, 0), "Error on SetFirmwareEnvironmentVariable", false);
+	if (!SetFirmwareEnvironmentVariable(varname, UEFI_BOOT_NAMESPACE, NULL, 0)) {
+		uprintf("Error on SetFirmwareEnvironmentVariable");
+		result = false;
+	}
 
 	/* Remove our entry from the boot order */
 	DWORD size = GetFirmwareEnvironmentVariable(UEFI_VAR_BOOTORDER, UEFI_BOOT_NAMESPACE, vardata, sizeof(vardata));
@@ -507,5 +511,5 @@ bool EFIRemoveEntry(wchar_t *desc) {
 
 	//print_entries();
 
-	return true;
+	return result;
 }
