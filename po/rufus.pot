@@ -31,11 +31,11 @@ msgid "Try Endless OS by running it from a USB stick."
 msgstr ""
 
 msgctxt "InstallEndlessButton"
-msgid "Create Reflasher USB"
+msgid "Create Reformatter USB"
 msgstr ""
 
 msgctxt "InstallEndlessText"
-msgid "Install Endless OS on any computer using a USB stick."
+msgid "Reformat any computer with Endless OS using a USB stick."
 msgstr ""
 
 msgctxt "CompareOptionsLink"
@@ -195,11 +195,11 @@ msgid "Endless OS"
 msgstr ""
 
 msgctxt "DualBootContentTitle"
-msgid "Download and Install Endless on this PC"
+msgid "Download and Install Endless on this Computer"
 msgstr ""
 
 msgctxt "DualBootContentDescription"
-msgid "Each time you start your PC, you will be able to choose between Endless and Windows. Your apps and files on Windows will not be affected."
+msgid "Each time you start your computer, you will be able to choose between Endless and Windows. Your apps and files on Windows will not be affected."
 msgstr ""
 
 msgctxt "DualBootInstallButon"
@@ -234,12 +234,20 @@ msgctxt "DualBootLanguageLabel"
 msgid "Select Language"
 msgstr ""
 
-msgctxt "AdvOptionsLanguageLabel"
-msgid "Select Language"
-msgstr ""
-
 msgctxt "AdvancedInstallReminder"
 msgid "To create an Endless USB Stick you will need a USB device with at least 8 GB of storage space."
+msgstr ""
+
+msgctxt "AdvancedOptionsSubtitle"
+msgid "With an <b>Endless USB Stick</b> you can:"
+msgstr ""
+
+msgctxt "CreateNewLiveUSB"
+msgid "Create Endless USB Stick"
+msgstr ""
+
+msgctxt "USBLearnMore"
+msgid "Learn more about the Endless USB Stick"
 msgstr ""
 
 msgctxt "MSG_020"
@@ -339,7 +347,7 @@ msgid "http://community.endlessm.com/"
 msgstr ""
 
 msgctxt "MSG_315"
-msgid "%s Download"
+msgid "%s/%s Download"
 msgstr ""
 
 msgctxt "MSG_316"
@@ -347,7 +355,7 @@ msgid "Full"
 msgstr ""
 
 msgctxt "MSG_319"
-msgid "%ls (%s)"
+msgid "%s (%s)"
 msgstr ""
 
 msgctxt "MSG_320"
@@ -483,7 +491,63 @@ msgid "Unfortunately, your %s drive is encrypted."
 msgstr ""
 
 msgctxt "MSG_357"
-msgid "Endless OS cannot be installed on encrypted drives."
+msgid "Endless OS cannot be installed on drives which are protected with Device Encryption or BitLocker."
+msgstr ""
+
+msgctxt "MSG_359"
+msgid "Unfortunately, your computer has another OS installed already."
+msgstr ""
+
+msgctxt "MSG_360"
+msgid "Endless OS only supports dual-boot on Windows-only systems."
+msgstr ""
+
+msgctxt "MSG_361"
+msgid "Are you sure you want to uninstall Endless OS? This will erase all apps and documents stored within your Endless OS installation."
+msgstr ""
+
+msgctxt "MSG_362"
+msgid "Endless OS has been uninstalled successfully"
+msgstr ""
+
+msgctxt "MSG_363"
+msgid "There was a problem uninstalling Endless OS. Please contact us for assistance."
+msgstr ""
+
+msgctxt "MSG_364"
+msgid "Uninstall Endless from this Computer"
+msgstr ""
+
+msgctxt "MSG_365"
+msgid "If you uninstall Endless, Windows will run automatically when you start your computer. Any apps and files stored in Endless will be erased."
+msgstr ""
+
+msgctxt "MSG_366"
+msgid "Uninstall Endless"
+msgstr ""
+
+msgctxt "MSG_367"
+msgid "Make sure you back up any important documents from Endless before you uninstall."
+msgstr ""
+
+msgctxt "MSG_368"
+msgid "Internet Explorer %d is not supported. Please click OK to download Internet Explorer %d, install it, then run the Endless Installer again."
+msgstr ""
+
+msgctxt "MSG_369"
+msgid "%s Download"
+msgstr ""
+
+msgctxt "MSG_370"
+msgid "Oops, something went wrong setting up Endless OS."
+msgstr ""
+
+msgctxt "MSG_371"
+msgid "https://support.endlessm.com/hc/en-us/articles/213585826"
+msgstr ""
+
+msgctxt "MSG_372"
+msgid "No USB device found. If you've inserted one, try a different USB port or a different USB device."
 msgstr ""
 
 msgctxt "MSG_400"
