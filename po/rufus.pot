@@ -18,23 +18,23 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-msgctxt "FirstPageTitle"
+msgctxt "AdvancedPageTitle"
 msgid "Advanced Install Options"
 msgstr ""
 
-msgctxt "TryEndlessButton"
+msgctxt "LiveUsbButton"
 msgid "Create Live USB"
 msgstr ""
 
-msgctxt "TryEndlessText"
+msgctxt "LiveUsbText"
 msgid "Try Endless OS by running it from a USB stick."
 msgstr ""
 
-msgctxt "InstallEndlessButton"
+msgctxt "ReformatterUsbButton"
 msgid "Create Reformatter USB"
 msgstr ""
 
-msgctxt "InstallEndlessText"
+msgctxt "ReformatterUsbText"
 msgid "Reformat any computer with Endless OS using a USB stick."
 msgstr ""
 
@@ -202,7 +202,7 @@ msgctxt "DualBootContentDescription"
 msgid "Each time you start your computer, you will be able to choose between Endless and Windows. Your apps and files on Windows will not be affected."
 msgstr ""
 
-msgctxt "DualBootInstallButon"
+msgctxt "DualBootInstallButton"
 msgid "Install Endless"
 msgstr ""
 
@@ -242,7 +242,7 @@ msgctxt "AdvancedOptionsSubtitle"
 msgid "With an <b>Endless USB Stick</b> you can:"
 msgstr ""
 
-msgctxt "CreateNewLiveUSB"
+msgctxt "CombinedUsbButton"
 msgid "Create Endless USB Stick"
 msgstr ""
 

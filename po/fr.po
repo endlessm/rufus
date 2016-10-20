@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: rufus\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-03-08 02:28+0000\n"
-"PO-Revision-Date: 2016-10-19 08:17+0000\n"
+"PO-Revision-Date: 2016-10-20 04:46+0000\n"
 "Last-Translator: Roddy Shuler <roddy@endlessm.com>\n"
 "Language-Team: French (http://www.transifex.com/endless-mobile-inc/rufus/language/fr/)\n"
 "MIME-Version: 1.0\n"
@@ -18,23 +18,23 @@ msgstr ""
 "Language: fr\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-msgctxt "FirstPageTitle"
+msgctxt "AdvancedPageTitle"
 msgid "Advanced Install Options"
 msgstr "Options d'installation avancées "
 
-msgctxt "TryEndlessButton"
+msgctxt "LiveUsbButton"
 msgid "Create Live USB"
 msgstr "Créer Live USB"
 
-msgctxt "TryEndlessText"
+msgctxt "LiveUsbText"
 msgid "Try Endless OS by running it from a USB stick."
 msgstr "Essayez Endless OS en l'exécutant à partir d'une clé USB."
 
-msgctxt "InstallEndlessButton"
+msgctxt "ReformatterUsbButton"
 msgid "Create Reformatter USB"
 msgstr ""
 
-msgctxt "InstallEndlessText"
+msgctxt "ReformatterUsbText"
 msgid "Reformat any computer with Endless OS using a USB stick."
 msgstr "Reformatez n'importe quel ordinateur avec Endless OS en utilisant une clé USB"
 
@@ -215,7 +215,7 @@ msgid ""
 "Endless and Windows. Your apps and files on Windows will not be affected."
 msgstr ""
 
-msgctxt "DualBootInstallButon"
+msgctxt "DualBootInstallButton"
 msgid "Install Endless"
 msgstr "Installer Endless"
 
@@ -262,7 +262,7 @@ msgctxt "AdvancedOptionsSubtitle"
 msgid "With an <b>Endless USB Stick</b> you can:"
 msgstr "Avec une <b>clé USB Endless</b>, vous pouvez :"
 
-msgctxt "CreateNewLiveUSB"
+msgctxt "CombinedUsbButton"
 msgid "Create Endless USB Stick"
 msgstr ""
 
@@ -591,15 +591,15 @@ msgstr "Internet Explorer %d n'est pas pris en charge. Veuillez cliquer sur OK p
 
 msgctxt "MSG_369"
 msgid "%s Download"
-msgstr ""
+msgstr "Téléchargement : %s"
 
 msgctxt "MSG_370"
 msgid "Oops, something went wrong setting up Endless OS."
-msgstr ""
+msgstr "Oups, une erreur s'est produite lors de l'installation de Endless OS."
 
 msgctxt "MSG_371"
 msgid "https://support.endlessm.com/hc/en-us/articles/213585826"
-msgstr ""
+msgstr "https://support.endlessm.com/hc/en-us/articles/213585826"
 
 msgctxt "MSG_372"
 msgid ""
