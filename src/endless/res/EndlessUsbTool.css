@@ -162,7 +162,6 @@ b {
 a {
 	color: #2a76c6; /* #3164a4 */ ;
 	cursor: pointer;
-	font-size: 13px;
 	text-decoration: underline;
 }
 
@@ -459,6 +458,10 @@ select:disabled {
 #AdvancedInstallReminder {
     font-size: 13px;
     padding-top: 20px;
+}
+
+#AdvancedInstallLink {
+    font-size: 13px;
 }
 
 #CombinedUsbButtonC {
