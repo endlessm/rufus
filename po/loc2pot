@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+import re
 
 # Script to parse the endless.loc file into a placeholder rufus.pot
 # that can be used with standard translation tools such as Transifex
@@ -30,6 +31,13 @@ msgstr ""
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\\n"
 '''
 
+# Numbered strings outside 02x are used as arguments to printf.
+is_c_format_string_rx = re.compile(r'MSG_(\d+)$')
+def is_c_format_string(label):
+    m = is_c_format_string_rx.match(label)
+    return m is not None and not m.group(1).startswith('02')
+
+
 with open(LOC_FILE) as loc_file, open(POT_FILE, 'w') as pot_file:
     pot_file.write(PREAMBLE)
     found = False
@@ -57,6 +65,8 @@ with open(LOC_FILE) as loc_file, open(POT_FILE, 'w') as pot_file:
                 # Close the previously found string
                 pot_file.write('msgstr ""\n')
             pot_file.write('\n')
+            if is_c_format_string(label):
+                pot_file.write('#, c-format\n')
             # Note the use of context rather than comments
             # to allow duplicates of the same msgid
             pot_file.write('msgctxt "' + label + '"\n')
