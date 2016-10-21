@@ -591,7 +591,7 @@ msgstr "Internet Explorer %d không được hỗ trợ. Vui lòng nhấp OK đ�
 
 msgctxt "MSG_369"
 msgid "%s Download"
-msgstr "% Tải xuống"
+msgstr "%s Tải xuống"
 
 msgctxt "MSG_370"
 msgid "Oops, something went wrong setting up Endless OS."

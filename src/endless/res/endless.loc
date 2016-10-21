@@ -1615,7 +1615,7 @@ t MSG_365 "Nếu bạn gỡ cài đặt Endless, Windows sẽ tự động chạ
 t MSG_366 "Gỡ cài đặt Endless"
 t MSG_367 "Hãy chắn chắn là bạn sao lưu bất kỳ tài liệu quan trọng nào từ Endless trước khi gỡ cài đặt."
 t MSG_368 "Internet Explorer %d không được hỗ trợ. Vui lòng nhấp OK để tải xuống Internet Explorer %d, cài đặt nó, sau đó chạy lại Trình cài đặt Endless."
-t MSG_369 "% Tải xuống"
+t MSG_369 "%s Tải xuống"
 t MSG_370 "Ối, có vấn đề xảy ra khi thiết lập HĐH Endless."
 t MSG_371 "https://support.endlessm.com/hc/en-us/articles/213585826"
 t MSG_372 "Không tìm thấy thiết bị USB nào. Nếu bạn đã chèn một USB, hãy thử dùng một cổng USB khác hoặc một thiết bị USB khác."
