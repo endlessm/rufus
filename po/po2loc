@@ -3,6 +3,7 @@
 import collections
 import os
 import polib
+import subprocess
 
 # Script to parse the .po files that contain Transifex translations
 # and populate the endless.loc file actually used by rufus
@@ -50,6 +51,15 @@ LANGS = collections.OrderedDict([
                'name': 'Chinese Simplified (简体中文)',
                'lcids': '0x0804, 0x1004'})])
 
+
+for lang in LANGS:
+    po_path = os.path.join(PO_DIR, lang + '.po')
+    # Validate the .po file. In particular, this checks that c format strings are consistent between
+    # the untranslated and the translated strings.
+    subprocess.check_call(['msgfmt', '-c', po_path])
+    LANGS[lang]['po'] = po_path
+
+
 # Read in the preamble until the marker that starts Endless translations
 preamble = ''
 have_marker = False
@@ -82,7 +92,7 @@ with open(LOC_FILE, 'w') as f:
         f.write('b "%s"\n' % SOURCE_LANG)
         f.write('\n')
         f.write('g IDD_ENDLESSUSBTOOL_DIALOG\n')
-        po = polib.pofile(os.path.join(PO_DIR, lang + '.po'))
+        po = polib.pofile(data['po'])
         for entry in po:
             msgstr = entry.msgstr
             if not msgstr:
