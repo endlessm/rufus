@@ -162,7 +162,6 @@ b {
 a {
 	color: #2a76c6; /* #3164a4 */ ;
 	cursor: pointer;
-	font-size: 13px;
 	text-decoration: underline;
 }
 
@@ -398,14 +397,14 @@ select:disabled {
 }
 
 #AdvancedPage .PageSubtitle {
-    height: 25px;
-    margin-top: 25px;
+    height: 20px;
+    margin-top: 15px;
 }
 
 .ContentPanel {
 	float: left;
 	width: 45%;
-    margin-top: 45px;
+    margin-top: 30px;
     padding-bottom: 25px;
 }
 
@@ -422,10 +421,10 @@ select:disabled {
 }
 
 .PanelImage {
-	width: 174px;
-	height: 124px;
+	width: 211px;
+	height: 113px;
 	background-repeat: no-repeat;
-	margin-top: 20px;
+	margin-top: 30px;
 	background-position: center; 
 }
 
@@ -449,7 +448,7 @@ select:disabled {
 #AdvancedPage .PageContent .FullWidthContent {
 	/*height: 25px;*/
 	text-align: center;
-	padding-top: 10px;
+	padding-top: 15px;
 }
 
 .LanguageSelect {
@@ -461,8 +460,12 @@ select:disabled {
     padding-top: 20px;
 }
 
+#AdvancedInstallLink {
+    font-size: 13px;
+}
+
 #CombinedUsbButtonC {
-    margin: 10px auto;
+    margin: 5px auto;
     width: 200px;
 }
 
