@@ -4925,7 +4925,11 @@ DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 	CEndlessUsbToolDlg::ImageUnpackFileSize = dlg->m_selectedFileSize;
 	if (CSTRING_GET_LAST(dlg->m_localFile, '\\') == ENDLESS_IMG_FILE_NAME) {
 		BOOL result = CopyFileEx(dlg->m_localFile, endlessImgPath, CEndlessUsbToolDlg::CopyProgressRoutine, dlg, NULL, 0);
-		IFFALSE_GOTOERROR(result, "Copying live image failed/cancelled.");
+		IFFALSE_GOTOERROR(result, "Copying unpacked dual-boot image failed/cancelled.");
+
+		// Clear READONLY flag inherited from endless.img on live USB.
+		IFFALSE_PRINTERROR(SetFileAttributes(endlessImgPath, FILE_ATTRIBUTE_SYSTEM | FILE_ATTRIBUTE_HIDDEN),
+			"Failed to clear FILE_ATTRIBUTE_READONLY; ExtendImageFile will probably now fail");
 	} else {
 		// Unpack img file
 		bool unpackResult = dlg->UnpackFile(dlg->m_localFile, endlessImgPath, 0, ImageUnpackCallback, &dlg->m_cancelImageUnpack);
