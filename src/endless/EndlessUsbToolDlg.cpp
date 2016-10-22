@@ -5909,7 +5909,7 @@ bool CEndlessUsbToolDlg::ShouldUninstall()
 		|| IsUninstaller());
 }
 
-#define MIN_DATE_IMAGE_BOOT	L"160917"
+#define MIN_DATE_IMAGE_BOOT	L"161020"
 
 // Image boot means support for booting from endless/endless.img
 // on dual boot (ntfs) and combined USB (exfat)
