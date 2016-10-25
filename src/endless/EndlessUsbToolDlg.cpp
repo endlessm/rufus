@@ -3435,7 +3435,7 @@ HRESULT CEndlessUsbToolDlg::OnInstallCancelClicked(IHTMLElement* pElement)
     }
 
     m_lastErrorCause = ErrorCause_t::ErrorCauseCancelled;
-    CancelRunningOperation();
+    CancelRunningOperation(true);
 
     return S_OK;
 }
@@ -4131,7 +4131,7 @@ void CEndlessUsbToolDlg::EnableHibernate(bool enable)
     SetThreadExecutionState(flags);
 }
 
-void CEndlessUsbToolDlg::CancelRunningOperation()
+void CEndlessUsbToolDlg::CancelRunningOperation(bool userCancel)
 {
     FUNCTION_ENTER;
 
@@ -4140,7 +4140,7 @@ void CEndlessUsbToolDlg::CancelRunningOperation()
 
     FormatStatus = FORMAT_STATUS_CANCEL;
     if (m_currentStep != OP_FLASHING_DEVICE) {
-        m_downloadManager.ClearExtraDownloadJobs(true);
+        m_downloadManager.ClearExtraDownloadJobs(userCancel);
         PostMessage(WM_FINISHED_ALL_OPERATIONS, (WPARAM)FALSE, 0);
     }
 }
