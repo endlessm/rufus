@@ -4776,7 +4776,8 @@ bool CEndlessUsbToolDlg::CopyFilesToexFAT(CEndlessUsbToolDlg *dlg, const CString
 	IFFALSE_GOTOERROR(0 != CopyFile(dlg->m_bootArchive, usbFilesPath + CSTRING_GET_LAST(dlg->m_bootArchive, '\\'), FALSE), "Error copying boot.zip file to drive.");
 	IFFALSE_GOTOERROR(0 != CopyFile(dlg->m_bootArchiveSig, usbFilesPath + CSTRING_GET_LAST(dlg->m_bootArchiveSig, '\\'), FALSE), "Error copying boot.zip signature file to drive.");
 
-	IFFALSE_PRINTERROR(SetAttributesForFilesInFolder(usbFilesPath, true), "Error on SetFileAttributes");
+	DWORD attributes = FILE_ATTRIBUTE_READONLY | FILE_ATTRIBUTE_SYSTEM | FILE_ATTRIBUTE_HIDDEN;
+	IFFALSE_PRINTERROR(SetAttributesForFilesInFolder(usbFilesPath, attributes), "Error on SetFileAttributes");
 
 	IFFALSE_GOTOERROR(0 != CopyFile(exePath, driveLetter + CSTRING_GET_LAST(exePath, '\\'), FALSE), "Error copying installer binary to drive.");
 
@@ -5321,38 +5322,45 @@ bool CEndlessUsbToolDlg::Has64BitSupport()
 	return false;
 }
 
-BOOL CEndlessUsbToolDlg::SetAttributesForFilesInFolder(CString path, bool addAttributes)
+/* Protect or unprotect files in 'path' (C:\endless or $eoslive:\endless) from modification,
+   *non-*-recursively.
+*/
+BOOL CEndlessUsbToolDlg::SetAttributesForFilesInFolder(CString path, DWORD attributes)
 {
 	WIN32_FIND_DATA findFileData;
 	HANDLE findFilesHandle = FindFirstFile(path + ALL_FILES, &findFileData);
-	BOOL retValue = TRUE;
-	BOOL result;
 
-	uprintf("RestrictAccessToFilesInFolder called with '%ls'", path);
+	uprintf("SetAccessToFilesInFolder(L\"%ls\", %x)", path, attributes);
+	DWORD folderAttributes = attributes & ~FILE_ATTRIBUTE_HIDDEN;
 
-	IFFALSE_PRINTERROR(SetFileAttributes(path, addAttributes ? FILE_ATTRIBUTE_SYSTEM | FILE_ATTRIBUTE_READONLY : FILE_ATTRIBUTE_NORMAL) != 0, "Error on SetFileAttributes");
+	uprintf("SetFileAttributes(L\"%ls\", %x)", path, folderAttributes);
+	IFFALSE_PRINTERROR(SetFileAttributes(path, folderAttributes) != 0, "Error on SetFileAttributes");
 
 	if (findFilesHandle == INVALID_HANDLE_VALUE) {
-		uprintf("UpdateFileEntries: No files found in current directory [%ls]", path);
+		uprintf("UpdateFileEntries: No files found in directory \"%ls\"", path);
 	} else {
 		do {
-			if (findFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
-				if ((0 == wcscmp(findFileData.cFileName, L".") || 0 == wcscmp(findFileData.cFileName, L".."))) continue;
+			if ((0 == wcscmp(findFileData.cFileName, L".") || 0 == wcscmp(findFileData.cFileName, L".."))) continue;
 
-				CString newFolder = path + findFileData.cFileName + L"\\";
-				IFFALSE_PRINTERROR(result = SetAttributesForFilesInFolder(newFolder, addAttributes), "Error on setting attributes.");
-				retValue = retValue && result;
-			} else {
-				if (0 != wcscmp(findFileData.cFileName, ENDLESS_UNINSTALLER_NAME)) {
-					IFFALSE_PRINTERROR(SetFileAttributes(path + findFileData.cFileName, addAttributes ? FILE_ATTRIBUTE_SYSTEM | FILE_ATTRIBUTE_READONLY | FILE_ATTRIBUTE_HIDDEN : FILE_ATTRIBUTE_NORMAL) != 0, "Error on SetFileAttributes");
-				}
+			if (0 != wcscmp(findFileData.cFileName, ENDLESS_UNINSTALLER_NAME)) {
+				IFFALSE_PRINTERROR(SetFileAttributes(path + findFileData.cFileName, attributes) != 0, "Error on SetFileAttributes for child");
+
+				// We deliberately do not recurse into subdirectories.
+				//
+				// In Endless OS, files and directories marked +h/+s on NTFS/exFAT partitions (respectively) are
+				// hidden from directory listings, but can be manipulated if you know the full path. If we mark
+				// the *contents* of \endless\grub as hidden & system then it's impossible to remove them,
+				// because we don't have a full list of its contents.
+				//
+				// If \endless\grub is hidden from listings but its contents are not, you can
+				// rm -r $eoslive/endless/grub if you know its full path -- which we do.
 			}
 		} while (FindNextFile(findFilesHandle, &findFileData) != 0);
 
 		FindClose(findFilesHandle);
 	}
 
-	return retValue;
+	return true;
 }
 
 BOOL CEndlessUsbToolDlg::SetPrivilege(HANDLE hToken, LPCTSTR lpszPrivilege, BOOL bEnablePrivilege)
@@ -5399,7 +5407,10 @@ BOOL CEndlessUsbToolDlg::ChangeAccessPermissions(CString path, bool restrictAcce
 	uprintf("RestrictFileAccess called with '%ls'", path);
 
 	// Mark files as system and read-only
-	if(restrictAccess) IFFALSE_PRINTERROR(SetAttributesForFilesInFolder(path, restrictAccess), "Error on SetFileAttributes");
+	if (restrictAccess) {
+		DWORD attributes = FILE_ATTRIBUTE_READONLY | FILE_ATTRIBUTE_SYSTEM | FILE_ATTRIBUTE_HIDDEN;
+		IFFALSE_PRINTERROR(SetAttributesForFilesInFolder(path, attributes), "Error on SetAttributesForFilesInFolder");
+	}
 
 	// Specify the DACL to use.
 	// Create a SID for the Everyone group.
@@ -5476,7 +5487,10 @@ BOOL CEndlessUsbToolDlg::ChangeAccessPermissions(CString path, bool restrictAcce
 
 done:
 	// Remove system and read-only from files
-	if (!restrictAccess) IFFALSE_PRINTERROR(SetAttributesForFilesInFolder(path, restrictAccess), "Error on SetFileAttributes");
+	if (!restrictAccess) {
+		DWORD attributes = FILE_ATTRIBUTE_NORMAL;
+		IFFALSE_PRINTERROR(SetAttributesForFilesInFolder(path, attributes), "Error on SetFileAttributes");
+	}
 
 	retResult = TRUE;
 error:
