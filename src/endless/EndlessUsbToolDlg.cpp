@@ -2781,14 +2781,20 @@ HRESULT CEndlessUsbToolDlg::OnSelectFileNextClicked(IHTMLElement* pElement)
 
 	// update Thank You page fields with the selected image data
 	uint32_t headlineMsg;
-	if (m_selectedInstallMethod == InstallMethod_t::InstallDualBoot) {
+	switch (m_selectedInstallMethod) {
+	case InstallDualBoot:
 		headlineMsg = MSG_320;
-	}
-	else if (m_selectedInstallMethod == InstallMethod_t::LiveUsb) {
-		headlineMsg = MSG_343;
-	}
-	else {
+		break;
+	case ReformatterUsb:
 		headlineMsg = MSG_344;
+		break;
+	case LiveUsb:
+	case CombinedUsb:
+		headlineMsg = MSG_343;
+		break;
+	default:
+		uprintf("Unexpected install method %ls", InstallMethodToStr(m_selectedInstallMethod));
+		headlineMsg = MSG_343;
 	}
 
 	CString finalMessageStr = UTF8ToCString(lmprintf(headlineMsg));
