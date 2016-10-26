@@ -4092,8 +4092,13 @@ DWORD WINAPI CEndlessUsbToolDlg::CheckInternetConnectionThread(void* param)
                 result = InternetGetConnectedState(&flags, 0);
                 IFFALSE_BREAK(result, "Device not connected to internet.");
 
-                result = InternetCheckConnection(JSON_URL(JSON_LIVE_FILE), FLAG_ICC_FORCE_CONNECTION, 0);
-                IFFALSE_BREAK(result, "Cannot connect to server hosting the JSON file.");
+				// require a working server check to discovery connectivity
+				// in the first place, but once we've got a connection, only
+				// the device/adapter going away will take us offline again
+				if (!connected) {
+					result = InternetCheckConnection(JSON_URL(JSON_LIVE_FILE), FLAG_ICC_FORCE_CONNECTION, 0);
+					IFFALSE_BREAK(result, "Cannot connect to server hosting the JSON file.");
+				}
 
                 result = TRUE;
                 break;
