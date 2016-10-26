@@ -311,6 +311,7 @@ enum endless_action_type {
 #define EOS_INSTALLER_PRODUCT_TEXT  "eosinstaller"
 #define EOS_NONFREE_PRODUCT_TEXT    "eosnonfree"
 #define EOS_OEM_PRODUCT_TEXT		"eosoem"
+#define EOS_RETAIL_PRODUCT_TEXT     "eosretail"
 const wchar_t* mainWindowTitle = L"Endless Installer";
 
 #define ALL_FILES					L"*.*"
@@ -2199,6 +2200,7 @@ void CEndlessUsbToolDlg::UpdateFileEntries(bool shouldInit)
 		// support being run from a USB drive 
 		CString liveFilePath = GET_IMAGE_PATH(EXFAT_ENDLESS_LIVE_FILE_NAME);
 		if (currentFile == ENDLESS_IMG_FILE_NAME && PathFileExists(liveFilePath)) {
+			uprintf("Found %ls; checking %ls to find image name", currentFile, liveFilePath);
 			FILE *liveFile = NULL;
 			char originalFileName[MAX_PATH];
 			memset(originalFileName, 0, MAX_PATH);
@@ -2209,8 +2211,13 @@ void CEndlessUsbToolDlg::UpdateFileEntries(bool shouldInit)
 					currentFile = UTF8ToCString(originalFileName);
 					currentFile.TrimRight();
 					isUnpackedFile = true;
+					uprintf("image name is %ls", currentFile);
 				}
 				fclose(liveFile);
+			}
+
+			if (!isUnpackedFile) {
+				uprintf("couldn't determine the unpacked image's true name");
 			}
 		}
 
@@ -2774,14 +2781,20 @@ HRESULT CEndlessUsbToolDlg::OnSelectFileNextClicked(IHTMLElement* pElement)
 
 	// update Thank You page fields with the selected image data
 	uint32_t headlineMsg;
-	if (m_selectedInstallMethod == InstallMethod_t::InstallDualBoot) {
+	switch (m_selectedInstallMethod) {
+	case InstallDualBoot:
 		headlineMsg = MSG_320;
-	}
-	else if (m_selectedInstallMethod == InstallMethod_t::LiveUsb) {
-		headlineMsg = MSG_343;
-	}
-	else {
+		break;
+	case ReformatterUsb:
 		headlineMsg = MSG_344;
+		break;
+	case LiveUsb:
+	case CombinedUsb:
+		headlineMsg = MSG_343;
+		break;
+	default:
+		uprintf("Unexpected install method %ls", InstallMethodToStr(m_selectedInstallMethod));
+		headlineMsg = MSG_343;
 	}
 
 	CString finalMessageStr = UTF8ToCString(lmprintf(headlineMsg));
@@ -2798,7 +2811,7 @@ HRESULT CEndlessUsbToolDlg::OnSelectFileNextClicked(IHTMLElement* pElement)
 	SetElementText(_T(ELEMENT_INSTALLER_CONTENT), CComBSTR(contentStr));
 
 	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_DUALBOOT_REMINDER), CComVariant(m_selectedInstallMethod == InstallMethod_t::InstallDualBoot));
-	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_LIVE_REMINDER), CComVariant(m_selectedInstallMethod == InstallMethod_t::LiveUsb));
+	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_LIVE_REMINDER), CComVariant(m_selectedInstallMethod == InstallMethod_t::LiveUsb || m_selectedInstallMethod == InstallMethod_t::CombinedUsb));
 	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_REFLASHER_REMINDER), CComVariant(m_selectedInstallMethod == InstallMethod_t::ReformatterUsb));
 	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_USBBOOT_HOWTO), CComVariant(m_selectedInstallMethod != InstallMethod_t::InstallDualBoot));
 
@@ -3919,7 +3932,13 @@ bool CEndlessUsbToolDlg::ParseImgFileName(const CString& filename, CString &pers
     version.Replace(_T(EOS_PRODUCT_TEXT), _T(""));
     IFFALSE_GOTOERROR(!version.IsEmpty() && !lastPart.IsEmpty(), "");
     installerImage = product == _T(EOS_INSTALLER_PRODUCT_TEXT);
-    IFFALSE_GOTOERROR(product == _T(EOS_PRODUCT_TEXT) || product == _T(EOS_NONFREE_PRODUCT_TEXT) || product == _T(EOS_OEM_PRODUCT_TEXT) || installerImage, "");
+    if (product != _T(EOS_PRODUCT_TEXT) &&
+        product != _T(EOS_NONFREE_PRODUCT_TEXT) &&
+        product != _T(EOS_OEM_PRODUCT_TEXT) &&
+        product != _T(EOS_RETAIL_PRODUCT_TEXT) &&
+        !installerImage) {
+        uprintf("Unrecognised product name '%ls'; assuming it's some new product", product);
+    }
 
     date = date.Right(date.GetLength() - date.Find('.') - 1);
 
