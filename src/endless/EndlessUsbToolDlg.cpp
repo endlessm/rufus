@@ -2199,6 +2199,7 @@ void CEndlessUsbToolDlg::UpdateFileEntries(bool shouldInit)
 		// support being run from a USB drive 
 		CString liveFilePath = GET_IMAGE_PATH(EXFAT_ENDLESS_LIVE_FILE_NAME);
 		if (currentFile == ENDLESS_IMG_FILE_NAME && PathFileExists(liveFilePath)) {
+			uprintf("Found %ls; checking %ls to find image name", currentFile, liveFilePath);
 			FILE *liveFile = NULL;
 			char originalFileName[MAX_PATH];
 			memset(originalFileName, 0, MAX_PATH);
@@ -2209,8 +2210,13 @@ void CEndlessUsbToolDlg::UpdateFileEntries(bool shouldInit)
 					currentFile = UTF8ToCString(originalFileName);
 					currentFile.TrimRight();
 					isUnpackedFile = true;
+					uprintf("image name is %ls", currentFile);
 				}
 				fclose(liveFile);
+			}
+
+			if (!isUnpackedFile) {
+				uprintf("couldn't determine the unpacked image's true name");
 			}
 		}
 
