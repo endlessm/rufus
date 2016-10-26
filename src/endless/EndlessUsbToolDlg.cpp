@@ -1239,16 +1239,19 @@ LRESULT CEndlessUsbToolDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lPara
             bool isReleaseJsonDownload = downloadStatus->jobName == DownloadManager::GetJobName(DownloadType_t::DownloadTypeReleseJson);
             // DO STUFF
             if (downloadStatus->error) {
-                uprintf("Error on download.");
-                if (isReleaseJsonDownload) {
-                    JSONDownloadFailed();
-                } else {
-                    bool diskFullError = (downloadStatus->errorContext == BG_ERROR_CONTEXT_LOCAL_FILE);
-                    diskFullError = diskFullError && (downloadStatus->errorCode == HRESULT_FROM_WIN32(ERROR_DISK_FULL));
-                    m_lastErrorCause = diskFullError ? ErrorCause_t::ErrorCauseDownloadFailedDiskFull : ErrorCause_t::ErrorCauseDownloadFailed;
-                    m_downloadManager.ClearExtraDownloadJobs();
-                    ErrorOccured(m_lastErrorCause);
-                }
+				if (isReleaseJsonDownload) {
+					uprintf("JSON download failed.");
+					JSONDownloadFailed();
+				} else if (m_lastErrorCause == ErrorCause_t::ErrorCauseCancelled) {
+					uprintf("Download cancelled by user request.");
+				} else {
+					uprintf("Error on download.");
+					bool diskFullError = (downloadStatus->errorContext == BG_ERROR_CONTEXT_LOCAL_FILE);
+					diskFullError = diskFullError && (downloadStatus->errorCode == HRESULT_FROM_WIN32(ERROR_DISK_FULL));
+					m_lastErrorCause = diskFullError ? ErrorCause_t::ErrorCauseDownloadFailedDiskFull : ErrorCause_t::ErrorCauseDownloadFailed;
+					m_downloadManager.ClearExtraDownloadJobs();
+					ErrorOccured(m_lastErrorCause);
+				}
             } else if (downloadStatus->done) {
                 uprintf("Download done for %ls", downloadStatus->jobName);
 
@@ -3432,7 +3435,7 @@ HRESULT CEndlessUsbToolDlg::OnInstallCancelClicked(IHTMLElement* pElement)
     }
 
     m_lastErrorCause = ErrorCause_t::ErrorCauseCancelled;
-    CancelRunningOperation();
+    CancelRunningOperation(true);
 
     return S_OK;
 }
@@ -4128,7 +4131,7 @@ void CEndlessUsbToolDlg::EnableHibernate(bool enable)
     SetThreadExecutionState(flags);
 }
 
-void CEndlessUsbToolDlg::CancelRunningOperation()
+void CEndlessUsbToolDlg::CancelRunningOperation(bool userCancel)
 {
     FUNCTION_ENTER;
 
@@ -4137,7 +4140,7 @@ void CEndlessUsbToolDlg::CancelRunningOperation()
 
     FormatStatus = FORMAT_STATUS_CANCEL;
     if (m_currentStep != OP_FLASHING_DEVICE) {
-        m_downloadManager.ClearExtraDownloadJobs(true);
+        m_downloadManager.ClearExtraDownloadJobs(userCancel);
         PostMessage(WM_FINISHED_ALL_OPERATIONS, (WPARAM)FALSE, 0);
     }
 }

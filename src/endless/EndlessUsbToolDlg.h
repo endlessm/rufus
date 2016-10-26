@@ -293,7 +293,7 @@ private:
     void GoToSelectFilePage();
     void InitLogging();
     void EnableHibernate(bool enable = true);
-    void CancelRunningOperation();
+    void CancelRunningOperation(bool userCancel = false);
     void StartCheckInternetConnectionThread();
     bool CanUseLocalFile();
     bool CanUseRemoteFile();
