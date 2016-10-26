@@ -311,6 +311,7 @@ enum endless_action_type {
 #define EOS_INSTALLER_PRODUCT_TEXT  "eosinstaller"
 #define EOS_NONFREE_PRODUCT_TEXT    "eosnonfree"
 #define EOS_OEM_PRODUCT_TEXT		"eosoem"
+#define EOS_RETAIL_PRODUCT_TEXT     "eosretail"
 const wchar_t* mainWindowTitle = L"Endless Installer";
 
 #define ALL_FILES					L"*.*"
@@ -3925,7 +3926,13 @@ bool CEndlessUsbToolDlg::ParseImgFileName(const CString& filename, CString &pers
     version.Replace(_T(EOS_PRODUCT_TEXT), _T(""));
     IFFALSE_GOTOERROR(!version.IsEmpty() && !lastPart.IsEmpty(), "");
     installerImage = product == _T(EOS_INSTALLER_PRODUCT_TEXT);
-    IFFALSE_GOTOERROR(product == _T(EOS_PRODUCT_TEXT) || product == _T(EOS_NONFREE_PRODUCT_TEXT) || product == _T(EOS_OEM_PRODUCT_TEXT) || installerImage, "");
+    if (product != _T(EOS_PRODUCT_TEXT) &&
+        product != _T(EOS_NONFREE_PRODUCT_TEXT) &&
+        product != _T(EOS_OEM_PRODUCT_TEXT) &&
+        product != _T(EOS_RETAIL_PRODUCT_TEXT) &&
+        !installerImage) {
+        uprintf("Unrecognised product name '%ls'; assuming it's some new product", product);
+    }
 
     date = date.Right(date.GetLength() - date.Find('.') - 1);
 
