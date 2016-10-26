@@ -174,6 +174,8 @@ DWORD usbDevicesCount;
 #define ELEMENT_STORAGE_DESCRIPTION     "StorageSpaceDescription"
 #define ELEMENT_STORAGE_AVAILABLE       "SelectStorageAvailableSpace"
 #define ELEMENT_STORAGE_MESSAGE			"SelectStorageSubtitle"
+#define ELEMENT_STORAGE_AGREEMENT_TEXT	"StorageAgreementText"
+#define ELEMENT_STORAGE_SPACE_WARNING   "StorageSpaceWarning"
 #define ELEMENT_STORAGE_SUPPORT_LINK	"StorageSupportLink"
 
 //Installing page elements
@@ -3390,9 +3392,18 @@ void CEndlessUsbToolDlg::GoToSelectStoragePage()
 	CallJavascript(_T(JS_ENABLE_ELEMENT), CComVariant(_T(ELEMENT_STORAGE_SELECT)), CComVariant(enoughBytesAvailable));
     CallJavascript(_T(JS_ENABLE_BUTTON), CComVariant(HTML_BUTTON_ID(_T(ELEMENT_SELSTORAGE_NEXT_BUTTON))), CComVariant(enoughBytesAvailable));
 
+	// Show/hide space warning vs "back up your files!" notice
+	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(_T(ELEMENT_STORAGE_AGREEMENT_TEXT)), CComVariant(enoughBytesAvailable));
+	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(_T(ELEMENT_STORAGE_SPACE_WARNING)), CComVariant(!enoughBytesAvailable));
+
 	if (!enoughBytesAvailable) {
 		uprintf("Not enough bytes available.");
+
+		message = UTF8ToCString(lmprintf(MSG_335, SizeToHumanReadable(neededSize, FALSE, use_fake_units), freeSize, systemDriveA));
+		SetElementText(_T(ELEMENT_STORAGE_SPACE_WARNING), CComBSTR(message));
+
 		ChangePage(_T(ELEMENT_STORAGE_PAGE));
+
 		return;
 	}
 

@@ -648,11 +648,15 @@ select:disabled {
 
 /* Select Storage Page */
 
-#StorageAgreementText {
+#StorageFooter {
     padding-top: 10px;
     font-size: 13px;
 	font-family: Lato;
     margin-top: 100px !important;
+}
+
+#StorageSpaceWarning {
+    color: red;
 }
 
 #SelectStoragePage .ContentTitle {
