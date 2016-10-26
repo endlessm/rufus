@@ -3367,11 +3367,6 @@ void CEndlessUsbToolDlg::GoToSelectStoragePage()
 	uprintf("Available space on drive %s is %s out of %s; we need %s", systemDrive, freeSize, totalSize, SizeToHumanReadable(neededSize, FALSE, use_fake_units));
 	maxAvailableGigs = (int) ((freeBytesAvailable.QuadPart - bytesInGig) / bytesInGig);
 
-	bool enoughBytesAvailable = (freeBytesAvailable.QuadPart - bytesInGig) > neededSize;
-
-	// Enable/disable ui elements based on space availability
-	CallJavascript(_T(JS_ENABLE_ELEMENT), CComVariant(_T(ELEMENT_STORAGE_SELECT)), CComVariant(enoughBytesAvailable));
-
 	// update messages with needed space based on selected version
 	CStringA osVersion = lmprintf(isBaseImage ? MSG_400 : MSG_316);
 	CStringA osSizeText = SizeToHumanReadable((isBaseImage ? RECOMMENDED_GIGS_BASE : RECOMMENDED_GIGS_FULL) * bytesInGig, FALSE, use_fake_units);
@@ -3388,6 +3383,12 @@ void CEndlessUsbToolDlg::GoToSelectStoragePage()
 	hr = GetSelectElement(_T(ELEMENT_STORAGE_SELECT), selectElement);
 	IFFALSE_RETURN(SUCCEEDED(hr) && selectElement != NULL, "Error returned from GetSelectElement.");
 	hr = selectElement->put_length(0);
+
+	bool enoughBytesAvailable = (freeBytesAvailable.QuadPart - bytesInGig) > neededSize;
+
+	// Enable/disable ui elements based on space availability
+	CallJavascript(_T(JS_ENABLE_ELEMENT), CComVariant(_T(ELEMENT_STORAGE_SELECT)), CComVariant(enoughBytesAvailable));
+    CallJavascript(_T(JS_ENABLE_BUTTON), CComVariant(HTML_BUTTON_ID(_T(ELEMENT_SELSTORAGE_NEXT_BUTTON))), CComVariant(enoughBytesAvailable));
 
 	if (!enoughBytesAvailable) {
 		uprintf("Not enough bytes available.");
