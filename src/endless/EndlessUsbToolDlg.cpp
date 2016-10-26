@@ -3404,6 +3404,8 @@ void CEndlessUsbToolDlg::GoToSelectStoragePage()
 
 		ChangePage(_T(ELEMENT_STORAGE_PAGE));
 
+		TrackEvent(_T("StorageInsufficient"));
+
 		return;
 	}
 
