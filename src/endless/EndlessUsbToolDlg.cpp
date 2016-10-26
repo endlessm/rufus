@@ -2811,7 +2811,7 @@ HRESULT CEndlessUsbToolDlg::OnSelectFileNextClicked(IHTMLElement* pElement)
 	SetElementText(_T(ELEMENT_INSTALLER_CONTENT), CComBSTR(contentStr));
 
 	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_DUALBOOT_REMINDER), CComVariant(m_selectedInstallMethod == InstallMethod_t::InstallDualBoot));
-	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_LIVE_REMINDER), CComVariant(m_selectedInstallMethod == InstallMethod_t::LiveUsb));
+	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_LIVE_REMINDER), CComVariant(m_selectedInstallMethod == InstallMethod_t::LiveUsb || m_selectedInstallMethod == InstallMethod_t::CombinedUsb));
 	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_REFLASHER_REMINDER), CComVariant(m_selectedInstallMethod == InstallMethod_t::ReformatterUsb));
 	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_USBBOOT_HOWTO), CComVariant(m_selectedInstallMethod != InstallMethod_t::InstallDualBoot));
 
