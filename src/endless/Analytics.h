@@ -10,7 +10,7 @@ public:
 
 	void sessionControl(BOOL start);
 	void screenTracking(const CString &name);
-	void eventTracking(const CString &category, const CString &action, const CString &label = CString(), int value = -1);
+	void eventTracking(const CString &category, const CString &action, const CString &label = CString(), LONGLONG value = -1);
 	void exceptionTracking(const CString &description, BOOL fatal);
 
 	void setLanguage(const CString &language);
