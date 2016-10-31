@@ -2984,8 +2984,12 @@ HRESULT CEndlessUsbToolDlg::OnSelectUSBNextClicked(IHTMLElement* pElement)
 
     FUNCTION_ENTER;
 
-	int size = SelectedDrive.DiskSize / BYTES_IN_MEGABYTE;
-	TrackEvent(_T("USBSizeMB"), _T(""), size);
+	{
+		int size = SelectedDrive.DiskSize / BYTES_IN_MEGABYTE;
+		CString label;
+		label.Format(_T("%d"), size);
+		TrackEvent(_T("USBSizeMB"), label, size);
+	}
 
 	LeavingDevicesPage();
 	StartInstallationProcess();
@@ -3280,7 +3284,11 @@ HRESULT CEndlessUsbToolDlg::OnSelectStorageNextClicked(IHTMLElement *pElement)
 
 	FUNCTION_ENTER;
 
-	TrackEvent(_T("StorageSizeGB"), _T(""), m_nrGigsSelected);
+	{
+		CString label;
+		label.Format(_T("%d"), m_nrGigsSelected);
+		TrackEvent(_T("StorageSizeGB"), label, m_nrGigsSelected);
+	}
 
 	StartInstallationProcess();
 
@@ -5232,7 +5240,11 @@ bool CEndlessUsbToolDlg::WriteMBRAndSBRToWinDrive(CEndlessUsbToolDlg *dlg, const
 		}
 	}
 
-	dlg->TrackEvent(_T("BootTrackSize"), _T(""), minStartingOffset);
+	{
+		CString label;
+		label.Format(_T("%I64i"), minStartingOffset);
+		dlg->TrackEvent(_T("BootTrackSize"), label, minStartingOffset);
+	}
 
 	IFFALSE_GOTOERROR(0 == _wfopen_s(&boottrackImgFile, endlessFilesPath + BACKUP_BOOTTRACK_IMG, L"wb"), "Error opening boottrack.img file");
 	boottrackData = (unsigned char*)malloc(DiskGeometry->Geometry.BytesPerSector);
