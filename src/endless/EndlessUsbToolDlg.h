@@ -6,6 +6,7 @@
 
 #include "localization.h"
 #include "DownloadManager.h"
+#include "TorrentDownloader.h"
 
 typedef struct FileImageEntry {
     CString filePath;
@@ -55,6 +56,7 @@ typedef struct RemoteImageEntry {
     CString displayName;
     CString downloadJobName;
     CString version;
+	CString urlFullTorrent;
 } RemoteImageEntry_t, *pRemoteImageEntry_t;
 
 typedef enum InstallMethod {
@@ -222,6 +224,8 @@ private:
     DownloadManager m_downloadManager;
     DWORD m_ieVersion;
     UINT m_globalWndMessage;
+
+	TorrentDownloader m_torrentDownloader;
 
     ErrorCause_t m_lastErrorCause;
     long m_maximumUSBVersion;

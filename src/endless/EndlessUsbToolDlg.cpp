@@ -20,6 +20,11 @@
 #include "WindowsUsbDefines.h"
 #include "StringHelperMethods.h"
 
+#include "TorrentDownloader.h"
+
+#define min(x, y) (((x) < (y)) ? (x) : (y))
+#define max(x, y)  (((x) > (y)) ? (x) : (y))
+
 // Rufus include files
 extern "C" {
 #include "rufus.h"
@@ -33,7 +38,6 @@ extern "C" {
 #include "usb.h"
 #include "mbr_grub2.h"
 #include "grub/grub.h"
-
 
 // RADU: try to remove the need for all of these
 OPENED_LIBRARIES_VARS;
@@ -807,6 +811,7 @@ BOOL CEndlessUsbToolDlg::OnInitDialog()
     CheckDlgButton(IDC_QUICK_FORMAT, BST_CHECKED);
 
     bool result = m_downloadManager.Init(m_hWnd, WM_FILE_DOWNLOAD_STATUS);
+	result = m_torrentDownloader.Init(m_hWnd, WM_FILE_DOWNLOAD_STATUS);
 
     SetWindowTextW(L"");
 
@@ -2471,6 +2476,8 @@ void CEndlessUsbToolDlg::StartJSONDownload()
 #define JSON_IMG_URL_FILE           "file"
 #define JSON_IMG_URL_SIG            "signature"
 #define JSON_IMG_UNPACKED_URL_SIG   "extracted_signature"
+#define JSON_IMG_TORRENTS			"torrents"
+#define JSON_IMG_TORRENTS_FULL		"full"
 
 #define CHECK_ENTRY(parentValue, tag) \
 do { \
@@ -2567,6 +2574,8 @@ bool CEndlessUsbToolDlg::ParseJsonFile(LPCTSTR filename, bool isInstallerJson)
             CHECK_ENTRY(fullImage, JSON_IMG_URL_FILE);
             CHECK_ENTRY(fullImage, JSON_IMG_URL_SIG);
             CHECK_ENTRY(fullImage, JSON_IMG_UNPACKED_URL_SIG);
+			CHECK_ENTRY(fullImage, JSON_IMG_TORRENTS);
+			CHECK_ENTRY(fullImage[JSON_IMG_TORRENTS], JSON_IMG_TORRENTS_FULL);
 
             RemoteImageEntry_t remoteImageEntry;
             RemoteImageEntry_t &remoteImage = isInstallerJson ? m_installerImage : remoteImageEntry;
@@ -2582,6 +2591,7 @@ bool CEndlessUsbToolDlg::ParseJsonFile(LPCTSTR filename, bool isInstallerJson)
             remoteImage.personality = persIt->asCString();
             remoteImage.version = latestVersion;
             remoteImage.urlUnpackedSignature = fullImage[JSON_IMG_UNPACKED_URL_SIG].asCString();
+			remoteImage.urlFullTorrent = (fullImage[JSON_IMG_TORRENTS])[JSON_IMG_TORRENTS_FULL].asCString();
 
             if(!isInstallerJson) {
                 bootImage = persImage["boot"];
@@ -3071,6 +3081,8 @@ void CEndlessUsbToolDlg::StartInstallationProcess()
 		ListOfStrings urls, files;
 		CString urlInstaller, urlInstallerAsc, installerFile, installerAscFile;
 		CString urlBootFiles, urlBootFilesAsc, urlImageSig;
+
+		urls = { remote.urlFullTorrent };
 		if (IsDualBootOrCombinedUsb()) {
 			urlBootFiles = CString(RELEASE_JSON_URLPATH) +  remote.urlBootArchive;
 			m_bootArchive = GET_IMAGE_PATH(CSTRING_GET_LAST(urlBootFiles, '/'));
@@ -3082,18 +3094,14 @@ void CEndlessUsbToolDlg::StartInstallationProcess()
 			m_unpackedImageSig = GET_IMAGE_PATH(CSTRING_GET_LAST(urlImageSig, '/'));
 
 			if (localFileExists) {
-				urls = { urlAsc, urlBootFiles, urlBootFilesAsc, urlImageSig };
 				files = { m_localFileSig, m_bootArchive, m_bootArchiveSig, m_unpackedImageSig };
 			} else {
-				urls = { url, urlAsc, urlBootFiles, urlBootFilesAsc, urlImageSig };
 				files = { m_localFile, m_localFileSig, m_bootArchive, m_bootArchiveSig, m_unpackedImageSig };
 			}
 		} else if (m_selectedInstallMethod == InstallMethod_t::LiveUsb) {
 			if (localFileExists) {
-				urls = { urlAsc };
 				files = { m_localFileSig };
 			} else {
-				urls = { url, urlAsc };
 				files = { m_localFile, m_localFileSig };
 			}
 		} else {
@@ -3105,37 +3113,31 @@ void CEndlessUsbToolDlg::StartInstallationProcess()
 			urlInstallerAsc = CString(RELEASE_JSON_URLPATH) + m_installerImage.urlSignature;
 			installerAscFile = GET_IMAGE_PATH(CSTRING_GET_LAST(m_installerImage.urlSignature, '/'));
 
+			urls = { remote.urlFullTorrent, m_installerImage.urlFullTorrent };
+
 			if (installerFileExists) {
 				if (localFileExists) {
-					urls = { urlAsc, urlInstallerAsc };
 					files = { m_localFileSig, installerAscFile };
 				} else {
-					urls = { url, urlAsc, urlInstallerAsc };
 					files = { m_localFile, m_localFileSig, installerAscFile };
 				}
 			} else if(localFileExists) {
-				urls = { urlAsc, urlInstaller, urlInstallerAsc };
 				files = { m_localFileSig, installerFile, installerAscFile };
 			} else {
-				urls = { url, urlAsc, urlInstaller, urlInstallerAsc };
 				files = { m_localFile, m_localFileSig, installerFile, installerAscFile };
 			}
 		}
 
 		// Try resuming the download if it exists
-		bool status = m_downloadManager.AddDownload(downloadType, urls, files, true, remote.downloadJobName);
+		bool status = m_torrentDownloader.AddDownload(downloadType, urls, files, remote.downloadJobName);
 		if (!status) {
-			// start the download again
-			status = m_downloadManager.AddDownload(downloadType, urls, files, false, remote.downloadJobName);
-			if (!status) {
-				ChangePage(_T(ELEMENT_INSTALL_PAGE));
-				// RADU: add custom error values for each of the errors so we can identify them and show a custom message for each
-				uprintf("Error adding files for download");
-				FormatStatus = FORMAT_STATUS_CANCEL;
-				m_lastErrorCause = ErrorCause_t::ErrorCauseDownloadFailed;
-				PostMessage(WM_FINISHED_ALL_OPERATIONS, 0, 0);
-				return;
-			}
+			ChangePage(_T(ELEMENT_INSTALL_PAGE));
+			// RADU: add custom error values for each of the errors so we can identify them and show a custom message for each
+			uprintf("Error adding files for download");
+			FormatStatus = FORMAT_STATUS_CANCEL;
+			m_lastErrorCause = ErrorCause_t::ErrorCauseDownloadFailed;
+			PostMessage(WM_FINISHED_ALL_OPERATIONS, 0, 0);
+			return;
 		}
 
 		// Create a thread to poll the download progress regularly as the event based BITS one is very irregular
@@ -4031,28 +4033,8 @@ DWORD WINAPI CEndlessUsbToolDlg::UpdateDownloadProgressThread(void* param)
 {
     FUNCTION_ENTER;
 
-    CComPtr<IBackgroundCopyManager> bcManager;
-    CComPtr<IBackgroundCopyJob> currentJob;
     DownloadStatus_t *downloadStatus = NULL;
     CEndlessUsbToolDlg *dlg = (CEndlessUsbToolDlg*)param;
-    RemoteImageEntry_t remote;
-    DownloadType_t downloadType = dlg->GetSelectedDownloadType();
-    POSITION pos = dlg->m_remoteImages.FindIndex(dlg->m_selectedRemoteIndex);
-    CString jobName;
-
-    IFFALSE_RETURN_VALUE(pos != NULL, "Index value not valid.", 0);
-    remote = dlg->m_remoteImages.GetAt(pos);
-
-    // Specify the appropriate COM threading model for your application.
-    HRESULT hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
-    IFFALSE_GOTO(SUCCEEDED(hr), "Error on calling CoInitializeEx", done);
-
-    hr = CoCreateInstance(__uuidof(BackgroundCopyManager), NULL, CLSCTX_LOCAL_SERVER, __uuidof(IBackgroundCopyManager), (void**)&bcManager);
-    IFFALSE_GOTO(SUCCEEDED(hr), "Error creating instance of BackgroundCopyManager.", done);
-
-    jobName = DownloadManager::GetJobName(downloadType);
-    jobName += remote.downloadJobName;
-    IFFALSE_GOTO(SUCCEEDED(DownloadManager::GetExistingJob(bcManager, jobName, currentJob)), "No download job found", done);
 
     while (TRUE)
     {
@@ -4069,8 +4051,9 @@ DWORD WINAPI CEndlessUsbToolDlg::UpdateDownloadProgressThread(void* param)
                 downloadStatus = new DownloadStatus_t;
                 downloadStatus->done = false;
                 downloadStatus->error = false;
-                bool result = dlg->m_downloadManager.GetDownloadProgress(currentJob, downloadStatus, jobName);
-                if (!result || downloadStatus->done || downloadStatus->error) {
+				bool result = dlg->m_torrentDownloader.GetDownloadProgress(downloadStatus);
+				if (!result) continue;
+                if (downloadStatus->done || downloadStatus->error) {
                     uprintf("CEndlessUsbToolDlg::UpdateDownloadProgressThread - Exiting");
                     delete downloadStatus;
                     goto done;
