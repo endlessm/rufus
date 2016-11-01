@@ -12,8 +12,8 @@ msgstr ""
 "Project-Id-Version: rufus\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-03-08 02:28+0000\n"
-"PO-Revision-Date: 2016-10-20 04:36+0000\n"
-"Last-Translator: Roddy Shuler <roddy@endlessm.com>\n"
+"PO-Revision-Date: 2016-10-25 14:06+0000\n"
+"Last-Translator: Will Thompson <wjt@endlessm.com>\n"
 "Language-Team: Portuguese (Brazil) (http://www.transifex.com/endless-mobile-inc/rufus/language/pt_BR/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -230,7 +230,7 @@ msgctxt "AdvancedOptionsText"
 msgid ""
 "For advanced install options using an <b>Endless USB Stick</b>, <a "
 "id='AdvancedOptionsLink'>click here</a>."
-msgstr "Para opções avançadas utilizando <b>Pendrive Endless OS</b>, <a id='AdvancedOptionsLink'>click here</a>. "
+msgstr "Para opções avançadas utilizando <b>Pendrive Endless OS</b>, <a id='AdvancedOptionsLink'>clique aqui</a>. "
 
 msgctxt "SelectStorageNextButton"
 msgid "Next"
@@ -297,351 +297,429 @@ msgctxt "MSG_025"
 msgid "Pb"
 msgstr "Pb"
 
+#, c-format
 msgctxt "MSG_046"
 msgid "%s (Disk %d) [%s]"
 msgstr "%s (Disk %d) [%s]"
 
+#, c-format
 msgctxt "MSG_049"
 msgid "Endless - Cancellation"
 msgstr "Endless - Cancelamento"
 
+#, c-format
 msgctxt "MSG_095"
 msgid "Endless Image"
 msgstr "Imagens Endless"
 
+#, c-format
 msgctxt "MSG_105"
 msgid ""
 "Warning: Cancelling may cause the device to malfunction. If you are sure you"
 " want to cancel, click YES. Otherwise, click NO."
 msgstr "Atenção: Cancelar pode comprometer o funcionamento do dispositivo. Se você estiver certo de que quer cancelar, clique SIM. Caso contrário, clique NÃO."
 
+#, c-format
 msgctxt "MSG_107"
 msgid "All files"
 msgstr "Todos os arquivos"
 
+#, c-format
 msgctxt "MSG_201"
 msgid "Cancelling, please wait"
 msgstr "Cancelando. Favor aguarde"
 
+#, c-format
 msgctxt "MSG_300"
 msgid "Error downloading file."
 msgstr "Erro de download do arquivo."
 
+#, c-format
 msgctxt "MSG_302"
 msgid "%s of %s (%s/s)"
 msgstr "%s de %s (%s/s)"
 
+#, c-format
 msgctxt "MSG_303"
 msgid "Something is wrong with your Endless OS file."
 msgstr "Há algo errado com o seu arquivo Endless OS"
 
+#, c-format
 msgctxt "MSG_304"
 msgid "Downloading"
 msgstr "Baixando"
 
+#, c-format
 msgctxt "MSG_305"
 msgid "Step %d"
 msgstr "Passo %d"
 
+#, c-format
 msgctxt "MSG_306"
 msgid "of %d:"
 msgstr "de %d:"
 
+#, c-format
 msgctxt "MSG_307"
 msgid "No Label"
 msgstr "Sem etiqueta"
 
+#, c-format
 msgctxt "MSG_309"
 msgid "Installing"
 msgstr "Instalando"
 
+#, c-format
 msgctxt "MSG_310"
 msgid "Verifying"
 msgstr "Verificando"
 
+#, c-format
 msgctxt "MSG_311"
 msgid "Writing"
 msgstr "Gravando"
 
+#, c-format
 msgctxt "MSG_312"
 msgid "https://support.endlessm.com/hc/en-us/articles/208895726"
 msgstr "https://support.endlessm.com/hc/pt/articles/208895726"
 
+#, c-format
 msgctxt "MSG_314"
 msgid "http://community.endlessm.com/"
 msgstr "http://community.endlessm.com/"
 
+#, c-format
 msgctxt "MSG_315"
 msgid "%s/%s Download"
 msgstr "Download %s/%s "
 
+#, c-format
 msgctxt "MSG_316"
 msgid "Full"
 msgstr "Full"
 
+#, c-format
 msgctxt "MSG_319"
 msgid "%s (%s)"
 msgstr "%ls (%s)"
 
+#, c-format
 msgctxt "MSG_320"
 msgid "Great! Endless OS has been successfully installed."
 msgstr "Legal! O Endless OS foi instalado com sucesso."
 
+#, c-format
 msgctxt "MSG_343"
 msgid "Great! Your Endless OS Live USB has been created."
 msgstr "Legal! O seu Live USB do Endless OS foi criado."
 
+#, c-format
 msgctxt "MSG_344"
 msgid "Great! Your Endless OS Reflasher USB has been created."
 msgstr "Legal! O seu USB Bootável para Endless OS foi criado."
 
+#, c-format
 msgctxt "MSG_321"
 msgid "Select Your Endless OS Version"
 msgstr "Selecione a sua versão do Endless OS"
 
+#, c-format
 msgctxt "MSG_322"
 msgid "Is this the version you’d like to use? If not, select another."
 msgstr "Esta é a versão do Endless OS que você deseja usar? Se não for, baixe outra."
 
+#, c-format
 msgctxt "MSG_323"
 msgid ""
 "We couldn’t finish getting Endless OS. Check your internet connection and "
 "click \"Resume\" to carry on downloading."
 msgstr "Não conseguimos terminar de captar o Endless OS. Verifique a sua conexão de internet e clique em \"Continuar\" para prosseguir com o download."
 
+#, c-format
 msgctxt "MSG_324"
 msgid ""
 "Something is wrong with your Endless OS file. Click \"Download Again\" to "
 "try downloading it again."
 msgstr "Há algo errado com o seu arquivo Endless OS. Clique em \"Fazer o download novamente\" para tentar baixar novamente."
 
+#, c-format
 msgctxt "MSG_325"
 msgid ""
 "Something went wrong writing Endless OS to your USB device. Find a different"
 " device and click \"Try Again\"."
 msgstr "Aconteceu algo errado durante a gravação do Endless OS no seu dispositivo USB. Procure um novo dispositivo e clique em \"Tentar novamente\"."
 
+#, c-format
 msgctxt "MSG_358"
 msgid "Something went wrong installing Endless OS to your computer."
 msgstr "Ocorreu um erro durante a instalação do Endless OS no seu computador."
 
+#, c-format
 msgctxt "MSG_326"
 msgid "Resume"
 msgstr "Continuar"
 
+#, c-format
 msgctxt "MSG_327"
 msgid "Download again"
 msgstr "Baixe novamente"
 
+#, c-format
 msgctxt "MSG_328"
 msgid "Try again"
 msgstr "Tente novamente"
 
+#, c-format
 msgctxt "MSG_329"
 msgid "https://support.endlessm.com/hc/en-us/articles/210527103"
 msgstr "https://support.endlessm.com/hc/pt/articles/210527103"
 
+#, c-format
 msgctxt "MSG_330"
 msgid ""
 "You have selected a slow USB device (USB 1.0). Please use a USB 3.0 device "
 "for the best experience."
 msgstr "Você selecionou um pendrive USB de baixa velocidade (USB 1.0). Para uma melhor experiência, favor usar um pendrive USB 3.0. "
 
+#, c-format
 msgctxt "MSG_331"
 msgid ""
 "You have selected a slow USB device (USB 1.0). Please use a USB 2.0 device "
 "for a better experience."
 msgstr "Você selecionou um pendrive USB de baixa velocidade (USB 1.0). Para uma melhor experiência, favor usar um pendrive USB 2.0. "
 
+#, c-format
 msgctxt "MSG_332"
 msgid ""
 "You have selected a slower USB device (USB 2.0). Please use a USB 3.0 device"
 " for the best experience."
 msgstr "Você selecionou um pendrive USB mais lento (USB 2.0). Para uma melhor experiência, favor usar um pendrive USB 3.0. "
 
+#, c-format
 msgctxt "MSG_333"
 msgid ""
 "Your USB 3.0 device is inserted into a USB 2.0 port. Please insert it into a"
 " USB 3.0 port (usually blue) for the best experience."
 msgstr "O seu pendrive USB 3.0 foi inserido em uma entrada USB 2.0. Favor inserir o pendrive em uma entrada USB 3.0 (geralmente azul) para obter uma melhor experiência."
 
+#, c-format
 msgctxt "MSG_334"
 msgid ""
 "There isn’t enough disk space for downloading Endless OS. Please free up %s "
 "and click \"Resume\" to start downloading."
 msgstr "Não há espaço suficiente no HD para baixar o Endless OS. Favor liberar até %s e clicar em \"Continuar\" para começar o download."
 
+#, c-format
 msgctxt "MSG_335"
 msgid ""
 "The selected version of Endless OS requires %s of free disk space, but only "
 "%s is available. Please free up some space on drive %s to continue."
 msgstr "A versão selecionada do Endless OS requer %s de espaço liberado no HD, mas só %s está disponível."
 
+#, c-format
 msgctxt "MSG_336"
 msgid "Delete the invalid file (%s)."
 msgstr "Remova o arquivo inválido (%s)."
 
+#, c-format
 msgctxt "MSG_337"
 msgid ""
 "For Endless OS %s, we recommend selecting at least %s of storage space."
 msgstr "Para o Endless OS %s, recomendamos que você selecione pelo menos %s de espaço de armazenagem."
 
+#, c-format
 msgctxt "MSG_338"
 msgid "%s (Minimum)"
 msgstr "%s (Mínimo)"
 
+#, c-format
 msgctxt "MSG_339"
 msgid "%s (Recommended)"
 msgstr "%s (Recomendado)"
 
+#, c-format
 msgctxt "MSG_340"
 msgid "%s (Maximum)"
 msgstr "%s (Máximo)"
 
+#, c-format
 msgctxt "MSG_341"
 msgid "You currently have %s free on your %s %s drive."
 msgstr "Você possui %s de espaço livre no drive %s %s."
 
+#, c-format
 msgctxt "MSG_342"
 msgid "Select how much of your %s drive to dedicate to Endless OS."
 msgstr "Selecione quanto do seu drive %s você deseja dedicar para o Endless OS."
 
+#, c-format
 msgctxt "MSG_350"
 msgid "Unfortunately, there is not enough storage space."
 msgstr "Infelizmente não há espaço de armazenagem suficiente."
 
+#, c-format
 msgctxt "MSG_351"
 msgid ""
 "To continue installing Endless OS, please free up at least %s by deleting "
 "videos, photos, or other large files on your %s drive."
 msgstr "Para continuar a instalação do Endless OS, favor liberar pelo menos %s no seu drive %s apagando vídeos, fotos ou outros arquivos de grande porte."
 
+#, c-format
 msgctxt "MSG_352"
 msgid "Unfortunately, your %s drive uses an unsupported format."
 msgstr "Infelizmente, o seu drive %s utiliza um formato incompatível."
 
+#, c-format
 msgctxt "MSG_353"
 msgid "Endless OS can only be installed on an NTFS drive."
 msgstr "O Endless OS só pode ser instalado em um drive NTFS."
 
+#, c-format
 msgctxt "MSG_354"
 msgid "Unfortunately, your computer is incompatible with Endless OS."
 msgstr "Infelizmente, seu computador não é compatível com o Endless OS."
 
+#, c-format
 msgctxt "MSG_355"
 msgid "Endless OS only supports 64-bit computers."
 msgstr "O Endless OS só é compatível com computadores de 64-bits"
 
+#, c-format
 msgctxt "MSG_356"
 msgid "Unfortunately, your %s drive is encrypted."
 msgstr "Infelizmente, o seu drive %s está criptografado."
 
+#, c-format
 msgctxt "MSG_357"
 msgid ""
 "Endless OS cannot be installed on drives which are protected with Device "
 "Encryption or BitLocker."
 msgstr "O Endless OS não pode ser instalado em drives protegidos com Criptografia de aparelho ou BitLocker."
 
+#, c-format
 msgctxt "MSG_359"
 msgid "Unfortunately, your computer has another OS installed already."
 msgstr "Infelizmente, o seu computador já possui um outro Sistema Operacional instalado."
 
+#, c-format
 msgctxt "MSG_360"
 msgid "Endless OS only supports dual-boot on Windows-only systems."
 msgstr "O Endless OS só funciona em modo dual boot com o sistema Windows."
 
+#, c-format
 msgctxt "MSG_361"
 msgid ""
 "Are you sure you want to uninstall Endless OS? This will erase all apps and "
 "documents stored within your Endless OS installation."
 msgstr "Você tem certeza de que quer desinstalar o Endless OS? Isso vai fazer com que todos os aplicativos e documentos salvos no Endless OS sejam apagados."
 
+#, c-format
 msgctxt "MSG_362"
 msgid "Endless OS has been uninstalled successfully"
 msgstr "O Endless OS foi desinstalado com sucesso"
 
+#, c-format
 msgctxt "MSG_363"
 msgid ""
 "There was a problem uninstalling Endless OS. Please contact us for "
 "assistance."
 msgstr "Ocorreu um problema com a desinstalação do Endless OS. Favor contatar o nosso suporte."
 
+#, c-format
 msgctxt "MSG_364"
 msgid "Uninstall Endless from this Computer"
 msgstr "Desinstalar o Endless deste computador."
 
+#, c-format
 msgctxt "MSG_365"
 msgid ""
 "If you uninstall Endless, Windows will run automatically when you start your"
 " computer. Any apps and files stored in Endless will be erased."
 msgstr "Caso você desinstale o Endless, o Windows vai rodar automaticamente quando você iniciar o seu computador. Todos os arquivos e programas salvos no Endless serão apagados."
 
+#, c-format
 msgctxt "MSG_366"
 msgid "Uninstall Endless"
 msgstr "Desinstale o Endless"
 
+#, c-format
 msgctxt "MSG_367"
 msgid ""
 "Make sure you back up any important documents from Endless before you "
 "uninstall."
 msgstr "Assegure-se de ter feito back up dos seus documentos mais importantes salvos no Endless antes de prosseguir com a desinstalação."
 
+#, c-format
 msgctxt "MSG_368"
 msgid ""
 "Internet Explorer %d is not supported. Please click OK to download Internet "
 "Explorer %d, install it, then run the Endless Installer again."
 msgstr "O Internet Explorer %d não é compatível. Favor clicar em ok para baixar o Internet Explorer %d, instale-o e depois execute o Instalador Endless novamente.  "
 
+#, c-format
 msgctxt "MSG_369"
 msgid "%s Download"
 msgstr "Download de %s"
 
+#, c-format
 msgctxt "MSG_370"
 msgid "Oops, something went wrong setting up Endless OS."
 msgstr "Opa! Algo errado aconteceu ao configurar o Endless OS."
 
+#, c-format
 msgctxt "MSG_371"
 msgid "https://support.endlessm.com/hc/en-us/articles/213585826"
 msgstr "https://support.endlessm.com/hc/pt"
 
+#, c-format
 msgctxt "MSG_372"
 msgid ""
 "No USB device found. If you've inserted one, try a different USB port or a "
 "different USB device."
 msgstr "Nenhum dispositivo USB encontrado. Caso você tenha inserido algum, tente uma outra entrada ou outro pendrive."
 
+#, c-format
 msgctxt "MSG_400"
 msgid "Basic"
 msgstr "Básico"
 
+#, c-format
 msgctxt "MSG_401"
 msgid "English"
 msgstr "Inglês"
 
+#, c-format
 msgctxt "MSG_402"
 msgid "Spanish"
 msgstr "Espanhol"
 
+#, c-format
 msgctxt "MSG_403"
 msgid "Portuguese (Brazilian)"
 msgstr "Português do Brasil"
 
+#, c-format
 msgctxt "MSG_404"
 msgid "Arabic"
 msgstr "Árabe"
 
+#, c-format
 msgctxt "MSG_405"
 msgid "French"
 msgstr "Francês"
 
+#, c-format
 msgctxt "MSG_406"
 msgid "Chinese Simplified"
 msgstr "Chinês Simplificado"
 
+#, c-format
 msgctxt "MSG_407"
 msgid "Bengali"
 msgstr "Bengalês"
 
+#, c-format
 msgctxt "MSG_408"
 msgid "Spanish (Guatemala)"
 msgstr "Espanhol (Guatemala)"

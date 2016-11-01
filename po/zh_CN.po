@@ -297,351 +297,429 @@ msgctxt "MSG_025"
 msgid "Pb"
 msgstr "Pb"
 
+#, c-format
 msgctxt "MSG_046"
 msgid "%s (Disk %d) [%s]"
 msgstr "%s (磁盘 %d) [%s]"
 
+#, c-format
 msgctxt "MSG_049"
 msgid "Endless - Cancellation"
 msgstr "Endless - 取消"
 
+#, c-format
 msgctxt "MSG_095"
 msgid "Endless Image"
 msgstr "Endless Image"
 
+#, c-format
 msgctxt "MSG_105"
 msgid ""
 "Warning: Cancelling may cause the device to malfunction. If you are sure you"
 " want to cancel, click YES. Otherwise, click NO."
 msgstr "警告：取消可能导致设备出现故障。如果您确定要取消，请单击“是”。否则单击“否”。"
 
+#, c-format
 msgctxt "MSG_107"
 msgid "All files"
 msgstr "全部文件"
 
+#, c-format
 msgctxt "MSG_201"
 msgid "Cancelling, please wait"
 msgstr "取消中，请稍候。"
 
+#, c-format
 msgctxt "MSG_300"
 msgid "Error downloading file."
 msgstr "下载文件时出错。"
 
+#, c-format
 msgctxt "MSG_302"
 msgid "%s of %s (%s/s)"
 msgstr "%s / %s (%s/s)"
 
+#, c-format
 msgctxt "MSG_303"
 msgid "Something is wrong with your Endless OS file."
 msgstr "您的Endless操作系统文件出现错误。"
 
+#, c-format
 msgctxt "MSG_304"
 msgid "Downloading"
 msgstr "下载中"
 
+#, c-format
 msgctxt "MSG_305"
 msgid "Step %d"
 msgstr "第%d步"
 
+#, c-format
 msgctxt "MSG_306"
 msgid "of %d:"
 msgstr "共%d步："
 
+#, c-format
 msgctxt "MSG_307"
 msgid "No Label"
 msgstr "无标签"
 
+#, c-format
 msgctxt "MSG_309"
 msgid "Installing"
 msgstr "安装"
 
+#, c-format
 msgctxt "MSG_310"
 msgid "Verifying"
 msgstr "验证中"
 
+#, c-format
 msgctxt "MSG_311"
 msgid "Writing"
 msgstr "写入中"
 
+#, c-format
 msgctxt "MSG_312"
 msgid "https://support.endlessm.com/hc/en-us/articles/208895726"
 msgstr "https://support.endlessm.com/hc/en-us/articles/208895726"
 
+#, c-format
 msgctxt "MSG_314"
 msgid "http://community.endlessm.com/"
 msgstr "http://community.endlessm.com/"
 
+#, c-format
 msgctxt "MSG_315"
 msgid "%s/%s Download"
 msgstr "%s/%s下载"
 
+#, c-format
 msgctxt "MSG_316"
 msgid "Full"
 msgstr "Full"
 
+#, c-format
 msgctxt "MSG_319"
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
+#, c-format
 msgctxt "MSG_320"
 msgid "Great! Endless OS has been successfully installed."
 msgstr "太棒了！Endless操作系统已经成功安装。"
 
+#, c-format
 msgctxt "MSG_343"
 msgid "Great! Your Endless OS Live USB has been created."
 msgstr "太棒了！您的Endless操作系统Live USB已经创建。 "
 
+#, c-format
 msgctxt "MSG_344"
 msgid "Great! Your Endless OS Reflasher USB has been created."
 msgstr "太棒了！您的Endless操作系统Reflasher USB已经创建。"
 
+#, c-format
 msgctxt "MSG_321"
 msgid "Select Your Endless OS Version"
 msgstr "选择您的Endless操作系统版本"
 
+#, c-format
 msgctxt "MSG_322"
 msgid "Is this the version you’d like to use? If not, select another."
 msgstr "这是您想要使用的版本吗？如果不是，请选择其他版本。"
 
+#, c-format
 msgctxt "MSG_323"
 msgid ""
 "We couldn’t finish getting Endless OS. Check your internet connection and "
 "click \"Resume\" to carry on downloading."
 msgstr "我们无法完成Endless操作系统的下载。请检查您的互联网连接，点击“继续”以继续下载。"
 
+#, c-format
 msgctxt "MSG_324"
 msgid ""
 "Something is wrong with your Endless OS file. Click \"Download Again\" to "
 "try downloading it again."
 msgstr "您的Endless操作系统文件出现问题。请单击“再次下载”以再次尝试下载。"
 
+#, c-format
 msgctxt "MSG_325"
 msgid ""
 "Something went wrong writing Endless OS to your USB device. Find a different"
 " device and click \"Try Again\"."
 msgstr "您的USB设备在写入Endless操作系统时出现问题。请使用另一个设备，点击“再试一次”。"
 
+#, c-format
 msgctxt "MSG_358"
 msgid "Something went wrong installing Endless OS to your computer."
 msgstr "在您的电脑上安装Endless操作系统时出错。"
 
+#, c-format
 msgctxt "MSG_326"
 msgid "Resume"
 msgstr "继续"
 
+#, c-format
 msgctxt "MSG_327"
 msgid "Download again"
 msgstr "再次下载"
 
+#, c-format
 msgctxt "MSG_328"
 msgid "Try again"
 msgstr "再试一次"
 
+#, c-format
 msgctxt "MSG_329"
 msgid "https://support.endlessm.com/hc/en-us/articles/210527103"
 msgstr "https://support.endlessm.com/hc/en-us/articles/210527103"
 
+#, c-format
 msgctxt "MSG_330"
 msgid ""
 "You have selected a slow USB device (USB 1.0). Please use a USB 3.0 device "
 "for the best experience."
 msgstr "您选择的是传输缓慢的USB设备(USB 1.0)。请使用USB 3.0设备以获得最佳体验。"
 
+#, c-format
 msgctxt "MSG_331"
 msgid ""
 "You have selected a slow USB device (USB 1.0). Please use a USB 2.0 device "
 "for a better experience."
 msgstr "您选择的是传输缓慢的USB设备(USB 1.0)。请使用USB 2.0设备以获得更好的体验。"
 
+#, c-format
 msgctxt "MSG_332"
 msgid ""
 "You have selected a slower USB device (USB 2.0). Please use a USB 3.0 device"
 " for the best experience."
 msgstr "您选择的是传输较慢的USB设备(USB 2.0)。请使用USB 3.0设备以获得最佳体验。"
 
+#, c-format
 msgctxt "MSG_333"
 msgid ""
 "Your USB 3.0 device is inserted into a USB 2.0 port. Please insert it into a"
 " USB 3.0 port (usually blue) for the best experience."
 msgstr "您的USB 3.0设备插入了USB 2.0接口。请将其插入USB 3.0接口(通常为蓝色)以获得最佳体验。"
 
+#, c-format
 msgctxt "MSG_334"
 msgid ""
 "There isn’t enough disk space for downloading Endless OS. Please free up %s "
 "and click \"Resume\" to start downloading."
 msgstr "空间不足，无法下载Endless操作系统。请释放%s空间，之后点击“继续”开始下载。"
 
+#, c-format
 msgctxt "MSG_335"
 msgid ""
 "The selected version of Endless OS requires %s of free disk space, but only "
 "%s is available. Please free up some space on drive %s to continue."
 msgstr "您选择的Endless操作系统版本需要%s可用磁盘空间，但是可用磁盘空间仅剩%s。请释放驱动器%s更多空间以继续。"
 
+#, c-format
 msgctxt "MSG_336"
 msgid "Delete the invalid file (%s)."
 msgstr "删除无效文件(%s)。"
 
+#, c-format
 msgctxt "MSG_337"
 msgid ""
 "For Endless OS %s, we recommend selecting at least %s of storage space."
 msgstr "对于Endless操作系统%s，我们建议选择容量至少为%s的存储空间。"
 
+#, c-format
 msgctxt "MSG_338"
 msgid "%s (Minimum)"
 msgstr "%s(最小值)"
 
+#, c-format
 msgctxt "MSG_339"
 msgid "%s (Recommended)"
 msgstr "%s (建议)"
 
+#, c-format
 msgctxt "MSG_340"
 msgid "%s (Maximum)"
 msgstr "%s (最大值)"
 
+#, c-format
 msgctxt "MSG_341"
 msgid "You currently have %s free on your %s %s drive."
 msgstr "您目前有%s可用空间在%s %s驱动器上。"
 
+#, c-format
 msgctxt "MSG_342"
 msgid "Select how much of your %s drive to dedicate to Endless OS."
 msgstr "选择%s驱动器中有多少容量专用于Endless操作系统。"
 
+#, c-format
 msgctxt "MSG_350"
 msgid "Unfortunately, there is not enough storage space."
 msgstr "很遗憾，没有足够存储空间。"
 
+#, c-format
 msgctxt "MSG_351"
 msgid ""
 "To continue installing Endless OS, please free up at least %s by deleting "
 "videos, photos, or other large files on your %s drive."
 msgstr "要继续安装Endless操作系统，请通过以下方式至少释放%s空间：在您的%s驱动器上删除视频、照片或其他大文件。"
 
+#, c-format
 msgctxt "MSG_352"
 msgid "Unfortunately, your %s drive uses an unsupported format."
 msgstr "很遗憾，您的%s驱动器使用不支持的格式。"
 
+#, c-format
 msgctxt "MSG_353"
 msgid "Endless OS can only be installed on an NTFS drive."
 msgstr "Endless操作系统只能安装在NTFS驱动器上。"
 
+#, c-format
 msgctxt "MSG_354"
 msgid "Unfortunately, your computer is incompatible with Endless OS."
 msgstr "很遗憾，您的电脑与Endless操作系统不兼容。"
 
+#, c-format
 msgctxt "MSG_355"
 msgid "Endless OS only supports 64-bit computers."
 msgstr "Endless操作系统仅支持64位电脑。"
 
+#, c-format
 msgctxt "MSG_356"
 msgid "Unfortunately, your %s drive is encrypted."
 msgstr "很遗憾，您的%s驱动器已加密。"
 
+#, c-format
 msgctxt "MSG_357"
 msgid ""
 "Endless OS cannot be installed on drives which are protected with Device "
 "Encryption or BitLocker."
 msgstr "Endless操作系统不能安装在使用“设备加密”或BitLocker进行保护的驱动器上。"
 
+#, c-format
 msgctxt "MSG_359"
 msgid "Unfortunately, your computer has another OS installed already."
 msgstr "很遗憾，您的电脑已经安装了其他操作系统。"
 
+#, c-format
 msgctxt "MSG_360"
 msgid "Endless OS only supports dual-boot on Windows-only systems."
 msgstr "Endless在仅包含Windows的系统上支持双重引导。"
 
+#, c-format
 msgctxt "MSG_361"
 msgid ""
 "Are you sure you want to uninstall Endless OS? This will erase all apps and "
 "documents stored within your Endless OS installation."
 msgstr "是否确定要卸载Endless操作系统。这将擦除Endless操作系统安装中存储的所有应用和文档。"
 
+#, c-format
 msgctxt "MSG_362"
 msgid "Endless OS has been uninstalled successfully"
 msgstr "Endless操作系统已成功卸载"
 
+#, c-format
 msgctxt "MSG_363"
 msgid ""
 "There was a problem uninstalling Endless OS. Please contact us for "
 "assistance."
 msgstr "卸载Endless操作系统时出现问题。请联系我们以获取帮助。"
 
+#, c-format
 msgctxt "MSG_364"
 msgid "Uninstall Endless from this Computer"
 msgstr "从此电脑卸载Endless"
 
+#, c-format
 msgctxt "MSG_365"
 msgid ""
 "If you uninstall Endless, Windows will run automatically when you start your"
 " computer. Any apps and files stored in Endless will be erased."
 msgstr "如果您卸载Endless，则在您启动电脑时，Windows将自动运行。Endless中存储的所有应用和文件都将被擦除。"
 
+#, c-format
 msgctxt "MSG_366"
 msgid "Uninstall Endless"
 msgstr "卸载Endless"
 
+#, c-format
 msgctxt "MSG_367"
 msgid ""
 "Make sure you back up any important documents from Endless before you "
 "uninstall."
 msgstr "在卸载之前，确保您已备份了Endless中的所有重要文档。"
 
+#, c-format
 msgctxt "MSG_368"
 msgid ""
 "Internet Explorer %d is not supported. Please click OK to download Internet "
 "Explorer %d, install it, then run the Endless Installer again."
 msgstr "不支持Internet Explorer %d。请单击“确定”以下载Internet Explorer %d并安装，然后再次运行Endless安装程序。"
 
+#, c-format
 msgctxt "MSG_369"
 msgid "%s Download"
 msgstr "%s下载"
 
+#, c-format
 msgctxt "MSG_370"
 msgid "Oops, something went wrong setting up Endless OS."
 msgstr "哎呀，安装Endless操作系统时出现问题。"
 
+#, c-format
 msgctxt "MSG_371"
 msgid "https://support.endlessm.com/hc/en-us/articles/213585826"
 msgstr "https://support.endlessm.com/hc/en-us/articles/213585826"
 
+#, c-format
 msgctxt "MSG_372"
 msgid ""
 "No USB device found. If you've inserted one, try a different USB port or a "
 "different USB device."
 msgstr "未找到USB设备。如果您已插入了USB设备，请尝试使用其他USB端口或者尝试使用其他USB设备。"
 
+#, c-format
 msgctxt "MSG_400"
 msgid "Basic"
 msgstr "基本"
 
+#, c-format
 msgctxt "MSG_401"
 msgid "English"
 msgstr "英语"
 
+#, c-format
 msgctxt "MSG_402"
 msgid "Spanish"
 msgstr "西班牙语"
 
+#, c-format
 msgctxt "MSG_403"
 msgid "Portuguese (Brazilian)"
 msgstr "葡萄牙语(巴西)"
 
+#, c-format
 msgctxt "MSG_404"
 msgid "Arabic"
 msgstr "阿拉伯语"
 
+#, c-format
 msgctxt "MSG_405"
 msgid "French"
 msgstr "法语"
 
+#, c-format
 msgctxt "MSG_406"
 msgid "Chinese Simplified"
 msgstr "简体中文"
 
+#, c-format
 msgctxt "MSG_407"
 msgid "Bengali"
 msgstr "孟加拉语"
 
+#, c-format
 msgctxt "MSG_408"
 msgid "Spanish (Guatemala)"
 msgstr "西班牙语(危地马拉)"

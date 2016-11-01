@@ -294,351 +294,429 @@ msgctxt "MSG_025"
 msgid "Pb"
 msgstr "Pb"
 
+#, c-format
 msgctxt "MSG_046"
 msgid "%s (Disk %d) [%s]"
 msgstr "%s (Disk %d) [%s]"
 
+#, c-format
 msgctxt "MSG_049"
 msgid "Endless - Cancellation"
 msgstr "Endless - Pembatalan"
 
+#, c-format
 msgctxt "MSG_095"
 msgid "Endless Image"
 msgstr "File Image Endless"
 
+#, c-format
 msgctxt "MSG_105"
 msgid ""
 "Warning: Cancelling may cause the device to malfunction. If you are sure you"
 " want to cancel, click YES. Otherwise, click NO."
 msgstr "Peringatan: Membatalkan dapat mengakibatkan malfungsi perangkat. Jika Anda yakin ingin membatalkan, klik YA. Jika tidak, klik TIDAK."
 
+#, c-format
 msgctxt "MSG_107"
 msgid "All files"
 msgstr "Semua file"
 
+#, c-format
 msgctxt "MSG_201"
 msgid "Cancelling, please wait"
 msgstr "Sedang membatalkan, harap menunggu"
 
+#, c-format
 msgctxt "MSG_300"
 msgid "Error downloading file."
 msgstr "Kesalahan saat mengunduh file."
 
+#, c-format
 msgctxt "MSG_302"
 msgid "%s of %s (%s/s)"
 msgstr "%s dari %s (%s/d)"
 
+#, c-format
 msgctxt "MSG_303"
 msgid "Something is wrong with your Endless OS file."
 msgstr "Ada kesalahan pada file Endless OS Anda."
 
+#, c-format
 msgctxt "MSG_304"
 msgid "Downloading"
 msgstr "Mengunduh"
 
+#, c-format
 msgctxt "MSG_305"
 msgid "Step %d"
 msgstr "Langkah %d"
 
+#, c-format
 msgctxt "MSG_306"
 msgid "of %d:"
 msgstr "dari %d:"
 
+#, c-format
 msgctxt "MSG_307"
 msgid "No Label"
 msgstr "Tanpa Label"
 
+#, c-format
 msgctxt "MSG_309"
 msgid "Installing"
 msgstr "Menginstal"
 
+#, c-format
 msgctxt "MSG_310"
 msgid "Verifying"
 msgstr "Memverifikasi."
 
+#, c-format
 msgctxt "MSG_311"
 msgid "Writing"
 msgstr "Menulis"
 
+#, c-format
 msgctxt "MSG_312"
 msgid "https://support.endlessm.com/hc/en-us/articles/208895726"
 msgstr "https://support.endlessm.com/hc/en-us/articles/208895726"
 
+#, c-format
 msgctxt "MSG_314"
 msgid "http://community.endlessm.com/"
 msgstr "http://community.endlessm.com/"
 
+#, c-format
 msgctxt "MSG_315"
 msgid "%s/%s Download"
 msgstr "%s/%s Unduhan"
 
+#, c-format
 msgctxt "MSG_316"
 msgid "Full"
 msgstr "Full"
 
+#, c-format
 msgctxt "MSG_319"
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
+#, c-format
 msgctxt "MSG_320"
 msgid "Great! Endless OS has been successfully installed."
 msgstr "Bagus! Endless OS telah berhasil diinstal."
 
+#, c-format
 msgctxt "MSG_343"
 msgid "Great! Your Endless OS Live USB has been created."
 msgstr "Bagus! Endless OS Live USB telah dibuat."
 
+#, c-format
 msgctxt "MSG_344"
 msgid "Great! Your Endless OS Reflasher USB has been created."
 msgstr "Bagus! Endless OS Reflasher USB Anda telah dibuat."
 
+#, c-format
 msgctxt "MSG_321"
 msgid "Select Your Endless OS Version"
 msgstr "Pilih Versi Endless OS Anda"
 
+#, c-format
 msgctxt "MSG_322"
 msgid "Is this the version you’d like to use? If not, select another."
 msgstr "Inikah versi yang ingin Anda gunakan? Jika tidak, pilih lainnya."
 
+#, c-format
 msgctxt "MSG_323"
 msgid ""
 "We couldn’t finish getting Endless OS. Check your internet connection and "
 "click \"Resume\" to carry on downloading."
 msgstr "Kami tidak bisa menyelesaikan mendapatkan Endless OS. Periksa koneksi internet Anda dan klik \"Lanjutkan\" untuk melanjutkan pengunduhan."
 
+#, c-format
 msgctxt "MSG_324"
 msgid ""
 "Something is wrong with your Endless OS file. Click \"Download Again\" to "
 "try downloading it again."
 msgstr "Terjadi sesuatu dengan berkas Endless OS. Klik \"Unduh Ulang\" untuk mencoba mengunduhnya kembali."
 
+#, c-format
 msgctxt "MSG_325"
 msgid ""
 "Something went wrong writing Endless OS to your USB device. Find a different"
 " device and click \"Try Again\"."
 msgstr "Terjadi kesalahan dalam penulisan Endless OS ke perangkat USB Anda. Cari perangkat lain dan klik \"Coba Lagi\"."
 
+#, c-format
 msgctxt "MSG_358"
 msgid "Something went wrong installing Endless OS to your computer."
 msgstr "Terjadi sesuatu pada komputer Anda saat menginstal Endless OS."
 
+#, c-format
 msgctxt "MSG_326"
 msgid "Resume"
 msgstr "Ringkasan"
 
+#, c-format
 msgctxt "MSG_327"
 msgid "Download again"
 msgstr "Unduh Ulang"
 
+#, c-format
 msgctxt "MSG_328"
 msgid "Try again"
 msgstr "Coba lagi"
 
+#, c-format
 msgctxt "MSG_329"
 msgid "https://support.endlessm.com/hc/en-us/articles/210527103"
 msgstr "https://support.endlessm.com/hc/en-us/articles/210527103"
 
+#, c-format
 msgctxt "MSG_330"
 msgid ""
 "You have selected a slow USB device (USB 1.0). Please use a USB 3.0 device "
 "for the best experience."
 msgstr "Anda telah memilih perangkat USB yang lambat (USB 1.0). Silakan gunakan USB 3.0 untuk pengalaman terbaik."
 
+#, c-format
 msgctxt "MSG_331"
 msgid ""
 "You have selected a slow USB device (USB 1.0). Please use a USB 2.0 device "
 "for a better experience."
 msgstr "Anda telah memilih perangkat USB yang lamban (USB 1.0). Harap gunakan perangkat USB 2.0 untuk pengalaman yang lebih baik."
 
+#, c-format
 msgctxt "MSG_332"
 msgid ""
 "You have selected a slower USB device (USB 2.0). Please use a USB 3.0 device"
 " for the best experience."
 msgstr "Anda telah memilih perangkat USB yang lebih lambat (USB 2.0). Silakan gunakan USB 3.0 untuk pengalaman terbaik."
 
+#, c-format
 msgctxt "MSG_333"
 msgid ""
 "Your USB 3.0 device is inserted into a USB 2.0 port. Please insert it into a"
 " USB 3.0 port (usually blue) for the best experience."
 msgstr "Perangkat USB 3.0 Anda dimasukkan ke dalam port USB 2.0. Harap memasukkannya ke port USB 3.0 (umumnya berwarna biru) untuk pengalaman terbaik."
 
+#, c-format
 msgctxt "MSG_334"
 msgid ""
 "There isn’t enough disk space for downloading Endless OS. Please free up %s "
 "and click \"Resume\" to start downloading."
 msgstr "Ruang penyimpanan yang tersedia tidak cukup untuk mengunduh Endless OS. Silakan bebaskan %s dan klik \"Lanjutkan\" untuk mulai mengunduh."
 
+#, c-format
 msgctxt "MSG_335"
 msgid ""
 "The selected version of Endless OS requires %s of free disk space, but only "
 "%s is available. Please free up some space on drive %s to continue."
 msgstr "Versi Endless OS yang dipilih memerlukan %s ruang penyimpanan yang kosong, tetapi hanya %s yang tersedia. Silakan bebaskan ruang penyimpanan pada drive %s untuk melanjutkan."
 
+#, c-format
 msgctxt "MSG_336"
 msgid "Delete the invalid file (%s)."
 msgstr "Hapus berkas yang tak valid (%s)."
 
+#, c-format
 msgctxt "MSG_337"
 msgid ""
 "For Endless OS %s, we recommend selecting at least %s of storage space."
 msgstr "Untuk Endless OS %s, kami sarankan memilih sedikitnya ruang penyimpanan sebesar %s."
 
+#, c-format
 msgctxt "MSG_338"
 msgid "%s (Minimum)"
 msgstr "%s (Minimal)"
 
+#, c-format
 msgctxt "MSG_339"
 msgid "%s (Recommended)"
 msgstr "%s (Disarankan)"
 
+#, c-format
 msgctxt "MSG_340"
 msgid "%s (Maximum)"
 msgstr "%s (Maksimal)"
 
+#, c-format
 msgctxt "MSG_341"
 msgid "You currently have %s free on your %s %s drive."
 msgstr "Saat ini Anda memiliki ruang kosong %s pada drive %s %s."
 
+#, c-format
 msgctxt "MSG_342"
 msgid "Select how much of your %s drive to dedicate to Endless OS."
 msgstr "Pilih berapa banyak drive %s yang ingin Anda dedikasikan untuk Endless OS."
 
+#, c-format
 msgctxt "MSG_350"
 msgid "Unfortunately, there is not enough storage space."
 msgstr "Sayangnya, ruang penyimpanan tidak cukup."
 
+#, c-format
 msgctxt "MSG_351"
 msgid ""
 "To continue installing Endless OS, please free up at least %s by deleting "
 "videos, photos, or other large files on your %s drive."
 msgstr "Untuk lanjut menginstal Endless OS, harap kosongkan sedikitnya %s dengan menghapus video, foto, atau berkas berukuran besar lainnya di drive %s."
 
+#, c-format
 msgctxt "MSG_352"
 msgid "Unfortunately, your %s drive uses an unsupported format."
 msgstr "Sayangnya, drive %s menggunakan format yang tidak didukung."
 
+#, c-format
 msgctxt "MSG_353"
 msgid "Endless OS can only be installed on an NTFS drive."
 msgstr "Endless OS hanya dapat diinstal pada drive NTFS."
 
+#, c-format
 msgctxt "MSG_354"
 msgid "Unfortunately, your computer is incompatible with Endless OS."
 msgstr "Sayangnya, komputer Anda tidak kompatibel dengan Endless OS."
 
+#, c-format
 msgctxt "MSG_355"
 msgid "Endless OS only supports 64-bit computers."
 msgstr "Endless OS hanya mendukung komputer 64-bit."
 
+#, c-format
 msgctxt "MSG_356"
 msgid "Unfortunately, your %s drive is encrypted."
 msgstr "Sayangnya, drive %s Anda terenkripsi."
 
+#, c-format
 msgctxt "MSG_357"
 msgid ""
 "Endless OS cannot be installed on drives which are protected with Device "
 "Encryption or BitLocker."
 msgstr "Endless OS tidak dapat dipasang di drive karena terlindungi dengan Enkripsi Perangkat atau BitLocker. "
 
+#, c-format
 msgctxt "MSG_359"
 msgid "Unfortunately, your computer has another OS installed already."
 msgstr "Sayangnya komputer Anda sudah memasang OS lain."
 
+#, c-format
 msgctxt "MSG_360"
 msgid "Endless OS only supports dual-boot on Windows-only systems."
 msgstr "Endless OS hanya mendukung dual booting di sistem Windows saja."
 
+#, c-format
 msgctxt "MSG_361"
 msgid ""
 "Are you sure you want to uninstall Endless OS? This will erase all apps and "
 "documents stored within your Endless OS installation."
 msgstr "Anda yakin ingin menghapus pemasangan Endless OS? Tindakan ini akan menghapus semua aplikasi dan dokumen yang disimpan di dalam instalasi Endless OS Anda."
 
+#, c-format
 msgctxt "MSG_362"
 msgid "Endless OS has been uninstalled successfully"
 msgstr "Endless OS telah berhasil dihapus pemasangannya."
 
+#, c-format
 msgctxt "MSG_363"
 msgid ""
 "There was a problem uninstalling Endless OS. Please contact us for "
 "assistance."
 msgstr "Ada masalah menghapus pemasangan Endless OS. Hubungi kami untuk mendapatkan bantuan."
 
+#, c-format
 msgctxt "MSG_364"
 msgid "Uninstall Endless from this Computer"
 msgstr "Hapus pemasangan Endless dari Komputer ini"
 
+#, c-format
 msgctxt "MSG_365"
 msgid ""
 "If you uninstall Endless, Windows will run automatically when you start your"
 " computer. Any apps and files stored in Endless will be erased."
 msgstr "Jika Anda menghapus pemasangan Endless, Windows akan berjalan secara otomatis ketika Anda mulai menjalankan komputer. Setiap aplikasi dan file yang disimpan di Endless akan dihapus."
 
+#, c-format
 msgctxt "MSG_366"
 msgid "Uninstall Endless"
 msgstr "Hapus Pemasangan Endless"
 
+#, c-format
 msgctxt "MSG_367"
 msgid ""
 "Make sure you back up any important documents from Endless before you "
 "uninstall."
 msgstr "Pastikan Anda mencadangkan setiap dokumen penting dari Endless sebelum menghapus pemasangan."
 
+#, c-format
 msgctxt "MSG_368"
 msgid ""
 "Internet Explorer %d is not supported. Please click OK to download Internet "
 "Explorer %d, install it, then run the Endless Installer again."
 msgstr "Internet Explorer %d tidak didukung. Klik OK untuk mengunduh Internet Explorer %d, pasang Internet Explorer, lalu jalankan Installer Endless lagi."
 
+#, c-format
 msgctxt "MSG_369"
 msgid "%s Download"
 msgstr "%s Unduhan"
 
+#, c-format
 msgctxt "MSG_370"
 msgid "Oops, something went wrong setting up Endless OS."
 msgstr "Ups, ada yang salah ketika menyiapkan Endless OS."
 
+#, c-format
 msgctxt "MSG_371"
 msgid "https://support.endlessm.com/hc/en-us/articles/213585826"
 msgstr "https://support.endlessm.com/hc/en-us/articles/213585826"
 
+#, c-format
 msgctxt "MSG_372"
 msgid ""
 "No USB device found. If you've inserted one, try a different USB port or a "
 "different USB device."
 msgstr "Perangkat USB tidak ditemukan. Jika Anda telah memasukkan perangkat USB, coba port USB yang lain atau perangkat USB yang berbeda."
 
+#, c-format
 msgctxt "MSG_400"
 msgid "Basic"
 msgstr "Dasar"
 
+#, c-format
 msgctxt "MSG_401"
 msgid "English"
 msgstr "Inggris"
 
+#, c-format
 msgctxt "MSG_402"
 msgid "Spanish"
 msgstr "Spanyol"
 
+#, c-format
 msgctxt "MSG_403"
 msgid "Portuguese (Brazilian)"
 msgstr "Portugis (Brazil)"
 
+#, c-format
 msgctxt "MSG_404"
 msgid "Arabic"
 msgstr "Arab"
 
+#, c-format
 msgctxt "MSG_405"
 msgid "French"
 msgstr "Perancis"
 
+#, c-format
 msgctxt "MSG_406"
 msgid "Chinese Simplified"
 msgstr "Tionghoa Sederhana"
 
+#, c-format
 msgctxt "MSG_407"
 msgid "Bengali"
 msgstr "Bengali"
 
+#, c-format
 msgctxt "MSG_408"
 msgid "Spanish (Guatemala)"
 msgstr "Spanyol (Guatemala)"

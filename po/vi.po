@@ -295,351 +295,429 @@ msgctxt "MSG_025"
 msgid "Pb"
 msgstr "Pb"
 
+#, c-format
 msgctxt "MSG_046"
 msgid "%s (Disk %d) [%s]"
 msgstr "%s (Disk %d) [%s]"
 
+#, c-format
 msgctxt "MSG_049"
 msgid "Endless - Cancellation"
 msgstr "Endless - Hủy"
 
+#, c-format
 msgctxt "MSG_095"
 msgid "Endless Image"
 msgstr "Hình ảnh Endless"
 
+#, c-format
 msgctxt "MSG_105"
 msgid ""
 "Warning: Cancelling may cause the device to malfunction. If you are sure you"
 " want to cancel, click YES. Otherwise, click NO."
 msgstr "Cảnh báo: Việc hủy bỏ có thể khiến thiết bị trục trặc. Nếu bạn chắc là mình muốn hủy bỏ, nhấn CÓ. Nếu không, bạn nhấn KHÔNG!"
 
+#, c-format
 msgctxt "MSG_107"
 msgid "All files"
 msgstr "Tất cả tệp"
 
+#, c-format
 msgctxt "MSG_201"
 msgid "Cancelling, please wait"
 msgstr "Đang hủy, vui lòng đợi"
 
+#, c-format
 msgctxt "MSG_300"
 msgid "Error downloading file."
 msgstr "Lỗi khi tải tệp xuống."
 
+#, c-format
 msgctxt "MSG_302"
 msgid "%s of %s (%s/s)"
 msgstr "%s trong số %s (%s/s)"
 
+#, c-format
 msgctxt "MSG_303"
 msgid "Something is wrong with your Endless OS file."
 msgstr "Có điều gì đó không ổn với tập tin Endless OS của bạn."
 
+#, c-format
 msgctxt "MSG_304"
 msgid "Downloading"
 msgstr "Đang tải"
 
+#, c-format
 msgctxt "MSG_305"
 msgid "Step %d"
 msgstr "Bước %d"
 
+#, c-format
 msgctxt "MSG_306"
 msgid "of %d:"
 msgstr "trong %d:"
 
+#, c-format
 msgctxt "MSG_307"
 msgid "No Label"
 msgstr "Không có Nhãn"
 
+#, c-format
 msgctxt "MSG_309"
 msgid "Installing"
 msgstr "Đang cài đặt"
 
+#, c-format
 msgctxt "MSG_310"
 msgid "Verifying"
 msgstr "Đang xác thực"
 
+#, c-format
 msgctxt "MSG_311"
 msgid "Writing"
 msgstr "Đang ghi"
 
+#, c-format
 msgctxt "MSG_312"
 msgid "https://support.endlessm.com/hc/en-us/articles/208895726"
 msgstr "https://support.endlessm.com/hc/en-us/articles/208895726"
 
+#, c-format
 msgctxt "MSG_314"
 msgid "http://community.endlessm.com/"
 msgstr "http://community.endlessm.com/"
 
+#, c-format
 msgctxt "MSG_315"
 msgid "%s/%s Download"
 msgstr "%s/%s Tải xuống"
 
+#, c-format
 msgctxt "MSG_316"
 msgid "Full"
 msgstr "Full"
 
+#, c-format
 msgctxt "MSG_319"
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
+#, c-format
 msgctxt "MSG_320"
 msgid "Great! Endless OS has been successfully installed."
 msgstr "Thật tuyệt! Hệ điều hành Endless của bạn đã được cài đặt thành công."
 
+#, c-format
 msgctxt "MSG_343"
 msgid "Great! Your Endless OS Live USB has been created."
 msgstr "Thật tuyệt! USB Trực tiếp Hệ điều hành Endless của bạn đã được tạo."
 
+#, c-format
 msgctxt "MSG_344"
 msgid "Great! Your Endless OS Reflasher USB has been created."
 msgstr "Thật tuyệt! USB phân phối lại Hệ điều hành Endless của bạn đã được tạo."
 
+#, c-format
 msgctxt "MSG_321"
 msgid "Select Your Endless OS Version"
 msgstr "Chọn Phiên bản Endless OS của Bạn"
 
+#, c-format
 msgctxt "MSG_322"
 msgid "Is this the version you’d like to use? If not, select another."
 msgstr "Đây có phải là phiên bản mà bạn muốn sử dụng? Nếu không, hãy chọn một phiên bản."
 
+#, c-format
 msgctxt "MSG_323"
 msgid ""
 "We couldn’t finish getting Endless OS. Check your internet connection and "
 "click \"Resume\" to carry on downloading."
 msgstr "Chúng tôi không thể hoàn tất việc tải HĐH Endless. Hãy kiểm tra kết nối internet của bạn và nhấp nút \"Khôi phục\" (Resume) để tiếp tục tải về."
 
+#, c-format
 msgctxt "MSG_324"
 msgid ""
 "Something is wrong with your Endless OS file. Click \"Download Again\" to "
 "try downloading it again."
 msgstr "Có điều gì đó không ổn với tập tin hệ điều hành Endless của bạn. Hãy nhấn \"Tải về lại\" để thử tải nó về một lần nữa."
 
+#, c-format
 msgctxt "MSG_325"
 msgid ""
 "Something went wrong writing Endless OS to your USB device. Find a different"
 " device and click \"Try Again\"."
 msgstr "Đã có vấn đề khi ghi HĐH Endless vào thiết bị USB của bạn. Hãy tìm một thiết bị khác và nhấp nút \"Thử lại\" (Try Again)."
 
+#, c-format
 msgctxt "MSG_358"
 msgid "Something went wrong installing Endless OS to your computer."
 msgstr "Có điều gì đó không ổn khi cài đặt Hệ điều hành Endless lên máy tính của bạn"
 
+#, c-format
 msgctxt "MSG_326"
 msgid "Resume"
 msgstr "Bắt đầu lại"
 
+#, c-format
 msgctxt "MSG_327"
 msgid "Download again"
 msgstr "Tải về lại"
 
+#, c-format
 msgctxt "MSG_328"
 msgid "Try again"
 msgstr "Thử lại"
 
+#, c-format
 msgctxt "MSG_329"
 msgid "https://support.endlessm.com/hc/en-us/articles/210527103"
 msgstr "https://support.endlessm.com/hc/en-us/articles/210527103"
 
+#, c-format
 msgctxt "MSG_330"
 msgid ""
 "You have selected a slow USB device (USB 1.0). Please use a USB 3.0 device "
 "for the best experience."
 msgstr "Bạn đã chọn một thiết bị USB tốc độ chậm (USB 1.0). Vui lòng sử dụng một thiết bị USB 3.0 để có trải nghiệm tốt nhất."
 
+#, c-format
 msgctxt "MSG_331"
 msgid ""
 "You have selected a slow USB device (USB 1.0). Please use a USB 2.0 device "
 "for a better experience."
 msgstr "Bạn đã chọn thiết bị USB chậm (USB 1.0). Vui lòng sử dụng thiết bị USB 2.0 để có trải nghiệm tốt hơn."
 
+#, c-format
 msgctxt "MSG_332"
 msgid ""
 "You have selected a slower USB device (USB 2.0). Please use a USB 3.0 device"
 " for the best experience."
 msgstr "Bạn đã chọn một thiết bị USB chậm hơn (USB 2.0). Vui lòng sử dụng thiết bị USB 3.0 để có được trải nghiệm tốt nhất."
 
+#, c-format
 msgctxt "MSG_333"
 msgid ""
 "Your USB 3.0 device is inserted into a USB 2.0 port. Please insert it into a"
 " USB 3.0 port (usually blue) for the best experience."
 msgstr "Thiết bị USB 3.0 của bạn được cắm cổng USB 2.0. Vui lòng cắm nó vào cổng USB 3.0 (thường là màu xanh) để có trải nghiệm nghiệm tốt nhất."
 
+#, c-format
 msgctxt "MSG_334"
 msgid ""
 "There isn’t enough disk space for downloading Endless OS. Please free up %s "
 "and click \"Resume\" to start downloading."
 msgstr "Không có đủ dung lượng đĩa để tải về Endless OS. Vui lòng tạo thêm %s và nhấp vào \"Khôi phục\" để bắt đầu tải về."
 
+#, c-format
 msgctxt "MSG_335"
 msgid ""
 "The selected version of Endless OS requires %s of free disk space, but only "
 "%s is available. Please free up some space on drive %s to continue."
 msgstr "Phiên bản được chọn của Endless OS cần %s dung lượng đĩa trống, nhưng chỉ có %s khả dụng. Vui lòng tạo thêm dung lượng trên ổ đĩa %s để tiếp tục."
 
+#, c-format
 msgctxt "MSG_336"
 msgid "Delete the invalid file (%s)."
 msgstr "Xóa tệp không hợp lệ (%s)."
 
+#, c-format
 msgctxt "MSG_337"
 msgid ""
 "For Endless OS %s, we recommend selecting at least %s of storage space."
 msgstr "Đối với Hệ điều hành Endless %s, chúng tôi khuyên bạn nên chọn ít nhất %s dung lượng bố nhớ."
 
+#, c-format
 msgctxt "MSG_338"
 msgid "%s (Minimum)"
 msgstr "%s (Tối thiểu)"
 
+#, c-format
 msgctxt "MSG_339"
 msgid "%s (Recommended)"
 msgstr "%s (Khuyến nghị)"
 
+#, c-format
 msgctxt "MSG_340"
 msgid "%s (Maximum)"
 msgstr "%s (Tối đa)"
 
+#, c-format
 msgctxt "MSG_341"
 msgid "You currently have %s free on your %s %s drive."
 msgstr "Bạn hiện có %s còn trống trên ổ đĩa %s %s của bạn."
 
+#, c-format
 msgctxt "MSG_342"
 msgid "Select how much of your %s drive to dedicate to Endless OS."
 msgstr "Chọn dung lượng trong ổ đĩa %s của bạn dành cho Hệ điều hành Endless"
 
+#, c-format
 msgctxt "MSG_350"
 msgid "Unfortunately, there is not enough storage space."
 msgstr "Rất tiếc, không có đủ dung lượng bộ nhớ."
 
+#, c-format
 msgctxt "MSG_351"
 msgid ""
 "To continue installing Endless OS, please free up at least %s by deleting "
 "videos, photos, or other large files on your %s drive."
 msgstr "Để tiếp tục cài đặt Hệ điều hành Endless, vui lòng giải phóng ít nhất %s bằng cách xóa các video, hình ảnh, hoặc tập tin lớn khác trên ổ đĩa %s của bạn."
 
+#, c-format
 msgctxt "MSG_352"
 msgid "Unfortunately, your %s drive uses an unsupported format."
 msgstr "Rất tiếc, ổ đĩa %s của bạn sử dụng định dạng không được hỗ trợ."
 
+#, c-format
 msgctxt "MSG_353"
 msgid "Endless OS can only be installed on an NTFS drive."
 msgstr "Hệ điều hành Endless chỉ có thể được cài đặt trên ổ đĩa NTFS."
 
+#, c-format
 msgctxt "MSG_354"
 msgid "Unfortunately, your computer is incompatible with Endless OS."
 msgstr "Rất tiếc, máy tính của bạn không tương thích với Hệ điều hành Endless."
 
+#, c-format
 msgctxt "MSG_355"
 msgid "Endless OS only supports 64-bit computers."
 msgstr "Hệ điều hành Endless chỉ hỗ trợ máy tính 64-bit."
 
+#, c-format
 msgctxt "MSG_356"
 msgid "Unfortunately, your %s drive is encrypted."
 msgstr "Rất tiếc, ổ đĩa %s của bạn đã bị mã hóa."
 
+#, c-format
 msgctxt "MSG_357"
 msgid ""
 "Endless OS cannot be installed on drives which are protected with Device "
 "Encryption or BitLocker."
 msgstr "Không thể cài đặt HĐH Endless trên các ổ đĩa được bảo vệ bằng Device Encryption hay BitLocker."
 
+#, c-format
 msgctxt "MSG_359"
 msgid "Unfortunately, your computer has another OS installed already."
 msgstr "Thật không may, máy tính của bạn đã được cài đặt một Hệ điều hành khác."
 
+#, c-format
 msgctxt "MSG_360"
 msgid "Endless OS only supports dual-boot on Windows-only systems."
 msgstr "HĐH Endless chỉ hỗ trợ dual-boot (chọn HĐH khi khởi động) trên các hệ thống chỉ dùng Windows."
 
+#, c-format
 msgctxt "MSG_361"
 msgid ""
 "Are you sure you want to uninstall Endless OS? This will erase all apps and "
 "documents stored within your Endless OS installation."
 msgstr "Bạn có chắc là bạn muốn gỡ cài đặt HĐH Endless? Việc này sẽ xóa mọi ứng dụng và tài liệu được lưu trữ trong cài đặt HĐH Endless của bạn."
 
+#, c-format
 msgctxt "MSG_362"
 msgid "Endless OS has been uninstalled successfully"
 msgstr "Đã gỡ cài đặt HĐH Endless thành công"
 
+#, c-format
 msgctxt "MSG_363"
 msgid ""
 "There was a problem uninstalling Endless OS. Please contact us for "
 "assistance."
 msgstr "Có vấn đề xảy ra khi gỡ cài đặt HĐH Endless. Vui lòng liên hệ chúng tôi để hỗ trợ."
 
+#, c-format
 msgctxt "MSG_364"
 msgid "Uninstall Endless from this Computer"
 msgstr "Gỡ cài đặt Endless từ Máy tính này"
 
+#, c-format
 msgctxt "MSG_365"
 msgid ""
 "If you uninstall Endless, Windows will run automatically when you start your"
 " computer. Any apps and files stored in Endless will be erased."
 msgstr "Nếu bạn gỡ cài đặt Endless, Windows sẽ tự động chạy khi bạn khởi động máy tính của mình. Bất kỳ ứng dụng và tệp nào được lưu trữ trên Endless sẽ bị xóa."
 
+#, c-format
 msgctxt "MSG_366"
 msgid "Uninstall Endless"
 msgstr "Gỡ cài đặt Endless"
 
+#, c-format
 msgctxt "MSG_367"
 msgid ""
 "Make sure you back up any important documents from Endless before you "
 "uninstall."
 msgstr "Hãy chắn chắn là bạn sao lưu bất kỳ tài liệu quan trọng nào từ Endless trước khi gỡ cài đặt."
 
+#, c-format
 msgctxt "MSG_368"
 msgid ""
 "Internet Explorer %d is not supported. Please click OK to download Internet "
 "Explorer %d, install it, then run the Endless Installer again."
 msgstr "Internet Explorer %d không được hỗ trợ. Vui lòng nhấp OK để tải xuống Internet Explorer %d, cài đặt nó, sau đó chạy lại Trình cài đặt Endless."
 
+#, c-format
 msgctxt "MSG_369"
 msgid "%s Download"
 msgstr "%s Tải xuống"
 
+#, c-format
 msgctxt "MSG_370"
 msgid "Oops, something went wrong setting up Endless OS."
 msgstr "Ối, có vấn đề xảy ra khi thiết lập HĐH Endless."
 
+#, c-format
 msgctxt "MSG_371"
 msgid "https://support.endlessm.com/hc/en-us/articles/213585826"
 msgstr "https://support.endlessm.com/hc/en-us/articles/213585826"
 
+#, c-format
 msgctxt "MSG_372"
 msgid ""
 "No USB device found. If you've inserted one, try a different USB port or a "
 "different USB device."
 msgstr "Không tìm thấy thiết bị USB nào. Nếu bạn đã chèn một USB, hãy thử dùng một cổng USB khác hoặc một thiết bị USB khác."
 
+#, c-format
 msgctxt "MSG_400"
 msgid "Basic"
 msgstr "Cơ bản"
 
+#, c-format
 msgctxt "MSG_401"
 msgid "English"
 msgstr "Tiếng Anh"
 
+#, c-format
 msgctxt "MSG_402"
 msgid "Spanish"
 msgstr "Tây Ban Nha"
 
+#, c-format
 msgctxt "MSG_403"
 msgid "Portuguese (Brazilian)"
 msgstr "Tiếng"
 
+#, c-format
 msgctxt "MSG_404"
 msgid "Arabic"
 msgstr "Tiếng Ả Rập"
 
+#, c-format
 msgctxt "MSG_405"
 msgid "French"
 msgstr "Pháp"
 
+#, c-format
 msgctxt "MSG_406"
 msgid "Chinese Simplified"
 msgstr "Tiếng Trung giản thể"
 
+#, c-format
 msgctxt "MSG_407"
 msgid "Bengali"
 msgstr "Tiếng Bengal"
 
+#, c-format
 msgctxt "MSG_408"
 msgid "Spanish (Guatemala)"
 msgstr "Tiếng Tây Ban Nha (Guatemala)"

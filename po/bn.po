@@ -296,351 +296,429 @@ msgctxt "MSG_025"
 msgid "Pb"
 msgstr "Pb"
 
+#, c-format
 msgctxt "MSG_046"
 msgid "%s (Disk %d) [%s]"
 msgstr "%s (ডিস্ক %d) [%s]"
 
+#, c-format
 msgctxt "MSG_049"
 msgid "Endless - Cancellation"
 msgstr "এন্ডলেস - বাতিল"
 
+#, c-format
 msgctxt "MSG_095"
 msgid "Endless Image"
 msgstr "Endless চিত্র"
 
+#, c-format
 msgctxt "MSG_105"
 msgid ""
 "Warning: Cancelling may cause the device to malfunction. If you are sure you"
 " want to cancel, click YES. Otherwise, click NO."
 msgstr "সতর্কীকরণ: বাতিল করে দিলে ডিভাইসটিতে ত্রুটি দেখা দিতে পারে। আপনি যদি বাতিল করার বিষয়ে নিশ্চিত থাকেন, হ্যাঁ চাপুন।নইলে, না চাপুন।"
 
+#, c-format
 msgctxt "MSG_107"
 msgid "All files"
 msgstr "সকল ফাইলসমূহ"
 
+#, c-format
 msgctxt "MSG_201"
 msgid "Cancelling, please wait"
 msgstr "বাতিল করা হচ্ছে, অনুগ্রহ করে অপেক্ষা করুন"
 
+#, c-format
 msgctxt "MSG_300"
 msgid "Error downloading file."
 msgstr "ফাইল ডাউনলোপ করতে ভুল হয়েছে।"
 
+#, c-format
 msgctxt "MSG_302"
 msgid "%s of %s (%s/s)"
 msgstr "%s (%s/s) এর %s"
 
+#, c-format
 msgctxt "MSG_303"
 msgid "Something is wrong with your Endless OS file."
 msgstr "আপনার এন্ডলেস OS ফাইলসমূহে কোন সমস্যা হয়েছে।"
 
+#, c-format
 msgctxt "MSG_304"
 msgid "Downloading"
 msgstr "ডাউনলোড হচ্ছে"
 
+#, c-format
 msgctxt "MSG_305"
 msgid "Step %d"
 msgstr "ধাপ %d"
 
+#, c-format
 msgctxt "MSG_306"
 msgid "of %d:"
 msgstr "%d এর:"
 
+#, c-format
 msgctxt "MSG_307"
 msgid "No Label"
 msgstr "কোন লেবেল নেই"
 
+#, c-format
 msgctxt "MSG_309"
 msgid "Installing"
 msgstr "সংস্থাপিত হচ্ছে"
 
+#, c-format
 msgctxt "MSG_310"
 msgid "Verifying"
 msgstr "যাচাইকরণ হচ্ছে"
 
+#, c-format
 msgctxt "MSG_311"
 msgid "Writing"
 msgstr "লেখা হচ্ছে"
 
+#, c-format
 msgctxt "MSG_312"
 msgid "https://support.endlessm.com/hc/en-us/articles/208895726"
 msgstr "https://support.endlessm.com/hc/en-us/articles/208895726"
 
+#, c-format
 msgctxt "MSG_314"
 msgid "http://community.endlessm.com/"
 msgstr "http://community.endlessm.com/"
 
+#, c-format
 msgctxt "MSG_315"
 msgid "%s/%s Download"
 msgstr "%s/%s ডাউনলোড "
 
+#, c-format
 msgctxt "MSG_316"
 msgid "Full"
 msgstr "Full"
 
+#, c-format
 msgctxt "MSG_319"
 msgid "%s (%s)"
 msgstr "%s (%s) "
 
+#, c-format
 msgctxt "MSG_320"
 msgid "Great! Endless OS has been successfully installed."
 msgstr "দারুণ! এন্ডলেস OS সফলভাবে সংস্থাপিত হয়েছে।"
 
+#, c-format
 msgctxt "MSG_343"
 msgid "Great! Your Endless OS Live USB has been created."
 msgstr "দারুণ! আপনার এন্ডলেস OS সক্রিয় USB তৈরি হয়েছে।"
 
+#, c-format
 msgctxt "MSG_344"
 msgid "Great! Your Endless OS Reflasher USB has been created."
 msgstr "দারুণ! আপনার এন্ডলেস OS রিফ্ল্যাশার USB তৈরি হয়েছে।"
 
+#, c-format
 msgctxt "MSG_321"
 msgid "Select Your Endless OS Version"
 msgstr "আপনার এন্ডলেস OS ভার্সন নির্বাচন করুন"
 
+#, c-format
 msgctxt "MSG_322"
 msgid "Is this the version you’d like to use? If not, select another."
 msgstr "আপনি কি এই সংস্করণটিই ব্যবহার করতে আগ্রহী? যদি না হয়, অন্য আরেকটি নির্বাচন করুন।"
 
+#, c-format
 msgctxt "MSG_323"
 msgid ""
 "We couldn’t finish getting Endless OS. Check your internet connection and "
 "click \"Resume\" to carry on downloading."
 msgstr "আমরা এন্ডলেস OS নামানো শেষ করতে পারিনি। অনুগ্রহ করে আপনার ইন্টারনেট সংযোগ পরীক্ষা করুন এবং ডাউনলোড চালিয়ে যেতে \"পুনরায়\" চাপুন।"
 
+#, c-format
 msgctxt "MSG_324"
 msgid ""
 "Something is wrong with your Endless OS file. Click \"Download Again\" to "
 "try downloading it again."
 msgstr "আপনার এন্ডলেস OS ফাইলটিতে কোন সমস্যা হয়েছে।আবার ডাউনলোড করার চেষ্টা করতে \"আবার ডাউনলোড\" চাপুন।"
 
+#, c-format
 msgctxt "MSG_325"
 msgid ""
 "Something went wrong writing Endless OS to your USB device. Find a different"
 " device and click \"Try Again\"."
 msgstr "আপনার USB ডিভাইসে এন্ডলেস OS যুক্ত করতে কোনো সমস্যা হয়েছে। অন্য একটি ডিভাইস অনুসন্ধান করুন এবং \"আবার চেষ্টা করুন\" চাপুন।"
 
+#, c-format
 msgctxt "MSG_358"
 msgid "Something went wrong installing Endless OS to your computer."
 msgstr "আপনার কম্পিউটারে এন্ডলেস OS সংস্থাপন করতে কোন সমস্যা হয়েছে।"
 
+#, c-format
 msgctxt "MSG_326"
 msgid "Resume"
 msgstr "পুনরায়"
 
+#, c-format
 msgctxt "MSG_327"
 msgid "Download again"
 msgstr "আবার ডাউনলোড"
 
+#, c-format
 msgctxt "MSG_328"
 msgid "Try again"
 msgstr "আবার চেষ্টা করুন"
 
+#, c-format
 msgctxt "MSG_329"
 msgid "https://support.endlessm.com/hc/en-us/articles/210527103"
 msgstr "https://support.endlessm.com/hc/en-us/articles/210527103"
 
+#, c-format
 msgctxt "MSG_330"
 msgid ""
 "You have selected a slow USB device (USB 1.0). Please use a USB 3.0 device "
 "for the best experience."
 msgstr "আপনি একটি ধীরগতির USB ডিভাইস (USB 1.0) বেছে নিয়েছেন। আরো ভাল কাজ করাতে অনুগ্রহ করে USB 3.0 ডিভাইস ব্যবহার করুন।"
 
+#, c-format
 msgctxt "MSG_331"
 msgid ""
 "You have selected a slow USB device (USB 1.0). Please use a USB 2.0 device "
 "for a better experience."
 msgstr "আপনি একটি ধীরগতির USB ডিভাইস (USB 1.0) বেছে নিয়েছেন। আরো ভাল কাজ করাতে অনুগ্রহ করে USB 2.0 ডিভাইস ব্যবহার করুন।"
 
+#, c-format
 msgctxt "MSG_332"
 msgid ""
 "You have selected a slower USB device (USB 2.0). Please use a USB 3.0 device"
 " for the best experience."
 msgstr "আপনি একটি ধীরগতির USB ডিভাইস (USB 2.0) বেছে নিয়েছেন। আরো ভাল কাজ করাতে অনুগ্রহ করে USB 3.0 ডিভাইস ব্যবহার করুন।"
 
+#, c-format
 msgctxt "MSG_333"
 msgid ""
 "Your USB 3.0 device is inserted into a USB 2.0 port. Please insert it into a"
 " USB 3.0 port (usually blue) for the best experience."
 msgstr "আপনার USB 3.0 ডিভাইস আপনি একটি USB 2.0 পোর্টের সাথে সংযুক্ত করেছেন। আরো ভাল কাজ করাতে অনুগ্রহ করে একটি USB 3.0 পোর্টের (সাধারণত নীল) সাথে সংযুক্ত করুন।"
 
+#, c-format
 msgctxt "MSG_334"
 msgid ""
 "There isn’t enough disk space for downloading Endless OS. Please free up %s "
 "and click \"Resume\" to start downloading."
 msgstr "এন্ডলেস OS ডাউনলোড করার জন্য ডিস্কে যথেষ্ট জায়গা নেই। অনুগ্রহ করে %s জায়গা খালি করুন এবং ডাউনলোড শুরু করতে \"পুনরায়\" চাপুন।"
 
+#, c-format
 msgctxt "MSG_335"
 msgid ""
 "The selected version of Endless OS requires %s of free disk space, but only "
 "%s is available. Please free up some space on drive %s to continue."
 msgstr "নির্বাচিত এন্ডলেস OS ভার্সনটির জন্য ডিস্কে %s পরিমাণ খালি জায়গা প্রয়োজন, কিন্তু মাত্র %s পরিমাণ খালি আছে। চালিয়ে যেতে হলে অনুগ্রহ করে %s ড্রাইভে কিছু জায়গা খালি করুন।"
 
+#, c-format
 msgctxt "MSG_336"
 msgid "Delete the invalid file (%s)."
 msgstr "অকার্যকরী ফাইল (%s) মুছুন।"
 
+#, c-format
 msgctxt "MSG_337"
 msgid ""
 "For Endless OS %s, we recommend selecting at least %s of storage space."
 msgstr "এন্ডলেস OS %s -এর জন্য, কমপক্ষে %s সংরক্ষণ করার জায়গা থাকা সুপারিশ করা হচ্ছে।"
 
+#, c-format
 msgctxt "MSG_338"
 msgid "%s (Minimum)"
 msgstr "%s (কমপক্ষে)"
 
+#, c-format
 msgctxt "MSG_339"
 msgid "%s (Recommended)"
 msgstr "%s (সুপারিশকৃত)"
 
+#, c-format
 msgctxt "MSG_340"
 msgid "%s (Maximum)"
 msgstr "%s (সর্বোচ্চ)"
 
+#, c-format
 msgctxt "MSG_341"
 msgid "You currently have %s free on your %s %s drive."
 msgstr "বর্তমানে আপনার %s %s ড্রাইভে %s খালি জায়গা আছে।"
 
+#, c-format
 msgctxt "MSG_342"
 msgid "Select how much of your %s drive to dedicate to Endless OS."
 msgstr "আপনার %s ড্রাইভের কতোটুকু এন্ডলেস OS -এর জন্য ব্যবহৃত হবে নির্বাচন করুন।"
 
+#, c-format
 msgctxt "MSG_350"
 msgid "Unfortunately, there is not enough storage space."
 msgstr "দুর্ভাগ্যক্রমে, সংরক্ষণ করার মতো যথেষ্ট খালি জায়গা নেই।"
 
+#, c-format
 msgctxt "MSG_351"
 msgid ""
 "To continue installing Endless OS, please free up at least %s by deleting "
 "videos, photos, or other large files on your %s drive."
 msgstr "এন্ডলেস OS সংস্থাপন চালিয়ে যেতে, অনুগ্রহ করে আপনার %s ড্রাইভ থেকে ভিডিও, ছবি বা অন্য কোন বড় আকারের ফাইল মুছে ফেলার মাধ্যমে কমপক্ষে %s জায়গা খালি করুন।"
 
+#, c-format
 msgctxt "MSG_352"
 msgid "Unfortunately, your %s drive uses an unsupported format."
 msgstr "দুর্ভাগ্যক্রমে, আপনার %s ড্রাইভ একটি অসমর্থিত ফরম্যাট ব্যবহার করছে।"
 
+#, c-format
 msgctxt "MSG_353"
 msgid "Endless OS can only be installed on an NTFS drive."
 msgstr "শুধুমাত্র NTFS ড্রাইভে এন্ডলেস OS  সংস্থাপিত হতে পারবে।"
 
+#, c-format
 msgctxt "MSG_354"
 msgid "Unfortunately, your computer is incompatible with Endless OS."
 msgstr "দুর্ভাগ্যক্রমে, আপনার কম্পিউটার এন্ডলেস OS -এর সাথে সামঞ্জস্যপূর্ণ নয়।"
 
+#, c-format
 msgctxt "MSG_355"
 msgid "Endless OS only supports 64-bit computers."
 msgstr "এন্ডলেস OS শুধুমাত্র 64-বিট কম্পিউটারসমূহে সমর্থিত।"
 
+#, c-format
 msgctxt "MSG_356"
 msgid "Unfortunately, your %s drive is encrypted."
 msgstr "দুর্ভাগ্যক্রমে, আপনার %s ড্রাইভ এনক্রিপ্ট করা।"
 
+#, c-format
 msgctxt "MSG_357"
 msgid ""
 "Endless OS cannot be installed on drives which are protected with Device "
 "Encryption or BitLocker."
 msgstr "এন্ডলেস ওএস এমন কোন ড্রাইভে ইনস্টল করা যাবে না যা ডিভাইস এনক্রিপশন না বিটলকার দিয়ে সুরক্ষিত। "
 
+#, c-format
 msgctxt "MSG_359"
 msgid "Unfortunately, your computer has another OS installed already."
 msgstr "দুর্ভাগ্যবশতঃ আপনার কম্পিউটারে অন্য ওএস ইনস্টল করা আছে এগে থেকেই। "
 
+#, c-format
 msgctxt "MSG_360"
 msgid "Endless OS only supports dual-boot on Windows-only systems."
 msgstr "এন্ডলেস ওস শুধু উইন্ডোজ আছে এমন সিস্টেমে দ্বৈত বুট সমর্থন করে। "
 
+#, c-format
 msgctxt "MSG_361"
 msgid ""
 "Are you sure you want to uninstall Endless OS? This will erase all apps and "
 "documents stored within your Endless OS installation."
 msgstr "আপনি নিশ্চিতভাবে এন্ডলেস ওএস আনইনস্টল করতে চান? এতে করে এন্ডলেস ওএস দিয়ে রাখা সব অ্যাপস আর ডকুমেন্ট মুছে যাবে। "
 
+#, c-format
 msgctxt "MSG_362"
 msgid "Endless OS has been uninstalled successfully"
 msgstr "এন্ডলেস ওএস সফলভাবে আনইনস্টল হয়েছে "
 
+#, c-format
 msgctxt "MSG_363"
 msgid ""
 "There was a problem uninstalling Endless OS. Please contact us for "
 "assistance."
 msgstr "এন্ডলেস ওএস আনইনস্টল করতে সমস্যা হচ্ছে। অনুগ্রহ করে আমাদের সাথে যোগাযোগ করুন সহায়তার জন্য। "
 
+#, c-format
 msgctxt "MSG_364"
 msgid "Uninstall Endless from this Computer"
 msgstr "এই কম্পিউটার থেকে এন্ডলেস আনইনস্টল করুন "
 
+#, c-format
 msgctxt "MSG_365"
 msgid ""
 "If you uninstall Endless, Windows will run automatically when you start your"
 " computer. Any apps and files stored in Endless will be erased."
 msgstr "আপনি যদি এন্ডলেস আনইনস্টল করেন, আপনি যখন কম্পিউটার চলু করবেন তখন উইন্ডোজ স্বয়ংক্রিয়ভাবে চালু হয়ে যাবে। এন্ডলেস দিয়ে রাখা সব অ্যাপস আর ডকুমেন্ট মুছে যাবে।  "
 
+#, c-format
 msgctxt "MSG_366"
 msgid "Uninstall Endless"
 msgstr "এন্ডলেস আনইনস্টল করুন "
 
+#, c-format
 msgctxt "MSG_367"
 msgid ""
 "Make sure you back up any important documents from Endless before you "
 "uninstall."
 msgstr "নিশ্চিত হোন যে আপনার গুরুত্বপূর্ণ ডকুমেন্টের ব্যাক আপ রেখেছেন এন্ডলেস আনইনস্টল করার আগে। "
 
+#, c-format
 msgctxt "MSG_368"
 msgid ""
 "Internet Explorer %d is not supported. Please click OK to download Internet "
 "Explorer %d, install it, then run the Endless Installer again."
 msgstr "ইন্টারনেট এক্সপ্লোরার %d সমর্থিত নয়। অনুগ্রহ করে ওকে চাপুন ইন্টারনেট এক্সপ্লোরার %d ডাউনলোড করতে, ইনস্টল করুন, তারপর এন্ডলেস ইনস্টলার পুনরায় চালু করতে। "
 
+#, c-format
 msgctxt "MSG_369"
 msgid "%s Download"
 msgstr "%s ডাউনলোড "
 
+#, c-format
 msgctxt "MSG_370"
 msgid "Oops, something went wrong setting up Endless OS."
 msgstr "ওহ, এন্ডলেস  ওএস সেট আপ করতে কোন একটা ভুল হয়েছে। "
 
+#, c-format
 msgctxt "MSG_371"
 msgid "https://support.endlessm.com/hc/en-us/articles/213585826"
 msgstr "https://support.endlessm.com/hc/en-us/articles/213585826 "
 
+#, c-format
 msgctxt "MSG_372"
 msgid ""
 "No USB device found. If you've inserted one, try a different USB port or a "
 "different USB device."
 msgstr "কোন ইউএসবি ডিভাইস পাওয়া যায় নি। আপনি যদি কোন একটি প্রবেশ করিয়ে থাকেবন, তাহলে অন্য আরেকটি ইউএসবি পোর্ট বা অন্য কোন ইউএসবি দিয়ে চেষ্টা করুন। "
 
+#, c-format
 msgctxt "MSG_400"
 msgid "Basic"
 msgstr "প্রাথমিক"
 
+#, c-format
 msgctxt "MSG_401"
 msgid "English"
 msgstr "ইংরেজি"
 
+#, c-format
 msgctxt "MSG_402"
 msgid "Spanish"
 msgstr "স্প্যানিশ"
 
+#, c-format
 msgctxt "MSG_403"
 msgid "Portuguese (Brazilian)"
 msgstr "পর্তুগিজ (ব্রাজিলিয়ান)"
 
+#, c-format
 msgctxt "MSG_404"
 msgid "Arabic"
 msgstr "আরবি"
 
+#, c-format
 msgctxt "MSG_405"
 msgid "French"
 msgstr "ফ্রেঞ্চ"
 
+#, c-format
 msgctxt "MSG_406"
 msgid "Chinese Simplified"
 msgstr "সহজ চাইনিজ"
 
+#, c-format
 msgctxt "MSG_407"
 msgid "Bengali"
 msgstr "বাংলা"
 
+#, c-format
 msgctxt "MSG_408"
 msgid "Spanish (Guatemala)"
 msgstr "স্প্যানিশ (গুয়াতেমালা)"
