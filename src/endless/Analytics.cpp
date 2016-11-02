@@ -119,7 +119,7 @@ void Analytics::screenTracking(const CString &name)
 	sendRequest(body);	
 }
 
-void Analytics::eventTracking(const CString &category, const CString &action, const CString &label, int value)
+void Analytics::eventTracking(const CString &category, const CString &action, const CString &label, LONGLONG value)
 {	
 	if (m_disabled) return;
 	FUNCTION_ENTER;
@@ -134,7 +134,7 @@ void Analytics::eventTracking(const CString &category, const CString &action, co
 		body.AppendFormat(_T("&el=%s"), labelEnc);
 	}
 	if (value >= 0) {
-		body.AppendFormat(_T("&ev=%d"), value);
+		body.AppendFormat(_T("&ev=%I64d"), value);
 	}
 	sendRequest(body);
 }

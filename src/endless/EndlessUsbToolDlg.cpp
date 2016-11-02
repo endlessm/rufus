@@ -1906,8 +1906,15 @@ bool CEndlessUsbToolDlg::IsButtonDisabled(IHTMLElement *pElement)
 //	return S_FALSE;
 //}
 
-void CEndlessUsbToolDlg::TrackEvent(const CString &action, const CString &label, int value)
+void CEndlessUsbToolDlg::TrackEvent(const CString &action, const CString &label, LONGLONG value)
 {
+	Analytics::instance()->eventTracking(InstallMethodToStr(m_selectedInstallMethod), action, label, value);
+}
+
+void CEndlessUsbToolDlg::TrackEvent(const CString &action, LONGLONG value)
+{
+	CString label;
+	label.Format(_T("%I64i"), value);
 	Analytics::instance()->eventTracking(InstallMethodToStr(m_selectedInstallMethod), action, label, value);
 }
 
@@ -2984,8 +2991,7 @@ HRESULT CEndlessUsbToolDlg::OnSelectUSBNextClicked(IHTMLElement* pElement)
 
     FUNCTION_ENTER;
 
-	int size = SelectedDrive.DiskSize / BYTES_IN_MEGABYTE;
-	TrackEvent(_T("USBSizeMB"), _T(""), size);
+	TrackEvent(_T("USBSizeMB"), SelectedDrive.DiskSize / BYTES_IN_MEGABYTE);
 
 	LeavingDevicesPage();
 	StartInstallationProcess();
@@ -3280,7 +3286,7 @@ HRESULT CEndlessUsbToolDlg::OnSelectStorageNextClicked(IHTMLElement *pElement)
 
 	FUNCTION_ENTER;
 
-	TrackEvent(_T("StorageSizeGB"), _T(""), m_nrGigsSelected);
+	TrackEvent(_T("StorageSizeGB"), (LONGLONG) m_nrGigsSelected);
 
 	StartInstallationProcess();
 
@@ -5232,7 +5238,7 @@ bool CEndlessUsbToolDlg::WriteMBRAndSBRToWinDrive(CEndlessUsbToolDlg *dlg, const
 		}
 	}
 
-	dlg->TrackEvent(_T("BootTrackSize"), _T(""), minStartingOffset);
+	dlg->TrackEvent(_T("BootTrackSize"), minStartingOffset);
 
 	IFFALSE_GOTOERROR(0 == _wfopen_s(&boottrackImgFile, endlessFilesPath + BACKUP_BOOTTRACK_IMG, L"wb"), "Error opening boottrack.img file");
 	boottrackData = (unsigned char*)malloc(DiskGeometry->Geometry.BytesPerSector);
