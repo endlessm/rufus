@@ -378,7 +378,8 @@ static LPCTSTR ErrorCauseToStr(ErrorCause_t errorCause)
         TOSTR(ErrorCauseBitLocker);
         TOSTR(ErrorCauseNotNTFS);
         TOSTR(ErrorCauseNonWindowsMBR);
-		TOSTR(ErrorCauseNonEndlessMBR);
+        TOSTR(ErrorCauseNonEndlessMBR);
+        TOSTR(ErrorCauseInstallFailedDiskFull);
         TOSTR(ErrorCauseNone);
         default: return _T("Error Cause Unknown");
     }
