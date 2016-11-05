@@ -98,9 +98,15 @@ done:
 
 TorrentDownloader::TorrentDownloader() :
 	m_stopDownloadEvent(INVALID_HANDLE_VALUE),
-	m_notificationThread(INVALID_HANDLE_VALUE)
+	m_notificationThread(INVALID_HANDLE_VALUE),
+	m_downloadCanceled(false)
 {
 
+}
+
+TorrentDownloader::~TorrentDownloader()
+{
+	Reset();
 }
 
 bool TorrentDownloader::Init(HWND window, DWORD statusMessageId)
@@ -109,8 +115,23 @@ bool TorrentDownloader::Init(HWND window, DWORD statusMessageId)
 
 	m_dispatchWindow = window;
 	m_statusMsgId = statusMessageId;
+	m_downloadCanceled = false;
 
 	return true;
+}
+
+void TorrentDownloader::Reset()
+{
+	std::unique_lock<std::mutex> lock(m_torrentSync);
+
+	safe_closehandle(m_stopDownloadEvent);
+	m_notificationThread = INVALID_HANDLE_VALUE;
+	m_downloadCanceled = false;
+
+	std::vector<lt::torrent_handle> &torrents = m_torrentSession.get_torrents();
+	for (auto torrent = torrents.begin(); torrent != torrents.end(); torrent++) {
+		m_torrentSession.remove_torrent(*torrent);
+	}
 }
 
 bool TorrentDownloader::AddDownload(DownloadType_t type, ListOfStrings urls, ListOfStrings files, const CString& jobSuffix)
@@ -148,11 +169,12 @@ error:
 	return false;
 }
 
-void TorrentDownloader::StopDownload()
+void TorrentDownloader::StopDownload(bool canceled)
 {
 	FUNCTION_ENTER;
 	std::unique_lock<std::mutex> lock(m_torrentSync);
 	if (m_stopDownloadEvent != INVALID_HANDLE_VALUE && m_notificationThread ) {
+		m_downloadCanceled = canceled;
 		SetEvent(m_stopDownloadEvent);
 	} else {
 		// TODO: post download finished event with error
@@ -170,7 +192,7 @@ DWORD WINAPI TorrentDownloader::NotificationThreadHandler(void* param)
 		// Check if user cancelled
 		{
 			std::unique_lock<std::mutex> lock(downloader->m_torrentSync);
-			IFFALSE_GOTO(downloader->m_stopDownloadEvent != INVALID_HANDLE_VALUE || WaitForSingleObject(downloader->m_stopDownloadEvent, 0) == WAIT_TIMEOUT, "User cancel.", cancel);
+			IFFALSE_GOTO(downloader->m_stopDownloadEvent != INVALID_HANDLE_VALUE && WaitForSingleObject(downloader->m_stopDownloadEvent, 0) == WAIT_TIMEOUT, "User cancel.", cancel);
 		}
 
 		downloader->m_torrentSession.pop_alerts(&alerts);
@@ -212,7 +234,6 @@ DWORD WINAPI TorrentDownloader::NotificationThreadHandler(void* param)
 					if (foundItem != downloader->m_filesToDownload.end()) {
 						uprintf("Downloading file (size=%I64i) at index %d: '%s'", files.file_size(index), index, files.file_name(index).c_str());
 						file_priorities[index] = 1;
-						p->handle.rename_file(index, newName);
 					}
 					else {
 						uprintf("Skipping file at index %d: '%s'", index, files.file_name(index).c_str());
@@ -227,6 +248,28 @@ DWORD WINAPI TorrentDownloader::NotificationThreadHandler(void* param)
 			case lt::torrent_finished_alert::alert_type:
 			{
 				printToLog = true;
+
+				// move files to exe folder
+				lt::torrent_finished_alert* p = (lt::torrent_finished_alert*)alert;
+				boost::shared_ptr<const lt::torrent_info> torrentInfo = p->handle.torrent_file();
+				int numberOfFiles = torrentInfo->num_files();
+				uprintf("Number of files in '%s' is %d", torrentInfo->name().c_str(), numberOfFiles);
+				const lt::file_storage &files = torrentInfo->files();
+				std::vector<int> file_priorities = p->handle.file_priorities();
+
+				for (int index = 0; index < numberOfFiles; index++) {
+					if (file_priorities[index]) {
+						std::string newName = downloader->m_downloadPath + "\\" + files.file_name(index).c_str();
+						if (PathFileExistsA(newName.c_str())) {
+							uprintf("Deleting file first as it already existed '%s'", newName.c_str());
+							BOOL result = DeleteFileA(newName.c_str());
+							uprintf("Result on deleting file GLE=%d", GetLastError());
+							if (result != ERROR_SUCCESS) continue;
+						}
+						p->handle.rename_file(index, newName);
+					}
+				}
+				// check if all torrents finished download
 				bool allFinished = true;
 				std::vector<lt::torrent_handle> &torrents = downloader->m_torrentSession.get_torrents();
 				for (auto torrent = torrents.begin(); torrent != torrents.end(); torrent++) {
@@ -236,6 +279,7 @@ DWORD WINAPI TorrentDownloader::NotificationThreadHandler(void* param)
 					}
 				}
 				if (allFinished) {
+					uprintf("Download of required files from all torrents done.");
 					torrentFinished = true;
 					goto done;
 				}
@@ -252,7 +296,9 @@ DWORD WINAPI TorrentDownloader::NotificationThreadHandler(void* param)
 				uprintf("type=[%d] {%s}", alert->type(), alert->message().c_str());
 				goto done;
 				break;
+
 			default:
+				printToLog = true;
 				break;
 			}
 
@@ -263,6 +309,14 @@ DWORD WINAPI TorrentDownloader::NotificationThreadHandler(void* param)
 
 cancel:
 	uprintf("Torrent download canceled.");
+	downloader->m_torrentSession.abort();
+	if (downloader->m_downloadCanceled) {
+		std::vector<lt::torrent_handle> &torrents = downloader->m_torrentSession.get_torrents();
+		for (auto torrent = torrents.begin(); torrent != torrents.end(); torrent++) {
+			downloader->m_torrentSession.remove_torrent(*torrent, lt::session::delete_files);
+		}
+	}
+
 	return 0;
 
 done:

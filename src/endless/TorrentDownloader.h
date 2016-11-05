@@ -10,11 +10,14 @@ namespace lt = libtorrent;
 class TorrentDownloader {
 public:
 	TorrentDownloader();
+	~TorrentDownloader();
 
 	bool Init(HWND window, DWORD statusMessageId);
 	bool AddDownload(DownloadType_t type, ListOfStrings urls, ListOfStrings files, const CString& jobSuffix);
-	void StopDownload();
+	void StopDownload(bool canceled);
 	bool GetDownloadProgress(DownloadStatus_t *downloadStatus);
+
+	void Reset();
 
 private:
 	HANDLE			m_notificationThread;
@@ -27,6 +30,7 @@ private:
 	CStringA		m_downloadPath;
 	HWND			m_dispatchWindow;
 	DWORD			m_statusMsgId;
+	bool			m_downloadCanceled;
 
 	static DWORD WINAPI NotificationThreadHandler(void* param);
 };

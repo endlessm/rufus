@@ -3479,6 +3479,9 @@ HRESULT CEndlessUsbToolDlg::OnRecoverErrorButtonClicked(IHTMLElement* pElement)
     StartCheckInternetConnectionThread();
     CallJavascript(_T(JS_ENABLE_BUTTON), CComVariant(HTML_BUTTON_ID(_T(ELEMENT_INSTALL_CANCEL))), CComVariant(TRUE));
 
+	m_downloadUpdateThread = INVALID_HANDLE_VALUE;
+	m_torrentDownloader.Reset();
+
     // continue based on error cause
     switch (errorCause) {
     case ErrorCause_t::ErrorCauseDownloadFailed:
@@ -4146,6 +4149,7 @@ void CEndlessUsbToolDlg::CancelRunningOperation(bool userCancel)
     FormatStatus = FORMAT_STATUS_CANCEL;
     if (m_currentStep != OP_FLASHING_DEVICE) {
         m_downloadManager.ClearExtraDownloadJobs(userCancel);
+		m_torrentDownloader.StopDownload(userCancel);
         PostMessage(WM_FINISHED_ALL_OPERATIONS, (WPARAM)FALSE, 0);
     }
 }
