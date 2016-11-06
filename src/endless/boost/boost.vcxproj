@@ -105,7 +105,7 @@ bootstrap</Command>
       </Command>
     </PreLinkEvent>
     <PostBuildEvent>
-      <Command>b2.exe -j$(NUMBER_OF_PROCESSORS)  --stagedir=$(OutDir) --build-dir=$(IntermediateOutputPath) --toolset=msvc --build-type=minimal variant=debug link=static threading=multi runtime-link=static stage</Command>
+      <Command>b2.exe --stagedir=$(OutDir) --build-dir=$(IntermediateOutputPath) --toolset=msvc --build-type=minimal variant=debug link=static threading=multi runtime-link=static stage</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -155,7 +155,7 @@ bootstrap</Command>
       </Command>
     </PreLinkEvent>
     <PostBuildEvent>
-      <Command>b2.exe  -j$(NUMBER_OF_PROCESSORS) --stagedir=$(OutDir) --build-dir=$(IntermediateOutputPath) --toolset=msvc --build-type=minimal variant=release link=static threading=multi runtime-link=static stage</Command>
+      <Command>b2.exe  --stagedir=$(OutDir) --build-dir=$(IntermediateOutputPath) --toolset=msvc --build-type=minimal variant=release link=static threading=multi runtime-link=static stage</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
