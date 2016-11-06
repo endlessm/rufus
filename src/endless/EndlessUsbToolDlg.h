@@ -129,6 +129,7 @@ protected:
 
 	// Error/Thank You page handlers
 	HRESULT OnCloseAppClicked(IHTMLElement* pElement);
+	HRESULT OnSuccessCloseAppClicked(IHTMLElement* pElement);
     HRESULT OnRecoverErrorButtonClicked(IHTMLElement* pElement);
     HRESULT OnDeleteCheckboxChanged(IHTMLElement* pElement);
 
@@ -390,4 +391,8 @@ private:
 	ULONGLONG GetNeededSpaceForDualBoot(int &neededGigs, bool *isBaseImage = NULL);
 
 	static const UINT m_uTaskbarBtnCreatedMsg;
+
+	NOTIFYICONDATA m_notificationInfoData;
+	UINT_PTR m_checkRatioTimer;
+	void InitNotificationInfoData();
 };

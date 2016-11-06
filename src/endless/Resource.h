@@ -104,6 +104,7 @@
 #define HTML_ELEM_AdvancedOptionsSubtitle 2067
 #define HTML_ELEM_CombinedUsbButton	      2068
 #define HTML_ELEM_USBLearnMore            2069
+#define HTML_ELEM_SeedTorrentText         2070
 
 
 // Rufus messages
@@ -207,6 +208,7 @@
 #define MSG_370							3370
 #define MSG_371							3371
 #define MSG_372							3372
+#define MSG_373							3373
 
 // For languages
 #define MSG_400                         3400

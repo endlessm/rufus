@@ -157,6 +157,7 @@ t AdvancedInstallReminder "To create an Endless USB Stick you will need a USB de
 t AdvancedOptionsSubtitle "With an <b>Endless USB Stick</b> you can:"
 t CombinedUsbButton "Create Endless USB Stick"
 t USBLearnMore "Learn more about the Endless USB Stick"
+t SeedTorrentText "Help other people get Endless OS faster."
 
 # *Short* size names. These can be used as suffixes
 t MSG_020 "bytes"
@@ -270,6 +271,8 @@ t MSG_369 "%s Download"
 t MSG_370 "Oops, something went wrong setting up Endless OS."
 t MSG_371 "https://support.endlessm.com/hc/en-us/articles/213585826"
 t MSG_372 "No USB device found. If you've inserted one, try a different USB port or a different USB device."
+# If this message is longer than 255 characters it will be truncated
+t MSG_373 "Seeding ratio met. Thank you for helping distribute Endless OS."
 
 t MSG_400 "Basic"
 t MSG_401 "English"

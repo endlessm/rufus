@@ -791,6 +791,10 @@ select:disabled {
 	font-family: LatoBold;	
 }
 
+#SeedTorrentContainer {
+    margin-top: 10px;
+}
+
 /* Error Page */
 
 #ErrorImage {

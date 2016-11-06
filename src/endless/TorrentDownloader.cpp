@@ -97,7 +97,7 @@ done:
 ///////////////////////////////////////////
 
 TorrentDownloader::TorrentDownloader() :
-	m_stopDownloadEvent(INVALID_HANDLE_VALUE),
+	m_stopThreadEvent(INVALID_HANDLE_VALUE),
 	m_notificationThread(INVALID_HANDLE_VALUE),
 	m_downloadCanceled(false)
 {
@@ -124,7 +124,7 @@ void TorrentDownloader::Reset()
 {
 	std::unique_lock<std::mutex> lock(m_torrentSync);
 
-	safe_closehandle(m_stopDownloadEvent);
+	safe_closehandle(m_stopThreadEvent);
 	m_notificationThread = INVALID_HANDLE_VALUE;
 	m_downloadCanceled = false;
 
@@ -157,27 +157,28 @@ bool TorrentDownloader::AddDownload(DownloadType_t type, ListOfStrings urls, Lis
 	m_jobDownloadName = DownloadManager::GetJobName(type) + jobSuffix;
 	uprintf("TorrentDownloader::AddDownload job %ls", m_jobDownloadName);
 
-	m_stopDownloadEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+	m_stopThreadEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 	m_notificationThread = CreateThread(NULL, 0, NotificationThreadHandler, (LPVOID)this, 0, NULL);
 	IFFALSE_GOTOERROR(m_notificationThread != NULL, "CreateThread returned NULL");
 
 	return true;
 error:
 
-	safe_closehandle(m_stopDownloadEvent);
+	safe_closehandle(m_stopThreadEvent);
 	m_notificationThread = INVALID_HANDLE_VALUE;
 	return false;
 }
 
-void TorrentDownloader::StopDownload(bool canceled)
+void TorrentDownloader::StopNotificationThread(bool canceled)
 {
 	FUNCTION_ENTER;
 	std::unique_lock<std::mutex> lock(m_torrentSync);
-	if (m_stopDownloadEvent != INVALID_HANDLE_VALUE && m_notificationThread ) {
-		m_downloadCanceled = canceled;
-		SetEvent(m_stopDownloadEvent);
+	m_downloadCanceled = canceled;
+	if (m_stopThreadEvent != INVALID_HANDLE_VALUE && m_notificationThread) {
+		SetEvent(m_stopThreadEvent);
 	} else {
-		// TODO: post download finished event with error
+		// nothing else to do
+		uprintf("Error on StopDownload because of invalid data: event=%d, thread=%d", m_stopThreadEvent, m_notificationThread);
 	}
 }
 
@@ -192,7 +193,7 @@ DWORD WINAPI TorrentDownloader::NotificationThreadHandler(void* param)
 		// Check if user cancelled
 		{
 			std::unique_lock<std::mutex> lock(downloader->m_torrentSync);
-			IFFALSE_GOTO(downloader->m_stopDownloadEvent != INVALID_HANDLE_VALUE && WaitForSingleObject(downloader->m_stopDownloadEvent, 0) == WAIT_TIMEOUT, "User cancel.", cancel);
+			IFFALSE_GOTO(downloader->m_stopThreadEvent != INVALID_HANDLE_VALUE && WaitForSingleObject(downloader->m_stopThreadEvent, 0) == WAIT_TIMEOUT, "User cancel.", cancel);
 		}
 
 		downloader->m_torrentSession.pop_alerts(&alerts);
@@ -364,4 +365,23 @@ bool TorrentDownloader::GetDownloadProgress(DownloadStatus_t *downloadStatus)
 	downloadStatus->done = !stillDownloading;
 
 	return true;
+}
+
+#define EXPECTED_SEEDING_RATIO 2.0
+
+bool TorrentDownloader::IsSeedingRatioMet()
+{
+	std::vector<lt::torrent_handle> &torrents = m_torrentSession.get_torrents();
+
+	for (auto torrent = torrents.begin(); torrent != torrents.end(); torrent++) {
+		lt::torrent_status status = torrent->status();
+		float ratio = status.all_time_upload * 1.0f / status.all_time_download;
+		uprintf("upload for torrent '%s': [UP:%I64i][DOWN:%I64i][[RATIO:%.2f]", torrent->name().c_str(), status.all_time_upload, status.all_time_download, ratio);
+		if (ratio < EXPECTED_SEEDING_RATIO) goto notmet;
+	}
+
+	return true;
+
+notmet:
+	return false;
 }

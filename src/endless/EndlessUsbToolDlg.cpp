@@ -200,6 +200,9 @@ DWORD usbDevicesCount;
 #define ELEMENT_LIVE_REMINDER           "ThankYouLiveReminder"
 #define ELEMENT_REFLASHER_REMINDER      "ThankYouReflasherReminder"
 #define ELEMENT_USBBOOT_HOWTO           "UsbBootHowToLink"
+#define ELEMENT_SEED_CHECKBOX			"SeedTorrentCheckbox"
+#define ELEMENT_SEED_CONTAINER			"SeedTorrentContainer"
+
 //Error page
 #define ELEMENT_ERROR_MESSAGE           "ErrorMessage"
 #define ELEMENT_ERROR_CLOSE_BUTTON      "CloseAppButton1"
@@ -276,6 +279,7 @@ enum custom_message {
     WM_FINISHED_FILE_COPY,
     WM_FINISHED_ALL_OPERATIONS,
     WM_INTERNET_CONNECTION_STATE,
+	WM_NOTIFICATION_MSG
 };
 
 enum endless_action_type {    
@@ -471,7 +475,7 @@ BEGIN_DHTML_EVENT_MAP(CEndlessUsbToolDlg)
     DHTML_EVENT_ONCLICK(_T(ELEMENT_INSTALL_CANCEL), OnInstallCancelClicked)
 
 	// Thank You Page handlers
-    DHTML_EVENT_ONCLICK(_T(ELEMENT_CLOSE_BUTTON), OnCloseAppClicked)
+    DHTML_EVENT_ONCLICK(_T(ELEMENT_CLOSE_BUTTON), OnSuccessCloseAppClicked)
     DHTML_EVENT_ONCLICK(_T(ELEMENT_USBBOOT_HOWTO), OnLinkClicked)
     // Error Page handlers
     DHTML_EVENT_ONCLICK(_T(ELEMENT_ERROR_CLOSE_BUTTON), OnCloseAppClicked)
@@ -528,7 +532,8 @@ CEndlessUsbToolDlg::CEndlessUsbToolDlg(UINT globalMessage, CWnd* pParent /*=NULL
     m_lastErrorCause(ErrorCause_t::ErrorCauseNone),
     m_localFilesScanned(false),
     m_jsonDownloadAttempted(false),
-	m_selectedInstallMethod(InstallMethod_t::None)
+	m_selectedInstallMethod(InstallMethod_t::None),
+	m_checkRatioTimer(0)
 {
     FUNCTION_ENTER;
     m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);    
@@ -825,6 +830,8 @@ BOOL CEndlessUsbToolDlg::OnInitDialog()
 		ExitProcess(0);
 	}
 
+	InitNotificationInfoData();
+
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
 
@@ -879,6 +886,8 @@ void CEndlessUsbToolDlg::Uninit()
         delete currentEntry;
     }
     m_imageFiles.RemoveAll();
+
+	if (m_checkRatioTimer != 0) KillTimer(m_checkRatioTimer);
 
     // uninit localization memory
     exit_localization();
@@ -963,7 +972,39 @@ void CALLBACK CEndlessUsbToolDlg::RefreshTimer(HWND hWnd, UINT uMsg, UINT_PTR id
 
 LRESULT CEndlessUsbToolDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 {
-    if (message == m_uTaskbarBtnCreatedMsg) {
+	if (message == WM_TIMER && m_checkRatioTimer != 0) {
+		if (m_torrentDownloader.IsSeedingRatioMet()) {
+			uprintf("Seeding ratio met.");
+			// stop timer
+			BOOL result = KillTimer(m_checkRatioTimer);
+			m_checkRatioTimer = 0;
+			// show tray popup
+			m_notificationInfoData.uFlags = NIF_INFO;
+			lstrcpy(m_notificationInfoData.szInfo, UTF8ToCString(lmprintf(MSG_373)));
+			lstrcpy(m_notificationInfoData.szInfoTitle, ENDLESS_INSTALLER_TEXT);
+			m_notificationInfoData.dwInfoFlags = NIIF_INFO;
+			m_notificationInfoData.uTimeout = 15000;
+			Shell_NotifyIcon(NIM_MODIFY, &m_notificationInfoData);
+			// stop torrent
+			m_torrentDownloader.Reset();
+			// allow user to close app instead of going to tray
+			m_useLocalFile = true;
+			CallJavascript(_T(JS_RESET_CHECK), CComVariant(_T(ELEMENT_SEED_CHECKBOX)));
+			CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(_T(ELEMENT_SEED_CONTAINER)), FALSE);
+
+		}
+	} else if (message == WM_NOTIFICATION_MSG) {
+		switch (lParam) {
+		case WM_LBUTTONUP:
+		case WM_RBUTTONUP:
+			Shell_NotifyIcon(NIM_DELETE, &m_notificationInfoData);
+			::ShowWindow(m_hWnd, SW_SHOW);
+			break;
+		default:
+			uprintf("Notification info (tray) untreated message %d", lParam);
+			break;
+		}
+	} else if (message == m_uTaskbarBtnCreatedMsg) {
         OnTaskbarBtnCreated(wParam, lParam);
     } else if (message >= CB_GETEDITSEL && message < CB_MSGMAX) {
         CComPtr<IHTMLSelectElement> selectElement;
@@ -2837,6 +2878,7 @@ HRESULT CEndlessUsbToolDlg::OnSelectFileNextClicked(IHTMLElement* pElement)
 	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_LIVE_REMINDER), CComVariant(m_selectedInstallMethod == InstallMethod_t::LiveUsb || m_selectedInstallMethod == InstallMethod_t::CombinedUsb));
 	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_REFLASHER_REMINDER), CComVariant(m_selectedInstallMethod == InstallMethod_t::ReformatterUsb));
 	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_USBBOOT_HOWTO), CComVariant(m_selectedInstallMethod != InstallMethod_t::InstallDualBoot));
+	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_SEED_CHECKBOX), CComVariant(!m_useLocalFile));
 
 	if (m_selectedInstallMethod != InstallMethod_t::InstallDualBoot) {
 		CallJavascript(_T(JS_RESET_CHECK), CComVariant(_T(ELEMENT_SELUSB_AGREEMENT)));
@@ -3462,6 +3504,41 @@ HRESULT CEndlessUsbToolDlg::OnCloseAppClicked(IHTMLElement* pElement)
 
 	return S_OK;
 }
+
+HRESULT CEndlessUsbToolDlg::OnSuccessCloseAppClicked(IHTMLElement* pElement)
+{
+	CComPtr<IHTMLElement> pElem;
+	CComPtr<IHTMLOptionButtonElement> checkboxElem;
+	VARIANT_BOOL checked = VARIANT_FALSE;
+
+	if (!m_useLocalFile) {
+		// check if we should seed
+		HRESULT hr = GetElement(_T(ELEMENT_SEED_CHECKBOX), &pElem);
+		IFFALSE_GOTOERROR(SUCCEEDED(hr) && pElem != NULL, "Error querying for IHTMLElement.");
+		hr = pElem->QueryInterface(&checkboxElem);
+		IFFALSE_GOTOERROR(SUCCEEDED(hr) && checkboxElem != NULL, "Error querying for IHTMLOptionButtonElement.");
+		hr = checkboxElem->get_checked(&checked);
+		IFFALSE_GOTOERROR(SUCCEEDED(hr) && checked == VARIANT_TRUE, "Seed checkbox not checked.");
+
+		BOOL result = Shell_NotifyIcon(NIM_ADD, &m_notificationInfoData);
+		if (!result) {
+			uprintf("Error adding the tray icon.");
+		} else {
+			::ShowWindow(m_hWnd, SW_HIDE);
+		}
+
+		if (m_checkRatioTimer == 0) {
+			m_checkRatioTimer = SetTimer(0, UPDATE_DOWNLOAD_PROGRESS_TIME, NULL);
+			uprintf("Started timer to check seeding ratio [%d]", m_checkRatioTimer);
+		}
+
+		return S_OK;
+	}
+
+error:
+	return OnCloseAppClicked(pElement);
+}
+
 
 HRESULT CEndlessUsbToolDlg::OnRecoverErrorButtonClicked(IHTMLElement* pElement)
 {
@@ -4149,7 +4226,7 @@ void CEndlessUsbToolDlg::CancelRunningOperation(bool userCancel)
     FormatStatus = FORMAT_STATUS_CANCEL;
     if (m_currentStep != OP_FLASHING_DEVICE) {
         m_downloadManager.ClearExtraDownloadJobs(userCancel);
-		m_torrentDownloader.StopDownload(userCancel);
+		m_torrentDownloader.StopNotificationThread(userCancel);
         PostMessage(WM_FINISHED_ALL_OPERATIONS, (WPARAM)FALSE, 0);
     }
 }
@@ -6129,4 +6206,25 @@ CComBSTR CEndlessUsbToolDlg::GetDownloadString(const RemoteImageEntry &imageEntr
 	ULONGLONG fullSize = GetActualDownloadSize(imageEntry, true);
 	CStringA fullSizeT = SizeToHumanReadable(fullSize, FALSE, use_fake_units);
 	return UTF8ToBSTR(size == fullSize ? lmprintf(MSG_369, fullSizeT) : lmprintf(MSG_315, sizeT, fullSizeT));
+}
+
+void CEndlessUsbToolDlg::InitNotificationInfoData()
+{
+	ZeroMemory(&m_notificationInfoData, sizeof(NOTIFYICONDATA));
+
+	if (nWindowsVersion >= WINDOWS_VISTA) {
+		m_notificationInfoData.cbSize = sizeof(NOTIFYICONDATA);
+	}
+	else {
+		m_notificationInfoData.cbSize = NOTIFYICONDATA_V3_SIZE;
+	}
+
+	m_notificationInfoData.hWnd = m_hWnd;
+	m_notificationInfoData.uFlags = NIF_ICON | NIF_TIP | NIF_MESSAGE;
+	m_notificationInfoData.uCallbackMessage = WM_NOTIFICATION_MSG;
+
+	// This text will be shown as the icon's tooltip.
+	wcscpy_s(m_notificationInfoData.szTip, ARRAYSIZE(m_notificationInfoData.szTip), ENDLESS_INSTALLER_TEXT);
+
+	m_notificationInfoData.hIcon = m_hIcon;
 }

@@ -14,14 +14,14 @@ public:
 
 	bool Init(HWND window, DWORD statusMessageId);
 	bool AddDownload(DownloadType_t type, ListOfStrings urls, ListOfStrings files, const CString& jobSuffix);
-	void StopDownload(bool canceled);
+	void StopNotificationThread(bool canceled);
 	bool GetDownloadProgress(DownloadStatus_t *downloadStatus);
-
+	bool IsSeedingRatioMet();
 	void Reset();
 
 private:
 	HANDLE			m_notificationThread;
-	HANDLE			m_stopDownloadEvent;
+	HANDLE			m_stopThreadEvent;
 	lt::session		m_torrentSession;
 	ListOfStrings	m_filesToDownload;
 	DownloadType_t	m_downloadType;
