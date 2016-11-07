@@ -2746,6 +2746,7 @@ HRESULT CEndlessUsbToolDlg::OnSelectFileNextClicked(IHTMLElement* pElement)
     // Get display name with actual image size, not compressed
     CString selectedImage, personality, version;
     ULONGLONG size = 0;
+    bool willUnpackImage = m_selectedInstallMethod == LiveUsb || m_selectedInstallMethod == CombinedUsb;
 
     if (m_useLocalFile) {
         selectedImage = UTF8ToCString(image_path);
@@ -2761,7 +2762,7 @@ HRESULT CEndlessUsbToolDlg::OnSelectFileNextClicked(IHTMLElement* pElement)
 		personality = localEntry->personality;
 		version = localEntry->version;
 
-		size = m_selectedInstallMethod == InstallMethod_t::LiveUsb && !localEntry->isUnpackedImage ? GetExtractedSize(selectedImage, FALSE) : localEntry->size;
+		size = (willUnpackImage && !localEntry->isUnpackedImage) ? GetExtractedSize(selectedImage, FALSE) : localEntry->size;
 
         m_selectedFileSize = localEntry->size;
     } else {
@@ -2779,7 +2780,7 @@ HRESULT CEndlessUsbToolDlg::OnSelectFileNextClicked(IHTMLElement* pElement)
 
         selectedImage = CSTRING_GET_LAST(remote.urlFile, '/');
 		CString selectedImagePath = GET_IMAGE_PATH(selectedImage);
-        size = m_selectedInstallMethod == InstallMethod_t::LiveUsb || RemoteMatchesUnpackedImg(selectedImagePath) ? remote.extractedSize : remote.compressedSize;
+        size = (willUnpackImage || RemoteMatchesUnpackedImg(selectedImagePath)) ? remote.extractedSize : remote.compressedSize;
 
 		m_selectedFileSize = remote.compressedSize;
     }
