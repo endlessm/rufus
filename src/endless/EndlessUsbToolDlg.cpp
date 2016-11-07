@@ -2746,6 +2746,7 @@ HRESULT CEndlessUsbToolDlg::OnSelectFileNextClicked(IHTMLElement* pElement)
     // Get display name with actual image size, not compressed
     CString selectedImage, personality, version;
     ULONGLONG size = 0;
+    bool willUnpackImage = m_selectedInstallMethod == LiveUsb || m_selectedInstallMethod == CombinedUsb;
 
     if (m_useLocalFile) {
         selectedImage = UTF8ToCString(image_path);
@@ -2761,7 +2762,7 @@ HRESULT CEndlessUsbToolDlg::OnSelectFileNextClicked(IHTMLElement* pElement)
 		personality = localEntry->personality;
 		version = localEntry->version;
 
-		size = m_selectedInstallMethod == InstallMethod_t::LiveUsb && !localEntry->isUnpackedImage ? GetExtractedSize(selectedImage, FALSE) : localEntry->size;
+		size = (willUnpackImage && !localEntry->isUnpackedImage) ? GetExtractedSize(selectedImage, FALSE) : localEntry->size;
 
         m_selectedFileSize = localEntry->size;
     } else {
@@ -2779,7 +2780,7 @@ HRESULT CEndlessUsbToolDlg::OnSelectFileNextClicked(IHTMLElement* pElement)
 
         selectedImage = CSTRING_GET_LAST(remote.urlFile, '/');
 		CString selectedImagePath = GET_IMAGE_PATH(selectedImage);
-        size = m_selectedInstallMethod == InstallMethod_t::LiveUsb || RemoteMatchesUnpackedImg(selectedImagePath) ? remote.extractedSize : remote.compressedSize;
+        size = (willUnpackImage || RemoteMatchesUnpackedImg(selectedImagePath)) ? remote.extractedSize : remote.compressedSize;
 
 		m_selectedFileSize = remote.compressedSize;
     }
@@ -2788,6 +2789,8 @@ HRESULT CEndlessUsbToolDlg::OnSelectFileNextClicked(IHTMLElement* pElement)
     if (m_selectedInstallMethod == InstallMethod_t::ReformatterUsb) {
         size += INSTALLER_DELTA_SIZE + m_installerImage.extractedSize;
     }
+
+    m_finalSize = size;
 
 	// update Thank You page fields with the selected image data
 	uint32_t headlineMsg;
@@ -3203,39 +3206,13 @@ HRESULT CEndlessUsbToolDlg::OnSelectedUSBDiskChanged(IHTMLElement* pElement)
     SelectedDrive.DeviceNumber = (DWORD)ComboBox_GetItemData(hDeviceList, deviceIndex);
     GetDrivePartitionData(SelectedDrive.DeviceNumber, fs_type, sizeof(fs_type), FALSE);
     
-    // Radu: same code found in OnSelectFileNextClicked, move to new method
-    // check if final image will fit in the disk
-    ULONGLONG size = 0;
-    if (m_useLocalFile) {
-        pFileImageEntry_t localEntry = NULL;
-        CString selectedImage = UTF8ToCString(image_path);
-		bool foundLocalEntry = 0 != m_imageFiles.Lookup(selectedImage, localEntry);
-
-		if (!foundLocalEntry || (m_selectedInstallMethod == InstallMethod_t::LiveUsb && !localEntry->isUnpackedImage)) {
-			size = GetExtractedSize(selectedImage, FALSE);
-		} else {
-            size = localEntry->size;
-        }
-    } else {
-        POSITION p = m_remoteImages.FindIndex(m_selectedRemoteIndex);
-        if (p != NULL) {
-            RemoteImageEntry_t remote = m_remoteImages.GetAt(p);
-            size = m_selectedInstallMethod == InstallMethod_t::LiveUsb ? remote.extractedSize : remote.compressedSize;
-        }
-    }
-
-    // add the installer size if this is not a live image
-    if (m_selectedInstallMethod == InstallMethod_t::ReformatterUsb) {
-        size += INSTALLER_DELTA_SIZE + m_installerImage.extractedSize;
-    }
-
     if (pElement != NULL) {
         CallJavascript(_T(JS_RESET_CHECK), CComVariant(_T(ELEMENT_SELUSB_AGREEMENT)));
         m_usbDeleteAgreement = false;
     }
 
     // RADU: should it be >= or should we take some more stuff into account like the partition size 
-    BOOL isDiskBigEnough = (ULONGLONG)SelectedDrive.DiskSize > size;
+    BOOL isDiskBigEnough = (ULONGLONG)SelectedDrive.DiskSize > m_finalSize;
 
     CallJavascript(_T(JS_ENABLE_BUTTON), CComVariant(HTML_BUTTON_ID(_T(ELEMENT_SELUSB_NEXT_BUTTON))), CComVariant(m_usbDeleteAgreement && isDiskBigEnough));
     CallJavascript(_T(JS_ENABLE_ELEMENT), CComVariant(_T(ELEMENT_SELUSB_USB_DRIVES)), CComVariant(TRUE));
