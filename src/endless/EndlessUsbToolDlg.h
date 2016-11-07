@@ -196,6 +196,14 @@ private:
     CString m_localFileSig;
     ULONGLONG m_selectedFileSize;
 
+    /* The size of data ultimately written to disk, taking into account the
+       eosinstaller image for old-style installers and the extracted image
+       size for every other mode.
+
+       Only valid once an image has been selected.
+    */
+    ULONGLONG m_finalSize;
+
     CString m_LiveFile;
     CString m_LiveFileSig;
 
