@@ -42,11 +42,13 @@ static UINT threadSendRequest(LPVOID pParam)
 				DWORD responseCode = 0;
 				IFFALSE_PRINTERROR(file->QueryInfoStatusCode(responseCode), "QueryInfoStatusCode failed");
 				uprintf("Analytics: response code %d", responseCode);
+				file->Close();
 				delete file;
 			}
 			else {
 				uprintf("Analytics req failed\n");
 			}
+			conn->Close();
 			delete conn;
 		}
 		catch (CInternetException *ex) {
