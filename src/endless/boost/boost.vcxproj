@@ -105,8 +105,7 @@ bootstrap</Command>
       </Command>
     </PreLinkEvent>
     <PostBuildEvent>
-      <Command>cmd /C "b2.exe --stagedir=$(OutDir) --build-dir=$(IntermediateOutputPath) --toolset=msvc --build-type=minimal variant=debug link=static threading=multi runtime-link=static stage &amp;&amp; exit /B 0"
-b2.exe --stagedir=$(OutDir) --build-dir=$(IntermediateOutputPath) --toolset=msvc --build-type=minimal variant=debug link=static threading=multi runtime-link=static stage</Command>
+      <Command>buildboost.bat $(OutDir) $(IntermediateOutputPath) debug $(NUMBER_OF_PROCESSORS)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -156,8 +155,7 @@ bootstrap --with-toolset=msvc</Command>
       </Command>
     </PreLinkEvent>
     <PostBuildEvent>
-      <Command>cmd /c "b2.exe  --stagedir=$(OutDir) --build-dir=$(IntermediateOutputPath) --toolset=msvc --build-type=minimal variant=release link=static threading=multi runtime-link=static stage"
-b2.exe  --stagedir=$(OutDir) --build-dir=$(IntermediateOutputPath) --toolset=msvc --build-type=minimal variant=release link=static threading=multi runtime-link=static stage</Command>
+      <Command>buildboost.bat $(OutDir) $(IntermediateOutputPath) release $(NUMBER_OF_PROCESSORS)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
