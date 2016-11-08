@@ -185,6 +185,7 @@
       <IgnoreSpecificDefaultLibraries>Uafxcw.lib;Libcmt.lib</IgnoreSpecificDefaultLibraries>
       <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
       <AdditionalLibraryDirectories>$(OutDir)lib</AdditionalLibraryDirectories>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
