@@ -105,7 +105,7 @@ bootstrap</Command>
       </Command>
     </PreLinkEvent>
     <PostBuildEvent>
-      <Command>cmd /C "b2.exe --stagedir=$(OutDir) --build-dir=$(IntermediateOutputPath) --toolset=msvc --build-type=minimal variant=debug link=static threading=multi runtime-link=static stage"
+      <Command>cmd /C "b2.exe --stagedir=$(OutDir) --build-dir=$(IntermediateOutputPath) --toolset=msvc --build-type=minimal variant=debug link=static threading=multi runtime-link=static stage &amp;&amp; exit /B 0"
 b2.exe --stagedir=$(OutDir) --build-dir=$(IntermediateOutputPath) --toolset=msvc --build-type=minimal variant=debug link=static threading=multi runtime-link=static stage</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
