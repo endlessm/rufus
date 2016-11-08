@@ -7,6 +7,8 @@
 #include "Analytics.h"
 #include "afxdialogex.h"
 
+#include <functional>
+
 #include <windowsx.h>
 #include <dbt.h>
 #include <atlpath.h>
@@ -5592,14 +5594,15 @@ BOOL CEndlessUsbToolDlg::SetEndlessRegistryKey(HKEY parentKey, const CString &ke
 
 #pragma comment(lib, "wbemuuid.lib")
 
-BOOL CEndlessUsbToolDlg::IsBitlockedDrive(const CString &drive)
+static BOOL RunWMIQuery(const CString &objectPath, const CString &query, std::function< BOOL( CComPtr<IEnumWbemClassObject> & )> callback)
 {
+	FUNCTION_ENTER;
+
 	HRESULT hres;
 	BOOL retResult = FALSE;
 	CComPtr<IWbemLocator> pLoc;
 	CComPtr<IWbemServices> pSvc;
 	CComPtr<IEnumWbemClassObject> pEnumerator;
-	CComPtr<IWbemClassObject> pclsObj;
 	CString bitlockerQuery;
 
 	hres = CoInitializeEx(0, COINIT_APARTMENTTHREADED);
@@ -5625,7 +5628,7 @@ BOOL CEndlessUsbToolDlg::IsBitlockedDrive(const CString &drive)
 	// Connect to WMI through the IWbemLocator::ConnectServer method
 	// Connect to the root\cimv2 namespace with the current user and obtain pointer pSvc to make IWbemServices calls.
 	hres = pLoc->ConnectServer(
-		_bstr_t(L"ROOT\\CIMV2\\Security\\MicrosoftVolumeEncryption"), // Object path of WMI namespace
+		_bstr_t(objectPath),     // Object path of WMI namespace
 		NULL,                    // User name. NULL = current user
 		NULL,                    // User password. NULL = current
 		0,                       // Locale. NULL indicates current
@@ -5649,22 +5652,38 @@ BOOL CEndlessUsbToolDlg::IsBitlockedDrive(const CString &drive)
 	);
 	IFFALSE_GOTOERROR(SUCCEEDED(hres), "Error on CoSetProxyBlanket.");
 
-	bitlockerQuery.Format(L"Select * from Win32_EncryptableVolume where ProtectionStatus != 0 and DriveLetter = '%ls'", drive);
-
 	// Use the IWbemServices pointer to make requests of WMI
-	hres = pSvc->ExecQuery(bstr_t("WQL"), bstr_t(bitlockerQuery), WBEM_FLAG_FORWARD_ONLY | WBEM_RETURN_WHEN_COMPLETE, NULL, &pEnumerator);
+	hres = pSvc->ExecQuery(bstr_t("WQL"), bstr_t(query), WBEM_FLAG_FORWARD_ONLY | WBEM_RETURN_WHEN_COMPLETE, NULL, &pEnumerator);
 	IFFALSE_GOTOERROR(SUCCEEDED(hres), "Error on pSvc->ExecQuery.");
 
-	// Retrieve the objects in the result set.
-	ULONG uReturned = 0;
-	hres = pEnumerator->Next(0, 1, &pclsObj, &uReturned);
-
-	retResult = (hres == S_OK) && (uReturned == 1);
+	retResult = callback(pEnumerator);
 
 error:
-	uprintf("IsBitlockedDrive done with hres=%x and retResult=%d", hres, retResult);
 	CoUninitialize();
 
+	return retResult;
+}
+
+BOOL CEndlessUsbToolDlg::IsBitlockedDrive(const CString &drive)
+{
+	FUNCTION_ENTER;
+
+	const CString objectPath(L"ROOT\\CIMV2\\Security\\MicrosoftVolumeEncryption");
+	CString bitlockerQuery;
+
+	bitlockerQuery.Format(L"Select * from Win32_EncryptableVolume where ProtectionStatus != 0 and DriveLetter = '%ls'", drive);
+
+	BOOL retResult = RunWMIQuery(objectPath, bitlockerQuery, [](CComPtr<IEnumWbemClassObject> &pEnumerator) {
+		HRESULT hres;
+		CComPtr<IWbemClassObject> pclsObj;
+		ULONG uReturned = 0;
+
+		hres = pEnumerator->Next(0, 1, &pclsObj, &uReturned);
+		uprintf("IsBitlockedDrive: hres=%x and uReturned=%d", hres, uReturned);
+		return (hres == S_OK) && (uReturned == 1);
+	});
+
+	uprintf("IsBitlockedDrive done with retResult=%d", retResult);
 	return retResult;
 }
 
