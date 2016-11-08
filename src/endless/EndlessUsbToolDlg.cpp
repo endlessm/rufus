@@ -1961,6 +1961,10 @@ HRESULT CEndlessUsbToolDlg::OnInstallDualBootClicked(IHTMLElement* pElement)
 	BOOL x64BitSupported = Has64BitSupport() ? TRUE : FALSE;
 	uprintf("HW processor has 64 bit support: %s", x64BitSupported ? "YES" : "NO");
 
+	CString manufacturer, model;
+	IFFALSE_PRINTERROR(GetMachineInfo(manufacturer, model), "Couldn't query manufacturer & model");
+	uprintf("System manufacturer: %ls; Model: %ls", manufacturer, model);
+
 	BOOL isBitLockerEnabled = IsBitlockedDrive(systemDriveLetter.Left(2));
 	uprintf("Is BitLocker/device encryption enabled on '%ls': %s", systemDriveLetter, isBitLockerEnabled ? "YES" : "NO");
 
@@ -5686,6 +5690,42 @@ BOOL CEndlessUsbToolDlg::IsBitlockedDrive(const CString &drive)
 	uprintf("IsBitlockedDrive done with retResult=%d", retResult);
 	return retResult;
 }
+
+BOOL CEndlessUsbToolDlg::GetMachineInfo(CString &manufacturer, CString &model)
+{
+	FUNCTION_ENTER;
+
+	const CString objectPath(L"ROOT\\CIMV2");
+	const CString query(L"Select * from Win32_ComputerSystem");
+
+	return RunWMIQuery(objectPath, query, [&](CComPtr<IEnumWbemClassObject> &pEnumerator) {
+		while (pEnumerator)
+		{
+			CComPtr<IWbemClassObject> pclsObj;
+			ULONG uReturn = 0;
+			HRESULT hr = pEnumerator->Next(WBEM_INFINITE, 1,
+				&pclsObj, &uReturn);
+
+			if (0 == uReturn)
+			{
+				break;
+			}
+
+			VARIANT vtProp;
+
+			hr = pclsObj->Get(L"Manufacturer", 0, &vtProp, 0, 0);
+			manufacturer = vtProp.bstrVal;
+			VariantClear(&vtProp);
+
+			hr = pclsObj->Get(L"Model", 0, &vtProp, 0, 0);
+			model = vtProp.bstrVal;
+			VariantClear(&vtProp);
+		}
+
+		return TRUE;
+	});
+}
+
 
 CStringW CEndlessUsbToolDlg::GetExePath()
 {
