@@ -1977,8 +1977,9 @@ HRESULT CEndlessUsbToolDlg::OnInstallDualBootClicked(IHTMLElement* pElement)
 	}
 
 	// check if windows MBR
+	BOOL isBIOS = IsLegacyBIOSBoot();
 	BOOL hasNonWindowsMBR = false;
-	if(IsLegacyBIOSBoot() && !CEndlessUsbToolApp::m_enableOverwriteMbr) {
+	if (isBIOS && !CEndlessUsbToolApp::m_enableOverwriteMbr) {
 		HANDLE hPhysical = GetPhysicalFromDriveLetter(systemDriveLetter);
 		if (hPhysical != INVALID_HANDLE_VALUE) {
 			FAKE_FD fake_fd = { 0 };
@@ -1999,6 +2000,10 @@ HRESULT CEndlessUsbToolDlg::OnInstallDualBootClicked(IHTMLElement* pElement)
 	}
 
 	SetSelectedInstallMethod(InstallMethod_t::InstallDualBoot);
+
+	TrackEvent(L"FirmwareType", isBIOS ? L"BIOS" : L"EFI");
+	TrackEvent(L"Manufacturer", manufacturer);
+	TrackEvent(L"Model", model);
 
 	if (!x64BitSupported) {
 		ErrorOccured(ErrorCauseNot64Bit);
