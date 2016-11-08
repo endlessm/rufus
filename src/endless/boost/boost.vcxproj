@@ -105,7 +105,8 @@ bootstrap</Command>
       </Command>
     </PreLinkEvent>
     <PostBuildEvent>
-      <Command>b2.exe --stagedir=$(OutDir) --build-dir=$(IntermediateOutputPath) --toolset=msvc --build-type=minimal variant=debug link=static threading=multi runtime-link=static stage</Command>
+      <Command>cmd /C "b2.exe --stagedir=$(OutDir) --build-dir=$(IntermediateOutputPath) --toolset=msvc --build-type=minimal variant=debug link=static threading=multi runtime-link=static stage"
+b2.exe --stagedir=$(OutDir) --build-dir=$(IntermediateOutputPath) --toolset=msvc --build-type=minimal variant=debug link=static threading=multi runtime-link=static stage</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -148,14 +149,15 @@ bootstrap</Command>
     </Link>
     <PreBuildEvent>
       <Command>set BOOST_ROOT=%cd%
-bootstrap</Command>
+bootstrap --with-toolset=msvc</Command>
     </PreBuildEvent>
     <PreLinkEvent>
       <Command>
       </Command>
     </PreLinkEvent>
     <PostBuildEvent>
-      <Command>b2.exe  --stagedir=$(OutDir) --build-dir=$(IntermediateOutputPath) --toolset=msvc --build-type=minimal variant=release link=static threading=multi runtime-link=static stage</Command>
+      <Command>cmd /c "b2.exe  --stagedir=$(OutDir) --build-dir=$(IntermediateOutputPath) --toolset=msvc --build-type=minimal variant=release link=static threading=multi runtime-link=static stage"
+b2.exe  --stagedir=$(OutDir) --build-dir=$(IntermediateOutputPath) --toolset=msvc --build-type=minimal variant=release link=static threading=multi runtime-link=static stage</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
