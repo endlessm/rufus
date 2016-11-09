@@ -274,7 +274,7 @@ DWORD WINAPI TorrentDownloader::NotificationThreadHandler(void* param)
 				bool allFinished = true;
 				std::vector<lt::torrent_handle> &torrents = downloader->m_torrentSession.get_torrents();
 				for (auto torrent = torrents.begin(); torrent != torrents.end(); torrent++) {
-					if (torrent->status().state != lt::torrent_status::state_t::finished) {
+					if (torrent->status().state != lt::torrent_status::state_t::finished && torrent->status().state != lt::torrent_status::state_t::seeding) {
 						allFinished = false;
 						break;
 					}
