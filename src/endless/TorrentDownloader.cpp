@@ -358,7 +358,7 @@ bool TorrentDownloader::GetDownloadProgress(DownloadStatus_t *downloadStatus)
 		lt::torrent_status status = torrent->status();
 		downloaded += status.total_wanted_done;
 		total += status.total_wanted;
-		if (status.state != lt::torrent_status::state_t::finished) {
+		if (status.state != lt::torrent_status::state_t::finished && torrent->status().state != lt::torrent_status::state_t::seeding) {
 			stillDownloading = true;
 		}
 		if (status.state == lt::torrent_status::state_t::downloading_metadata) {
