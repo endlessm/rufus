@@ -4430,7 +4430,7 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	IFFALSE_GOTOERROR(hPhysical != INVALID_HANDLE_VALUE, "Error on acquiring disk handle.");
 
 	// initialize the disk
-	result = DeviceIoControl(hPhysical, IOCTL_DISK_CREATE_DISK, &createDiskData, sizeof(createDiskData), NULL, 0, NULL, NULL);
+	result = DeviceIoControl(hPhysical, IOCTL_DISK_CREATE_DISK, &createDiskData, sizeof(createDiskData), NULL, 0, &size, NULL);
 	IFFALSE_GOTOERROR(result != 0, "Error when calling IOCTL_DISK_CREATE_DISK");
 
 	// get disk geometry information
