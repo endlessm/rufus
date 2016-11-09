@@ -298,8 +298,18 @@ DWORD WINAPI TorrentDownloader::NotificationThreadHandler(void* param)
 				goto done;
 				break;
 
-			default:
+			case lt::file_completed_alert::alert_type:
+			case lt::state_changed_alert::alert_type:
+			case lt::tracker_error_alert::alert_type:
+			case lt::metadata_failed_alert::alert_type:
+			case lt::peer_error_alert::alert_type:
+			case lt::file_error_alert::alert_type:
+			case lt::udp_error_alert::alert_type:
 				printToLog = true;
+				break;
+
+			default:
+				printToLog = false;
 				break;
 			}
 
