@@ -4684,7 +4684,13 @@ void CEndlessUsbToolDlg::RemoveNonEmptyDirectory(const CString directoryPath)
 	SHFILEOPSTRUCT fileOperation;
 	wchar_t dir[MAX_PATH + 1];
 	memset(dir, 0, sizeof(dir));
-	wsprintf(dir, L"%ls", directoryPath);
+	// On Windows XP, SHFileOperation fails with code 0x402 ("an unknown error occurred")
+	// if there is a trailing slash on the path. In practice we always pass a string with
+	// a trailing slash to this function, but let's not rely on that and explicitly check:
+	const CString withoutTrailingSlash = directoryPath.Right(1) == _T("\\")
+		? directoryPath.Left(directoryPath.GetLength() - 1)
+		: directoryPath;
+	wsprintf(dir, L"%ls", withoutTrailingSlash);
 
 	fileOperation.fFlags = FOF_SILENT | FOF_NOCONFIRMATION | FOF_NOERRORUI | FOF_NOCONFIRMMKDIR;
 	fileOperation.pFrom = dir;
