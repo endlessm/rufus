@@ -2,8 +2,8 @@
 
 #define RELEASE_VER_MAIN    3
 #define RELEASE_VER_MAIN2   0
-#define RELEASE_VER_SUB     5
-#define RELEASE_VER_SUB2    2
+#define RELEASE_VER_SUB     6
+#define RELEASE_VER_SUB2    0
 
 // version number (string)
 #define TOSTRING2(arg) #arg
