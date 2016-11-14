@@ -34,5 +34,3 @@ private:
 
 	static DWORD WINAPI NotificationThreadHandler(void* param);
 };
-
-void DownloadTorrent(const CStringA appPath);
