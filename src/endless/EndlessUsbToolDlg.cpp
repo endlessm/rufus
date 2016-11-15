@@ -4041,15 +4041,21 @@ void CEndlessUsbToolDlg::GetIEVersion()
     CRegKey registryKey;
     LSTATUS result;
     wchar_t versionValue[256];
-    ULONG size = sizeof(versionValue) / sizeof(versionValue[0]);
+    ULONG size = _countof(versionValue);
 
     result = registryKey.Open(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Internet Explorer", KEY_QUERY_VALUE);
     IFFALSE_RETURN(result == ERROR_SUCCESS, "Error opening IE registry key.");
 
-    result = registryKey.QueryStringValue(L"Version", versionValue, &size);
+    // Quoth <https://support.microsoft.com/en-us/kb/969393>:
+    // "The version string value for Internet Explorer 10 is 9.10.9200.16384,
+    // and the svcVersion string value is 10.0.9200.16384."
+    result = registryKey.QueryStringValue(L"svcVersion", versionValue, &size);
+    if (result != ERROR_SUCCESS) {
+        size = _countof(versionValue);
+        result = registryKey.QueryStringValue(L"Version", versionValue, &size);
+    }
     IFFALSE_RETURN(result == ERROR_SUCCESS, "Error Querying for version value.");
-
-    uprintf("%ls", versionValue);
+    uprintf("Internet Explorer %ls", versionValue);
 
     CString version = versionValue;
     version = version.Left(version.Find(L'.'));
