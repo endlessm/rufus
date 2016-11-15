@@ -812,7 +812,8 @@ BOOL CEndlessUsbToolDlg::OnInitDialog()
 
     SetWindowTextW(L"");
 
-	Analytics::instance()->sessionControl(true);
+    Analytics::instance()->sessionControl(true);
+    TrackEvent(_T("IEVersion"), m_ieVersion);
 
     if (m_ieVersion < MIN_SUPPORTED_IE_VERSION) {
         ShowIETooOldError();
