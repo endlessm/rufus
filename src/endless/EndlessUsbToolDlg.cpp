@@ -814,15 +814,33 @@ BOOL CEndlessUsbToolDlg::OnInitDialog()
 
 	Analytics::instance()->sessionControl(true);
 
-	if (m_ieVersion < MIN_SUPPORTED_IE_VERSION) {
-		int result = AfxMessageBox(UTF8ToCString(lmprintf(MSG_368, m_ieVersion, MIN_SUPPORTED_IE_VERSION)), MB_OKCANCEL | MB_ICONERROR);
-		if (result == IDOK) {
-			ShellExecute(NULL, L"open", L"https://www.microsoft.com/en-us/download/details.aspx?id=32072", NULL, NULL, SW_SHOWNORMAL);
-		}
-		ExitProcess(0);
-	}
+    if (m_ieVersion < MIN_SUPPORTED_IE_VERSION) {
+        ShowIETooOldError();
+        ExitProcess(0);
+    }
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
+}
+
+void CEndlessUsbToolDlg::ShowIETooOldError()
+{
+    CString message = UTF8ToCString(lmprintf(MSG_368, m_ieVersion, MIN_SUPPORTED_IE_VERSION));
+    int result = AfxMessageBox(message, MB_OKCANCEL | MB_ICONERROR);
+    if (result == IDOK) {
+        const char *command;
+        if (nWindowsVersion >= WINDOWS_VISTA) {
+            // https://msdn.microsoft.com/en-us/library/cc144191(VS.85).aspx
+            command = "c:\\windows\\system32\\control.exe /name Microsoft.WindowsUpdate";
+        } else {
+            // This is what the Windows Update item in the Start menu points to
+            command = "c:\\windows\\system32\\wupdmgr.exe";
+        }
+
+        UINT ret = WinExec(command, SW_NORMAL);
+        if (ret <= 31) {
+            uprintf("WinExec('%s', SW_NORMAL) failed: %d", command, ret);
+        }
+    }
 }
 
 #define THREADS_WAIT_TIMEOUT 10000 // 10 seconds

@@ -242,6 +242,7 @@ private:
 	void LoadLocalizationData();
 	void AddLanguagesToUI();
 	void ApplyRufusLocalization();
+	void ShowIETooOldError();
 
 	void ChangePage(PCTSTR newPage);
 
