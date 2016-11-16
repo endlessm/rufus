@@ -336,7 +336,7 @@ const wchar_t* mainWindowTitle = L"Endless Installer";
 #define UPDATE_DOWNLOAD_PROGRESS_TIME       2000
 #define CHECK_INTERNET_CONNECTION_TIME      2000
 
-#define MIN_SUPPORTED_IE_VERSION		7
+#define MIN_SUPPORTED_IE_VERSION		8
 
 #define FORMAT_STATUS_CANCEL (ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_CANCELLED)
 
@@ -812,17 +812,36 @@ BOOL CEndlessUsbToolDlg::OnInitDialog()
 
     SetWindowTextW(L"");
 
-	Analytics::instance()->sessionControl(true);
+    Analytics::instance()->sessionControl(true);
+    TrackEvent(_T("IEVersion"), m_ieVersion);
 
-	if (m_ieVersion < MIN_SUPPORTED_IE_VERSION) {
-		int result = AfxMessageBox(UTF8ToCString(lmprintf(MSG_368, m_ieVersion, MIN_SUPPORTED_IE_VERSION)), MB_OKCANCEL | MB_ICONERROR);
-		if (result == IDOK) {
-			ShellExecute(NULL, L"open", L"https://www.microsoft.com/en-us/download/details.aspx?id=32072", NULL, NULL, SW_SHOWNORMAL);
-		}
-		ExitProcess(0);
-	}
+    if (m_ieVersion < MIN_SUPPORTED_IE_VERSION) {
+        ShowIETooOldError();
+        ExitProcess(0);
+    }
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
+}
+
+void CEndlessUsbToolDlg::ShowIETooOldError()
+{
+    CString message = UTF8ToCString(lmprintf(MSG_368, m_ieVersion, MIN_SUPPORTED_IE_VERSION));
+    int result = AfxMessageBox(message, MB_OKCANCEL | MB_ICONERROR);
+    if (result == IDOK) {
+        const char *command;
+        if (nWindowsVersion >= WINDOWS_VISTA) {
+            // https://msdn.microsoft.com/en-us/library/cc144191(VS.85).aspx
+            command = "c:\\windows\\system32\\control.exe /name Microsoft.WindowsUpdate";
+        } else {
+            // This is what the Windows Update item in the Start menu points to
+            command = "c:\\windows\\system32\\wupdmgr.exe";
+        }
+
+        UINT ret = WinExec(command, SW_NORMAL);
+        if (ret <= 31) {
+            uprintf("WinExec('%s', SW_NORMAL) failed: %d", command, ret);
+        }
+    }
 }
 
 #define THREADS_WAIT_TIMEOUT 10000 // 10 seconds
@@ -4022,15 +4041,21 @@ void CEndlessUsbToolDlg::GetIEVersion()
     CRegKey registryKey;
     LSTATUS result;
     wchar_t versionValue[256];
-    ULONG size = sizeof(versionValue) / sizeof(versionValue[0]);
+    ULONG size = _countof(versionValue);
 
     result = registryKey.Open(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Internet Explorer", KEY_QUERY_VALUE);
     IFFALSE_RETURN(result == ERROR_SUCCESS, "Error opening IE registry key.");
 
-    result = registryKey.QueryStringValue(L"Version", versionValue, &size);
+    // Quoth <https://support.microsoft.com/en-us/kb/969393>:
+    // "The version string value for Internet Explorer 10 is 9.10.9200.16384,
+    // and the svcVersion string value is 10.0.9200.16384."
+    result = registryKey.QueryStringValue(L"svcVersion", versionValue, &size);
+    if (result != ERROR_SUCCESS) {
+        size = _countof(versionValue);
+        result = registryKey.QueryStringValue(L"Version", versionValue, &size);
+    }
     IFFALSE_RETURN(result == ERROR_SUCCESS, "Error Querying for version value.");
-
-    uprintf("%ls", versionValue);
+    uprintf("Internet Explorer %ls", versionValue);
 
     CString version = versionValue;
     version = version.Left(version.Find(L'.'));
