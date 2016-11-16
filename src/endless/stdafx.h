@@ -52,4 +52,10 @@
 #endif
 #endif
 
+// needed to bypass the 'unresolved external symbol ___iob_func' error
+// when linking agains openssl libs compiled with VS versions older than 2015
+// http://stackoverflow.com/questions/30450042/unresolved-external-symbol-imp-iob-func-referenced-in-function-openssldie
+FILE _iob[] = { *stdin, *stdout, *stderr };
+extern "C" FILE * __cdecl __iob_func(void) { return _iob; }
+
 
