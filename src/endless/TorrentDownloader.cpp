@@ -20,6 +20,8 @@ extern "C" {
 
 ///////////////////////////////////////////
 
+#define TORRENT_WAIT_ALERT_TIMEOUT 2000
+
 TorrentDownloader::TorrentDownloader() :
 	m_stopThreadEvent(INVALID_HANDLE_VALUE),
 	m_notificationThread(INVALID_HANDLE_VALUE),
@@ -118,6 +120,11 @@ DWORD WINAPI TorrentDownloader::NotificationThreadHandler(void* param)
 		{
 			std::unique_lock<std::mutex> lock(downloader->m_torrentSync);
 			IFFALSE_GOTO(downloader->m_stopThreadEvent != INVALID_HANDLE_VALUE && WaitForSingleObject(downloader->m_stopThreadEvent, 0) == WAIT_TIMEOUT, "User cancel.", cancel);
+		}
+
+		if (NULL == downloader->m_torrentSession.wait_for_alert(std::chrono::milliseconds(TORRENT_WAIT_ALERT_TIMEOUT))) {
+			uprintf("No new alerts received from libtorrent.");
+			continue;
 		}
 
 		downloader->m_torrentSession.pop_alerts(&alerts);
@@ -239,7 +246,6 @@ DWORD WINAPI TorrentDownloader::NotificationThreadHandler(void* param)
 
 			if(printToLog) uprintf("type=[%d] {%s}", alert->type(), alert->message().c_str());
 		}
-		//std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	}
 
 cancel:
