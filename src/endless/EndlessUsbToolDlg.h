@@ -394,5 +394,6 @@ private:
 
 	NOTIFYICONDATA m_notificationInfoData;
 	UINT_PTR m_checkRatioTimer;
+	bool m_seedingRatioMet;
 	void InitNotificationInfoData();
 };
