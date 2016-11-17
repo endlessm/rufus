@@ -113,7 +113,7 @@
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <AdditionalDependencies>setupapi.lib;comctl32.lib;wininet.lib;shlwapi.lib;crypt32.lib;wintrust.lib;libtorrent.lib;ssleay32MTd.lib;libeay32MTd.lib;Uafxcwd.lib;Libcmtd.lib;libboost_system-vc140-mt-sgd-1_61.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>setupapi.lib;comctl32.lib;wininet.lib;shlwapi.lib;crypt32.lib;wintrust.lib;libtorrent.lib;ssleay32MTd.lib;libeay32MTd.lib;Uafxcwd.lib;Libcmtd.lib;libboost_system-vc140-mt-sgd-1_62.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
       <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>Uafxcwd.lib;Libcmtd.lib</IgnoreSpecificDefaultLibraries>
@@ -179,7 +179,7 @@
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>setupapi.lib;comctl32.lib;wininet.lib;shlwapi.lib;crypt32.lib;wintrust.lib;libtorrent.lib;ssleay32MT.lib;libeay32MT.lib;Uafxcw.lib;Libcmt.lib;libboost_system-vc140-mt-s-1_61.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>setupapi.lib;comctl32.lib;wininet.lib;shlwapi.lib;crypt32.lib;wintrust.lib;libtorrent.lib;ssleay32MT.lib;libeay32MT.lib;Uafxcw.lib;Libcmt.lib;libboost_system-vc140-mt-s-1_62.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
       <GenerateDebugInformation>Debug</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>Uafxcw.lib;Libcmt.lib</IgnoreSpecificDefaultLibraries>
