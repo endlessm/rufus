@@ -531,7 +531,8 @@ CEndlessUsbToolDlg::CEndlessUsbToolDlg(UINT globalMessage, CWnd* pParent /*=NULL
     m_localFilesScanned(false),
     m_jsonDownloadAttempted(false),
 	m_selectedInstallMethod(InstallMethod_t::None),
-	m_checkRatioTimer(0)
+	m_checkRatioTimer(0),
+	m_seedingRatioMet(false)
 {
     FUNCTION_ENTER;
     m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);    
@@ -973,6 +974,7 @@ LRESULT CEndlessUsbToolDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lPara
 	if (message == WM_TIMER && m_checkRatioTimer != 0) {
 		if (m_torrentDownloader.IsSeedingRatioMet()) {
 			uprintf("Seeding ratio met.");
+			m_seedingRatioMet = true;
 			// stop timer
 			BOOL result = KillTimer(m_checkRatioTimer);
 			m_checkRatioTimer = 0;
@@ -986,7 +988,6 @@ LRESULT CEndlessUsbToolDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lPara
 			// stop torrent
 			m_torrentDownloader.Reset();
 			// allow user to close app instead of going to tray
-			m_useLocalFile = true;
 			CallJavascript(_T(JS_RESET_CHECK), CComVariant(_T(ELEMENT_SEED_CHECKBOX)));
 			CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(_T(ELEMENT_SEED_CONTAINER)), FALSE);
 
@@ -3509,7 +3510,7 @@ HRESULT CEndlessUsbToolDlg::OnSuccessCloseAppClicked(IHTMLElement* pElement)
 	CComPtr<IHTMLOptionButtonElement> checkboxElem;
 	VARIANT_BOOL checked = VARIANT_FALSE;
 
-	if (!m_useLocalFile) {
+	if (!m_useLocalFile && !m_seedingRatioMet) {
 		// check if we should seed
 		HRESULT hr = GetElement(_T(ELEMENT_SEED_CHECKBOX), &pElem);
 		IFFALSE_GOTOERROR(SUCCEEDED(hr) && pElem != NULL, "Error querying for IHTMLElement.");
