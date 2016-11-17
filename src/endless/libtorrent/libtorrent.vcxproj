@@ -92,7 +92,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_LIB;WIN32_LEAN_AND_MEAN;_WIN32_WINNT=0x0501;_CRT_SECURE_NO_DEPRECATE;UNICODE;BOOST_ASIO_HASH_MAP_BUCKETS=1021;BOOST_FILESYSTEM_VERSION=2;WITH_SHIPPED_GEOIP_H;TORRENT_BUILDING_SHARED;BOOST_ASIO_SEPARATE_COMPILATION;BOOST_ASIO_ENABLE_CANCELIO;TORRENT_USE_OPENSSL;WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)\src\endless\boost;$(SolutionDir)\src\endless\libtorrent\include;c:\OpenSSL-Win32\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>c:\Libraries\boost_1_62_0;$(SolutionDir)\src\endless\libtorrent\include;c:\OpenSSL-Win32\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
@@ -130,7 +130,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>_LIB;WIN32_LEAN_AND_MEAN;_WIN32_WINNT=0x0501;_CRT_SECURE_NO_DEPRECATE;UNICODE;BOOST_ASIO_HASH_MAP_BUCKETS=1021;BOOST_FILESYSTEM_VERSION=2;WITH_SHIPPED_GEOIP_H;TORRENT_BUILDING_SHARED;BOOST_ASIO_SEPARATE_COMPILATION;BOOST_ASIO_ENABLE_CANCELIO;TORRENT_USE_OPENSSL;NDEBUG;WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)\src\endless\boost;$(SolutionDir)\src\endless\libtorrent\include;c:\OpenSSL-Win32\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>c:\Libraries\boost_1_62_0;$(SolutionDir)\src\endless\libtorrent\include;c:\OpenSSL-Win32\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>

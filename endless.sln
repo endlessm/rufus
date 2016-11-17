@@ -35,11 +35,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EndlessUsbTool", "src\endle
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libtorrent", "src\endless\libtorrent\libtorrent.vcxproj", "{EDA6CE2C-4E88-4B03-A86D-A5C26F47EDB4}"
-	ProjectSection(ProjectDependencies) = postProject
-		{71BE3AFA-8F74-47BF-B335-88CE637776B4} = {71BE3AFA-8F74-47BF-B335-88CE637776B4}
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "boost", "src\endless\boost\boost.vcxproj", "{71BE3AFA-8F74-47BF-B335-88CE637776B4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -227,20 +222,6 @@ Global
 		{EDA6CE2C-4E88-4B03-A86D-A5C26F47EDB4}.Release|x86_32.ActiveCfg = Release|Win32
 		{EDA6CE2C-4E88-4B03-A86D-A5C26F47EDB4}.Release|x86_32.Build.0 = Release|Win32
 		{EDA6CE2C-4E88-4B03-A86D-A5C26F47EDB4}.Release|x86_64.ActiveCfg = Release|Win32
-		{71BE3AFA-8F74-47BF-B335-88CE637776B4}.Debug|x64.ActiveCfg = Debug|x64
-		{71BE3AFA-8F74-47BF-B335-88CE637776B4}.Debug|x64.Build.0 = Debug|x64
-		{71BE3AFA-8F74-47BF-B335-88CE637776B4}.Debug|x86.ActiveCfg = Debug|Win32
-		{71BE3AFA-8F74-47BF-B335-88CE637776B4}.Debug|x86.Build.0 = Debug|Win32
-		{71BE3AFA-8F74-47BF-B335-88CE637776B4}.Debug|x86_32.ActiveCfg = Debug|Win32
-		{71BE3AFA-8F74-47BF-B335-88CE637776B4}.Debug|x86_32.Build.0 = Debug|Win32
-		{71BE3AFA-8F74-47BF-B335-88CE637776B4}.Debug|x86_64.ActiveCfg = Debug|Win32
-		{71BE3AFA-8F74-47BF-B335-88CE637776B4}.Release|x64.ActiveCfg = Release|x64
-		{71BE3AFA-8F74-47BF-B335-88CE637776B4}.Release|x64.Build.0 = Release|x64
-		{71BE3AFA-8F74-47BF-B335-88CE637776B4}.Release|x86.ActiveCfg = Release|Win32
-		{71BE3AFA-8F74-47BF-B335-88CE637776B4}.Release|x86.Build.0 = Release|Win32
-		{71BE3AFA-8F74-47BF-B335-88CE637776B4}.Release|x86_32.ActiveCfg = Release|Win32
-		{71BE3AFA-8F74-47BF-B335-88CE637776B4}.Release|x86_32.Build.0 = Release|Win32
-		{71BE3AFA-8F74-47BF-B335-88CE637776B4}.Release|x86_64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
