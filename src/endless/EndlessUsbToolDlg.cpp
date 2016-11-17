@@ -21,9 +21,7 @@
 #include "StringHelperMethods.h"
 
 #include "TorrentDownloader.h"
-
-#define min(x, y) (((x) < (y)) ? (x) : (y))
-#define max(x, y)  (((x) > (y)) ? (x) : (y))
+#include <minmax.h>
 
 // Rufus include files
 extern "C" {
