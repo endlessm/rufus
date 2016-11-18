@@ -6,6 +6,8 @@ extern "C" {
 	#include "rufus.h"
 }
 
+#include "json/json.h"
+
 #include "Version.h"
 #include "GeneralCode.h"
 
@@ -17,6 +19,34 @@ extern "C" {
 
 #define SERVER_NAME "www.google-analytics.com"
 #define SERVER_PORT 80
+
+static void HandleDebugResponse(CHttpFile *file)
+{
+	std::string response;
+	char chunk[1024];
+	UINT n;
+	while (0 < (n = file->Read(chunk, _countof(chunk)))) {
+		response.append(chunk, n);
+		break;
+	}
+	// uprintf("Analytics: response: %s", response.c_str());
+
+	Json::Reader reader;
+	Json::Value root;
+	if (reader.parse(response, root)) {
+		Json::Value hpr = root["hitParsingResult"];
+		for (Json::ArrayIndex i = 0; i < hpr.size(); i++) {
+			Json::Value result = hpr[i];
+			if (!result["valid"].asBool()) {
+				uprintf("Analytics: submitted an invalid hit: %s", response.c_str());
+				break;
+			}
+		}
+	}
+	else {
+		uprintf("Analytics: failed to parse debug result: %s", response.c_str());
+	}
+}
 
 static UINT threadSendRequest(LPVOID pParam)
 {
@@ -42,6 +72,9 @@ static UINT threadSendRequest(LPVOID pParam)
 				DWORD responseCode = 0;
 				IFFALSE_PRINTERROR(file->QueryInfoStatusCode(responseCode), "QueryInfoStatusCode failed");
 				uprintf("Analytics: response code %d", responseCode);
+				if (debug) {
+					HandleDebugResponse(file);
+				}
 				file->Close();
 				delete file;
 			}
