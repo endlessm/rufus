@@ -290,6 +290,8 @@ static BYTE vardata[10000];
 static BYTE vardata1[1000];
 
 int EFIGetBootEntryNumber(const wchar_t *desc, bool createNewEntry) {
+	FUNCTION_ENTER;
+
 	DWORD size;
 	WORD *bootorder;
 	int i;
@@ -335,6 +337,8 @@ int EFIGetBootEntryNumber(const wchar_t *desc, bool createNewEntry) {
 }
 
 bool EFICreateNewEntry(const wchar_t *drive, wchar_t *path, wchar_t *desc) {
+	FUNCTION_ENTER;
+
 	int i;
 	int target = -1, windows = -1;
 
@@ -363,7 +367,8 @@ bool EFICreateNewEntry(const wchar_t *drive, wchar_t *path, wchar_t *desc) {
 
 	bool retResult = false;
 
-	//print_entries();
+	uprintf("=== Current boot configuration ===");
+	print_entries();
 
 	target = EFIGetBootEntryNumber(desc, true);
 	IFFALSE_GOTOERROR(target != -1, "Failed to find a free boot variable");
@@ -477,7 +482,8 @@ bool EFICreateNewEntry(const wchar_t *drive, wchar_t *path, wchar_t *desc) {
 	bootorder[0] = target;
 	IFFALSE_GOTOERROR(SetFirmwareEnvironmentVariable(UEFI_VAR_BOOTORDER, UEFI_BOOT_NAMESPACE, vardata, size + extraBytes), "Error on SetFirmwareEnvironmentVariable");
 
-	//print_entries();
+	uprintf("=== New boot configuration ===");
+	print_entries();
 
 	retResult = true;
 
@@ -486,11 +492,14 @@ error:
 }
 
 bool EFIRemoveEntry(wchar_t *desc) {
+	FUNCTION_ENTER;
+
 	wchar_t varname[9];
 	int target = -1;
 	bool result = true;
 
-	//print_entries();
+	uprintf("=== Current boot configuration ===");
+	print_entries();
 
 	target = EFIGetBootEntryNumber(desc, false);
 	IFFALSE_RETURN_VALUE(target != -1, "Failed to find EFI entry for Endless OS", false);
@@ -529,7 +538,8 @@ bool EFIRemoveEntry(wchar_t *desc) {
 		uprintf("Our EFI entry %ls was not found in BootOrder list", varname);
 	}
 
-	//print_entries();
+	uprintf("=== New boot configuration ===");
+	print_entries();
 
 	return result;
 }
