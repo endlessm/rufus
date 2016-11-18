@@ -340,7 +340,7 @@ bool EFICreateNewEntry(const wchar_t *drive, wchar_t *path, wchar_t *desc) {
 	FUNCTION_ENTER;
 
 	int i;
-	int target = -1, windows = -1;
+	int target = -1;
 
 	wchar_t varname[9];
 	wchar_t volumename[1000];
