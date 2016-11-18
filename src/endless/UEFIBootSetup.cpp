@@ -295,7 +295,6 @@ int EFIGetBootEntryNumber(const wchar_t *desc, bool createNewEntry) {
 	DWORD size;
 	WORD *bootorder;
 	int i;
-	int lowestfree = 0, target = -1;
 	wchar_t varname[9];
 
 	size = GetFirmwareEnvironmentVariable(UEFI_VAR_BOOTORDER, UEFI_BOOT_NAMESPACE, vardata, sizeof(vardata));
@@ -309,31 +308,24 @@ int EFIGetBootEntryNumber(const wchar_t *desc, bool createNewEntry) {
 			wchar_t *description = (wchar_t *)&vardata1[6];
 			// TODO: should we add more validation than just the boot entry description matching?
 			if (0 == wcscmp(desc, description)) {
-				target = bootorder[i];
-				lowestfree = 0x10000;
-				break;
-			}
-
-			if (bootorder[i] >= lowestfree) {
-				lowestfree = bootorder[i] + 1;
+				return bootorder[i];
 			}
 		}
 	}
 
 	if (!createNewEntry)
-		return target;
+		return -1;
 
 	/* Find a free boot entry */
-	for (i = lowestfree; i <= 0xffff; i++) {
+	for (i = 0; i <= 0xffff; i++) {
 		swprintf(varname, sizeof(varname), UEFI_VAR_BOOT_ENTRY_FORMAT, i);
 		size = GetFirmwareEnvironmentVariable(varname, UEFI_BOOT_NAMESPACE, vardata, sizeof(vardata));
-		if (GetLastError() == ERROR_ENVVAR_NOT_FOUND && target == -1) {
-			target = i;
-			break;
+		if (size == 0 && GetLastError() == ERROR_ENVVAR_NOT_FOUND) {
+			return i;
 		}
 	}
 
-	return target;
+	return -1;
 }
 
 bool EFICreateNewEntry(const wchar_t *drive, wchar_t *path, wchar_t *desc) {
@@ -351,7 +343,6 @@ bool EFICreateNewEntry(const wchar_t *drive, wchar_t *path, wchar_t *desc) {
 	DWORD size, offset, blocksize;
 	WORD *bootorder;
 	BYTE *target_addr;
-	int lowestfree = 0;
 
 	EFI_HARD_DRIVE_PATH hd_path;
 	EFI_LOAD_OPTION *load_option;
