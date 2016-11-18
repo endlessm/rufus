@@ -18,7 +18,7 @@ extern "C" {
 #define REG_KEY_DEBUG "Debug"
 
 #define SERVER_NAME "www.google-analytics.com"
-#define SERVER_PORT 80
+#define SERVER_PORT 443
 
 static void HandleDebugResponse(CHttpFile *file)
 {
@@ -65,7 +65,15 @@ static UINT threadSendRequest(LPVOID pParam)
 			CString headers = _T("Content-type: application/x-www-form-urlencoded");
 			CHttpConnection *conn = session.GetHttpConnection(_T(SERVER_NAME), (INTERNET_PORT)SERVER_PORT);
 			CString path = debug ? _T("debug/collect") : _T("collect");
-			CHttpFile *file = conn->OpenRequest(CHttpConnection::HTTP_VERB_POST, path);
+			const DWORD flags = INTERNET_FLAG_EXISTING_CONNECT
+				| INTERNET_FLAG_KEEP_CONNECTION
+				| INTERNET_FLAG_SECURE
+				| INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTP
+				| INTERNET_FLAG_NO_COOKIES
+				| INTERNET_FLAG_NO_UI;
+			CHttpFile *file = conn->OpenRequest(CHttpConnection::HTTP_VERB_POST, path,
+				/* Referer */ NULL, /* context */ 1, /* Accept */ NULL,
+				_T("HTTP/1.1"), flags);
 			if (file) {
 				file->SendRequest(headers, (LPVOID)(LPCSTR)bodyUtf8, bodyUtf8.GetLength());
 				uprintf("Analytics req: %s\n", (LPCSTR)bodyUtf8);
