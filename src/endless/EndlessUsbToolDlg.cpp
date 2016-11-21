@@ -856,14 +856,20 @@ void CEndlessUsbToolDlg::Uninit()
     m_initialized = false;
 
     int handlesCount = 0;
-    HANDLE handlesToWaitFor[4];
+    HANDLE handlesToWaitFor[5];
     
-	Analytics::instance()->stopSession();
+    TrackEvent(_T("Closed"));
+    HANDLE analyticsHandle = Analytics::instance()->stopSession();
 
-    if (m_fileScanThread != INVALID_HANDLE_VALUE) handlesToWaitFor[handlesCount++] = m_fileScanThread;
-    if (m_operationThread != INVALID_HANDLE_VALUE) handlesToWaitFor[handlesCount++] = m_operationThread;
-    if (m_downloadUpdateThread != INVALID_HANDLE_VALUE) handlesToWaitFor[handlesCount++] = m_downloadUpdateThread;
-    if (m_checkConnectionThread != INVALID_HANDLE_VALUE) handlesToWaitFor[handlesCount++] = m_checkConnectionThread;
+#define await_handle(h) do { \
+	if (h != INVALID_HANDLE_VALUE) handlesToWaitFor[handlesCount++] = h; \
+} while (0)
+    await_handle(analyticsHandle);
+    await_handle(m_fileScanThread);
+    await_handle(m_operationThread);
+    await_handle(m_downloadUpdateThread);
+    await_handle(m_checkConnectionThread);
+#undef await_handle
 
     if (handlesCount > 0) {
         if (m_closeFileScanThreadEvent != INVALID_HANDLE_VALUE) SetEvent(m_closeFileScanThreadEvent);
@@ -3490,7 +3496,6 @@ HRESULT CEndlessUsbToolDlg::OnInstallCancelClicked(IHTMLElement* pElement)
 // Error/Thank You Page Handlers
 HRESULT CEndlessUsbToolDlg::OnCloseAppClicked(IHTMLElement* pElement)
 {
-	TrackEvent(_T("Closed"));
 	EndDialog(IDCLOSE);
 	return S_OK;
 }

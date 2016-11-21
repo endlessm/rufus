@@ -183,19 +183,15 @@ void Analytics::startSession()
 	sendRequest(body);
 }
 
-void Analytics::stopSession()
+HANDLE Analytics::stopSession()
 {
-	if (m_disabled) return;
+	if (m_disabled) return INVALID_HANDLE_VALUE;
 	FUNCTION_ENTER;
 	CString body;
 	prefixId(body);
 	body += _T("t=screenview&cd=LastPage&sc=end");
 	sendRequest(body, TRUE);
-	DWORD ret = WaitForSingleObject(m_workerThread->m_hThread, 4000);
-	if (ret == WAIT_TIMEOUT) {
-		delete m_workerThread;
-		m_workerThread = NULL;
-	}
+	return m_workerThread->m_hThread;
 }
 
 void Analytics::screenTracking(const CString &name)

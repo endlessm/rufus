@@ -9,7 +9,7 @@ public:
 	static Analytics *instance();
 
 	void startSession();
-	void stopSession();
+	HANDLE stopSession();
 	void screenTracking(const CString &name);
 	void eventTracking(const CString &category, const CString &action, const CString &label = CString(), LONGLONG value = -1);
 	void exceptionTracking(const CString &description, BOOL fatal);
