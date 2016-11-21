@@ -496,6 +496,7 @@ const UINT CEndlessUsbToolDlg::m_uTaskbarBtnCreatedMsg = RegisterWindowMessage(_
 
 CEndlessUsbToolDlg::CEndlessUsbToolDlg(UINT globalMessage, CWnd* pParent /*=NULL*/)
     : CDHtmlDialog(IDD_ENDLESSUSBTOOL_DIALOG, IDR_HTML_ENDLESSUSBTOOL_DIALOG, pParent),
+    m_initialized(false),
     m_selectedLocale(NULL),
     m_localizationFile(""),
     m_shellNotificationsRegister(0),
@@ -747,6 +748,8 @@ BOOL CEndlessUsbToolDlg::OnInitDialog()
 
 	CDHtmlDialog::OnInitDialog();
 
+	m_initialized = true;
+
 	CHANGEFILTERSTRUCT cfs = { sizeof(CHANGEFILTERSTRUCT) };
 
 	PF_INIT(ChangeWindowMessageFilterEx, user32);
@@ -817,7 +820,7 @@ BOOL CEndlessUsbToolDlg::OnInitDialog()
 
     if (m_ieVersion < MIN_SUPPORTED_IE_VERSION) {
         ShowIETooOldError();
-        ExitProcess(0);
+        EndDialog(IDCANCEL);
     }
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
@@ -848,6 +851,9 @@ void CEndlessUsbToolDlg::ShowIETooOldError()
 void CEndlessUsbToolDlg::Uninit()
 {
     FUNCTION_ENTER;
+
+    IFFALSE_RETURN(m_initialized, "not yet initialized; or already uninitialized");
+    m_initialized = false;
 
     int handlesCount = 0;
     HANDLE handlesToWaitFor[4];
@@ -3485,9 +3491,7 @@ HRESULT CEndlessUsbToolDlg::OnInstallCancelClicked(IHTMLElement* pElement)
 HRESULT CEndlessUsbToolDlg::OnCloseAppClicked(IHTMLElement* pElement)
 {
 	TrackEvent(_T("Closed"));
-    Uninit();
-    AfxPostQuitMessage(0);
-
+	EndDialog(IDCLOSE);
 	return S_OK;
 }
 
@@ -3604,7 +3608,6 @@ void CEndlessUsbToolDlg::OnClose()
         return;
     }
 
-    Uninit();
     CDHtmlDialog::OnClose();
 }
 
@@ -6172,9 +6175,7 @@ void CEndlessUsbToolDlg::QueryAndDoUninstall()
 		Analytics::instance()->exceptionTracking(_T("UninstallError"), TRUE);
 	}
 
-	Analytics::instance()->stopSession();
-
-	ExitProcess(0);
+	EndDialog(IDCLOSE);
 }
 
 bool CEndlessUsbToolDlg::IsEndlessMBR(FILE* fp, const CString &endlessPath)

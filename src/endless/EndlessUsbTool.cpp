@@ -147,21 +147,11 @@ BOOL CEndlessUsbToolApp::InitInstance()
 		CEndlessUsbToolDlg dlg(wndMsg);
         m_pMainWnd = &dlg;
         INT_PTR nResponse = dlg.DoModal();
-        if (nResponse == IDOK)
+        if (nResponse == -1)
         {
-            // TODO: Place code here to handle when the dialog is
-            //  dismissed with OK
+            TRACE(traceAppMsg, 0, "Warning: EndlessUsbToolDlg closed without calling ::EndDialog.\n");
         }
-        else if (nResponse == IDCANCEL)
-        {
-            // TODO: Place code here to handle when the dialog is
-            //  dismissed with Cancel
-        }
-        else if (nResponse == -1)
-        {
-            TRACE(traceAppMsg, 0, "Warning: dialog creation failed, so application is terminating unexpectedly.\n");
-            TRACE(traceAppMsg, 0, "Warning: if you are using MFC controls on the dialog, you cannot #define _AFX_NO_MFC_CONTROLS_IN_DIALOGS.\n");
-        }
+        dlg.Uninit();
     } else {
         ::SendMessage(HWND_BROADCAST, wndMsg, 0, 0);
     }
