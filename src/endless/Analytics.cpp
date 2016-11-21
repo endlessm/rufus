@@ -173,24 +173,28 @@ Analytics *Analytics::instance()
 	return &instance;
 }
 
-void Analytics::sessionControl(BOOL start)
+void Analytics::startSession()
 {
 	if (m_disabled) return;
 	FUNCTION_ENTER;
 	CString body;
 	prefixId(body);
-	if (start) {
-		body = body + _T("t=screenview&cd=DualBootInstallPage&sc=start");
-		sendRequest(body);
-	}
-	else {
-		body = body + _T("t=screenview&cd=LastPage&sc=end");
-		sendRequest(body, TRUE);
-		DWORD ret = WaitForSingleObject(m_workerThread->m_hThread, 4000);
-		if (ret == WAIT_TIMEOUT) {
-			delete m_workerThread;
-			m_workerThread = NULL;
-		}
+	body += _T("t=screenview&cd=DualBootInstallPage&sc=start");
+	sendRequest(body);
+}
+
+void Analytics::stopSession()
+{
+	if (m_disabled) return;
+	FUNCTION_ENTER;
+	CString body;
+	prefixId(body);
+	body += _T("t=screenview&cd=LastPage&sc=end");
+	sendRequest(body, TRUE);
+	DWORD ret = WaitForSingleObject(m_workerThread->m_hThread, 4000);
+	if (ret == WAIT_TIMEOUT) {
+		delete m_workerThread;
+		m_workerThread = NULL;
 	}
 }
 

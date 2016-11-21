@@ -812,7 +812,7 @@ BOOL CEndlessUsbToolDlg::OnInitDialog()
 
     SetWindowTextW(L"");
 
-    Analytics::instance()->sessionControl(true);
+    Analytics::instance()->startSession();
     TrackEvent(_T("IEVersion"), m_ieVersion);
 
     if (m_ieVersion < MIN_SUPPORTED_IE_VERSION) {
@@ -852,7 +852,7 @@ void CEndlessUsbToolDlg::Uninit()
     int handlesCount = 0;
     HANDLE handlesToWaitFor[4];
     
-	Analytics::instance()->sessionControl(false);
+	Analytics::instance()->stopSession();
 
     if (m_fileScanThread != INVALID_HANDLE_VALUE) handlesToWaitFor[handlesCount++] = m_fileScanThread;
     if (m_operationThread != INVALID_HANDLE_VALUE) handlesToWaitFor[handlesCount++] = m_operationThread;
@@ -6172,7 +6172,7 @@ void CEndlessUsbToolDlg::QueryAndDoUninstall()
 		Analytics::instance()->exceptionTracking(_T("UninstallError"), TRUE);
 	}
 
-	Analytics::instance()->sessionControl(false);
+	Analytics::instance()->stopSession();
 
 	ExitProcess(0);
 }
