@@ -10,6 +10,7 @@ extern "C" {
 
 #include "Version.h"
 #include "GeneralCode.h"
+#include "StringHelperMethods.h"
 
 #define TRACKING_ID "UA-61784217-3"
 #define REG_SECTION "Analytics"
@@ -48,13 +49,55 @@ static void HandleDebugResponse(CHttpFile *file)
 	}
 }
 
+// We pretend to be sending requests with the UA used by the browser widget.
+// In particular, this includes the OS version. Here is an example user agent
+// from Windows 10 with IE 11 installed:
+//
+//    Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 10.0; WOW64; Trident/7.0; .NET4.0C; .NET4.0E)
+//
+// https://www.whatismybrowser.com/developers/tools/user-agent-parser/
+// understands this to be IE 11 running in IE 7 Compatibility View mode.  If
+// you hack the UI to go to https://www.whatismybrowser.com/ this does actually
+// match the UA seen there.
+//
+// We send a separate IEVersion event with the *real* IE version; the UA is used
+// mainly for the OS information.
+static CString GetUserAgent()
+{
+	FUNCTION_ENTER;
+
+	DWORD uaSize = 0;
+	char *ua = NULL;
+	HRESULT hr;
+	CString ret(_T("Endless Installer"));
+
+	char dummy[1] = "";
+	hr = ObtainUserAgentString(0, dummy, &uaSize);
+	IFFALSE_GOTOERROR(hr == E_OUTOFMEMORY, "Expected ObtainUserAgentString to fail");
+	IFFALSE_GOTOERROR(uaSize > 0, "Expected ObtainUserAgentString to return non-zero size");
+
+	ua = (char *) HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, uaSize);
+	hr = ObtainUserAgentString(0, ua, &uaSize);
+	IFFALSE_GOTOERROR(hr == S_OK, "ObtainUserAgentString failed");
+
+	ret = UTF8ToCString(ua);
+	uprintf("User agent: '%ls'", ret);
+
+error:
+	if (ua != NULL) {
+		HeapFree(GetProcessHeap(), 0, ua);
+		ua = NULL;
+	}
+	return ret;
+}
+
 static UINT threadSendRequest(LPVOID pParam)
 {
 	FUNCTION_ENTER;
 
 	BOOL debug = (BOOL) pParam;
 
-	CInternetSession session(_T("Endless Installer"));
+	CInternetSession session(GetUserAgent());
 	MSG msg;
 
 	while (GetMessage(&msg, NULL, WM_APP, WM_APP+1)) {
