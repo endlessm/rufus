@@ -23,7 +23,28 @@ extern "C" {
 #define SERVER_PATH _T("collect")
 #define SERVER_DEBUG_PATH _T("debug/collect")
 
-static void HandleDebugResponse(CHttpFile *file)
+class AnalyticsRequestThread
+	: public CWinThread
+{
+public:
+	AnalyticsRequestThread(BOOL debug)
+		: m_debug(debug)
+		, m_session(GetUserAgent())
+	{}
+	virtual int Run();
+	virtual BOOL InitInstance() { return TRUE;  }
+
+private:
+	static void HandleDebugResponse(CHttpFile *file);
+	static CString GetUserAgent();
+
+	void SendRequest(const CStringA &bodyUtf8);
+
+	BOOL m_debug;
+	CInternetSession m_session;
+};
+
+void AnalyticsRequestThread::HandleDebugResponse(CHttpFile *file)
 {
 	std::string response;
 	char chunk[1024];
@@ -64,7 +85,7 @@ static void HandleDebugResponse(CHttpFile *file)
 //
 // We send a separate IEVersion event with the *real* IE version; the UA is used
 // mainly for the OS information.
-static CString GetUserAgent()
+CString AnalyticsRequestThread::GetUserAgent()
 {
 	FUNCTION_ENTER;
 
@@ -93,13 +114,50 @@ error:
 	return ret;
 }
 
-static UINT threadSendRequest(LPVOID pParam)
+void AnalyticsRequestThread::SendRequest(const CStringA &bodyUtf8)
+{
+	try {
+		CString headers = _T("Content-type: application/x-www-form-urlencoded");
+		CHttpConnection *conn = m_session.GetHttpConnection(_T(SERVER_NAME), (INTERNET_PORT)SERVER_PORT);
+		CString path = m_debug ? SERVER_DEBUG_PATH : SERVER_PATH;
+		const DWORD flags = INTERNET_FLAG_EXISTING_CONNECT
+			| INTERNET_FLAG_KEEP_CONNECTION
+			| INTERNET_FLAG_SECURE
+			| INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTP
+			| INTERNET_FLAG_NO_COOKIES
+			| INTERNET_FLAG_NO_UI;
+		CHttpFile *file = conn->OpenRequest(CHttpConnection::HTTP_VERB_POST, path,
+			/* Referer */ NULL, /* context */ 1, /* Accept */ NULL,
+			_T("HTTP/1.1"), flags);
+		if (file) {
+			file->SendRequest(headers, (LPVOID)(LPCSTR)bodyUtf8, bodyUtf8.GetLength());
+			uprintf("Analytics req: %s\n", (LPCSTR)bodyUtf8);
+			DWORD responseCode = 0;
+			IFFALSE_PRINTERROR(file->QueryInfoStatusCode(responseCode), "QueryInfoStatusCode failed");
+			uprintf("Analytics: response code %d", responseCode);
+			if (m_debug) {
+				HandleDebugResponse(file);
+			}
+			file->Close();
+			delete file;
+		}
+		else {
+			uprintf("Analytics req failed\n");
+		}
+		conn->Close();
+		delete conn;
+	}
+	catch (CInternetException *ex) {
+		TCHAR err[256];
+		ex->GetErrorMessage(err, 256);
+		uprintf("Analytics req error: %ls\n", (LPCTSTR)err);
+	}
+}
+
+int AnalyticsRequestThread::Run()
 {
 	FUNCTION_ENTER;
 
-	BOOL debug = (BOOL) pParam;
-
-	CInternetSession session(GetUserAgent());
 	BOOL bRet;
 	MSG msg;
 
@@ -109,42 +167,7 @@ static UINT threadSendRequest(LPVOID pParam)
 		CString *pBody = (CString *)msg.wParam;
 		CStringA bodyUtf8 = CW2A(*pBody);
 
-		try {
-			CString headers = _T("Content-type: application/x-www-form-urlencoded");
-			CHttpConnection *conn = session.GetHttpConnection(_T(SERVER_NAME), (INTERNET_PORT)SERVER_PORT);
-			CString path = debug ? SERVER_DEBUG_PATH : SERVER_PATH;
-			const DWORD flags = INTERNET_FLAG_EXISTING_CONNECT
-				| INTERNET_FLAG_KEEP_CONNECTION
-				| INTERNET_FLAG_SECURE
-				| INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTP
-				| INTERNET_FLAG_NO_COOKIES
-				| INTERNET_FLAG_NO_UI;
-			CHttpFile *file = conn->OpenRequest(CHttpConnection::HTTP_VERB_POST, path,
-				/* Referer */ NULL, /* context */ 1, /* Accept */ NULL,
-				_T("HTTP/1.1"), flags);
-			if (file) {
-				file->SendRequest(headers, (LPVOID)(LPCSTR)bodyUtf8, bodyUtf8.GetLength());
-				uprintf("Analytics req: %s\n", (LPCSTR)bodyUtf8);
-				DWORD responseCode = 0;
-				IFFALSE_PRINTERROR(file->QueryInfoStatusCode(responseCode), "QueryInfoStatusCode failed");
-				uprintf("Analytics: response code %d", responseCode);
-				if (debug) {
-					HandleDebugResponse(file);
-				}
-				file->Close();
-				delete file;
-			}
-			else {
-				uprintf("Analytics req failed\n");
-			}
-			conn->Close();
-			delete conn;
-		}
-		catch (CInternetException *ex) {
-			TCHAR err[256];
-			ex->GetErrorMessage(err, 256);
-			uprintf("Analytics req error: %ls\n", (LPCTSTR)err);
-		}
+		SendRequest(bodyUtf8);
 
 		delete pBody;
 
@@ -165,7 +188,9 @@ Analytics::Analytics()
 	loadUuid(m_clientId);
 	m_language = "en-US";
 	urlEncode(CString(WindowsVersionStr), m_windowsVersion);
-	m_workerThread = AfxBeginThread(threadSendRequest, (LPVOID) debug());
+
+	m_workerThread = new AnalyticsRequestThread(debug());
+	m_workerThread->CreateThread();
 }
 
 Analytics::~Analytics()
