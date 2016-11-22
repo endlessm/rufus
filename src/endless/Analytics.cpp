@@ -20,6 +20,8 @@ extern "C" {
 
 #define SERVER_NAME "www.google-analytics.com"
 #define SERVER_PORT 443
+#define SERVER_PATH _T("collect")
+#define SERVER_DEBUG_PATH _T("debug/collect")
 
 static void HandleDebugResponse(CHttpFile *file)
 {
@@ -110,7 +112,7 @@ static UINT threadSendRequest(LPVOID pParam)
 		try {
 			CString headers = _T("Content-type: application/x-www-form-urlencoded");
 			CHttpConnection *conn = session.GetHttpConnection(_T(SERVER_NAME), (INTERNET_PORT)SERVER_PORT);
-			CString path = debug ? _T("debug/collect") : _T("collect");
+			CString path = debug ? SERVER_DEBUG_PATH : SERVER_PATH;
 			const DWORD flags = INTERNET_FLAG_EXISTING_CONNECT
 				| INTERNET_FLAG_KEEP_CONNECTION
 				| INTERNET_FLAG_SECURE
