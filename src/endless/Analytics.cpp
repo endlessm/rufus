@@ -98,9 +98,12 @@ static UINT threadSendRequest(LPVOID pParam)
 	BOOL debug = (BOOL) pParam;
 
 	CInternetSession session(GetUserAgent());
+	BOOL bRet;
 	MSG msg;
 
-	while (GetMessage(&msg, NULL, WM_APP, WM_APP+1)) {
+	while (0 != (bRet = GetMessage(&msg, NULL, WM_APP, WM_APP+1))) {
+		IFFALSE_RETURN_VALUE(bRet != -1, "GetMessage failed", 0);
+
 		CString *pBody = (CString *)msg.wParam;
 		CStringA bodyUtf8 = CW2A(*pBody);
 
