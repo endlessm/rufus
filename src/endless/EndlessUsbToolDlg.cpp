@@ -858,8 +858,7 @@ void CEndlessUsbToolDlg::Uninit()
     int handlesCount = 0;
     HANDLE handlesToWaitFor[5];
     
-    TrackEvent(_T("Closed"));
-    HANDLE analyticsHandle = Analytics::instance()->stopSession();
+    HANDLE analyticsHandle = Analytics::instance()->stopSession(InstallMethodToStr(m_selectedInstallMethod));
 
 #define await_handle(h) do { \
 	if (h != INVALID_HANDLE_VALUE) handlesToWaitFor[handlesCount++] = h; \

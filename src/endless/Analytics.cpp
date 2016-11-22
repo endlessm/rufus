@@ -213,13 +213,14 @@ void Analytics::startSession()
 	sendRequest(body);
 }
 
-HANDLE Analytics::stopSession()
+HANDLE Analytics::stopSession(const CString &category)
 {
 	if (m_disabled) return INVALID_HANDLE_VALUE;
 	FUNCTION_ENTER;
-	CString body;
+	CString body, catEnc;
 	prefixId(body);
-	body += _T("t=screenview&cd=LastPage&sc=end");
+	urlEncode(category, catEnc);
+	body.AppendFormat(_T("t=event&ec=%s&ea=Closed&sc=end"), catEnc);
 	sendRequest(body, TRUE);
 	return m_workerThread->m_hThread;
 }
