@@ -2771,6 +2771,7 @@ HRESULT CEndlessUsbToolDlg::OnSelectFilePreviousClicked(IHTMLElement* pElement)
     FUNCTION_ENTER;
 
     ChangePage(m_selectedInstallMethod == InstallMethod_t::InstallDualBoot ? _T(ELEMENT_DUALBOOT_PAGE) : _T(ELEMENT_ADVANCED_PAGE));
+	SetSelectedInstallMethod(None);
 
 	return S_OK;
 }
