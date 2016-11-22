@@ -28,7 +28,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v140_xp</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <UseOfMfc>Static</UseOfMfc>
   </PropertyGroup>
@@ -77,7 +77,7 @@
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)x86_32\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)x86_32\$(Configuration)\$(ProjectName)\</IntDir>
-    <LibraryPath>$(SolutionDir)x86_32\$(Configuration)\;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86;c:\OpenSSL-Win32\lib\VC\static;c:\Libraries\boost_1_62_0\lib32-msvc-14.0</LibraryPath>
+    <LibraryPath>$(SolutionDir)x86_32\$(Configuration)\;$(VC_LibraryPath_x86);$(WindowsSdk_71A_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86;c:\OpenSSL-Win32\lib\VC\static;c:\Libraries\boost_1_62_0\lib32-msvc-14.0</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
