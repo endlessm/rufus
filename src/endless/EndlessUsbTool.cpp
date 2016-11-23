@@ -147,21 +147,11 @@ BOOL CEndlessUsbToolApp::InitInstance()
 		CEndlessUsbToolDlg dlg(wndMsg);
         m_pMainWnd = &dlg;
         INT_PTR nResponse = dlg.DoModal();
-        if (nResponse == IDOK)
+        if (nResponse == -1)
         {
-            // TODO: Place code here to handle when the dialog is
-            //  dismissed with OK
+            TRACE(traceAppMsg, 0, "Warning: EndlessUsbToolDlg closed without calling ::EndDialog.\n");
         }
-        else if (nResponse == IDCANCEL)
-        {
-            // TODO: Place code here to handle when the dialog is
-            //  dismissed with Cancel
-        }
-        else if (nResponse == -1)
-        {
-            TRACE(traceAppMsg, 0, "Warning: dialog creation failed, so application is terminating unexpectedly.\n");
-            TRACE(traceAppMsg, 0, "Warning: if you are using MFC controls on the dialog, you cannot #define _AFX_NO_MFC_CONTROLS_IN_DIALOGS.\n");
-        }
+        dlg.Uninit();
     } else {
         ::SendMessage(HWND_BROADCAST, wndMsg, 0, 0);
     }
@@ -251,11 +241,11 @@ void CEndlessUsbToolApp::Log(const char *logMessage)
 		// calling uprintf here works because it will only be executed once
 		firstMessage = false;
 		CStringA debugMessage;
-		debugMessage.Format("Log original file name %ls\n", m_logFile.GetFileName()); Log(debugMessage);
-		debugMessage.Format("Application version: %s\n", RELEASE_VER_STR); Log(debugMessage);
-		debugMessage.Format("Windows version: %s\n", WindowsVersionStr); Log(debugMessage);
-		debugMessage.Format("Windows version number: 0x%X\n", nWindowsVersion); Log(debugMessage);
-		debugMessage.Format("-----------------------------------\n"); Log(debugMessage);
+		debugMessage.Format("Log original file name %ls\r\n", m_logFile.GetFileName()); Log(debugMessage);
+		debugMessage.Format("Application version: %s\r\n", RELEASE_VER_STR); Log(debugMessage);
+		debugMessage.Format("Windows version: %s\r\n", WindowsVersionStr); Log(debugMessage);
+		debugMessage.Format("Windows version number: 0x%X\r\n", nWindowsVersion); Log(debugMessage);
+		debugMessage.Format("-----------------------------------\r\n"); Log(debugMessage);
 	}
 
 	if (CEndlessUsbToolApp::m_enableLogDebugging) {

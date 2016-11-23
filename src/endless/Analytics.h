@@ -8,7 +8,11 @@ public:
 
 	static Analytics *instance();
 
-	void sessionControl(BOOL start);
+	void startSession();
+	// like eventTracking(category, _T("Closed")), but with the session-close
+	// flag set.
+	HANDLE stopSession(const CString &category);
+
 	void screenTracking(const CString &name);
 	void eventTracking(const CString &category, const CString &action, const CString &label = CString(), LONGLONG value = -1);
 	void exceptionTracking(const CString &description, BOOL fatal);

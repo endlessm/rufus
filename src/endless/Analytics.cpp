@@ -6,8 +6,11 @@ extern "C" {
 	#include "rufus.h"
 }
 
+#include "json/json.h"
+
 #include "Version.h"
 #include "GeneralCode.h"
+#include "StringHelperMethods.h"
 
 #define TRACKING_ID "UA-61784217-3"
 #define REG_SECTION "Analytics"
@@ -16,46 +19,155 @@ extern "C" {
 #define REG_KEY_DEBUG "Debug"
 
 #define SERVER_NAME "www.google-analytics.com"
-#define SERVER_PORT 80
+#define SERVER_PORT 443
+#define SERVER_PATH _T("collect")
+#define SERVER_DEBUG_PATH _T("debug/collect")
 
-static UINT threadSendRequest(LPVOID pParam)
+class AnalyticsRequestThread
+	: public CWinThread
+{
+public:
+	AnalyticsRequestThread(BOOL debug)
+		: m_debug(debug)
+		, m_session(GetUserAgent())
+	{}
+	virtual int Run();
+	virtual BOOL InitInstance() { return TRUE;  }
+
+private:
+	static void HandleDebugResponse(CHttpFile *file);
+	static CString GetUserAgent();
+
+	void SendRequest(const CStringA &bodyUtf8);
+
+	BOOL m_debug;
+	CInternetSession m_session;
+};
+
+void AnalyticsRequestThread::HandleDebugResponse(CHttpFile *file)
+{
+	std::string response;
+	char chunk[1024];
+	UINT n;
+	while (0 < (n = file->Read(chunk, _countof(chunk)))) {
+		response.append(chunk, n);
+		break;
+	}
+	// uprintf("Analytics: response: %s", response.c_str());
+
+	Json::Reader reader;
+	Json::Value root;
+	if (reader.parse(response, root)) {
+		Json::Value hpr = root["hitParsingResult"];
+		for (Json::ArrayIndex i = 0; i < hpr.size(); i++) {
+			Json::Value result = hpr[i];
+			if (!result["valid"].asBool()) {
+				uprintf("Analytics: submitted an invalid hit: %s", response.c_str());
+				break;
+			}
+		}
+	}
+	else {
+		uprintf("Analytics: failed to parse debug result: %s", response.c_str());
+	}
+}
+
+// We pretend to be sending requests with the UA used by the browser widget.
+// In particular, this includes the OS version. Here is an example user agent
+// from Windows 10 with IE 11 installed:
+//
+//    Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 10.0; WOW64; Trident/7.0; .NET4.0C; .NET4.0E)
+//
+// https://www.whatismybrowser.com/developers/tools/user-agent-parser/
+// understands this to be IE 11 running in IE 7 Compatibility View mode.  If
+// you hack the UI to go to https://www.whatismybrowser.com/ this does actually
+// match the UA seen there.
+//
+// We send a separate IEVersion event with the *real* IE version; the UA is used
+// mainly for the OS information.
+CString AnalyticsRequestThread::GetUserAgent()
 {
 	FUNCTION_ENTER;
 
-	BOOL debug = (BOOL) pParam;
+	DWORD uaSize = 0;
+	char *ua = NULL;
+	HRESULT hr;
+	CString ret(_T("Endless Installer"));
 
-	CInternetSession session(_T("Endless Installer"));
+	char dummy[1] = "";
+	hr = ObtainUserAgentString(0, dummy, &uaSize);
+	IFFALSE_GOTOERROR(hr == E_OUTOFMEMORY, "Expected ObtainUserAgentString to fail");
+	IFFALSE_GOTOERROR(uaSize > 0, "Expected ObtainUserAgentString to return non-zero size");
+
+	ua = (char *) HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, uaSize);
+	hr = ObtainUserAgentString(0, ua, &uaSize);
+	IFFALSE_GOTOERROR(hr == S_OK, "ObtainUserAgentString failed");
+
+	ret = UTF8ToCString(ua);
+	uprintf("User agent: '%ls'", ret);
+
+error:
+	if (ua != NULL) {
+		HeapFree(GetProcessHeap(), 0, ua);
+		ua = NULL;
+	}
+	return ret;
+}
+
+void AnalyticsRequestThread::SendRequest(const CStringA &bodyUtf8)
+{
+	try {
+		CString headers = _T("Content-type: application/x-www-form-urlencoded");
+		CHttpConnection *conn = m_session.GetHttpConnection(_T(SERVER_NAME), (INTERNET_PORT)SERVER_PORT);
+		CString path = m_debug ? SERVER_DEBUG_PATH : SERVER_PATH;
+		const DWORD flags = INTERNET_FLAG_EXISTING_CONNECT
+			| INTERNET_FLAG_KEEP_CONNECTION
+			| INTERNET_FLAG_SECURE
+			| INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTP
+			| INTERNET_FLAG_NO_COOKIES
+			| INTERNET_FLAG_NO_UI;
+		CHttpFile *file = conn->OpenRequest(CHttpConnection::HTTP_VERB_POST, path,
+			/* Referer */ NULL, /* context */ 1, /* Accept */ NULL,
+			_T("HTTP/1.1"), flags);
+		if (file) {
+			file->SendRequest(headers, (LPVOID)(LPCSTR)bodyUtf8, bodyUtf8.GetLength());
+			uprintf("Analytics req: %s\n", (LPCSTR)bodyUtf8);
+			DWORD responseCode = 0;
+			IFFALSE_PRINTERROR(file->QueryInfoStatusCode(responseCode), "QueryInfoStatusCode failed");
+			uprintf("Analytics: response code %d", responseCode);
+			if (m_debug) {
+				HandleDebugResponse(file);
+			}
+			file->Close();
+			delete file;
+		}
+		else {
+			uprintf("Analytics req failed\n");
+		}
+		conn->Close();
+		delete conn;
+	}
+	catch (CInternetException *ex) {
+		TCHAR err[256];
+		ex->GetErrorMessage(err, 256);
+		uprintf("Analytics req error: %ls\n", (LPCTSTR)err);
+	}
+}
+
+int AnalyticsRequestThread::Run()
+{
+	FUNCTION_ENTER;
+
+	BOOL bRet;
 	MSG msg;
 
-	while (GetMessage(&msg, NULL, WM_APP, WM_APP+1)) {
+	while (0 != (bRet = GetMessage(&msg, NULL, WM_APP, WM_APP+1))) {
+		IFFALSE_RETURN_VALUE(bRet != -1, "GetMessage failed", 0);
+
 		CString *pBody = (CString *)msg.wParam;
 		CStringA bodyUtf8 = CW2A(*pBody);
 
-		try {
-			CString headers = _T("Content-type: application/x-www-form-urlencoded");
-			CHttpConnection *conn = session.GetHttpConnection(_T(SERVER_NAME), (INTERNET_PORT)SERVER_PORT);
-			CString path = debug ? _T("debug/collect") : _T("collect");
-			CHttpFile *file = conn->OpenRequest(CHttpConnection::HTTP_VERB_POST, path);
-			if (file) {
-				file->SendRequest(headers, (LPVOID)(LPCSTR)bodyUtf8, bodyUtf8.GetLength());
-				uprintf("Analytics req: %s\n", (LPCSTR)bodyUtf8);
-				DWORD responseCode = 0;
-				IFFALSE_PRINTERROR(file->QueryInfoStatusCode(responseCode), "QueryInfoStatusCode failed");
-				uprintf("Analytics: response code %d", responseCode);
-				file->Close();
-				delete file;
-			}
-			else {
-				uprintf("Analytics req failed\n");
-			}
-			conn->Close();
-			delete conn;
-		}
-		catch (CInternetException *ex) {
-			TCHAR err[256];
-			ex->GetErrorMessage(err, 256);
-			uprintf("Analytics req error: %ls\n", (LPCTSTR)err);
-		}
+		SendRequest(bodyUtf8);
 
 		delete pBody;
 
@@ -76,7 +188,9 @@ Analytics::Analytics()
 	loadUuid(m_clientId);
 	m_language = "en-US";
 	urlEncode(CString(WindowsVersionStr), m_windowsVersion);
-	m_workerThread = AfxBeginThread(threadSendRequest, (LPVOID) debug());
+
+	m_workerThread = new AnalyticsRequestThread(debug());
+	m_workerThread->CreateThread();
 }
 
 Analytics::~Analytics()
@@ -89,25 +203,26 @@ Analytics *Analytics::instance()
 	return &instance;
 }
 
-void Analytics::sessionControl(BOOL start)
+void Analytics::startSession()
 {
 	if (m_disabled) return;
 	FUNCTION_ENTER;
 	CString body;
 	prefixId(body);
-	if (start) {
-		body = body + _T("t=screenview&cd=DualBootInstallPage&sc=start");
-		sendRequest(body);
-	}
-	else {
-		body = body + _T("t=screenview&cd=LastPage&sc=end");
-		sendRequest(body, TRUE);
-		DWORD ret = WaitForSingleObject(m_workerThread->m_hThread, 4000);
-		if (ret == WAIT_TIMEOUT) {
-			delete m_workerThread;
-			m_workerThread = NULL;
-		}
-	}
+	body += _T("t=screenview&cd=DualBootInstallPage&sc=start");
+	sendRequest(body);
+}
+
+HANDLE Analytics::stopSession(const CString &category)
+{
+	if (m_disabled) return INVALID_HANDLE_VALUE;
+	FUNCTION_ENTER;
+	CString body, catEnc;
+	prefixId(body);
+	urlEncode(category, catEnc);
+	body.AppendFormat(_T("t=event&ec=%s&ea=Closed&sc=end"), catEnc);
+	sendRequest(body, TRUE);
+	return m_workerThread->m_hThread;
 }
 
 void Analytics::screenTracking(const CString &name)

@@ -496,6 +496,7 @@ const UINT CEndlessUsbToolDlg::m_uTaskbarBtnCreatedMsg = RegisterWindowMessage(_
 
 CEndlessUsbToolDlg::CEndlessUsbToolDlg(UINT globalMessage, CWnd* pParent /*=NULL*/)
     : CDHtmlDialog(IDD_ENDLESSUSBTOOL_DIALOG, IDR_HTML_ENDLESSUSBTOOL_DIALOG, pParent),
+    m_initialized(false),
     m_selectedLocale(NULL),
     m_localizationFile(""),
     m_shellNotificationsRegister(0),
@@ -747,6 +748,8 @@ BOOL CEndlessUsbToolDlg::OnInitDialog()
 
 	CDHtmlDialog::OnInitDialog();
 
+	m_initialized = true;
+
 	CHANGEFILTERSTRUCT cfs = { sizeof(CHANGEFILTERSTRUCT) };
 
 	PF_INIT(ChangeWindowMessageFilterEx, user32);
@@ -812,12 +815,12 @@ BOOL CEndlessUsbToolDlg::OnInitDialog()
 
     SetWindowTextW(L"");
 
-    Analytics::instance()->sessionControl(true);
+    Analytics::instance()->startSession();
     TrackEvent(_T("IEVersion"), m_ieVersion);
 
     if (m_ieVersion < MIN_SUPPORTED_IE_VERSION) {
         ShowIETooOldError();
-        ExitProcess(0);
+        EndDialog(IDCANCEL);
     }
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
@@ -849,15 +852,23 @@ void CEndlessUsbToolDlg::Uninit()
 {
     FUNCTION_ENTER;
 
-    int handlesCount = 0;
-    HANDLE handlesToWaitFor[4];
-    
-	Analytics::instance()->sessionControl(false);
+    IFFALSE_RETURN(m_initialized, "not yet initialized; or already uninitialized");
+    m_initialized = false;
 
-    if (m_fileScanThread != INVALID_HANDLE_VALUE) handlesToWaitFor[handlesCount++] = m_fileScanThread;
-    if (m_operationThread != INVALID_HANDLE_VALUE) handlesToWaitFor[handlesCount++] = m_operationThread;
-    if (m_downloadUpdateThread != INVALID_HANDLE_VALUE) handlesToWaitFor[handlesCount++] = m_downloadUpdateThread;
-    if (m_checkConnectionThread != INVALID_HANDLE_VALUE) handlesToWaitFor[handlesCount++] = m_checkConnectionThread;
+    int handlesCount = 0;
+    HANDLE handlesToWaitFor[5];
+    
+    HANDLE analyticsHandle = Analytics::instance()->stopSession(InstallMethodToStr(m_selectedInstallMethod));
+
+#define await_handle(h) do { \
+	if (h != INVALID_HANDLE_VALUE) handlesToWaitFor[handlesCount++] = h; \
+} while (0)
+    await_handle(analyticsHandle);
+    await_handle(m_fileScanThread);
+    await_handle(m_operationThread);
+    await_handle(m_downloadUpdateThread);
+    await_handle(m_checkConnectionThread);
+#undef await_handle
 
     if (handlesCount > 0) {
         if (m_closeFileScanThreadEvent != INVALID_HANDLE_VALUE) SetEvent(m_closeFileScanThreadEvent);
@@ -2760,6 +2771,7 @@ HRESULT CEndlessUsbToolDlg::OnSelectFilePreviousClicked(IHTMLElement* pElement)
     FUNCTION_ENTER;
 
     ChangePage(m_selectedInstallMethod == InstallMethod_t::InstallDualBoot ? _T(ELEMENT_DUALBOOT_PAGE) : _T(ELEMENT_ADVANCED_PAGE));
+	SetSelectedInstallMethod(None);
 
 	return S_OK;
 }
@@ -3484,10 +3496,7 @@ HRESULT CEndlessUsbToolDlg::OnInstallCancelClicked(IHTMLElement* pElement)
 // Error/Thank You Page Handlers
 HRESULT CEndlessUsbToolDlg::OnCloseAppClicked(IHTMLElement* pElement)
 {
-	TrackEvent(_T("Closed"));
-    Uninit();
-    AfxPostQuitMessage(0);
-
+	EndDialog(IDCLOSE);
 	return S_OK;
 }
 
@@ -3604,7 +3613,6 @@ void CEndlessUsbToolDlg::OnClose()
         return;
     }
 
-    Uninit();
     CDHtmlDialog::OnClose();
 }
 
@@ -6172,9 +6180,7 @@ void CEndlessUsbToolDlg::QueryAndDoUninstall()
 		Analytics::instance()->exceptionTracking(_T("UninstallError"), TRUE);
 	}
 
-	Analytics::instance()->sessionControl(false);
-
-	ExitProcess(0);
+	EndDialog(IDCLOSE);
 }
 
 bool CEndlessUsbToolDlg::IsEndlessMBR(FILE* fp, const CString &endlessPath)

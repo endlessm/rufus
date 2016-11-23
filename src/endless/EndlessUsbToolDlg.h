@@ -77,6 +77,8 @@ public:
 	static bool IsUninstaller();
 	static bool ShouldUninstall();
 
+	void Uninit();
+
 // Dialog Data
 #ifdef AFX_DESIGN_TIME
 	enum { IDD = IDD_ENDLESSUSBTOOL_DIALOG, IDH = IDR_HTML_ENDLESSUSBTOOL_DIALOG };
@@ -159,6 +161,7 @@ protected:
 	LRESULT OnTaskbarBtnCreated(WPARAM wParam, LPARAM lParam);
 
 private:
+	BOOL m_initialized;
 	int m_nrGigsSelected;
 	loc_cmd* m_selectedLocale;
 	char m_localizationFile[MAX_PATH];
@@ -264,8 +267,6 @@ private:
     bool UnpackFile(const CString &archive, const CString &destination, int compressionType = 0, void* progress_function = NULL, unsigned long* cancel_request = NULL);
     bool ParseJsonFile(LPCTSTR filename, bool isInstallerJson);
     void AddDownloadOptionsToUI();
-
-	void Uninit();
 
     void ErrorOccured(ErrorCause_t errorCause);
 
