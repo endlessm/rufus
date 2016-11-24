@@ -21,6 +21,7 @@
 #include "Version.h"
 #include "WindowsUsbDefines.h"
 #include "StringHelperMethods.h"
+#include "Images.h"
 
 // Rufus include files
 extern "C" {
@@ -2533,6 +2534,7 @@ bool CEndlessUsbToolDlg::ParseJsonFile(LPCTSTR filename, bool isInstallerJson)
     Json::Reader reader;
     Json::Value rootValue, imagesElem, jsonElem, personalities, persImages, persImage, fullImage, latestEntry, bootImage;
     CString latestVersion("");
+    ImageVersion latestParsedVersion;
 
     std::ifstream jsonStream;
 
@@ -2563,8 +2565,15 @@ bool CEndlessUsbToolDlg::ParseJsonFile(LPCTSTR filename, bool isInstallerJson)
         persImages = (*it)[JSON_IMG_PERS_IMAGES];
         IFFALSE_CONTINUE(!persImages.isNull(), "Error: No personality_images entry found.");
 
-        CString currentVersion((*it)[JSON_IMG_VERSION].asCString());
-        if (currentVersion > latestVersion) {
+        const char *versionString = (*it)[JSON_IMG_VERSION].asCString();
+        CString currentVersion(versionString);
+        ImageVersion currentParsedVersion;
+        if (!ImageVersion::Parse(versionString, currentParsedVersion)) {
+            uprintf("Can't parse version '%ls'", currentVersion);
+            continue;
+        }
+        if (currentParsedVersion > latestParsedVersion) {
+            latestParsedVersion = currentParsedVersion;
             latestVersion = currentVersion;
             latestEntry = *it;
         }
