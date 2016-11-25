@@ -4995,6 +4995,9 @@ DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 	// Copy ourseleves to the <SYSDRIVE>:\endless directory
 	IFFALSE_GOTOERROR(0 != CopyFile(exeFilePath, endlessFilesPath + ENDLESS_UNINSTALLER_NAME, FALSE), "Error copying exe uninstaller file.");
 
+	// Add uninstall entry for Control Panel
+	IFFALSE_GOTOERROR(AddUninstallRegistryKeys(endlessFilesPath + ENDLESS_UNINSTALLER_NAME, endlessFilesPath), "Error on AddUninstallRegistryKeys.");
+
 	CEndlessUsbToolDlg::ImageUnpackOperation = OP_SETUP_DUALBOOT;
 	CEndlessUsbToolDlg::ImageUnpackPercentStart = DB_PROGRESS_CHECK_PARTITION;
 	CEndlessUsbToolDlg::ImageUnpackPercentEnd = DB_PROGRESS_FINISHED_UNPACK;
@@ -5037,9 +5040,6 @@ DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 
 	// disable Fast Start (aka Hiberboot) so that the NTFS partition is always cleanly unmounted at shutdown:
 	IFFALSE_PRINTERROR(SetEndlessRegistryKey(HKEY_LOCAL_MACHINE, REGKEY_FASTBOOT_PATH, REGKEY_FASTBOOT, CComVariant(0)), "Error on disabling fastboot.");
-
-	// Add uninstall entry for Control Panel
-	IFFALSE_GOTOERROR(AddUninstallRegistryKeys(endlessFilesPath + ENDLESS_UNINSTALLER_NAME, endlessFilesPath), "Error on AddUninstallRegistryKeys.");
 
 	UpdateProgress(OP_SETUP_DUALBOOT, DB_PROGRESS_MBR_OR_EFI_SETUP);
 
