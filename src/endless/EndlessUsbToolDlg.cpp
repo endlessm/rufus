@@ -5303,7 +5303,7 @@ bool CEndlessUsbToolDlg::WriteMBRAndSBRToWinDrive(CEndlessUsbToolDlg *dlg, const
 	fake_fd._handle = (char*)hPhysical;
 	set_bytes_per_sector(SelectedDrive.Geometry.BytesPerSector);
 	IFFALSE_GOTOERROR(write_data(fp, 0x0, endlessMBRData, MBR_WINDOWS_NT_MAGIC) != 0, "Error on write_data with boot.img contents.");
-    IFFALSE_GOTOERROR(write_bootmark(fp, DiskGeometry->Geometry.BytesPerSector), "Error on write_bootmark");
+    IFFALSE_PRINTERROR(write_bootmark(fp, DiskGeometry->Geometry.BytesPerSector), "Error on write_bootmark");
 
 	retResult = true;
 
