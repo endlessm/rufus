@@ -1998,31 +1998,10 @@ HRESULT CEndlessUsbToolDlg::OnInstallDualBootClicked(IHTMLElement* pElement)
 	BOOL isBitLockerEnabled = IsBitlockedDrive(systemDriveLetter.Left(2));
 	uprintf("Is BitLocker/device encryption enabled on '%ls': %s", systemDriveLetter, isBitLockerEnabled ? "YES" : "NO");
 
-	// Verify that this is an NTFS partition
-	BOOL isNtfsPartition = FALSE;
-	wchar_t fileSystemType[MAX_PATH + 1];
-	if (GetVolumeInformation(systemDriveLetter, NULL, 0, NULL, NULL, NULL, fileSystemType, MAX_PATH + 1)) {
-		uprintf("File system type '%ls'", fileSystemType);
-		isNtfsPartition = (0 == wcscmp(fileSystemType, L"NTFS"));
-	}
-
-	// check if windows MBR
-	BOOL isBIOS = IsLegacyBIOSBoot();
-	BOOL hasNonWindowsMBR = false;
-	if (isBIOS && !CEndlessUsbToolApp::m_enableOverwriteMbr) {
-		HANDLE hPhysical = GetPhysicalFromDriveLetter(systemDriveLetter);
-		if (hPhysical != INVALID_HANDLE_VALUE) {
-			FAKE_FD fake_fd = { 0 };
-			FILE* fp = (FILE*)&fake_fd;
-			fake_fd._handle = (char*)hPhysical;
-
-			hasNonWindowsMBR = !IsWindowsMBR(fp, systemDriveLetter);
-		} else {
-			PRINT_ERROR_MSG("can't check MBR, assuming non-Windows");
-			hasNonWindowsMBR = true;
-		}
-		safe_closehandle(hPhysical);
-	}
+	bool isBIOS = IsLegacyBIOSBoot();
+	ErrorCause cause = ErrorCauseNone;
+	// TODO: move bitlocker check in here too?
+	bool canInstall = CanInstallToDrive(systemDriveLetter, isBIOS, cause);
 
 	if (ShouldUninstall()) {
 		QueryAndDoUninstall();
@@ -2039,10 +2018,8 @@ HRESULT CEndlessUsbToolDlg::OnInstallDualBootClicked(IHTMLElement* pElement)
 		ErrorOccured(ErrorCauseNot64Bit);
 	} else if (isBitLockerEnabled) {
 		ErrorOccured(ErrorCauseBitLocker);
-	} else if (!isNtfsPartition) {
-		ErrorOccured(ErrorCauseNotNTFS);
-	} else if (hasNonWindowsMBR) {
-		ErrorOccured(ErrorCauseNonWindowsMBR);
+	} else if (!canInstall) {
+		ErrorOccured(cause);
 	} else {
 		GoToSelectFilePage();
 	}
@@ -4960,17 +4937,19 @@ DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 	CString endlessFilesPath;
 	CString endlessImgPath;
 	CString bootFilesPath = CEndlessUsbToolApp::TempFilePath(CString(BOOT_COMPONENTS_FOLDER)) + L"\\";
-	wchar_t fileSystemType[MAX_PATH + 1];
 	CStringW exeFilePath = GetExePath();
+	const bool isBIOS = IsLegacyBIOSBoot();
 
 	systemDriveLetter = GetSystemDrive();
 	endlessFilesPath = systemDriveLetter + PATH_ENDLESS_SUBDIRECTORY;
 	endlessImgPath = endlessFilesPath + ENDLESS_IMG_FILE_NAME;
 
-	// Verify that this is an NTFS partition
-	IFFALSE_GOTOERROR(GetVolumeInformation(systemDriveLetter, NULL, 0, NULL, NULL, NULL, fileSystemType, MAX_PATH + 1) != 0, "Error on GetVolumeInformation.");
-	uprintf("File system type '%ls'", fileSystemType);
-	IFFALSE_GOTO(0 == wcscmp(fileSystemType, L"NTFS"), "File system type is not NTFS", not_ntfs);
+	// Double-check this is an NTFS drive and (on BIOS systems) that there's no
+	// non-Windows bootloader. Note that we deliberately jump to 'done' in this
+	// case rather than 'error' -- we have not yet written anything to
+	// endlessFilesPath so we shouldn't try to delete it, and we set
+	// m_lastErrorCause directly.
+	IFFALSE_GOTO(CanInstallToDrive(systemDriveLetter, isBIOS, dlg->m_lastErrorCause), "Can't install to this drive", done);
 
 	UpdateProgress(OP_SETUP_DUALBOOT, DB_PROGRESS_CHECK_PARTITION);
 
@@ -5026,7 +5005,7 @@ DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 	UpdateProgress(OP_SETUP_DUALBOOT, DB_PROGRESS_COPY_GRUB_FOLDER);
 	CHECK_IF_CANCELLED;
 
-	if (IsLegacyBIOSBoot()) {
+	if (isBIOS) {
 		IFFALSE_GOTOERROR(WriteMBRAndSBRToWinDrive(dlg, systemDriveLetter, bootFilesPath, endlessFilesPath), "Error on WriteMBRAndSBRToWinDrive");
 	} else {
 		IFFALSE_GOTOERROR(SetupEndlessEFI(systemDriveLetter, bootFilesPath), "Error on SetupEndlessEFI");
@@ -5044,9 +5023,6 @@ DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 	UpdateProgress(OP_SETUP_DUALBOOT, DB_PROGRESS_MBR_OR_EFI_SETUP);
 
 	goto done;
-
-not_ntfs:
-    dlg->m_lastErrorCause = ErrorCause_t::ErrorCauseNotNTFS;
 
 error:
 	if (GetLastError() == ERROR_DISK_FULL) {
@@ -5162,6 +5138,55 @@ bool CEndlessUsbToolDlg::IsLegacyBIOSBoot()
 	return result == 0 && GetLastError() == ERROR_INVALID_FUNCTION;
 }
 
+// Checks preconditions for installing Endless OS to a given drive. Guaranteed to only modify 'cause' on error.
+bool CEndlessUsbToolDlg::CanInstallToDrive(const CString & systemDriveLetter, const bool isBIOS, ErrorCause &cause)
+{
+	FUNCTION_ENTER;
+	
+	wchar_t fileSystemType[MAX_PATH + 1];
+	IFFALSE_GOTOERROR(GetVolumeInformation(systemDriveLetter, NULL, 0, NULL, NULL, NULL, fileSystemType, MAX_PATH + 1), "Error on GetVolumeInformation");
+	uprintf("File system type '%ls'", fileSystemType);
+	if (0 != wcscmp(fileSystemType, L"NTFS")) {
+		cause = ErrorCauseNotNTFS;
+		return false;
+	}
+
+	if (!isBIOS) {
+		// On EFI systems, assume that there will be no problem installing GRUB.
+		return true;
+	}
+
+	if (CEndlessUsbToolApp::m_enableOverwriteMbr) {
+		uprintf("Not checking for Windows MBR as /forcembr is enabled.");
+		return true;
+	} else {
+		bool ret = false;
+
+		HANDLE hPhysical = GetPhysicalFromDriveLetter(systemDriveLetter);
+		if (hPhysical != INVALID_HANDLE_VALUE) {
+			FAKE_FD fake_fd = { 0 };
+			FILE* fp = (FILE*)&fake_fd;
+			fake_fd._handle = (char*)hPhysical;
+
+			if (IsWindowsMBR(fp, systemDriveLetter)) {
+				ret = true;
+			} else {
+				cause = ErrorCauseNonWindowsMBR;
+			}
+		} else {
+			PRINT_ERROR_MSG("can't check MBR, assuming non-Windows");
+			cause = ErrorCauseNonWindowsMBR;
+		}
+		safe_closehandle(hPhysical);
+		return ret;
+	}
+
+error:
+	// Something unexpected happened happened
+	cause = ErrorCauseWriteFailed;
+	return false;
+}
+
 // Returns TRUE if the drive has a Windows MBR, FALSE otherwise
 bool CEndlessUsbToolDlg::IsWindowsMBR(FILE* fpDrive, const CString &TargetName)
 {
@@ -5202,7 +5227,7 @@ static int write_bootmark(FILE *fp, unsigned long ulBytesPerSector)
     return 1;
 }
 
-
+// Unconditionally write GRUB from 'bootFilesPath' to 'systemDriveLetter', backing up the current boot track to 'endlessFilesPath'.
 bool CEndlessUsbToolDlg::WriteMBRAndSBRToWinDrive(CEndlessUsbToolDlg *dlg, const CString &systemDriveLetter, const CString &bootFilesPath, const CString &endlessFilesPath)
 {
 	FUNCTION_ENTER;
@@ -5227,16 +5252,6 @@ bool CEndlessUsbToolDlg::WriteMBRAndSBRToWinDrive(CEndlessUsbToolDlg *dlg, const
 	// Get system disk handle
 	hPhysical = GetPhysicalFromDriveLetter(systemDriveLetter);
 	IFFALSE_GOTOERROR(hPhysical != INVALID_HANDLE_VALUE, "Error on acquiring disk handle.");
-
-	// Make sure there already is a Windows MBR on this disk
-	fake_fd._handle = (char*)hPhysical;
-	if (CEndlessUsbToolApp::m_enableOverwriteMbr) {
-		uprintf("Not checking for Windows MBRs as /forcembr is enabled.");
-	} else if (!IsWindowsMBR(fp, systemDriveLetter)) {
-		uprintf("Error: no Windows MBR detected, unsupported configuration.");
-		dlg->m_lastErrorCause = ErrorCause_t::ErrorCauseNonWindowsMBR;
-		goto error;
-	}
 
 	// get disk geometry information
 	result = DeviceIoControl(hPhysical, IOCTL_DISK_GET_DRIVE_GEOMETRY_EX, NULL, 0, geometry, sizeof(geometry), &size, NULL);
