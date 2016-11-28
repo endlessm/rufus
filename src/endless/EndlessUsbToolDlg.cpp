@@ -1449,7 +1449,9 @@ LRESULT CEndlessUsbToolDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lPara
         {
             uprintf("Received WM_POWERBROADCAST with WPARAM 0x%X LPARAM 0x%X", wParam, lParam);
             bool shouldStopSuspend = m_currentStep != OP_NO_OPERATION_IN_PROGRESS;
-            if (shouldStopSuspend && lParam & PBT_APMQUERYSUSPEND) {
+			// Windows XP only. Vista and later do not send PBT_APMQUERYSUSPEND;
+			// we attempt to inhibit suspend in EnableHibernate with the newer API.
+            if (shouldStopSuspend && wParam == PBT_APMQUERYSUSPEND) {
                 uprintf("Received WM_POWERBROADCAST with PBT_APMQUERYSUSPEND and trying to cancel it.");
                 return BROADCAST_QUERY_DENY;
             } else {
