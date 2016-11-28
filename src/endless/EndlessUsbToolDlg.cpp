@@ -4917,8 +4917,8 @@ error:
 }
 
 // Below defines need to be in this order
-#define DB_PROGRESS_UNPACK_BOOT_ZIP		2
-#define DB_PROGRESS_CHECK_PARTITION		3
+#define DB_PROGRESS_CHECK_PARTITION		1
+#define DB_PROGRESS_UNPACK_BOOT_ZIP		3
 #define DB_PROGRESS_FINISHED_UNPACK		95
 #define DB_PROGRESS_COPY_GRUB_FOLDER	98
 #define DB_PROGRESS_MBR_OR_EFI_SETUP	100
@@ -4978,7 +4978,7 @@ DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 	IFFALSE_GOTOERROR(AddUninstallRegistryKeys(endlessFilesPath + ENDLESS_UNINSTALLER_NAME, endlessFilesPath), "Error on AddUninstallRegistryKeys.");
 
 	CEndlessUsbToolDlg::ImageUnpackOperation = OP_SETUP_DUALBOOT;
-	CEndlessUsbToolDlg::ImageUnpackPercentStart = DB_PROGRESS_CHECK_PARTITION;
+	CEndlessUsbToolDlg::ImageUnpackPercentStart = DB_PROGRESS_UNPACK_BOOT_ZIP;
 	CEndlessUsbToolDlg::ImageUnpackPercentEnd = DB_PROGRESS_FINISHED_UNPACK;
 	CEndlessUsbToolDlg::ImageUnpackFileSize = dlg->m_selectedFileSize;
 	if (CSTRING_GET_LAST(dlg->m_localFile, '\\') == ENDLESS_IMG_FILE_NAME) {
