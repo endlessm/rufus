@@ -382,6 +382,7 @@ static LPCTSTR ErrorCauseToStr(ErrorCause_t errorCause)
         TOSTR(ErrorCauseNonWindowsMBR);
         TOSTR(ErrorCauseNonEndlessMBR);
         TOSTR(ErrorCauseInstallFailedDiskFull);
+        TOSTR(ErrorCauseSuspended);
         TOSTR(ErrorCauseNone);
         default: return _T("Error Cause Unknown");
     }
@@ -1448,22 +1449,26 @@ LRESULT CEndlessUsbToolDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lPara
         case WM_POWERBROADCAST:
         {
             uprintf("Received WM_POWERBROADCAST with WPARAM 0x%X LPARAM 0x%X", wParam, lParam);
-            bool shouldStopSuspend = m_currentStep != OP_NO_OPERATION_IN_PROGRESS;
-			// Windows XP only. Vista and later do not send PBT_APMQUERYSUSPEND;
-			// we attempt to inhibit suspend in EnableHibernate with the newer API.
-            if (shouldStopSuspend && wParam == PBT_APMQUERYSUSPEND) {
-                uprintf("Received WM_POWERBROADCAST with PBT_APMQUERYSUSPEND and trying to cancel it.");
-                return BROADCAST_QUERY_DENY;
-            } else {
-                if (wParam == PBT_APMSUSPEND) {
-                    uprintf("Received PBT_APMSUSPEND so canceling the operation.");
-                    m_lastErrorCause = ErrorCause_t::ErrorCauseDownloadFailed;
-                    CancelRunningOperation();
-                }
-
+            if (m_currentStep == OP_NO_OPERATION_IN_PROGRESS) {
+                uprintf("no operation in progress, ignoring");
                 return TRUE;
             }
-            break;
+
+            switch (wParam) {
+            case PBT_APMQUERYSUSPEND:
+                // Windows XP only. Vista and later do not send PBT_APMQUERYSUSPEND;
+                // we attempt to inhibit suspend in EnableHibernate with the newer API.
+                uprintf("Received WM_POWERBROADCAST with PBT_APMQUERYSUSPEND and trying to cancel it.");
+                return BROADCAST_QUERY_DENY;
+
+            case PBT_APMSUSPEND:
+                uprintf("Received PBT_APMSUSPEND so canceling the operation.");
+                m_lastErrorCause = ErrorCause_t::ErrorCauseSuspended;
+                CancelRunningOperation();
+                break;
+            }
+
+            return TRUE;
         }
 
         default:
@@ -1684,6 +1689,7 @@ void CEndlessUsbToolDlg::ErrorOccured(ErrorCause_t errorCause)
     case ErrorCause_t::ErrorCauseCancelled:
     case ErrorCause_t::ErrorCauseGeneric:
     case ErrorCause_t::ErrorCauseWriteFailed:
+    case ErrorCause_t::ErrorCauseSuspended: // TODO: new string here
         buttonMsgId = MSG_328;
         suggestionMsgId = m_selectedInstallMethod == InstallMethod_t::InstallDualBoot ? MSG_358 : MSG_325;
         break;

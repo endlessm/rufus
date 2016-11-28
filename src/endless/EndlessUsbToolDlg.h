@@ -39,6 +39,7 @@ typedef enum ErrorCause {
     ErrorCauseNonWindowsMBR,
 	ErrorCauseNonEndlessMBR,
 	ErrorCauseInstallFailedDiskFull,
+    ErrorCauseSuspended,
     ErrorCauseNone
 } ErrorCause_t;
 
