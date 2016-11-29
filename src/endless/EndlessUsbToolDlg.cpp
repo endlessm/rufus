@@ -3656,6 +3656,7 @@ void CEndlessUsbToolDlg::UpdateCurrentStep(int currentStep)
     FUNCTION_ENTER;
 
     int nrSteps = m_useLocalFile ? 2 : 3;
+    CString action;
     int nrCurrentStep;
     int locMsgIdTitle;
     m_currentStep = currentStep;
@@ -3663,29 +3664,34 @@ void CEndlessUsbToolDlg::UpdateCurrentStep(int currentStep)
     switch (m_currentStep)
     {
     case OP_DOWNLOADING_FILES:
+        action = _T("DownloadStarted");
         locMsgIdTitle = MSG_304;
         nrCurrentStep = 1;
         break;
     case OP_VERIFYING_SIGNATURE:
+        action = _T("VerifyStarted");
         locMsgIdTitle = MSG_310;
         nrCurrentStep = m_useLocalFile ? 1 : 2;
         break;
     case OP_FLASHING_DEVICE:
     case OP_FILE_COPY:
-	case OP_NEW_LIVE_CREATION:
-		locMsgIdTitle = MSG_311;
-		nrCurrentStep = m_useLocalFile ? 2 : 3;
-		break;
-	case OP_SETUP_DUALBOOT:
+    case OP_NEW_LIVE_CREATION:
+        action = _T("WritingStarted");
+        locMsgIdTitle = MSG_311;
+        nrCurrentStep = m_useLocalFile ? 2 : 3;
+        break;
+    case OP_SETUP_DUALBOOT:
+        action = _T("InstallStarted");
         locMsgIdTitle = MSG_309;
         nrCurrentStep = m_useLocalFile ? 2 : 3;
         break;
     default:
-        uprintf("Unknown operation %ls(%d)", OperationToStr(currentStep), currentStep);
+        action.Format(_T("%ls(%d)"), OperationToStr(currentStep), currentStep);
+        uprintf("Unknown operation %ls", action);
         break;
     }
     
-	CString str;
+    CString str;
 
     str = UTF8ToCString(lmprintf(MSG_305, nrCurrentStep));
     SetElementText(_T(ELEMENT_INSTALL_STEP), CComBSTR(str));
@@ -3698,6 +3704,8 @@ void CEndlessUsbToolDlg::UpdateCurrentStep(int currentStep)
 
     CallJavascript(_T(JS_SET_PROGRESS), CComVariant(0));
     SetElementText(_T(ELEMENT_INSTALL_STATUS), CComBSTR(""));
+
+    TrackEvent(action);
 }
 
 bool CEndlessUsbToolDlg::FileHashingCallback(__int64 currentSize, __int64 totalSize, LPVOID context)
