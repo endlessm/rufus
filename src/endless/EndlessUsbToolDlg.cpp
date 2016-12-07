@@ -5354,9 +5354,6 @@ bool CEndlessUsbToolDlg::SetupEndlessEFI(const CString &systemDriveLetter, const
 
 	HANDLE hPhysical;
 	bool retResult = false;
-	BYTE layout[4096] = { 0 };
-	PDRIVE_LAYOUT_INFORMATION_EX DriveLayout = (PDRIVE_LAYOUT_INFORMATION_EX)(void*)layout;
-	CStringA systemDriveA;
 	CString windowsEspDriveLetter;
 	const char *espMountLetter = NULL;
 
