@@ -1,0 +1,22 @@
+root = true
+
+# most Rufus code uses tabs
+[*]
+indent_style = tab
+
+# Endless code is an unholy mixture. Err on the side of spaces, but set
+# unambiguously-tabby files to keep with tabs for now.
+[src/endless/*]
+indent_style = space
+
+[src/endless/Analytics.*]
+indent_style = tab
+
+[src/endless/EndlessUsbTool.*]
+indent_style = tab
+
+[src/endless/StringHelperMethods.*]
+indent_style = tab
+
+[src/endless/UEFIBootSetup.*]
+indent_style = tab
