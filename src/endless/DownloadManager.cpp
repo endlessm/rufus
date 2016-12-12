@@ -11,9 +11,6 @@ extern "C" {
 #define MINIMUM_RETRY_DELAY_SEC_JSON    5
 #define MINIMUM_RETRY_DELAY_SEC         20
 
-#define NO_PROGRESS_TIMEOUT_SEC_JSON    30
-#define NO_PROGRESS_TIMEOUT_SEC         600
-
 volatile ULONG DownloadManager::m_refCount = 0;
 
 DownloadManager::DownloadManager()
@@ -143,16 +140,12 @@ usecurrentjob:
         IFFALSE_GOTOERROR(SUCCEEDED(hr), "Error creating instance of IBackgroundCopyJob.");
 
         ULONG secondsRetry = MINIMUM_RETRY_DELAY_SEC;
-        ULONG secondsTimeout = MINIMUM_RETRY_DELAY_SEC;
         if (type == DownloadType_t::DownloadTypeReleseJson) {
             secondsRetry = MINIMUM_RETRY_DELAY_SEC_JSON;
-            secondsTimeout = MINIMUM_RETRY_DELAY_SEC_JSON;
         }
         currentJob->SetPriority(BG_JOB_PRIORITY_FOREGROUND);
         hr = currentJob->SetMinimumRetryDelay(secondsRetry);
         IFFALSE_PRINTERROR(SUCCEEDED(hr), "Error on SetMinimumRetryDelay");
-        hr = currentJob->SetNoProgressTimeout(secondsTimeout);
-        IFFALSE_PRINTERROR(SUCCEEDED(hr), "Error on SetNoProgressTimeout");
 
         for (auto url = urls.begin(), file = files.begin(); url != urls.end(); url++, file++) {
             uprintf("Adding download [%ls]->[%ls]", *url, *file);
