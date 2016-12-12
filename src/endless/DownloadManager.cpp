@@ -11,6 +11,23 @@ extern "C" {
 #define MINIMUM_RETRY_DELAY_SEC_JSON    5
 #define MINIMUM_RETRY_DELAY_SEC         20
 
+static LPCTSTR JobStateToStr(BG_JOB_STATE state)
+{
+    switch (state)
+    {
+        TOSTR(BG_JOB_STATE_QUEUED);
+        TOSTR(BG_JOB_STATE_CONNECTING);
+        TOSTR(BG_JOB_STATE_TRANSFERRING);
+        TOSTR(BG_JOB_STATE_SUSPENDED);
+        TOSTR(BG_JOB_STATE_ERROR);
+        TOSTR(BG_JOB_STATE_TRANSIENT_ERROR);
+        TOSTR(BG_JOB_STATE_TRANSFERRED);
+        TOSTR(BG_JOB_STATE_ACKNOWLEDGED);
+        TOSTR(BG_JOB_STATE_CANCELLED);
+    default: return _T("Unknown BG_JOB_STATE");
+    }
+}
+
 volatile ULONG DownloadManager::m_refCount = 0;
 
 DownloadManager::DownloadManager()
@@ -283,6 +300,8 @@ STDMETHODIMP DownloadManager::JobModification(IBackgroundCopyJob *JobModificatio
 
     DownloadStatus_t *downloadStatus = NULL;
 
+    uprintf("Job %ls %ls (0x%X)", pszJobName, JobStateToStr(State), State);
+
     switch (State) {
     case BG_JOB_STATE_ACKNOWLEDGED:
     case BG_JOB_STATE_TRANSFERRED:
@@ -325,28 +344,11 @@ STDMETHODIMP DownloadManager::JobModification(IBackgroundCopyJob *JobModificatio
         //and files transferred.
         downloadStatus->done = false;
     }
-    else if (BG_JOB_STATE_QUEUED == State) {
-        uprintf("Job %ls QUEUED\n", pszJobName);
-    }
-    else if (BG_JOB_STATE_CONNECTING == State) {
-        uprintf("%ls CONNECTING\n", pszJobName);
-    }
-    else if (BG_JOB_STATE_SUSPENDED == State) {
-        uprintf("Job %ls SUSPENDED\n", pszJobName);
-        //m_bcJob->Cancel();
-    }
-    else if (BG_JOB_STATE_TRANSIENT_ERROR == State) {
-        uprintf("Job %ls TRANSIENT_ERROR\n", pszJobName);
-    }
     else if (BG_JOB_STATE_ACKNOWLEDGED == State) {
-        uprintf("Job %ls ACKNOWLEDGED\n", pszJobName);
         downloadStatus->done = true;
     }
     else if (BG_JOB_STATE_CANCELLED == State) {
-        uprintf("Job %ls CANCELLED\n", pszJobName);
         downloadStatus->error = true;
-    } else {
-        uprintf("Job %ls Unknown download state %d\n", pszJobName, State);
     }
 
     if (downloadStatus != NULL && m_dispatchWindow != NULL)
@@ -418,6 +420,7 @@ HRESULT DownloadManager::GetExistingJob(CComPtr<IBackgroundCopyManager> &bcManag
                 existingJob = job;
                 return S_OK;
             } else {
+                uprintf("Cancelling job %ls (in state %ls)", displayName, JobStateToStr(state));
                 job->Cancel();
             }
         }
