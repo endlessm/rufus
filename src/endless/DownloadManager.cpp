@@ -295,7 +295,6 @@ STDMETHODIMP DownloadManager::JobModification(IBackgroundCopyJob *JobModificatio
     case BG_JOB_STATE_TRANSFERRED:
     case BG_JOB_STATE_TRANSFERRING:
     case BG_JOB_STATE_ERROR:
-    case BG_JOB_STATE_TRANSIENT_ERROR:
     case BG_JOB_STATE_CANCELLED:
         downloadStatus = new DownloadStatus_t;
         *downloadStatus = DownloadStatusNull;
@@ -316,7 +315,7 @@ STDMETHODIMP DownloadManager::JobModification(IBackgroundCopyJob *JobModificatio
         if (FAILED(hr)) JobModification->Cancel();
         downloadStatus->done = true;
     }
-    else if (BG_JOB_STATE_ERROR == State || BG_JOB_STATE_TRANSIENT_ERROR == State) {
+    else if (BG_JOB_STATE_ERROR == State) {
         //Call pJob->GetError(&pError); to retrieve an IBackgroundCopyError interface 
         //pointer which you use to determine the cause of the error.
         CComPtr<IBackgroundCopyError> error;
@@ -342,6 +341,9 @@ STDMETHODIMP DownloadManager::JobModification(IBackgroundCopyJob *JobModificatio
     else if (BG_JOB_STATE_SUSPENDED == State) {
         uprintf("Job %ls SUSPENDED\n", pszJobName);
         //m_bcJob->Cancel();
+    }
+    else if (BG_JOB_STATE_TRANSIENT_ERROR == State) {
+        uprintf("Job %ls TRANSIENT_ERROR\n", pszJobName);
     }
     else if (BG_JOB_STATE_ACKNOWLEDGED == State) {
         uprintf("Job %ls ACKNOWLEDGED\n", pszJobName);
