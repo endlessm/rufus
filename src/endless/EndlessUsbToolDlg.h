@@ -268,6 +268,7 @@ private:
     bool UnpackFile(const CString &archive, const CString &destination, int compressionType = 0, void* progress_function = NULL, unsigned long* cancel_request = NULL);
     bool ParseJsonFile(LPCTSTR filename, bool isInstallerJson);
     void AddDownloadOptionsToUI();
+    void UpdateDownloadableState();
 
     void ErrorOccured(ErrorCause_t errorCause);
 

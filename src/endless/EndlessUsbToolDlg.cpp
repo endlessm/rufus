@@ -1297,7 +1297,6 @@ LRESULT CEndlessUsbToolDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lPara
                     if (!m_jsonDownloadAttempted) {
                         m_jsonDownloadAttempted = true;
                         UpdateDownloadOptions();
-                        AddDownloadOptionsToUI();
                     }
                 } else {
                     StartOperationThread(OP_VERIFYING_SIGNATURE, CEndlessUsbToolDlg::FileVerificationThread);
@@ -1441,9 +1440,7 @@ LRESULT CEndlessUsbToolDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lPara
                 CancelRunningOperation();
             }
 
-            CallJavascript(_T(JS_ENABLE_DOWNLOAD), CComVariant(m_remoteImages.GetCount() != 0), CComVariant(connected));
-            CallJavascript(_T(JS_ENABLE_BUTTON), CComVariant(HTML_BUTTON_ID(_T(ELEMENT_DOWNLOAD_LIGHT_BUTTON))), CComVariant(connected && (m_baseImageRemoteIndex != -1)));
-
+            UpdateDownloadableState();
             break;
         }
 
@@ -2449,7 +2446,7 @@ void CEndlessUsbToolDlg::StartJSONDownload()
 
     if (!m_isConnected) {
         uprintf("Device not connected to internet");
-        CallJavascript(_T(JS_ENABLE_DOWNLOAD), CComVariant(FALSE), CComVariant(FALSE));
+        UpdateDownloadableState();
         return;
     }
 
@@ -2674,13 +2671,11 @@ void CEndlessUsbToolDlg::UpdateDownloadOptions()
 #endif // ENABLE_JSON_COMPRESSION
     IFFALSE_GOTOERROR(ParseJsonFile(filePath, true), "Error parsing eosinstaller JSON file.");
 
-    return;
+    AddDownloadOptionsToUI();
 
 error:
-    // RADU: disable downloading here I assume? Or retry download/parse?
-    CallJavascript(_T(JS_ENABLE_DOWNLOAD), CComVariant(FALSE), CComVariant(m_isConnected));
-    CallJavascript(_T(JS_ENABLE_BUTTON), CComVariant(HTML_BUTTON_ID(_T(ELEMENT_DOWNLOAD_LIGHT_BUTTON))), CComVariant(FALSE));
-    return;
+    // TODO: on error, retry download?
+    UpdateDownloadableState();
 }
 
 void CEndlessUsbToolDlg::AddDownloadOptionsToUI()
@@ -2700,7 +2695,6 @@ void CEndlessUsbToolDlg::AddDownloadOptionsToUI()
 
     // add options to UI
     long selectIndex = -1;
-    CallJavascript(_T(JS_ENABLE_BUTTON), CComVariant(HTML_BUTTON_ID(_T(ELEMENT_DOWNLOAD_LIGHT_BUTTON))), CComVariant(FALSE));
     for (POSITION pos = m_remoteImages.GetHeadPosition(); pos != NULL; ) {
         RemoteImageEntry_t imageEntry = m_remoteImages.GetNext(pos);
         bool matchesLanguage = languagePersonalty == imageEntry.personality;
@@ -2713,7 +2707,6 @@ void CEndlessUsbToolDlg::AddDownloadOptionsToUI()
         const wchar_t *htmlElemId = NULL;
 
         if (imageEntry.personality == PERSONALITY_BASE) {
-            CallJavascript(_T(JS_ENABLE_BUTTON), CComVariant(HTML_BUTTON_ID(_T(ELEMENT_DOWNLOAD_LIGHT_BUTTON))), CComVariant(TRUE));
             m_baseImageRemoteIndex = selectIndex;
             htmlElemId = _T(ELEMENT_DOWNLOAD_LIGHT_SIZE);
         }
@@ -2732,13 +2725,24 @@ void CEndlessUsbToolDlg::AddDownloadOptionsToUI()
         }
     }
 
-    bool foundRemoteImages = m_remoteImages.GetCount() != 0;
-    hr = CallJavascript(_T(JS_ENABLE_DOWNLOAD), CComVariant(foundRemoteImages), CComVariant(m_isConnected));
-    IFFALSE_PRINTERROR(SUCCEEDED(hr), "Error calling javascript to enable/disable download posibility.");
-
     if (m_imageFiles.GetCount() == 0) {
         m_selectedRemoteIndex = m_baseImageRemoteIndex;
     }
+}
+
+void CEndlessUsbToolDlg::UpdateDownloadableState()
+{
+    FUNCTION_ENTER;
+
+    HRESULT hr;
+
+    bool foundRemoteImages = m_remoteImages.GetCount() != 0;
+    hr = CallJavascript(_T(JS_ENABLE_DOWNLOAD), CComVariant(foundRemoteImages), CComVariant(m_isConnected));
+    IFFALSE_PRINTERROR(SUCCEEDED(hr), "Error calling " JS_ENABLE_DOWNLOAD "()");
+
+    bool foundBaseImage = m_baseImageRemoteIndex != -1;
+    hr = CallJavascript(_T(JS_ENABLE_BUTTON), CComVariant(HTML_BUTTON_ID(_T(ELEMENT_DOWNLOAD_LIGHT_BUTTON))), CComVariant(m_isConnected && foundBaseImage));
+    IFFALSE_PRINTERROR(SUCCEEDED(hr), "Error enabling 'Light' button");
 }
 
 HRESULT CEndlessUsbToolDlg::OnAdvancedPagePreviousClicked(IHTMLElement* pElement)
