@@ -1434,9 +1434,6 @@ LRESULT CEndlessUsbToolDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lPara
 
             if (m_isConnected) {
                 StartJSONDownload();
-            } else if(m_currentStep == OP_DOWNLOADING_FILES) {
-                m_lastErrorCause = ErrorCause_t::ErrorCauseDownloadFailed;
-                CancelRunningOperation();
             }
 
             UpdateDownloadableState();
