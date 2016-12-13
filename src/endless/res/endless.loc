@@ -166,7 +166,10 @@ t MSG_023 "Gb"
 t MSG_024 "Tb"
 t MSG_025 "Pb"
 
+t MSG_045 "USB Storage Device (Generic)"
 t MSG_046 "%s (Disk %d) [%s]"
+# Used when a drive is detected that contains more than one partition
+t MSG_047 "Multiple Partitions"
 t MSG_049 "Endless - Cancellation"
 t MSG_095 "Endless Image"
 t MSG_105 "Warning: Cancelling may cause the device to malfunction. If you are sure you want to cancel, click YES. Otherwise, click NO."
