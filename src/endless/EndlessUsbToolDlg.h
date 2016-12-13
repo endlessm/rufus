@@ -67,6 +67,12 @@ typedef enum InstallMethod {
 	UninstallDualBoot
 } InstallMethod_t;
 
+enum JSONDownloadState {
+    Pending,
+    Failed,
+    Succeeded
+};
+
 // CEndlessUsbToolDlg dialog
 class CEndlessUsbToolDlg : public CDHtmlDialog
 {
@@ -186,7 +192,7 @@ private:
     int m_currentStep;
     bool m_isConnected;
     bool m_localFilesScanned;
-    bool m_jsonDownloadAttempted;
+    JSONDownloadState m_jsonDownloadState;
     CMap<CString, LPCTSTR, pFileImageEntry_t, pFileImageEntry_t> m_imageFiles;
     CList<CString> m_imageIndexToPath;
     CList<RemoteImageEntry_t> m_remoteImages;
@@ -313,7 +319,7 @@ private:
     void FindMaxUSBSpeed();
     void CheckUSBHub(LPCTSTR devicePath);
     void UpdateUSBSpeedMessage(int deviceIndex);
-    void JSONDownloadFailed();
+    void SetJSONDownloadState(JSONDownloadState state);
 
 	void GoToSelectStoragePage();
 	BOOL AddStorageEntryToSelect(CComPtr<IHTMLSelectElement> &selectElement, int noOfGigs, uint8_t extraData);

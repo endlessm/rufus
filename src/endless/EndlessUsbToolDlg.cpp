@@ -528,7 +528,7 @@ CEndlessUsbToolDlg::CEndlessUsbToolDlg(UINT globalMessage, CWnd* pParent /*=NULL
     m_isConnected(false),
     m_lastErrorCause(ErrorCause_t::ErrorCauseNone),
     m_localFilesScanned(false),
-    m_jsonDownloadAttempted(false),
+    m_jsonDownloadState(JSONDownloadState::Pending),
 	m_selectedInstallMethod(InstallMethod_t::None)
 {
     FUNCTION_ENTER;
@@ -1279,7 +1279,7 @@ LRESULT CEndlessUsbToolDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lPara
             if (downloadStatus->error) {
 				if (isReleaseJsonDownload) {
 					uprintf("JSON download failed.");
-					JSONDownloadFailed();
+					SetJSONDownloadState(JSONDownloadState::Failed);
 				} else if (m_lastErrorCause == ErrorCause_t::ErrorCauseCancelled) {
 					uprintf("Download cancelled by user request.");
 				} else {
@@ -1294,8 +1294,7 @@ LRESULT CEndlessUsbToolDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lPara
                 uprintf("Download done for %ls", downloadStatus->jobName);
 
                 if (isReleaseJsonDownload) {
-                    if (!m_jsonDownloadAttempted) {
-                        m_jsonDownloadAttempted = true;
+                    if (m_jsonDownloadState != JSONDownloadState::Succeeded) {
                         UpdateDownloadOptions();
                     }
                 } else {
@@ -2082,9 +2081,6 @@ void CEndlessUsbToolDlg::GoToSelectFilePage()
         ApplyRufusLocalization();
     } else {
         uprintf("No remote images available and no local images available.");
-        m_lastErrorCause = ErrorCause_t::ErrorCauseJSONDownloadFailed;
-        CancelRunningOperation();
-        return;
     }
 
     // Update page with no local files found
@@ -2444,12 +2440,6 @@ void CEndlessUsbToolDlg::StartJSONDownload()
     char tmp_path[MAX_PATH] = "";
     bool success;
 
-    if (!m_isConnected) {
-        uprintf("Device not connected to internet");
-        UpdateDownloadableState();
-        return;
-    }
-
     if (m_remoteImages.GetCount() != 0) {
         uprintf("List of remote images already downloaded");
         return;
@@ -2477,8 +2467,9 @@ void CEndlessUsbToolDlg::StartJSONDownload()
         success = m_downloadManager.AddDownload(DownloadType_t::DownloadTypeReleseJson, urls, files, false);
     }
 
-    if(!success) {
-        JSONDownloadFailed();
+    if (!success) {
+        uprintf("AddDownload failed");
+        SetJSONDownloadState(JSONDownloadState::Failed);
     }
 }
 
@@ -2677,10 +2668,12 @@ void CEndlessUsbToolDlg::UpdateDownloadOptions()
     IFFALSE_GOTOERROR(ParseJsonFile(filePath, true), "Error parsing eosinstaller JSON file.");
 
     AddDownloadOptionsToUI();
+    SetJSONDownloadState(JSONDownloadState::Succeeded);
+    return;
 
 error:
     // TODO: on error, retry download?
-    UpdateDownloadableState();
+    SetJSONDownloadState(JSONDownloadState::Failed);
 }
 
 void CEndlessUsbToolDlg::AddDownloadOptionsToUI()
@@ -2742,7 +2735,9 @@ void CEndlessUsbToolDlg::UpdateDownloadableState()
     HRESULT hr;
 
     bool foundRemoteImages = m_remoteImages.GetCount() != 0;
-    hr = CallJavascript(_T(JS_ENABLE_DOWNLOAD), CComVariant(foundRemoteImages), CComVariant(m_isConnected));
+    // Show JSON download errors as connection errors. Maybe a proxy is mangling the JSON?
+    bool connected = m_isConnected && m_jsonDownloadState != JSONDownloadState::Failed;
+    hr = CallJavascript(_T(JS_ENABLE_DOWNLOAD), CComVariant(foundRemoteImages), CComVariant(connected));
     IFFALSE_PRINTERROR(SUCCEEDED(hr), "Error calling " JS_ENABLE_DOWNLOAD "()");
 
     bool foundBaseImage = m_baseImageRemoteIndex != -1;
@@ -3513,7 +3508,7 @@ HRESULT CEndlessUsbToolDlg::OnRecoverErrorButtonClicked(IHTMLElement* pElement)
     // reset the state
     m_lastErrorCause = ErrorCause_t::ErrorCauseNone;
     m_localFilesScanned = false;
-    m_jsonDownloadAttempted = false;
+    SetJSONDownloadState(JSONDownloadState::Pending);
     ResetEvent(m_cancelOperationEvent);
     ResetEvent(m_closeFileScanThreadEvent);
     StartCheckInternetConnectionThread();
@@ -4245,9 +4240,10 @@ bool CEndlessUsbToolDlg::CanUseLocalFile()
     return !m_localFilesScanned || (hasLocalInstaller && hasLocalImages) || hasFilesForDualBoot;
 }
 
+// Returns true if we might, in principle, be able to use a remote file.
 bool CEndlessUsbToolDlg::CanUseRemoteFile()
 {
-    return !m_jsonDownloadAttempted || m_remoteImages.GetCount() != 0;
+    return m_jsonDownloadState == JSONDownloadState::Pending || m_remoteImages.GetCount() != 0;
 }
 
 void CEndlessUsbToolDlg::FindMaxUSBSpeed()
@@ -4380,14 +4376,12 @@ void CEndlessUsbToolDlg::UpdateUSBSpeedMessage(int deviceIndex)
     }
 }
 
-void CEndlessUsbToolDlg::JSONDownloadFailed()
+void CEndlessUsbToolDlg::SetJSONDownloadState(JSONDownloadState state)
 {
-    m_jsonDownloadAttempted = true;
-    if (!CanUseLocalFile()) {
-        uprintf("Going to error page as no local files were found either.");
-        m_lastErrorCause = ErrorCause_t::ErrorCauseJSONDownloadFailed;
-        CancelRunningOperation();
-    }
+    FUNCTION_ENTER_FMT("%d", state);
+
+    m_jsonDownloadState = state;
+    UpdateDownloadableState();
 }
 
 #define GPT_MAX_PARTITION_COUNT		128
