@@ -22,6 +22,8 @@
 #define safe_closefile(__file__) if (__file__ != NULL) { fclose(__file__); __file__ = NULL; }
 
 #define FUNCTION_ENTER uprintf("%s:%d %s", __FILE__, __LINE__, __FUNCTION__)
+#define FUNCTION_ENTER_FMT(fmt, ...) uprintf("%s:%d %s " fmt, __FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)
+
 
 /* Command copied from https://gitlab.com/tortoisegit/tortoisegit/blob/e1262ead5495ecc7902b61ac3e1f3da22294bb2d/src/version.h */
 /* gpg --armor --export 587A279C | sed -e s/^/\"/ -e s/\$/\\\\n\"/ */
