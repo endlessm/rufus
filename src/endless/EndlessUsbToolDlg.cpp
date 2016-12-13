@@ -2470,7 +2470,12 @@ void CEndlessUsbToolDlg::StartJSONDownload()
     ListOfStrings urls = { JSON_URL(JSON_LIVE_FILE), JSON_URL(JSON_INSTALLER_FILE) };
     ListOfStrings files = { liveJson, installerJson };
 
-    success = m_downloadManager.AddDownload(DownloadType_t::DownloadTypeReleseJson, urls, files, false);
+    success = m_downloadManager.AddDownload(DownloadType_t::DownloadTypeReleseJson, urls, files, true);
+    if (!success) {
+        // If resuming a possibly-existing download failed, try harder to start a new one.
+        // In theory this shouldn't be necessary but this is done for the image download case so who knows!
+        success = m_downloadManager.AddDownload(DownloadType_t::DownloadTypeReleseJson, urls, files, false);
+    }
 
     if(!success) {
         JSONDownloadFailed();
