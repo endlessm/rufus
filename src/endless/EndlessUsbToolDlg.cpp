@@ -4129,7 +4129,7 @@ DWORD WINAPI CEndlessUsbToolDlg::UpdateDownloadProgressThread(void* param)
     }
 
 done:
-
+    dlg->m_downloadUpdateThread = INVALID_HANDLE_VALUE;
     CoUninitialize();
     return 0;
 }
