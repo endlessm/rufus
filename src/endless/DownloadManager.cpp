@@ -211,105 +211,95 @@ STDMETHODIMP DownloadManager::JobTransferred(IBackgroundCopyJob *pJob)
     return S_OK;
 }
 
+void DownloadManager::ReportStatus(const DownloadStatus_t & downloadStatus)
+{
+    if (m_dispatchWindow != NULL)
+        ::PostMessage(m_dispatchWindow, m_statusMsgId, (WPARAM)new DownloadStatus_t(downloadStatus), 0);
+}
+
 STDMETHODIMP DownloadManager::JobError(IBackgroundCopyJob *pJob, IBackgroundCopyError *pError)
 {
     FUNCTION_ENTER;
 
     HRESULT hr;
-    BG_ERROR_CONTEXT Context;
-    HRESULT ErrorCode = S_OK;
+    DownloadStatus_t downloadStatus = DownloadStatusNull;
     CComHeapPtr<WCHAR> jobName;
     CComHeapPtr<WCHAR> errorDescription;
 
-    hr = pError->GetError(&Context, &ErrorCode);
+    downloadStatus.error = true;
+
+    hr = pError->GetError(&downloadStatus.errorContext, &downloadStatus.errorCode);
     IFFALSE_PRINTERROR(SUCCEEDED(hr), "GetError failed");
+
+    hr = pJob->GetProgress(&downloadStatus.progress);
+    IFFALSE_PRINTERROR(SUCCEEDED(hr), "GetProgress failed");
+
     hr = pJob->GetDisplayName(&jobName);
     IFFALSE_PRINTERROR(SUCCEEDED(hr), "GetDisplayName failed");
+    downloadStatus.jobName = jobName;
+
+    // This fails, apparently because the message catalogue isn't loaded
     hr = pError->GetErrorDescription(LANGIDFROMLCID(GetThreadLocale()), &errorDescription);
     IFFALSE_PRINTERROR(SUCCEEDED(hr), "GetErrorDescription failed");
 
-    uprintf("Job %ls error 0x%x in context %d: %ls", jobName, ErrorCode, Context,
+    uprintf("Job %ls error 0x%x in context %d: %ls", jobName,
+        downloadStatus.errorCode, downloadStatus.errorContext,
         errorDescription ? errorDescription : L"");
+
+    ReportStatus(downloadStatus);
 
     return S_OK;
 }
 
 STDMETHODIMP DownloadManager::JobModification(IBackgroundCopyJob *JobModification, DWORD dwReserved)
 {
+    FUNCTION_ENTER;
+
     HRESULT hr;
-    WCHAR* pszJobName = NULL;
-    BG_JOB_PROGRESS Progress;
+    CComHeapPtr<WCHAR> pszJobName;
     BG_JOB_STATE State;
+    DownloadStatus_t downloadStatus = DownloadStatusNull;
 
     hr = JobModification->GetDisplayName(&pszJobName);
     IFFALSE_GOTOERROR(SUCCEEDED(hr), "GetDisplayName failed");
+    downloadStatus.jobName = pszJobName;
 
-    hr = JobModification->GetProgress(&Progress);
+    hr = JobModification->GetProgress(&downloadStatus.progress);
     IFFALSE_GOTOERROR(SUCCEEDED(hr), "GetProgress failed");
 
     hr = JobModification->GetState(&State);
     IFFALSE_GOTOERROR(SUCCEEDED(hr), "GetState failed");
 
-    DownloadStatus_t *downloadStatus = NULL;
-
     uprintf("Job %ls %ls (0x%X)", pszJobName, JobStateToStr(State), State);
 
     switch (State) {
     case BG_JOB_STATE_ACKNOWLEDGED:
-    case BG_JOB_STATE_TRANSFERRED:
-    case BG_JOB_STATE_TRANSFERRING:
-    case BG_JOB_STATE_ERROR:
-    case BG_JOB_STATE_CANCELLED:
-        downloadStatus = new DownloadStatus_t;
-        *downloadStatus = DownloadStatusNull;
-        downloadStatus->jobName = pszJobName;
-        downloadStatus->progress = Progress;
+        downloadStatus.done = true;
         break;
-    }
-
-    //Do something with the progress and state information.
-    //BITS generates a high volume of modification
-    //callbacks. Use this callback with discretion. Consider creating a timer and 
-    //polling for state and progress information.
-    if (BG_JOB_STATE_TRANSFERRED == State) {
+    case BG_JOB_STATE_TRANSFERRED:
         //Call pJob->Complete(); to acknowledge that the transfer is complete
         //and make the file available to the client.
         uprintf("Job %ls DONE\n", pszJobName);
         hr = JobModification->Complete();
         if (FAILED(hr)) JobModification->Cancel();
-        downloadStatus->done = true;
-    }
-    else if (BG_JOB_STATE_ERROR == State) {
-        //Call pJob->GetError(&pError); to retrieve an IBackgroundCopyError interface 
-        //pointer which you use to determine the cause of the error.
-        CComPtr<IBackgroundCopyError> error;
-        JobModification->GetError(&error);
-        LPWSTR str[1024];
-        memset(str, 0, 1024);
-        error->GetErrorDescription(GetUserDefaultLangID(), str);
-        error->GetError(&downloadStatus->errorContext, &downloadStatus->errorCode);
-        uprintf("Job %ls ERROR! %ls\n", pszJobName, str);
-        downloadStatus->error = true;
-    }
-    else if (BG_JOB_STATE_TRANSFERRING == State) {
-        //Call pJob->GetProgress(&Progress); to determine the number of bytes
-        //and files transferred.
-        downloadStatus->done = false;
-    }
-    else if (BG_JOB_STATE_ACKNOWLEDGED == State) {
-        downloadStatus->done = true;
-    }
-    else if (BG_JOB_STATE_CANCELLED == State) {
-        downloadStatus->error = true;
+        downloadStatus.done = true;
+        break;
+    case BG_JOB_STATE_TRANSFERRING:
+        downloadStatus.done = false;
+        break;
+    case BG_JOB_STATE_CANCELLED:
+        downloadStatus.error = true;
+        break;
+    case BG_JOB_STATE_ERROR:
+        // handled by the JobError callback
+        return S_OK;
+    default:
+        return S_OK;
     }
 
-    if (downloadStatus != NULL && m_dispatchWindow != NULL)
-        ::PostMessage(m_dispatchWindow, m_statusMsgId, (WPARAM)downloadStatus, 0);
+    ReportStatus(downloadStatus);
 
 error:
-    if (pszJobName != NULL)
-        CoTaskMemFree(pszJobName);
-
     return S_OK;
 }
 

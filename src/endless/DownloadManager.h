@@ -79,6 +79,8 @@ public:
     }
 
 private:
+    void ReportStatus(const DownloadStatus_t &downloadStatus);
+
     LONG m_PendingJobModificationCount;
     static volatile ULONG m_refCount;
     HWND m_dispatchWindow;
