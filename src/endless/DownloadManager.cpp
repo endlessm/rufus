@@ -211,74 +211,26 @@ STDMETHODIMP DownloadManager::JobTransferred(IBackgroundCopyJob *pJob)
     return S_OK;
 }
 
-#define TWO_GB 2147483648    // 2GB
-
 STDMETHODIMP DownloadManager::JobError(IBackgroundCopyJob *pJob, IBackgroundCopyError *pError)
 {
     FUNCTION_ENTER;
 
     HRESULT hr;
-    BG_FILE_PROGRESS Progress;
     BG_ERROR_CONTEXT Context;
-    IBackgroundCopyFile *pFile;
     HRESULT ErrorCode = S_OK;
-    WCHAR* pszJobName = NULL;
-    WCHAR* pszErrorDescription = NULL;
-    BOOL IsError = TRUE;
-
-    //Use pJob and pError to retrieve information of interest. For example,
-    //if the job is an upload reply, call the IBackgroundCopyError::GetError method 
-    //to determine the context in which the job failed. If the context is 
-    //BG_JOB_CONTEXT_REMOTE_APPLICATION, the server application that received the 
-    //upload file failed.
+    CComHeapPtr<WCHAR> jobName;
+    CComHeapPtr<WCHAR> errorDescription;
 
     hr = pError->GetError(&Context, &ErrorCode);
+    IFFALSE_PRINTERROR(SUCCEEDED(hr), "GetError failed");
+    hr = pJob->GetDisplayName(&jobName);
+    IFFALSE_PRINTERROR(SUCCEEDED(hr), "GetDisplayName failed");
+    hr = pError->GetErrorDescription(LANGIDFROMLCID(GetThreadLocale()), &errorDescription);
+    IFFALSE_PRINTERROR(SUCCEEDED(hr), "GetErrorDescription failed");
 
-    //If the proxy or server does not support the Content-Range header or if
-    //antivirus software removes the range requests, BITS returns BG_E_INSUFFICIENT_RANGE_SUPPORT.
-    //This implementation tries to switch the job to foreground priority, so
-    //the content has a better chance of being successfully downloaded.
-    if (BG_E_INSUFFICIENT_RANGE_SUPPORT == ErrorCode)
-    {
-        hr = pError->GetFile(&pFile);
-        hr = pFile->GetProgress(&Progress);
-        if (BG_SIZE_UNKNOWN == Progress.BytesTotal)
-        {
-            //The content is dynamic, do not change priority. Handle as an error.
-        }
-        else if (Progress.BytesTotal > TWO_GB)
-        {
-            //BITS does not use range requests if the content is less than 2 GB. 
-            //However, if the content is greater than 2 GB, BITS
-            //uses 2 GB ranges to download the file, so switching to foreground 
-            //priority will not help.
-        }
-        else
-        {
-            hr = pJob->SetPriority(BG_JOB_PRIORITY_FOREGROUND);
-            hr = pJob->Resume();
-            IsError = FALSE;
-        }
+    uprintf("Job %ls error 0x%x in context %d: %ls", jobName, ErrorCode, Context,
+        errorDescription ? errorDescription : L"");
 
-        pFile->Release();
-    }
-
-    if (TRUE == IsError)
-    {
-        hr = pJob->GetDisplayName(&pszJobName);
-        hr = pError->GetErrorDescription(LANGIDFROMLCID(GetThreadLocale()), &pszErrorDescription);
-
-        if (pszJobName && pszErrorDescription)
-        {
-            //Do something with the job name and description. 
-            uprintf("Error on download %ls: [%ls]", pszJobName, pszErrorDescription);
-        }
-
-        CoTaskMemFree(pszJobName);
-        CoTaskMemFree(pszErrorDescription);
-    }
-
-    //If you do not return S_OK, BITS continues to call this callback.
     return S_OK;
 }
 
