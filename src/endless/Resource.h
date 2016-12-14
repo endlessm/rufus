@@ -114,7 +114,9 @@
 #define MSG_023                         3023
 #define MSG_024                         3024
 #define MSG_025                         3025
+#define MSG_045                         3045
 #define MSG_046                         3046
+#define MSG_047                         3047
 #define MSG_049                         3049
 #define MSG_052                         3052
 #define MSG_061                         3061

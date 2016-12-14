@@ -275,8 +275,18 @@ msgid "Pb"
 msgstr ""
 
 #, c-format
+msgctxt "MSG_045"
+msgid "USB Storage Device (Generic)"
+msgstr ""
+
+#, c-format
 msgctxt "MSG_046"
 msgid "%s (Disk %d) [%s]"
+msgstr ""
+
+#, c-format
+msgctxt "MSG_047"
+msgid "Multiple Partitions"
 msgstr ""
 
 #, c-format
