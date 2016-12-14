@@ -1332,7 +1332,7 @@ LRESULT CEndlessUsbToolDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lPara
                     }
 
                     CStringA strDownloaded = SizeToHumanReadable(downloadStatus->progress.BytesTransferred, FALSE, use_fake_units);
-                    CStringA strTotal = SizeToHumanReadable(totalSize, FALSE, use_fake_units);
+                    CStringA strTotal = totalSize == BG_SIZE_UNKNOWN ? "---" : SizeToHumanReadable(totalSize, FALSE, use_fake_units);
                     // push to UI
                     CString downloadString = UTF8ToCString(lmprintf(MSG_302, strDownloaded, strTotal, speed));
                     SetElementText(_T(ELEMENT_INSTALL_STATUS), CComBSTR(downloadString));
