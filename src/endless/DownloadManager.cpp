@@ -448,7 +448,6 @@ bool DownloadManager::GetDownloadProgress(CComPtr<IBackgroundCopyJob> &currentJo
         break;
     case BG_JOB_STATE_ERROR:
     case BG_JOB_STATE_CANCELLED:
-    case BG_JOB_STATE_TRANSIENT_ERROR:
         downloadStatus->error = true;
         downloadStatus->errorContext = BG_ERROR_CONTEXT_NONE;
         break;
