@@ -372,7 +372,6 @@ static LPCTSTR ErrorCauseToStr(ErrorCause_t errorCause)
     {
         TOSTR(ErrorCauseGeneric);
         TOSTR(ErrorCauseCancelled);
-        TOSTR(ErrorCauseJSONDownloadFailed);
         TOSTR(ErrorCauseDownloadFailed);
         TOSTR(ErrorCauseDownloadFailedDiskFull);
         TOSTR(ErrorCauseVerificationFailed);
@@ -1675,7 +1674,6 @@ void CEndlessUsbToolDlg::ErrorOccured(ErrorCause_t errorCause)
         headlineMsgId = MSG_350;
         suggestionMsgId = MSG_351;
         break;
-    case ErrorCause_t::ErrorCauseJSONDownloadFailed:
     case ErrorCause_t::ErrorCauseVerificationFailed:
         buttonMsgId = MSG_327;
         suggestionMsgId = MSG_324;
@@ -3535,7 +3533,6 @@ HRESULT CEndlessUsbToolDlg::OnRecoverErrorButtonClicked(IHTMLElement* pElement)
         break;
     }
     case ErrorCause_t::ErrorCauseCancelled:
-    case ErrorCause_t::ErrorCauseJSONDownloadFailed:
     default:
         ChangePage(_T(ELEMENT_DUALBOOT_PAGE));
         break;
@@ -4378,6 +4375,9 @@ void CEndlessUsbToolDlg::SetJSONDownloadState(JSONDownloadState state)
     FUNCTION_ENTER_FMT("%d", state);
 
     m_jsonDownloadState = state;
+    if (state == JSONDownloadState::Failed) {
+        TrackEvent(_T("Failed"), _T("ErrorCauseJSONDownloadFailed"));
+    }
     UpdateDownloadableState();
 }
 

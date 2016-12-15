@@ -28,7 +28,6 @@ typedef struct FileImageEntry {
 typedef enum ErrorCause {
     ErrorCauseGeneric,
     ErrorCauseCancelled,
-    ErrorCauseJSONDownloadFailed,
     ErrorCauseDownloadFailed,
     ErrorCauseDownloadFailedDiskFull,
     ErrorCauseVerificationFailed,
