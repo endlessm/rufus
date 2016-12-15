@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: rufus\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-03-08 02:28+0000\n"
-"PO-Revision-Date: 2016-10-20 04:40+0000\n"
+"PO-Revision-Date: 2016-12-15 05:03+0000\n"
 "Last-Translator: Roddy Shuler <roddy@endlessm.com>\n"
 "Language-Team: Arabic (http://www.transifex.com/endless-mobile-inc/rufus/language/ar/)\n"
 "MIME-Version: 1.0\n"
@@ -295,9 +295,19 @@ msgid "Pb"
 msgstr "بيتا بايت"
 
 #, c-format
+msgctxt "MSG_045"
+msgid "USB Storage Device (Generic)"
+msgstr "جهاز تخزين USB (فلاش)"
+
+#, c-format
 msgctxt "MSG_046"
 msgid "%s (Disk %d) [%s]"
 msgstr "%s (القرص %d) [%s]"
+
+#, c-format
+msgctxt "MSG_047"
+msgid "Multiple Partitions"
+msgstr "تقسيمات متعددة"
 
 #, c-format
 msgctxt "MSG_049"

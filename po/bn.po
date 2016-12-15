@@ -11,7 +11,7 @@ msgstr ""
 "Project-Id-Version: rufus\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-03-08 02:28+0000\n"
-"PO-Revision-Date: 2016-10-20 04:33+0000\n"
+"PO-Revision-Date: 2016-12-15 05:01+0000\n"
 "Last-Translator: Roddy Shuler <roddy@endlessm.com>\n"
 "Language-Team: Bengali (http://www.transifex.com/endless-mobile-inc/rufus/language/bn/)\n"
 "MIME-Version: 1.0\n"
@@ -297,9 +297,19 @@ msgid "Pb"
 msgstr "Pb"
 
 #, c-format
+msgctxt "MSG_045"
+msgid "USB Storage Device (Generic)"
+msgstr ""
+
+#, c-format
 msgctxt "MSG_046"
 msgid "%s (Disk %d) [%s]"
 msgstr "%s (ডিস্ক %d) [%s]"
+
+#, c-format
+msgctxt "MSG_047"
+msgid "Multiple Partitions"
+msgstr ""
 
 #, c-format
 msgctxt "MSG_049"
