@@ -322,19 +322,20 @@ enum endless_action_type {
 #define FILE_GZ_EXTENSION	"gz"
 #define FILE_XZ_EXTENSION	"xz"
 
-#define RELEASE_JSON_URLPATH    _T("https://d1anzknqnc1kmb.cloudfront.net/")
-#define JSON_LIVE_FILE          "releases-eos-3.json"
-#define JSON_INSTALLER_FILE     "releases-eosinstaller-3.json"
-#define JSON_GZIP               "." FILE_GZ_EXTENSION
-#define JSON_PACKED(__file__)   __file__ JSON_GZIP
+#define RELEASE_JSON_URLPATH       _T("https://d1anzknqnc1kmb.cloudfront.net/")
+#define JSON_LIVE_FILE             "releases-eos-3.json"
+#define JSON_CODING_LIVE_FILE      "releases-coding-3.json"
+#define JSON_INSTALLER_FILE        "releases-eosinstaller-3.json"
+#define JSON_GZIP                  "." FILE_GZ_EXTENSION
+#define JSON_PACKED(__file__)      __file__ JSON_GZIP
 #ifdef ENABLE_JSON_COMPRESSION
-#define JSON_URL(__file__)      RELEASE_JSON_URLPATH _T(JSON_PACKED(__file__))
+#define JSON_URL(__file__)         RELEASE_JSON_URLPATH _T(JSON_PACKED(__file__))
 #else
-#define JSON_URL(__file__)      RELEASE_JSON_URLPATH _T(__file__)
+#define JSON_URL(__file__)         RELEASE_JSON_URLPATH _T(__file__)
 #endif // ENABLE_JSON_COMPRESSION
-#define SIGNATURE_FILE_EXT      L".asc"
-#define	BOOT_ARCHIVE_SUFFIX		L".boot.zip"
-#define	IMAGE_FILE_EXT			L".img"
+#define SIGNATURE_FILE_EXT         L".asc"
+#define	BOOT_ARCHIVE_SUFFIX		   L".boot.zip"
+#define	IMAGE_FILE_EXT			   L".img"
 
 #define ENDLESS_OS "Endless OS"
 const wchar_t* mainWindowTitle = L"Endless Installer";
@@ -2489,18 +2490,13 @@ void CEndlessUsbToolDlg::StartJSONDownload()
     }
 
     // Add both JSONs to download, maybe user goes back and switches between Try and Install
-#ifdef ENABLE_JSON_COMPRESSION
-    CString liveJson(JSON_PACKED(JSON_LIVE_FILE));
-    CString installerJson(JSON_PACKED(JSON_INSTALLER_FILE));
-#else
-    CString liveJson(JSON_LIVE_FILE);
-    CString installerJson(JSON_INSTALLER_FILE);
-#endif // ENABLE_JSON_COMPRESSION
+	CString liveJson(JsonLiveFile());
+	CString installerJson(JsonInstallerFile());
 
     liveJson = CEndlessUsbToolApp::TempFilePath(liveJson);
     installerJson = CEndlessUsbToolApp::TempFilePath(installerJson);
 
-    ListOfStrings urls = { JSON_URL(JSON_LIVE_FILE), JSON_URL(JSON_INSTALLER_FILE) };
+    ListOfStrings urls = { JsonLiveFileURL(), JsonInstallerFileURL() };
     ListOfStrings files = { liveJson, installerJson };
 
     success = m_downloadManager.AddDownload(DownloadType_t::DownloadTypeReleseJson, urls, files, true);
@@ -2751,17 +2747,17 @@ void CEndlessUsbToolDlg::UpdateDownloadOptions()
     m_remoteImages.RemoveAll();
 
     // Parse JSON with normal images
-    filePath = CEndlessUsbToolApp::TempFilePath(CString(JSON_LIVE_FILE));
+    filePath = CEndlessUsbToolApp::TempFilePath(CString(JsonLiveFile(false)));
 #ifdef ENABLE_JSON_COMPRESSION
-    filePathGz = CEndlessUsbToolApp::TempFilePath(CString(JSON_PACKED(JSON_LIVE_FILE)));
+    filePathGz = CEndlessUsbToolApp::TempFilePath(CString(JsonLiveFile()));
     IFFALSE_GOTOERROR(UnpackFile(filePathGz, filePath, BLED_COMPRESSION_GZIP), "Error uncompressing eos JSON file.");
 #endif // ENABLE_JSON_COMPRESSION
     IFFALSE_GOTOERROR(ParseJsonFile(filePath, false), "Error parsing eos JSON file.");
 
     // Parse JSON with installer images
-    filePath = CEndlessUsbToolApp::TempFilePath(CString(JSON_INSTALLER_FILE));
+    filePath = CEndlessUsbToolApp::TempFilePath(CString(JsonInstallerFile(false)));
 #ifdef ENABLE_JSON_COMPRESSION
-    filePathGz = CEndlessUsbToolApp::TempFilePath(CString(JSON_PACKED(JSON_INSTALLER_FILE)));
+    filePathGz = CEndlessUsbToolApp::TempFilePath(CString(JsonInstallerFile()));
     IFFALSE_GOTOERROR(UnpackFile(filePathGz, filePath, BLED_COMPRESSION_GZIP), "Error uncompressing eosinstaller JSON file.");
 #endif // ENABLE_JSON_COMPRESSION
     IFFALSE_GOTOERROR(ParseJsonFile(filePath, true), "Error parsing eosinstaller JSON file.");
@@ -6264,6 +6260,42 @@ bool CEndlessUsbToolDlg::IsCoding()
 {
 	static const bool is_coding = ExeNameContains(CODE_EXENAME_SUBSTRING);
 	return is_coding;
+}
+
+const char* CEndlessUsbToolDlg::JsonLiveFile(bool withCompressedSuffix)
+{
+#ifdef ENABLE_JSON_COMPRESSION
+	if (withCompressedSuffix) {
+		return IsCoding()
+			? JSON_PACKED(JSON_CODING_LIVE_FILE)
+			: JSON_PACKED(JSON_LIVE_FILE);
+	}
+#endif // ENABLE_JSON_COMPRESSION
+	return IsCoding()
+		? JSON_CODING_LIVE_FILE
+		: JSON_LIVE_FILE;
+}
+
+const wchar_t* CEndlessUsbToolDlg::JsonLiveFileURL()
+{
+	return IsCoding()
+		? JSON_URL(JSON_CODING_LIVE_FILE)
+		: JSON_URL(JSON_LIVE_FILE);
+}
+
+const char* CEndlessUsbToolDlg::JsonInstallerFile(bool withCompressedSuffix)
+{
+#ifdef ENABLE_JSON_COMPRESSION
+	if (withCompressedSuffix) {
+		return JSON_PACKED(JSON_INSTALLER_FILE);
+	}
+#endif
+	return JSON_INSTALLER_FILE;
+}
+
+const wchar_t* CEndlessUsbToolDlg::JsonInstallerFileURL()
+{
+	return JSON_URL(JSON_INSTALLER_FILE);
 }
 
 bool CEndlessUsbToolDlg::ShouldUninstall()

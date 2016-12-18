@@ -464,4 +464,9 @@ private:
 	ULONGLONG GetNeededSpaceForDualBoot(int &neededGigs, bool *isBaseImage = NULL);
 
 	static const UINT m_uTaskbarBtnCreatedMsg;
+
+	static const char* JsonLiveFile(bool withCompressedSuffix=true);
+	static const char* JsonInstallerFile(bool withCompressedSuffix=true);
+	static const wchar_t* JsonLiveFileURL();
+	static const wchar_t* JsonInstallerFileURL();
 };
