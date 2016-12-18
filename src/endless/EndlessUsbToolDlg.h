@@ -119,7 +119,9 @@ public:
 	CEndlessUsbToolDlg(UINT globalMessage, CWnd* pParent = NULL);	// standard constructor
     ~CEndlessUsbToolDlg();
 
+	static bool ExeNameContains(const wchar_t* substring);
 	static bool IsUninstaller();
+	static bool IsCoding();
 	static bool ShouldUninstall();
 
 	void Uninit();

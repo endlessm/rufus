@@ -341,6 +341,7 @@ const wchar_t* mainWindowTitle = L"Endless Installer";
 
 #define ALL_FILES					L"*.*"
 
+#define CODE_EXENAME_SUBSTRING   L"-code-"
 #define ENDLESS_UNINSTALLER_NAME L"endless-uninstaller.exe"
 #define ENDLESS_OS_NAME L"Endless OS"
 
@@ -6245,11 +6246,24 @@ error:
 	}
 }
 
+bool CEndlessUsbToolDlg::ExeNameContains(const wchar_t *substring)
+{
+	CStringW exePath = GetExePath();
+	CStringW exeName = CSTRING_GET_LAST(exePath, '\\');
+	exeName.MakeLower();
+	return exeName.Find(substring) != -1;
+}
 
 bool CEndlessUsbToolDlg::IsUninstaller()
 {
 	CStringW exePath = GetExePath();
 	return CSTRING_GET_LAST(exePath, '\\') == ENDLESS_UNINSTALLER_NAME;
+}
+
+bool CEndlessUsbToolDlg::IsCoding()
+{
+	static const bool is_coding = ExeNameContains(CODE_EXENAME_SUBSTRING);
+	return is_coding;
 }
 
 bool CEndlessUsbToolDlg::ShouldUninstall()
