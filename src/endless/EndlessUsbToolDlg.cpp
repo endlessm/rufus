@@ -218,6 +218,7 @@ DWORD usbDevicesCount;
 #define JS_ENABLE_BUTTON                "enableButton"
 #define JS_SHOW_ELEMENT                 "showElement"
 #define JS_RESET_CHECK                  "resetCheck"
+#define JS_SET_CODING_MODE              "setCodingMode"
 
 // Personalities
 
@@ -648,6 +649,7 @@ void CEndlessUsbToolDlg::OnDocumentComplete(LPDISPATCH pDisp, LPCTSTR szUrl)
         CallJavascript(_T(JS_ENABLE_BUTTON), CComVariant(HTML_BUTTON_ID(_T(ELEMENT_REFORMATTER_USB_BUTTON))), CComVariant(FALSE));
     }
 
+	CallJavascript(_T(JS_SET_CODING_MODE), CComVariant(IsCoding()));
     SetElementText(_T(ELEMENT_VERSION_LINK), CComBSTR(RELEASE_VER_STR));
 
     StartCheckInternetConnectionThread();
