@@ -105,6 +105,22 @@
 #define HTML_ELEM_CombinedUsbButton	      2068
 #define HTML_ELEM_USBLearnMore            2069
 
+// Endless Code specific strings
+#define HTML_ELEM_LiveUsbTextCoding               2071
+#define HTML_ELEM_DualBootPageTitleCoding         2072
+#define HTML_ELEM_InstallingPageTitleCoding       2073
+#define HTML_ELEM_ThankYouDualBootReminderCoding  2074
+#define HTML_ELEM_ThankYouLiveReminderCoding      2075
+#define HTML_ELEM_ThankYouReflasherReminderCoding 2076
+#define HTML_ELEM_ErrorMessageCoding              2077
+#define HTML_ELEM_ReformatterUsbTextCoding        2078
+#define HTML_ELEM_SelectFilePageTitleCoding       2079
+#define HTML_ELEM_SelectFileSubtitleCoding        2080
+#define HTML_ELEM_LightDownloadDescriptionCoding  2081
+#define HTML_ELEM_DownloadLightButtonCoding       2082
+#define HTML_ELEM_FullDownloadDescriptionCoding   2083
+#define HTML_ELEM_DownloadFullButtonCoding        2084
+#define HTML_ELEM_SelectStoragePageTitleCoding    2085
 
 // Rufus messages
 #define MSG_000                         3000
