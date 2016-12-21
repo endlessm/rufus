@@ -3498,7 +3498,8 @@ void CEndlessUsbToolDlg::GoToSelectStoragePage()
 	// update messages with needed space based on selected version
 	CStringA osVersion = lmprintf(isBaseImage ? MSG_400 : MSG_316);
 	CStringA osSizeText = SizeToHumanReadable((isBaseImage ? RECOMMENDED_GIGS_BASE : RECOMMENDED_GIGS_FULL) * bytesInGig, FALSE, use_fake_units);
-	CString message = UTF8ToCString(lmprintf(MSG_337, osVersion, osSizeText));
+
+	CString message = UTF8ToCString(lmprintf(IsCoding() ? MSG_346 : MSG_337, osVersion, osSizeText));
 	SetElementText(_T(ELEMENT_STORAGE_DESCRIPTION), CComBSTR(message));
 
 	message = UTF8ToCString(lmprintf(MSG_341, freeSize, totalSize, systemDriveA));
