@@ -3504,7 +3504,7 @@ void CEndlessUsbToolDlg::GoToSelectStoragePage()
 	message = UTF8ToCString(lmprintf(MSG_341, freeSize, totalSize, systemDriveA));
 	SetElementText(_T(ELEMENT_STORAGE_AVAILABLE), CComBSTR(message));
 
-	message = UTF8ToCString(lmprintf(MSG_342, systemDriveA));
+	message = UTF8ToCString(lmprintf(IsCoding() ? MSG_345 : MSG_342, systemDriveA));
 	SetElementText(_T(ELEMENT_STORAGE_MESSAGE), CComBSTR(message));
 
 	// Clear existing elements from the drop down

@@ -202,6 +202,7 @@
 #define MSG_342							3342
 #define MSG_343							3343
 #define MSG_344							3344
+#define MSG_345                         3345
 #define MSG_350							3350
 #define MSG_351							3351
 #define MSG_352							3352

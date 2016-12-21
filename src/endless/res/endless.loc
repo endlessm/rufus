@@ -265,6 +265,7 @@ t MSG_339 "%s (Recommended)"
 t MSG_340 "%s (Maximum)"
 t MSG_341 "You currently have %s free on your %s %s drive."
 t MSG_342 "Select how much of your %s drive to dedicate to Endless OS."
+t MSG_345 "Select how much of your %s drive to dedicate to Endless Code."
 
 t MSG_350 "Unfortunately, there is not enough storage space."
 t MSG_351 "To continue installing Endless OS, please free up at least %s by deleting videos, photos, or other large files on your %s drive."
