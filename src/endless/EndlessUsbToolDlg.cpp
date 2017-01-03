@@ -378,6 +378,7 @@ static LPCTSTR ErrorCauseToStr(ErrorCause_t errorCause)
         TOSTR(ErrorCauseVerificationFailed);
         TOSTR(ErrorCauseWriteFailed);
         TOSTR(ErrorCauseNot64Bit);
+        TOSTR(ErrorCause32BitEFI);
         TOSTR(ErrorCauseBitLocker);
         TOSTR(ErrorCauseNotNTFS);
         TOSTR(ErrorCauseNonWindowsMBR);
@@ -1696,6 +1697,7 @@ void CEndlessUsbToolDlg::ErrorOccured(ErrorCause_t errorCause)
         suggestionMsgId = m_selectedInstallMethod == InstallMethod_t::InstallDualBoot ? MSG_358 : MSG_325;
         break;
     case ErrorCause_t::ErrorCauseNot64Bit:
+    case ErrorCause_t::ErrorCause32BitEFI:
         buttonMsgId = MSG_328;
         headlineMsgId = MSG_354;
         suggestionMsgId = MSG_355;
@@ -5178,8 +5180,15 @@ bool CEndlessUsbToolDlg::CanInstallToDrive(const CString & systemDriveLetter, co
 	}
 
 	if (!isBIOS) {
-		// On EFI systems, assume that there will be no problem installing GRUB.
-		return true;
+		if (!is_x64()) {
+			uprintf("EFI system with 32-bit Windows; assuming IA32 EFI (which is unsupported)");
+			cause = ErrorCause32BitEFI;
+			return false;
+		} else {
+			uprintf("EFI system with 64-bit Windows; assuming x64 EFI (which is ok)");
+			// assume there will be no problem installing GRUB
+			return true;
+		}
 	}
 
 	if (CEndlessUsbToolApp::m_enableOverwriteMbr) {
