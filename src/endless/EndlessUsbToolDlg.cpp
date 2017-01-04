@@ -378,6 +378,7 @@ static LPCTSTR ErrorCauseToStr(ErrorCause_t errorCause)
         TOSTR(ErrorCauseVerificationFailed);
         TOSTR(ErrorCauseWriteFailed);
         TOSTR(ErrorCauseNot64Bit);
+        TOSTR(ErrorCause32BitEFI);
         TOSTR(ErrorCauseBitLocker);
         TOSTR(ErrorCauseNotNTFS);
         TOSTR(ErrorCauseNonWindowsMBR);
@@ -1664,56 +1665,57 @@ void CEndlessUsbToolDlg::ChangePage(PCTSTR newPage)
 	return;
 }
 
+#define MSG_RECOVER_RESUME          MSG_326
+#define MSG_RECOVER_DOWNLOAD_AGAIN  MSG_327
+#define MSG_RECOVER_TRY_AGAIN       MSG_328
+
 void CEndlessUsbToolDlg::ErrorOccured(ErrorCause_t errorCause)
 {
-    uint32_t buttonMsgId = 0, suggestionMsgId = 0, headlineMsgId = MSG_370;
+    uint32_t recoverButtonMsgId = 0, suggestionMsgId = 0, headlineMsgId = MSG_370;
     bool driveLetterInHeading = false;
 
     switch (errorCause) {
     case ErrorCause_t::ErrorCauseDownloadFailed:
-        buttonMsgId = MSG_326;
+        recoverButtonMsgId = MSG_RECOVER_RESUME;
         suggestionMsgId = MSG_323;
         break;
     case ErrorCause_t::ErrorCauseDownloadFailedDiskFull:
-        buttonMsgId = MSG_326;
+        recoverButtonMsgId = MSG_RECOVER_RESUME;
         headlineMsgId = MSG_350;
         suggestionMsgId = MSG_334;
     case ErrorCause_t::ErrorCauseInstallFailedDiskFull:
-        buttonMsgId = MSG_326;
+        recoverButtonMsgId = MSG_RECOVER_RESUME;
         headlineMsgId = MSG_350;
         suggestionMsgId = MSG_351;
         break;
     case ErrorCause_t::ErrorCauseJSONDownloadFailed:
     case ErrorCause_t::ErrorCauseVerificationFailed:
-        buttonMsgId = MSG_327;
+        recoverButtonMsgId = MSG_RECOVER_DOWNLOAD_AGAIN;
         suggestionMsgId = MSG_324;
         break;
     case ErrorCause_t::ErrorCauseCancelled:
     case ErrorCause_t::ErrorCauseGeneric:
     case ErrorCause_t::ErrorCauseWriteFailed:
     case ErrorCause_t::ErrorCauseSuspended: // TODO: new string here
-        buttonMsgId = MSG_328;
+        recoverButtonMsgId = MSG_RECOVER_TRY_AGAIN;
         suggestionMsgId = m_selectedInstallMethod == InstallMethod_t::InstallDualBoot ? MSG_358 : MSG_325;
         break;
     case ErrorCause_t::ErrorCauseNot64Bit:
-        buttonMsgId = MSG_328;
+    case ErrorCause_t::ErrorCause32BitEFI:
         headlineMsgId = MSG_354;
         suggestionMsgId = MSG_355;
         break;
     case ErrorCause_t::ErrorCauseBitLocker:
-        buttonMsgId = MSG_328;
         headlineMsgId = MSG_356;
         driveLetterInHeading = true;
         suggestionMsgId = MSG_357;
         break;
     case ErrorCause_t::ErrorCauseNotNTFS:
-        buttonMsgId = MSG_328;
         headlineMsgId = MSG_352;
         driveLetterInHeading = true;
         suggestionMsgId = MSG_353;
         break;
     case ErrorCause_t::ErrorCauseNonWindowsMBR:
-        buttonMsgId = MSG_328;
         headlineMsgId = MSG_359;
         suggestionMsgId = MSG_360;
         break;
@@ -1723,8 +1725,8 @@ void CEndlessUsbToolDlg::ErrorOccured(ErrorCause_t errorCause)
     }
 
     // Update the error button text if it's a "recoverable" error case or hide it otherwise
-    if (buttonMsgId != 0) {
-        SetElementText(_T(ELEMENT_ERROR_BUTTON), UTF8ToBSTR(lmprintf(buttonMsgId)));
+    if (recoverButtonMsgId != 0) {
+        SetElementText(_T(ELEMENT_ERROR_BUTTON), UTF8ToBSTR(lmprintf(recoverButtonMsgId)));
         CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(HTML_BUTTON_ID(ELEMENT_ERROR_BUTTON)), CComVariant(TRUE));
     } else {
         CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(HTML_BUTTON_ID(ELEMENT_ERROR_BUTTON)), CComVariant(FALSE));
@@ -5178,8 +5180,15 @@ bool CEndlessUsbToolDlg::CanInstallToDrive(const CString & systemDriveLetter, co
 	}
 
 	if (!isBIOS) {
-		// On EFI systems, assume that there will be no problem installing GRUB.
-		return true;
+		if (!is_x64()) {
+			uprintf("EFI system with 32-bit Windows; assuming IA32 EFI (which is unsupported)");
+			cause = ErrorCause32BitEFI;
+			return false;
+		} else {
+			uprintf("EFI system with 64-bit Windows; assuming x64 EFI (which is ok)");
+			// assume there will be no problem installing GRUB
+			return true;
+		}
 	}
 
 	if (CEndlessUsbToolApp::m_enableOverwriteMbr) {

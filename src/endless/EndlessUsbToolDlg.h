@@ -34,6 +34,7 @@ typedef enum ErrorCause {
     ErrorCauseVerificationFailed,
     ErrorCauseWriteFailed,
     ErrorCauseNot64Bit,
+    ErrorCause32BitEFI,
     ErrorCauseBitLocker,
     ErrorCauseNotNTFS,
     ErrorCauseNonWindowsMBR,
