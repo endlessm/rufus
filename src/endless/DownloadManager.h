@@ -37,6 +37,7 @@ static LPCTSTR DownloadTypeToString(DownloadType_t type)
 typedef struct DownloadStatus {
     BG_JOB_PROGRESS progress;    
     bool done;
+    bool transientError;
     bool error;
     CString jobName;
     BG_ERROR_CONTEXT errorContext;
@@ -45,7 +46,7 @@ typedef struct DownloadStatus {
 
 typedef std::vector<CString> ListOfStrings;
 
-static const DownloadStatus_t DownloadStatusNull = { {0, 0, 0, 0}, false, false, L"" };
+static const DownloadStatus_t DownloadStatusNull = { {0, 0, 0, 0}, false, false, false, L"" };
 
 class DownloadManager : public IBackgroundCopyCallback {
 public:
@@ -60,7 +61,7 @@ public:
 
     static CString GetJobName(DownloadType_t type);
 
-    static bool GetDownloadProgress(CComPtr<IBackgroundCopyJob> &currentJob, DownloadStatus_t *downloadStatus, const CString &jobName);
+    static bool GetDownloadProgress(CComPtr<IBackgroundCopyJob> &currentJob, DownloadStatus_t &downloadStatus, const CString &jobName);
     static HRESULT GetExistingJob(CComPtr<IBackgroundCopyManager> &bcManager, LPCWSTR jobName, CComPtr<IBackgroundCopyJob> &existingJob);
 
     void ClearExtraDownloadJobs(bool forceCancel = false);

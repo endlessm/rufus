@@ -1303,11 +1303,19 @@ LRESULT CEndlessUsbToolDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lPara
 				CStringA part, total;
 				part = SizeToHumanReadable(downloadStatus->progress.BytesTransferred, FALSE, use_fake_units);
 				total = SizeToHumanReadable(downloadStatus->progress.BytesTotal, FALSE, use_fake_units);
-                uprintf("Download [%ls] progress %s of %s (%d of %d files)", downloadStatus->jobName,
+                uprintf("Download [%ls] progress %s of %s (%d of %d files) %s", downloadStatus->jobName,
                     part, total,
-                    downloadStatus->progress.FilesTransferred, downloadStatus->progress.FilesTotal);
+                    downloadStatus->progress.FilesTransferred, downloadStatus->progress.FilesTotal,
+                    downloadStatus->transientError ? "(transient error)" : "");
 
-                if (!isReleaseJsonDownload) {
+                if (isReleaseJsonDownload) {
+                    if (downloadStatus->transientError) {
+                        SetJSONDownloadState(JSONDownloadState::Retrying);
+                    }
+                    // Don't clear this on the downwards edge. If the link is up but the connection times out, the
+                    // download will enter state TRANSIENT_ERROR and then immediately re-enter state CONNECTING.
+                    // We want to give some indication that some error has occured, even as we retry.
+                } else {
                     static ULONGLONG startedTickCount = 0;
                     static ULONGLONG startedBytes = 0;
 
@@ -2731,7 +2739,9 @@ void CEndlessUsbToolDlg::UpdateDownloadableState()
 
     bool foundRemoteImages = m_remoteImages.GetCount() != 0;
     // Show JSON download errors as connection errors. Maybe a proxy is mangling the JSON?
-    bool connected = m_isConnected && m_jsonDownloadState != JSONDownloadState::Failed;
+    bool connected = m_isConnected
+        && m_jsonDownloadState != JSONDownloadState::Failed
+        && m_jsonDownloadState != JSONDownloadState::Retrying;
     hr = CallJavascript(_T(JS_ENABLE_DOWNLOAD), CComVariant(foundRemoteImages), CComVariant(connected));
     IFFALSE_PRINTERROR(SUCCEEDED(hr), "Error calling " JS_ENABLE_DOWNLOAD "()");
 
@@ -4110,16 +4120,13 @@ DWORD WINAPI CEndlessUsbToolDlg::UpdateDownloadProgressThread(void* param)
             }
             case WAIT_TIMEOUT:
             {
-                downloadStatus = new DownloadStatus_t;
-                downloadStatus->done = false;
-                downloadStatus->error = false;
+                DownloadStatus_t downloadStatus;
                 bool result = dlg->m_downloadManager.GetDownloadProgress(currentJob, downloadStatus, jobName);
-                if (!result || downloadStatus->done || downloadStatus->error) {
+                if (!result || downloadStatus.done || downloadStatus.error) {
                     uprintf("CEndlessUsbToolDlg::UpdateDownloadProgressThread - Exiting");
-                    delete downloadStatus;
                     goto done;
                 }
-                ::PostMessage(dlg->m_hWnd, WM_FILE_DOWNLOAD_STATUS, (WPARAM)downloadStatus, 0);
+                ::PostMessage(dlg->m_hWnd, WM_FILE_DOWNLOAD_STATUS, (WPARAM) new DownloadStatus_t(downloadStatus), 0);
                 break;
             }
         }

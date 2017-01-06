@@ -68,6 +68,7 @@ typedef enum InstallMethod {
 
 enum JSONDownloadState {
     Pending,
+    Retrying,
     Failed,
     Succeeded
 };

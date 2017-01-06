@@ -284,8 +284,8 @@ STDMETHODIMP DownloadManager::JobModification(IBackgroundCopyJob *JobModificatio
         if (FAILED(hr)) JobModification->Cancel();
         downloadStatus.done = true;
         break;
-    case BG_JOB_STATE_TRANSFERRING:
-        downloadStatus.done = false;
+    case BG_JOB_STATE_TRANSIENT_ERROR:
+        downloadStatus.transientError = true;
         break;
     case BG_JOB_STATE_CANCELLED:
         downloadStatus.error = true;
@@ -431,11 +431,13 @@ CString DownloadManager::GetJobName(DownloadType_t type)
     return CString(DOWNLOAD_JOB_PREFIX) + DownloadTypeToString(type);
 }
 
-bool DownloadManager::GetDownloadProgress(CComPtr<IBackgroundCopyJob> &currentJob, DownloadStatus_t *downloadStatus, const CString &jobName)
+bool DownloadManager::GetDownloadProgress(CComPtr<IBackgroundCopyJob> &currentJob, DownloadStatus_t &downloadStatus, const CString &jobName)
 {
     HRESULT hr;
     BG_JOB_STATE State;
     bool result = false;
+
+    downloadStatus = DownloadStatusNull;
 
     hr = currentJob->GetState(&State);
     IFFALSE_GOTOERROR(SUCCEEDED(hr), "Error querying for job state");
@@ -444,17 +446,20 @@ bool DownloadManager::GetDownloadProgress(CComPtr<IBackgroundCopyJob> &currentJo
     case BG_JOB_STATE_TRANSFERRED:
     case BG_JOB_STATE_ACKNOWLEDGED:
     case BG_JOB_STATE_SUSPENDED:
-        downloadStatus->done = true;
+        downloadStatus.done = true;
+        break;
+    case BG_JOB_STATE_TRANSIENT_ERROR:
+        downloadStatus.transientError = true;
         break;
     case BG_JOB_STATE_ERROR:
     case BG_JOB_STATE_CANCELLED:
-        downloadStatus->error = true;
-        downloadStatus->errorContext = BG_ERROR_CONTEXT_NONE;
+        downloadStatus.error = true;
+        downloadStatus.errorContext = BG_ERROR_CONTEXT_NONE;
         break;
     }
-    downloadStatus->jobName = jobName;
+    downloadStatus.jobName = jobName;
 
-    hr = currentJob->GetProgress(&downloadStatus->progress);
+    hr = currentJob->GetProgress(&downloadStatus.progress);
     IFFALSE_GOTOERROR(SUCCEEDED(hr), "Error querying for job progress");
 
     result = true;
