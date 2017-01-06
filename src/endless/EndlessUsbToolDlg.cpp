@@ -4385,6 +4385,10 @@ void CEndlessUsbToolDlg::SetJSONDownloadState(JSONDownloadState state)
     if (state == JSONDownloadState::Failed) {
         TrackEvent(_T("Failed"), _T("ErrorCauseJSONDownloadFailed"));
     }
+    if (state == JSONDownloadState::Succeeded) {
+        // TODO: dissociate this event from the install method
+        TrackEvent(_T("JSONDownloadSucceeded"));
+    }
     UpdateDownloadableState();
 }
 
