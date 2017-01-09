@@ -1336,7 +1336,7 @@ t MSG_367 "Assegure-se de ter feito back up dos seus documentos mais importantes
 t MSG_368 "O Internet Explorer %d não é compatível. Favor clicar em ok para baixar o Internet Explorer %d, instale-o e depois execute o Instalador Endless novamente.  "
 t MSG_369 "Download de %s"
 t MSG_370 "Opa! Algo errado aconteceu ao configurar o Endless OS."
-t MSG_371 "https://support.endlessm.com/hc/pt"
+t MSG_371 "https://support.endlessm.com/hc/pt/articles/213585826"
 t MSG_372 "Nenhum dispositivo USB encontrado. Caso você tenha inserido algum, tente uma outra entrada ou outro pendrive."
 t MSG_400 "Básico"
 t MSG_401 "Inglês"
