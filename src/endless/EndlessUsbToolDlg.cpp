@@ -2526,20 +2526,12 @@ error:
     return result >= 0;
 }
 
-bool CEndlessUsbToolDlg::ParseJsonFile(LPCTSTR filename, bool isInstallerJson)
+static bool FindLatestVersion(const Json::Value &rootValue, Json::Value &latestEntry)
 {
     FUNCTION_ENTER;
 
-    Json::Reader reader;
-    Json::Value rootValue, imagesElem, jsonElem, personalities, persImages, persImage, fullImage, latestEntry, bootImage;
-    CString latestVersion("");
+    Json::Value jsonElem, imagesElem, personalities, persImages;
     ImageVersion latestParsedVersion;
-
-    std::ifstream jsonStream;
-
-    jsonStream.open(filename);
-    IFFALSE_GOTOERROR(!jsonStream.fail(), "Opening JSON file failed.");
-    IFFALSE_GOTOERROR(reader.parse(jsonStream, rootValue, false), "Parsing of JSON failed.");
 
     // Print version
     jsonElem = rootValue[JSON_VERSION];
@@ -2565,26 +2557,47 @@ bool CEndlessUsbToolDlg::ParseJsonFile(LPCTSTR filename, bool isInstallerJson)
         IFFALSE_CONTINUE(!persImages.isNull(), "Error: No personality_images entry found.");
 
         const char *versionString = (*it)[JSON_IMG_VERSION].asCString();
-        CString currentVersion(versionString);
         ImageVersion currentParsedVersion;
         if (!ImageVersion::Parse(versionString, currentParsedVersion)) {
-            uprintf("Can't parse version '%ls'", currentVersion);
+            uprintf("Can't parse version '%s'", versionString);
             continue;
         }
         if (currentParsedVersion > latestParsedVersion) {
             latestParsedVersion = currentParsedVersion;
-            latestVersion = currentVersion;
             latestEntry = *it;
         }
     }
 
     IFFALSE_GOTOERROR(!latestEntry.isNull(), "No images found in the JSON.");
+    return true;
+
+error:
+    return false;
+}
+
+bool CEndlessUsbToolDlg::ParseJsonFile(LPCTSTR filename, bool isInstallerJson)
+{
+    FUNCTION_ENTER;
+
+    Json::Reader reader;
+    Json::Value rootValue, personalities, persImages, persImage, fullImage, latestEntry, bootImage;
+    CString latestVersion("");
+
+    std::ifstream jsonStream;
+
+    jsonStream.open(filename);
+    IFFALSE_GOTOERROR(!jsonStream.fail(), "Opening JSON file failed.");
+    IFFALSE_GOTOERROR(reader.parse(jsonStream, rootValue, false), "Parsing of JSON failed.");
+
+    IFFALSE_GOTOERROR(FindLatestVersion(rootValue, latestEntry), "No images found in the JSON.");
 
     if (!latestEntry.isNull()) {
+        latestVersion = latestEntry[JSON_IMG_VERSION].asCString();
         uprintf("Selected version '%ls'", latestVersion);
         m_downloadManager.SetLatestEosVersion(latestVersion);
         uint32_t personalityMsgId = 0;
         personalities = latestEntry[JSON_IMG_PERSONALITIES];
+        persImages = latestEntry[JSON_IMG_PERS_IMAGES];
         for (Json::ValueIterator persIt = personalities.begin(); persIt != personalities.end(); persIt++) {
             IFFALSE_CONTINUE(persIt->isString(), "Entry is not string, continuing");
             IFFALSE_CONTINUE(!isInstallerJson || CString(persIt->asCString()) == PERSONALITY_BASE, "Installer JSON parsing: not base personality");
