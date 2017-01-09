@@ -4247,7 +4247,7 @@ bool CEndlessUsbToolDlg::CanUseLocalFile()
 // Returns true if we might, in principle, be able to use a remote file.
 bool CEndlessUsbToolDlg::CanUseRemoteFile()
 {
-    return m_jsonDownloadState == JSONDownloadState::Pending || m_remoteImages.GetCount() != 0;
+    return m_jsonDownloadState != JSONDownloadState::Failed || m_remoteImages.GetCount() != 0;
 }
 
 void CEndlessUsbToolDlg::FindMaxUSBSpeed()
