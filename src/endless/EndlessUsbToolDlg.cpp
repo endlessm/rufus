@@ -372,7 +372,6 @@ static LPCTSTR ErrorCauseToStr(ErrorCause_t errorCause)
     {
         TOSTR(ErrorCauseGeneric);
         TOSTR(ErrorCauseCancelled);
-        TOSTR(ErrorCauseJSONDownloadFailed);
         TOSTR(ErrorCauseDownloadFailed);
         TOSTR(ErrorCauseDownloadFailedDiskFull);
         TOSTR(ErrorCauseVerificationFailed);
@@ -530,7 +529,7 @@ CEndlessUsbToolDlg::CEndlessUsbToolDlg(UINT globalMessage, CWnd* pParent /*=NULL
     m_isConnected(false),
     m_lastErrorCause(ErrorCause_t::ErrorCauseNone),
     m_localFilesScanned(false),
-    m_jsonDownloadAttempted(false),
+    m_jsonDownloadState(JSONDownloadState::Pending),
 	m_selectedInstallMethod(InstallMethod_t::None)
 {
     FUNCTION_ENTER;
@@ -1281,7 +1280,7 @@ LRESULT CEndlessUsbToolDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lPara
             if (downloadStatus->error) {
 				if (isReleaseJsonDownload) {
 					uprintf("JSON download failed.");
-					JSONDownloadFailed();
+					SetJSONDownloadState(JSONDownloadState::Failed);
 				} else if (m_lastErrorCause == ErrorCause_t::ErrorCauseCancelled) {
 					uprintf("Download cancelled by user request.");
 				} else {
@@ -1296,10 +1295,8 @@ LRESULT CEndlessUsbToolDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lPara
                 uprintf("Download done for %ls", downloadStatus->jobName);
 
                 if (isReleaseJsonDownload) {
-                    if (!m_jsonDownloadAttempted) {
-                        m_jsonDownloadAttempted = true;
+                    if (m_jsonDownloadState != JSONDownloadState::Succeeded) {
                         UpdateDownloadOptions();
-                        AddDownloadOptionsToUI();
                     }
                 } else {
                     StartOperationThread(OP_VERIFYING_SIGNATURE, CEndlessUsbToolDlg::FileVerificationThread);
@@ -1308,11 +1305,19 @@ LRESULT CEndlessUsbToolDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lPara
 				CStringA part, total;
 				part = SizeToHumanReadable(downloadStatus->progress.BytesTransferred, FALSE, use_fake_units);
 				total = SizeToHumanReadable(downloadStatus->progress.BytesTotal, FALSE, use_fake_units);
-                uprintf("Download [%ls] progress %s of %s (%d of %d files)", downloadStatus->jobName,
+                uprintf("Download [%ls] progress %s of %s (%d of %d files) %s", downloadStatus->jobName,
                     part, total,
-                    downloadStatus->progress.FilesTransferred, downloadStatus->progress.FilesTotal);
+                    downloadStatus->progress.FilesTransferred, downloadStatus->progress.FilesTotal,
+                    downloadStatus->transientError ? "(transient error)" : "");
 
-                if (!isReleaseJsonDownload) {
+                if (isReleaseJsonDownload) {
+                    if (downloadStatus->transientError) {
+                        SetJSONDownloadState(JSONDownloadState::Retrying);
+                    }
+                    // Don't clear this on the downwards edge. If the link is up but the connection times out, the
+                    // download will enter state TRANSIENT_ERROR and then immediately re-enter state CONNECTING.
+                    // We want to give some indication that some error has occured, even as we retry.
+                } else {
                     static ULONGLONG startedTickCount = 0;
                     static ULONGLONG startedBytes = 0;
 
@@ -1336,7 +1341,7 @@ LRESULT CEndlessUsbToolDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lPara
                     }
 
                     CStringA strDownloaded = SizeToHumanReadable(downloadStatus->progress.BytesTransferred, FALSE, use_fake_units);
-                    CStringA strTotal = SizeToHumanReadable(totalSize, FALSE, use_fake_units);
+                    CStringA strTotal = totalSize == BG_SIZE_UNKNOWN ? "---" : SizeToHumanReadable(totalSize, FALSE, use_fake_units);
                     // push to UI
                     CString downloadString = UTF8ToCString(lmprintf(MSG_302, strDownloaded, strTotal, speed));
                     SetElementText(_T(ELEMENT_INSTALL_STATUS), CComBSTR(downloadString));
@@ -1438,14 +1443,9 @@ LRESULT CEndlessUsbToolDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lPara
 
             if (m_isConnected) {
                 StartJSONDownload();
-            } else if(m_currentStep == OP_DOWNLOADING_FILES) {
-                m_lastErrorCause = ErrorCause_t::ErrorCauseDownloadFailed;
-                CancelRunningOperation();
             }
 
-            CallJavascript(_T(JS_ENABLE_DOWNLOAD), CComVariant(m_remoteImages.GetCount() != 0), CComVariant(connected));
-            CallJavascript(_T(JS_ENABLE_BUTTON), CComVariant(HTML_BUTTON_ID(_T(ELEMENT_DOWNLOAD_LIGHT_BUTTON))), CComVariant(connected && (m_baseImageRemoteIndex != -1)));
-
+            UpdateDownloadableState();
             break;
         }
 
@@ -1688,7 +1688,6 @@ void CEndlessUsbToolDlg::ErrorOccured(ErrorCause_t errorCause)
         headlineMsgId = MSG_350;
         suggestionMsgId = MSG_351;
         break;
-    case ErrorCause_t::ErrorCauseJSONDownloadFailed:
     case ErrorCause_t::ErrorCauseVerificationFailed:
         recoverButtonMsgId = MSG_RECOVER_DOWNLOAD_AGAIN;
         suggestionMsgId = MSG_324;
@@ -2088,9 +2087,6 @@ void CEndlessUsbToolDlg::GoToSelectFilePage()
         ApplyRufusLocalization();
     } else {
         uprintf("No remote images available and no local images available.");
-        m_lastErrorCause = ErrorCause_t::ErrorCauseJSONDownloadFailed;
-        CancelRunningOperation();
-        return;
     }
 
     // Update page with no local files found
@@ -2450,12 +2446,6 @@ void CEndlessUsbToolDlg::StartJSONDownload()
     char tmp_path[MAX_PATH] = "";
     bool success;
 
-    if (!m_isConnected) {
-        uprintf("Device not connected to internet");
-        CallJavascript(_T(JS_ENABLE_DOWNLOAD), CComVariant(FALSE), CComVariant(FALSE));
-        return;
-    }
-
     if (m_remoteImages.GetCount() != 0) {
         uprintf("List of remote images already downloaded");
         return;
@@ -2476,10 +2466,16 @@ void CEndlessUsbToolDlg::StartJSONDownload()
     ListOfStrings urls = { JSON_URL(JSON_LIVE_FILE), JSON_URL(JSON_INSTALLER_FILE) };
     ListOfStrings files = { liveJson, installerJson };
 
-    success = m_downloadManager.AddDownload(DownloadType_t::DownloadTypeReleseJson, urls, files, false);
+    success = m_downloadManager.AddDownload(DownloadType_t::DownloadTypeReleseJson, urls, files, true);
+    if (!success) {
+        // If resuming a possibly-existing download failed, try harder to start a new one.
+        // In theory this shouldn't be necessary but this is done for the image download case so who knows!
+        success = m_downloadManager.AddDownload(DownloadType_t::DownloadTypeReleseJson, urls, files, false);
+    }
 
-    if(!success) {
-        JSONDownloadFailed();
+    if (!success) {
+        uprintf("AddDownload failed");
+        SetJSONDownloadState(JSONDownloadState::Failed);
     }
 }
 
@@ -2677,13 +2673,13 @@ void CEndlessUsbToolDlg::UpdateDownloadOptions()
 #endif // ENABLE_JSON_COMPRESSION
     IFFALSE_GOTOERROR(ParseJsonFile(filePath, true), "Error parsing eosinstaller JSON file.");
 
+    AddDownloadOptionsToUI();
+    SetJSONDownloadState(JSONDownloadState::Succeeded);
     return;
 
 error:
-    // RADU: disable downloading here I assume? Or retry download/parse?
-    CallJavascript(_T(JS_ENABLE_DOWNLOAD), CComVariant(FALSE), CComVariant(m_isConnected));
-    CallJavascript(_T(JS_ENABLE_BUTTON), CComVariant(HTML_BUTTON_ID(_T(ELEMENT_DOWNLOAD_LIGHT_BUTTON))), CComVariant(FALSE));
-    return;
+    // TODO: on error, retry download?
+    SetJSONDownloadState(JSONDownloadState::Failed);
 }
 
 void CEndlessUsbToolDlg::AddDownloadOptionsToUI()
@@ -2703,7 +2699,6 @@ void CEndlessUsbToolDlg::AddDownloadOptionsToUI()
 
     // add options to UI
     long selectIndex = -1;
-    CallJavascript(_T(JS_ENABLE_BUTTON), CComVariant(HTML_BUTTON_ID(_T(ELEMENT_DOWNLOAD_LIGHT_BUTTON))), CComVariant(FALSE));
     for (POSITION pos = m_remoteImages.GetHeadPosition(); pos != NULL; ) {
         RemoteImageEntry_t imageEntry = m_remoteImages.GetNext(pos);
         bool matchesLanguage = languagePersonalty == imageEntry.personality;
@@ -2716,7 +2711,6 @@ void CEndlessUsbToolDlg::AddDownloadOptionsToUI()
         const wchar_t *htmlElemId = NULL;
 
         if (imageEntry.personality == PERSONALITY_BASE) {
-            CallJavascript(_T(JS_ENABLE_BUTTON), CComVariant(HTML_BUTTON_ID(_T(ELEMENT_DOWNLOAD_LIGHT_BUTTON))), CComVariant(TRUE));
             m_baseImageRemoteIndex = selectIndex;
             htmlElemId = _T(ELEMENT_DOWNLOAD_LIGHT_SIZE);
         }
@@ -2735,13 +2729,28 @@ void CEndlessUsbToolDlg::AddDownloadOptionsToUI()
         }
     }
 
-    bool foundRemoteImages = m_remoteImages.GetCount() != 0;
-    hr = CallJavascript(_T(JS_ENABLE_DOWNLOAD), CComVariant(foundRemoteImages), CComVariant(m_isConnected));
-    IFFALSE_PRINTERROR(SUCCEEDED(hr), "Error calling javascript to enable/disable download posibility.");
-
     if (m_imageFiles.GetCount() == 0) {
         m_selectedRemoteIndex = m_baseImageRemoteIndex;
     }
+}
+
+void CEndlessUsbToolDlg::UpdateDownloadableState()
+{
+    FUNCTION_ENTER;
+
+    HRESULT hr;
+
+    bool foundRemoteImages = m_remoteImages.GetCount() != 0;
+    // Show JSON download errors as connection errors. Maybe a proxy is mangling the JSON?
+    bool connected = m_isConnected
+        && m_jsonDownloadState != JSONDownloadState::Failed
+        && m_jsonDownloadState != JSONDownloadState::Retrying;
+    hr = CallJavascript(_T(JS_ENABLE_DOWNLOAD), CComVariant(foundRemoteImages), CComVariant(connected));
+    IFFALSE_PRINTERROR(SUCCEEDED(hr), "Error calling " JS_ENABLE_DOWNLOAD "()");
+
+    bool foundBaseImage = m_baseImageRemoteIndex != -1;
+    hr = CallJavascript(_T(JS_ENABLE_BUTTON), CComVariant(HTML_BUTTON_ID(_T(ELEMENT_DOWNLOAD_LIGHT_BUTTON))), CComVariant(m_isConnected && foundBaseImage));
+    IFFALSE_PRINTERROR(SUCCEEDED(hr), "Error enabling 'Light' button");
 }
 
 HRESULT CEndlessUsbToolDlg::OnAdvancedPagePreviousClicked(IHTMLElement* pElement)
@@ -3507,7 +3516,7 @@ HRESULT CEndlessUsbToolDlg::OnRecoverErrorButtonClicked(IHTMLElement* pElement)
     // reset the state
     m_lastErrorCause = ErrorCause_t::ErrorCauseNone;
     m_localFilesScanned = false;
-    m_jsonDownloadAttempted = false;
+    SetJSONDownloadState(JSONDownloadState::Pending);
     ResetEvent(m_cancelOperationEvent);
     ResetEvent(m_closeFileScanThreadEvent);
     StartCheckInternetConnectionThread();
@@ -3537,7 +3546,6 @@ HRESULT CEndlessUsbToolDlg::OnRecoverErrorButtonClicked(IHTMLElement* pElement)
         break;
     }
     case ErrorCause_t::ErrorCauseCancelled:
-    case ErrorCause_t::ErrorCauseJSONDownloadFailed:
     default:
         ChangePage(_T(ELEMENT_DUALBOOT_PAGE));
         break;
@@ -4115,23 +4123,20 @@ DWORD WINAPI CEndlessUsbToolDlg::UpdateDownloadProgressThread(void* param)
             }
             case WAIT_TIMEOUT:
             {
-                downloadStatus = new DownloadStatus_t;
-                downloadStatus->done = false;
-                downloadStatus->error = false;
+                DownloadStatus_t downloadStatus;
                 bool result = dlg->m_downloadManager.GetDownloadProgress(currentJob, downloadStatus, jobName);
-                if (!result || downloadStatus->done || downloadStatus->error) {
+                if (!result || downloadStatus.done || downloadStatus.error) {
                     uprintf("CEndlessUsbToolDlg::UpdateDownloadProgressThread - Exiting");
-                    delete downloadStatus;
                     goto done;
                 }
-                ::PostMessage(dlg->m_hWnd, WM_FILE_DOWNLOAD_STATUS, (WPARAM)downloadStatus, 0);
+                ::PostMessage(dlg->m_hWnd, WM_FILE_DOWNLOAD_STATUS, (WPARAM) new DownloadStatus_t(downloadStatus), 0);
                 break;
             }
         }
     }
 
 done:
-
+    dlg->m_downloadUpdateThread = INVALID_HANDLE_VALUE;
     CoUninitialize();
     return 0;
 }
@@ -4156,22 +4161,13 @@ DWORD WINAPI CEndlessUsbToolDlg::CheckInternetConnectionThread(void* param)
             {
                 flags = 0;
                 result = InternetGetConnectedState(&flags, 0);
-                IFFALSE_BREAK(result, "Device not connected to internet.");
 
-				// require a working server check to discovery connectivity
-				// in the first place, but once we've got a connection, only
-				// the device/adapter going away will take us offline again
-				if (!connected) {
-					result = InternetCheckConnection(JSON_URL(JSON_LIVE_FILE), FLAG_ICC_FORCE_CONNECTION, 0);
-					IFFALSE_BREAK(result, "Cannot connect to server hosting the JSON file.");
-				}
-
-                result = TRUE;
                 break;
             }
         }
 
         if (firstTime || result != connected) {
+            uprintf("InternetGetConnectedState changed: %s (flags %d)", result ? "online" : "offline", flags);
             firstTime = FALSE;
             connected = result;
             ::PostMessage(dlg->m_hWnd, WM_INTERNET_CONNECTION_STATE, (WPARAM)connected, 0);
@@ -4248,9 +4244,10 @@ bool CEndlessUsbToolDlg::CanUseLocalFile()
     return !m_localFilesScanned || (hasLocalInstaller && hasLocalImages) || hasFilesForDualBoot;
 }
 
+// Returns true if we might, in principle, be able to use a remote file.
 bool CEndlessUsbToolDlg::CanUseRemoteFile()
 {
-    return !m_jsonDownloadAttempted || m_remoteImages.GetCount() != 0;
+    return m_jsonDownloadState == JSONDownloadState::Pending || m_remoteImages.GetCount() != 0;
 }
 
 void CEndlessUsbToolDlg::FindMaxUSBSpeed()
@@ -4383,14 +4380,19 @@ void CEndlessUsbToolDlg::UpdateUSBSpeedMessage(int deviceIndex)
     }
 }
 
-void CEndlessUsbToolDlg::JSONDownloadFailed()
+void CEndlessUsbToolDlg::SetJSONDownloadState(JSONDownloadState state)
 {
-    m_jsonDownloadAttempted = true;
-    if (!CanUseLocalFile()) {
-        uprintf("Going to error page as no local files were found either.");
-        m_lastErrorCause = ErrorCause_t::ErrorCauseJSONDownloadFailed;
-        CancelRunningOperation();
+    FUNCTION_ENTER_FMT("%d", state);
+
+    m_jsonDownloadState = state;
+    if (state == JSONDownloadState::Failed) {
+        TrackEvent(_T("Failed"), _T("ErrorCauseJSONDownloadFailed"));
     }
+    if (state == JSONDownloadState::Succeeded) {
+        // TODO: dissociate this event from the install method
+        TrackEvent(_T("JSONDownloadSucceeded"));
+    }
+    UpdateDownloadableState();
 }
 
 #define GPT_MAX_PARTITION_COUNT		128

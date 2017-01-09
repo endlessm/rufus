@@ -28,7 +28,6 @@ typedef struct FileImageEntry {
 typedef enum ErrorCause {
     ErrorCauseGeneric,
     ErrorCauseCancelled,
-    ErrorCauseJSONDownloadFailed,
     ErrorCauseDownloadFailed,
     ErrorCauseDownloadFailedDiskFull,
     ErrorCauseVerificationFailed,
@@ -67,6 +66,13 @@ typedef enum InstallMethod {
 	InstallDualBoot,
 	UninstallDualBoot
 } InstallMethod_t;
+
+enum JSONDownloadState {
+    Pending,
+    Retrying,
+    Failed,
+    Succeeded
+};
 
 // CEndlessUsbToolDlg dialog
 class CEndlessUsbToolDlg : public CDHtmlDialog
@@ -187,7 +193,7 @@ private:
     int m_currentStep;
     bool m_isConnected;
     bool m_localFilesScanned;
-    bool m_jsonDownloadAttempted;
+    JSONDownloadState m_jsonDownloadState;
     CMap<CString, LPCTSTR, pFileImageEntry_t, pFileImageEntry_t> m_imageFiles;
     CList<CString> m_imageIndexToPath;
     CList<RemoteImageEntry_t> m_remoteImages;
@@ -269,6 +275,7 @@ private:
     bool UnpackFile(const CString &archive, const CString &destination, int compressionType = 0, void* progress_function = NULL, unsigned long* cancel_request = NULL);
     bool ParseJsonFile(LPCTSTR filename, bool isInstallerJson);
     void AddDownloadOptionsToUI();
+    void UpdateDownloadableState();
 
     void ErrorOccured(ErrorCause_t errorCause);
 
@@ -313,7 +320,7 @@ private:
     void FindMaxUSBSpeed();
     void CheckUSBHub(LPCTSTR devicePath);
     void UpdateUSBSpeedMessage(int deviceIndex);
-    void JSONDownloadFailed();
+    void SetJSONDownloadState(JSONDownloadState state);
 
 	void GoToSelectStoragePage();
 	BOOL AddStorageEntryToSelect(CComPtr<IHTMLSelectElement> &selectElement, int noOfGigs, uint8_t extraData);
