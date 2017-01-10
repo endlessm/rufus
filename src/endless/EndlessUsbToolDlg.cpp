@@ -290,7 +290,7 @@ enum endless_action_type {
 
 #define TID_UPDATE_FILES                TID_REFRESH_TIMER + 1
 
-//#define ENABLE_JSON_COMPRESSION 1
+#define ENABLE_JSON_COMPRESSION 1
 
 #define BOOT_COMPONENTS_FOLDER	"EndlessBoot"
 
