@@ -28,6 +28,7 @@ if (!$describe.StartsWith("VERSION_")) {
     exit(1)
 }
 
+$tag = $describe.Split('-')[0]
 $version = $describe.Substring("VERSION_".length)
 
 # We use the four integral parts of the version in the .rc file,
@@ -47,6 +48,7 @@ $header = @"
 #define RELEASE_VER_SUB2    $z
 
 #define RELEASE_VER_STR "$version"
+#define RELEASE_VER_TAG_URL "https://github.com/endlessm/rufus/releases/tag/$tag"
 "@
 
 # echo $header

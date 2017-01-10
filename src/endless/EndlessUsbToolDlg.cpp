@@ -208,7 +208,7 @@ DWORD usbDevicesCount;
 #define ELEMENT_ERROR_DELETE_CHECKBOX   "DeleteFilesCheckbox"
 #define ELEMENT_ERROR_DELETE_TEXT       "DeleteFilesText"
 
-#define ELEMENT_VERSION_CONTAINER       "VersionContainer"
+#define ELEMENT_VERSION_LINK            "VersionLink"
 
 // Javascript methods
 #define JS_SET_PROGRESS                 "setProgress"
@@ -433,6 +433,7 @@ BEGIN_DHTML_EVENT_MAP(CEndlessUsbToolDlg)
 	DHTML_EVENT_ONCLICK(_T(ELEMENT_DUALBOOT_CLOSE_BUTTON), OnCloseAppClicked)
 	DHTML_EVENT_ONCLICK(_T(ELEMENT_DUALBOOT_ADVANCED_LINK), OnAdvancedOptionsClicked)
 	DHTML_EVENT_ONCLICK(_T(ELEMENT_DUALBOOT_INSTALL_BUTTON), OnInstallDualBootClicked)
+    DHTML_EVENT_ONCLICK(_T(ELEMENT_VERSION_LINK), OnLinkClicked)
 
 	// Advanced Page Handlers
     DHTML_EVENT_ONCLICK(_T(ELEMENT_LIVE_USB_BUTTON), OnLiveUsbClicked)
@@ -616,7 +617,7 @@ void CEndlessUsbToolDlg::OnDocumentComplete(LPDISPATCH pDisp, LPCTSTR szUrl)
         CallJavascript(_T(JS_ENABLE_BUTTON), CComVariant(HTML_BUTTON_ID(_T(ELEMENT_REFORMATTER_USB_BUTTON))), CComVariant(FALSE));
     }
 
-    SetElementText(_T(ELEMENT_VERSION_CONTAINER), CComBSTR(RELEASE_VER_STR));
+    SetElementText(_T(ELEMENT_VERSION_LINK), CComBSTR(RELEASE_VER_STR));
 
     StartCheckInternetConnectionThread();
     FindMaxUSBSpeed();
@@ -2137,15 +2138,19 @@ HRESULT CEndlessUsbToolDlg::OnLinkClicked(IHTMLElement* pElement)
 		msg_id = MSG_329;
 	} else if (id == _T(ELEMENT_USB_LEARN_MORE)) {
 		msg_id = MSG_371;
+    } else if (id == _T(ELEMENT_VERSION_LINK)) {
+        url = RELEASE_VER_TAG_URL;
     } else {
-        msg_id = 0;
         uprintf("Unknown link clicked %ls", id);
-        return S_OK;
     }
 
     if (msg_id != 0) {
+        url = lmprintf(msg_id);
+    }
+
+    if (url != NULL) {
         // Radu: do we care about the errors?
-        ShellExecuteA(NULL, "open", lmprintf(msg_id), NULL, NULL, SW_SHOWNORMAL);
+        ShellExecuteA(NULL, "open", url, NULL, NULL, SW_SHOWNORMAL);
     }
 
 	return S_OK;
