@@ -4025,6 +4025,8 @@ void CEndlessUsbToolDlg::GetImgDisplayName(CString &displayName, const CString &
 {
     FUNCTION_ENTER;
 
+    // TODO: the JSON file is only parsed once, so m_selectedInstallMethod might well be a different value to what the user ultimately selects.
+    // We should format the image size at the last possible moment.
     ULONGLONG actualsize = m_selectedInstallMethod == InstallMethod_t::ReformatterUsb ? (size + m_installerImage.compressedSize) : size;
     // Create display name
     displayName = _T(ENDLESS_OS);
