@@ -815,9 +815,13 @@ select:disabled {
 
 
 #VersionContainer {
-	color: #d6d6d6;
-	font-size: 8px;
+	font-size: 9px;
 	text-align: right;
 	padding-right: 5px;
 	padding-top: 10px;
+}
+
+#VersionContainer, #VersionContainer a {
+	color: #d6d6d6;
+	text-decoration: none;
 }

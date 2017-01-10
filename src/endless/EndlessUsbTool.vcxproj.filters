@@ -262,6 +262,7 @@
     <None Include="res\endless.loc">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="GenerateVersion.ps1" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="EndlessUsbTool.rc">
