@@ -78,21 +78,25 @@
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)x86_32\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)x86_32\$(Configuration)\$(ProjectName)\</IntDir>
+    <CustomBuildBeforeTargets>ClCompile</CustomBuildBeforeTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)x86_64\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)x86_64\$(Configuration)\$(ProjectName)\</IntDir>
+    <CustomBuildBeforeTargets>ClCompile</CustomBuildBeforeTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)x86_32\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)x86_32\$(Configuration)\$(ProjectName)\</IntDir>
+    <CustomBuildBeforeTargets>ClCompile</CustomBuildBeforeTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)x86_64\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)x86_64\$(Configuration)\$(ProjectName)\</IntDir>
+    <CustomBuildBeforeTargets>ClCompile</CustomBuildBeforeTargets>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -127,6 +131,16 @@
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
+    <CustomBuildStep>
+      <Command>PowerShell -File $(ProjectDir)GenerateVersion.ps1 $(ProjectDir)Version.h</Command>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Message>Generating Version.h</Message>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Outputs>$(ProjectDir)Version.h</Outputs>
+      <Inputs>$(ProjectDir)GenerateVersion.ps1;$(SolutionDir).git\logs\HEAD</Inputs>
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -155,6 +169,16 @@
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
+    <CustomBuildStep>
+      <Command>PowerShell -File $(ProjectDir)GenerateVersion.ps1 $(ProjectDir)Version.h</Command>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Message>Generating Version.h</Message>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Outputs>$(ProjectDir)Version.h</Outputs>
+      <Inputs>$(ProjectDir)GenerateVersion.ps1;$(SolutionDir).git\logs\HEAD</Inputs>
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -189,6 +213,16 @@
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
+    <CustomBuildStep>
+      <Command>PowerShell -File $(ProjectDir)GenerateVersion.ps1 $(ProjectDir)Version.h</Command>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Message>Generating Version.h</Message>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Outputs>$(ProjectDir)Version.h</Outputs>
+      <Inputs>$(ProjectDir)GenerateVersion.ps1;$(SolutionDir).git\logs\HEAD</Inputs>
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -220,6 +254,16 @@
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
+    <CustomBuildStep>
+      <Command>PowerShell -File $(ProjectDir)GenerateVersion.ps1 $(ProjectDir)Version.h</Command>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Message>Generating Version.h</Message>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Outputs>$(ProjectDir)Version.h</Outputs>
+      <Inputs>$(ProjectDir)GenerateVersion.ps1;$(SolutionDir).git\logs\HEAD</Inputs>
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -479,6 +523,7 @@
     <ClCompile Include="UEFIBootSetup.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="GenerateVersion.ps1" />
     <None Include="res\endless.loc" />
     <None Include="res\EndlessFonts.css" />
     <None Include="res\EndlessUsbTool.css" />
