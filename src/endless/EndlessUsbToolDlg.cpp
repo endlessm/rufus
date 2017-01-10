@@ -2624,14 +2624,12 @@ bool CEndlessUsbToolDlg::ParseJsonFile(LPCTSTR filename, bool isInstallerJson)
             if(remoteImage.extractedSize == 0) remoteImage.extractedSize = remoteImage.compressedSize;            
             remoteImage.urlFile = fullImage[JSON_IMG_URL_FILE].asCString();
             remoteImage.urlSignature = fullImage[JSON_IMG_URL_SIG].asCString();
-            remoteImage.urlBootArchive = CSTRING_GET_PATH(CSTRING_GET_PATH(remoteImage.urlFile, L'.'), L'.') + BOOT_ARCHIVE_SUFFIX;
-            remoteImage.urlBootArchiveSignature = remoteImage.urlBootArchive + SIGNATURE_FILE_EXT;
             remoteImage.personality = persIt->asCString();
             remoteImage.version = latestVersion;
             remoteImage.urlUnpackedSignature = fullImage[JSON_IMG_UNPACKED_URL_SIG].asCString();
 
             if(!isInstallerJson) {
-                bootImage = persImage["boot"];
+                bootImage = persImage[JSON_IMG_BOOT];
                 IFFALSE_CONTINUE(!bootImage.isNull(), CString("'boot' entry not found for personality - ") + persIt->asCString());
                 CHECK_ENTRY(bootImage, JSON_IMG_COMPRESSED_SIZE);
                 CHECK_ENTRY(bootImage, JSON_IMG_URL_FILE);
