@@ -343,8 +343,6 @@ const wchar_t* mainWindowTitle = L"Endless Installer";
 
 #define ALL_FILES					L"*.*"
 
-#define CODE_EXENAME_SUBSTRING   L"-code-"
-#define ENDLESS_UNINSTALLER_NAME L"endless-uninstaller.exe"
 #define ENDLESS_OS_NAME L"Endless OS"
 
 // Radu: How much do we need to reserve for the exfat partition header?
@@ -5160,10 +5158,10 @@ DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 	}
 
 	// Copy ourselves to the <SYSDRIVE>:\endless directory
-	IFFALSE_GOTOERROR(0 != CopyFile(exeFilePath, endlessFilesPath + ENDLESS_UNINSTALLER_NAME, FALSE), "Error copying exe uninstaller file.");
+	IFFALSE_GOTOERROR(0 != CopyFile(exeFilePath, endlessFilesPath + UninstallerFileName(), FALSE), "Error copying exe uninstaller file.");
 
 	// Add uninstall entry for Control Panel
-	IFFALSE_GOTOERROR(AddUninstallRegistryKeys(endlessFilesPath + ENDLESS_UNINSTALLER_NAME, endlessFilesPath), "Error on AddUninstallRegistryKeys.");
+	IFFALSE_GOTOERROR(AddUninstallRegistryKeys(endlessFilesPath + UninstallerFileName(), endlessFilesPath), "Error on AddUninstallRegistryKeys.");
 
 	CEndlessUsbToolDlg::ImageUnpackOperation = OP_SETUP_DUALBOOT;
 	CEndlessUsbToolDlg::ImageUnpackPercentStart = DB_PROGRESS_UNPACK_BOOT_ZIP;
@@ -5613,7 +5611,7 @@ BOOL CEndlessUsbToolDlg::SetAttributesForFilesInFolder(CString path, DWORD attri
 		do {
 			if ((0 == wcscmp(findFileData.cFileName, L".") || 0 == wcscmp(findFileData.cFileName, L".."))) continue;
 
-			if (0 != wcscmp(findFileData.cFileName, ENDLESS_UNINSTALLER_NAME)) {
+			if (0 != wcscmp(findFileData.cFileName, UninstallerFileName())) {
 				IFFALSE_PRINTERROR(SetFileAttributes(path + findFileData.cFileName, attributes) != 0, "Error on SetFileAttributes for child");
 
 				// We deliberately do not recurse into subdirectories.
@@ -6245,24 +6243,43 @@ error:
 	}
 }
 
-bool CEndlessUsbToolDlg::ExeNameContains(const wchar_t *substring)
+static int _lowerCaseExeNameFindSubstring(CStringW exePath, const wchar_t* substring, bool* isSuffix)
 {
-	CStringW exePath = GetExePath();
 	CStringW exeName = CSTRING_GET_LAST(exePath, '\\');
 	exeName.MakeLower();
-	return exeName.Find(substring) != -1;
+	int pos = exeName.Find(substring);
+	if (pos >= 0 && isSuffix != NULL) {
+		size_t substringLen = wcslen(substring);
+		*isSuffix = (pos + substringLen == exeName.GetLength());
+	}
+	return pos;
+}
+
+static bool _matchesUninstallerSuffix(CStringW exePath)
+{
+	bool isSuffix = false;
+	int pos = _lowerCaseExeNameFindSubstring(exePath, L"-uninstaller.exe", &isSuffix);
+	return (pos > 0) && isSuffix;
 }
 
 bool CEndlessUsbToolDlg::IsUninstaller()
 {
-	CStringW exePath = GetExePath();
-	return CSTRING_GET_LAST(exePath, '\\') == ENDLESS_UNINSTALLER_NAME;
+	static const bool is_uninstaller = _matchesUninstallerSuffix(GetExePath());
+	return is_uninstaller;
 }
 
 bool CEndlessUsbToolDlg::IsCoding()
 {
-	static const bool is_coding = ExeNameContains(CODE_EXENAME_SUBSTRING);
+	static const bool is_coding =
+	    (_lowerCaseExeNameFindSubstring(GetExePath(), L"-code-", NULL) > 0);
 	return is_coding;
+}
+
+const wchar_t* CEndlessUsbToolDlg::UninstallerFileName()
+{
+	return IsCoding()
+		? L"endless-code-uninstaller.exe"
+		: L"endless-uninstaller.exe";
 }
 
 const char* CEndlessUsbToolDlg::JsonLiveFile(bool withCompressedSuffix)

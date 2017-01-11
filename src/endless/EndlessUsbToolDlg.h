@@ -119,7 +119,6 @@ public:
 	CEndlessUsbToolDlg(UINT globalMessage, CWnd* pParent = NULL);	// standard constructor
     ~CEndlessUsbToolDlg();
 
-	static bool ExeNameContains(const wchar_t* substring);
 	static bool IsUninstaller();
 	static bool IsCoding();
 	static bool ShouldUninstall();
@@ -465,6 +464,7 @@ private:
 
 	static const UINT m_uTaskbarBtnCreatedMsg;
 
+	static const wchar_t* UninstallerFileName();
 	static const char* JsonLiveFile(bool withCompressedSuffix=true);
 	static const char* JsonInstallerFile(bool withCompressedSuffix=true);
 	static const wchar_t* JsonLiveFileURL();
