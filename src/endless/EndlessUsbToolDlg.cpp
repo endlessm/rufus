@@ -17,6 +17,7 @@
 #include <Wbemidl.h>
 
 #include "json/json.h"
+#include <algorithm>
 #include <fstream>
 #include "Version.h"
 #include "WindowsUsbDefines.h"
@@ -2599,15 +2600,39 @@ bool CEndlessUsbToolDlg::ParseJsonFile(LPCTSTR filename, bool isInstallerJson)
         m_downloadManager.SetLatestEosVersion(latestVersion);
         personalities = latestEntry[JSON_IMG_PERSONALITIES];
         persImages = latestEntry[JSON_IMG_PERS_IMAGES];
+
+        // Json::ValueIterator doesn't support random access so we can't std::sort personalties.
+        // CList's POSITIONs aren't STL-style iterators so we can't std::sort m_remoteImages;
+        // and it's a linked list so (again) random access is not cheap. It would be neater to
+        // store images as a sorted map keyed by personalities, but for now let's just make a
+        // new array and sort that.
+        std::vector<std::string> ps;
         for (Json::ValueIterator persIt = personalities.begin(); persIt != personalities.end(); persIt++) {
             IFFALSE_CONTINUE(persIt->isString(), "Entry is not string, continuing");
-            IFFALSE_CONTINUE(!isInstallerJson || CString(persIt->asCString()) == PERSONALITY_BASE, "Installer JSON parsing: not base personality");
+            ps.push_back(persIt->asString());
+        }
+        std::sort(ps.begin(), ps.end(), [](const std::string &a, const std::string &b) {
+            // Sort "base" before all other images, for the benefit of the "local images found" page
+            // which lists all remote images together.
+            if (a == "base") {
+                return true;
+            }
+            if (b == "base") {
+                return false;
+            }
+            return a < b;
+        });
 
-            persImage = persImages[persIt->asString()];
-            IFFALSE_CONTINUE(!persImage.isNull(), CString("Personality image entry not found - ") + persIt->asCString());
+        for (auto persIt = ps.begin(); persIt != ps.end(); persIt++) {
+            std::string &p = *persIt;
+            CString pCStr = CString(p.c_str());
+            IFFALSE_CONTINUE(!isInstallerJson || pCStr == PERSONALITY_BASE, "Installer JSON parsing: not base personality");
+
+            persImage = persImages[p];
+            IFFALSE_CONTINUE(!persImage.isNull(), CString("Personality image entry not found - ") + pCStr);
 
             fullImage = persImage[JSON_IMG_FULL];
-            IFFALSE_CONTINUE(!fullImage.isNull(), CString("'full' entry not found for personality - ") + persIt->asCString());
+            IFFALSE_CONTINUE(!fullImage.isNull(), CString("'full' entry not found for personality - ") + pCStr);
 
             CHECK_ENTRY(fullImage, JSON_IMG_COMPRESSED_SIZE);
             CHECK_ENTRY(fullImage, JSON_IMG_EXTRACTED_SIZE);
@@ -2624,13 +2649,13 @@ bool CEndlessUsbToolDlg::ParseJsonFile(LPCTSTR filename, bool isInstallerJson)
             if(remoteImage.extractedSize == 0) remoteImage.extractedSize = remoteImage.compressedSize;            
             remoteImage.urlFile = fullImage[JSON_IMG_URL_FILE].asCString();
             remoteImage.urlSignature = fullImage[JSON_IMG_URL_SIG].asCString();
-            remoteImage.personality = persIt->asCString();
+            remoteImage.personality = pCStr;
             remoteImage.version = latestVersion;
             remoteImage.urlUnpackedSignature = fullImage[JSON_IMG_UNPACKED_URL_SIG].asCString();
 
             if(!isInstallerJson) {
                 bootImage = persImage[JSON_IMG_BOOT];
-                IFFALSE_CONTINUE(!bootImage.isNull(), CString("'boot' entry not found for personality - ") + persIt->asCString());
+                IFFALSE_CONTINUE(!bootImage.isNull(), CString("'boot' entry not found for personality - ") + pCStr);
                 CHECK_ENTRY(bootImage, JSON_IMG_COMPRESSED_SIZE);
                 CHECK_ENTRY(bootImage, JSON_IMG_URL_FILE);
                 CHECK_ENTRY(bootImage, JSON_IMG_URL_SIG);
@@ -2644,7 +2669,7 @@ bool CEndlessUsbToolDlg::ParseJsonFile(LPCTSTR filename, bool isInstallerJson)
 
                 // Create dowloadJobName
                 remoteImage.downloadJobName = latestVersion;
-                remoteImage.downloadJobName += persIt->asCString();
+                remoteImage.downloadJobName += pCStr;
 
                 m_remoteImages.AddTail(remoteImage);
             }
