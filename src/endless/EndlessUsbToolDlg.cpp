@@ -229,6 +229,7 @@ DWORD usbDevicesCount;
 #define PERSONALITY_CHINESE             L"zh_CN"
 #define PERSONALITY_BENGALI             L"bn"
 #define PERSONALITY_SPANISH_GT          L"es_GT"
+#define PERSONALITY_SPANISH_MX          L"es_MX"
 
 static const wchar_t *globalAvailablePersonalities[] =
 {
@@ -241,6 +242,7 @@ static const wchar_t *globalAvailablePersonalities[] =
     PERSONALITY_CHINESE,
     PERSONALITY_BENGALI,
     PERSONALITY_SPANISH_GT,
+    PERSONALITY_SPANISH_MX,
 };
 
 static_assert(
