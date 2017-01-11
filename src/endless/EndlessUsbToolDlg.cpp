@@ -290,7 +290,7 @@ enum endless_action_type {
 
 #define TID_UPDATE_FILES                TID_REFRESH_TIMER + 1
 
-//#define ENABLE_JSON_COMPRESSION 1
+#define ENABLE_JSON_COMPRESSION 1
 
 #define BOOT_COMPONENTS_FOLDER	"EndlessBoot"
 
@@ -2531,20 +2531,12 @@ error:
     return result >= 0;
 }
 
-bool CEndlessUsbToolDlg::ParseJsonFile(LPCTSTR filename, bool isInstallerJson)
+static bool FindLatestVersion(const Json::Value &rootValue, Json::Value &latestEntry)
 {
     FUNCTION_ENTER;
 
-    Json::Reader reader;
-    Json::Value rootValue, imagesElem, jsonElem, personalities, persImages, persImage, fullImage, latestEntry, bootImage;
-    CString latestVersion("");
+    Json::Value jsonElem, imagesElem, personalities, persImages;
     ImageVersion latestParsedVersion;
-
-    std::ifstream jsonStream;
-
-    jsonStream.open(filename);
-    IFFALSE_GOTOERROR(!jsonStream.fail(), "Opening JSON file failed.");
-    IFFALSE_GOTOERROR(reader.parse(jsonStream, rootValue, false), "Parsing of JSON failed.");
 
     // Print version
     jsonElem = rootValue[JSON_VERSION];
@@ -2570,26 +2562,47 @@ bool CEndlessUsbToolDlg::ParseJsonFile(LPCTSTR filename, bool isInstallerJson)
         IFFALSE_CONTINUE(!persImages.isNull(), "Error: No personality_images entry found.");
 
         const char *versionString = (*it)[JSON_IMG_VERSION].asCString();
-        CString currentVersion(versionString);
         ImageVersion currentParsedVersion;
         if (!ImageVersion::Parse(versionString, currentParsedVersion)) {
-            uprintf("Can't parse version '%ls'", currentVersion);
+            uprintf("Can't parse version '%s'", versionString);
             continue;
         }
         if (currentParsedVersion > latestParsedVersion) {
             latestParsedVersion = currentParsedVersion;
-            latestVersion = currentVersion;
             latestEntry = *it;
         }
     }
 
     IFFALSE_GOTOERROR(!latestEntry.isNull(), "No images found in the JSON.");
+    return true;
+
+error:
+    return false;
+}
+
+bool CEndlessUsbToolDlg::ParseJsonFile(LPCTSTR filename, bool isInstallerJson)
+{
+    FUNCTION_ENTER;
+
+    Json::Reader reader;
+    Json::Value rootValue, personalities, persImages, persImage, fullImage, latestEntry, bootImage;
+    CString latestVersion("");
+
+    std::ifstream jsonStream;
+
+    jsonStream.open(filename);
+    IFFALSE_GOTOERROR(!jsonStream.fail(), "Opening JSON file failed.");
+    IFFALSE_GOTOERROR(reader.parse(jsonStream, rootValue, false), "Parsing of JSON failed.");
+
+    IFFALSE_GOTOERROR(FindLatestVersion(rootValue, latestEntry), "No images found in the JSON.");
 
     if (!latestEntry.isNull()) {
+        latestVersion = latestEntry[JSON_IMG_VERSION].asCString();
         uprintf("Selected version '%ls'", latestVersion);
         m_downloadManager.SetLatestEosVersion(latestVersion);
         uint32_t personalityMsgId = 0;
         personalities = latestEntry[JSON_IMG_PERSONALITIES];
+        persImages = latestEntry[JSON_IMG_PERS_IMAGES];
         for (Json::ValueIterator persIt = personalities.begin(); persIt != personalities.end(); persIt++) {
             IFFALSE_CONTINUE(persIt->isString(), "Entry is not string, continuing");
             IFFALSE_CONTINUE(!isInstallerJson || CString(persIt->asCString()) == PERSONALITY_BASE, "Installer JSON parsing: not base personality");
@@ -2616,14 +2629,12 @@ bool CEndlessUsbToolDlg::ParseJsonFile(LPCTSTR filename, bool isInstallerJson)
             if(remoteImage.extractedSize == 0) remoteImage.extractedSize = remoteImage.compressedSize;            
             remoteImage.urlFile = fullImage[JSON_IMG_URL_FILE].asCString();
             remoteImage.urlSignature = fullImage[JSON_IMG_URL_SIG].asCString();
-            remoteImage.urlBootArchive = CSTRING_GET_PATH(CSTRING_GET_PATH(remoteImage.urlFile, L'.'), L'.') + BOOT_ARCHIVE_SUFFIX;
-            remoteImage.urlBootArchiveSignature = remoteImage.urlBootArchive + SIGNATURE_FILE_EXT;
             remoteImage.personality = persIt->asCString();
             remoteImage.version = latestVersion;
             remoteImage.urlUnpackedSignature = fullImage[JSON_IMG_UNPACKED_URL_SIG].asCString();
 
             if(!isInstallerJson) {
-                bootImage = persImage["boot"];
+                bootImage = persImage[JSON_IMG_BOOT];
                 IFFALSE_CONTINUE(!bootImage.isNull(), CString("'boot' entry not found for personality - ") + persIt->asCString());
                 CHECK_ENTRY(bootImage, JSON_IMG_COMPRESSED_SIZE);
                 CHECK_ENTRY(bootImage, JSON_IMG_URL_FILE);
@@ -4019,6 +4030,8 @@ void CEndlessUsbToolDlg::GetImgDisplayName(CString &displayName, const CString &
 {
     FUNCTION_ENTER;
 
+    // TODO: the JSON file is only parsed once, so m_selectedInstallMethod might well be a different value to what the user ultimately selects.
+    // We should format the image size at the last possible moment.
     ULONGLONG actualsize = m_selectedInstallMethod == InstallMethod_t::ReformatterUsb ? (size + m_installerImage.compressedSize) : size;
     // Create display name
     displayName = _T(ENDLESS_OS);
