@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: rufus\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-03-08 02:28+0000\n"
-"PO-Revision-Date: 2016-12-15 05:08+0000\n"
+"PO-Revision-Date: 2017-01-07 09:08+0000\n"
 "Last-Translator: Roddy Shuler <roddy@endlessm.com>\n"
 "Language-Team: Thai (http://www.transifex.com/endless-mobile-inc/rufus/language/th/)\n"
 "MIME-Version: 1.0\n"
@@ -297,7 +297,7 @@ msgstr "Pb"
 #, c-format
 msgctxt "MSG_045"
 msgid "USB Storage Device (Generic)"
-msgstr ""
+msgstr "อุปกรณ์เก็บข้อมูล USB (ทั่วไป)"
 
 #, c-format
 msgctxt "MSG_046"
