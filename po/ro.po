@@ -1,0 +1,733 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# 
+# Translators:
+# georgian balan <braila222@gmail.com>, 2016
+# Roddy Shuler <roddy@endlessm.com>, 2016-2017
+msgid ""
+msgstr ""
+"Project-Id-Version: rufus\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-03-08 02:28+0000\n"
+"PO-Revision-Date: 2017-01-14 07:20+0000\n"
+"Last-Translator: Roddy Shuler <roddy@endlessm.com>\n"
+"Language-Team: Romanian (http://www.transifex.com/endless-mobile-inc/rufus/language/ro/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: ro\n"
+"Plural-Forms: nplurals=3; plural=(n==1?0:(((n%100>19)||((n%100==0)&&(n!=0)))?2:1));\n"
+
+msgctxt "AdvancedPageTitle"
+msgid "Advanced Install Options"
+msgstr "Opțiuni de instalare avansate"
+
+msgctxt "LiveUsbButton"
+msgid "Create Live USB"
+msgstr "Creeaza Live USB"
+
+msgctxt "LiveUsbText"
+msgid "Try Endless OS by running it from a USB stick."
+msgstr "Incearca Endless OS ruland de pe un stick USB"
+
+msgctxt "ReformatterUsbButton"
+msgid "Create Reformatter USB"
+msgstr "Creeaza USB de reformatare"
+
+msgctxt "ReformatterUsbText"
+msgid "Reformat any computer with Endless OS using a USB stick."
+msgstr "Reformateaza orice computer cu Endless OS folosind un stick USB"
+
+msgctxt "CompareOptionsLink"
+msgid "Compare the two options"
+msgstr "Compara cele doua optiuni"
+
+msgctxt "SelectFilePreviousButton"
+msgid "Previous"
+msgstr "Anterior"
+
+msgctxt "SelectFileNextButton"
+msgid "Next"
+msgstr "Urmator"
+
+msgctxt "SelectFilePageTitle"
+msgid "Select Your Endless OS Version"
+msgstr "Selectați versiunea pentru Endless OS"
+
+msgctxt "SelectFileSubtitle"
+msgid "Choose the version of Endless OS that’s best for you."
+msgstr "Alegeti versiunea de Endless OS care este mai potrivita"
+
+msgctxt "NoInternetConnectionTitle"
+msgid "Unfortunately, there was a problem connecting to the server."
+msgstr "Din pacate, sa produs o problema la conectarea cu serverul."
+
+msgctxt "NoInternetConnectionSubtitle"
+msgid ""
+"Make sure you're <a id='ConnectedLink'>connected to the internet</a>, and if"
+" the problem persists, visit our <a id='ConnectedSupportLink'>support</a>."
+msgstr "Asigurați-vă că sunteți <a id='ConnectedLink'> conectat la internet </a>, iar dacă problema persistă, accesați <a id='ConnectedSupportLink'> suport </a>."
+
+msgctxt "ExistingImageFile"
+msgid "Use existing image file:"
+msgstr "Utilizați un fișier de imagine existent:"
+
+msgctxt "DownloadNewImage"
+msgid "Download a new version:"
+msgstr "Descarca o versiune noua:"
+
+msgctxt "LightVersionText"
+msgid "BASIC"
+msgstr "SIMPLIFICAT"
+
+msgctxt "LightDownloadDescription"
+msgid ""
+"Includes basic features of Endless OS and the option to download more apps "
+"and content later. This version is best for computers with reliable internet"
+" access."
+msgstr "Include caracteristicile de bază ale sistemului de operare Endless OS și opțiunea de a descărca mai multe aplicații și conținut mai târziu. Această versiune este cea mai buna pentru calculatoare cu acces la internet de încredere."
+
+msgctxt "DownloadLightButton"
+msgid "Download EOS Basic"
+msgstr "Descarca EOS "
+
+msgctxt "FullVersionText"
+msgid "FULL"
+msgstr "COMPLET"
+
+msgctxt "FullDownloadDescription"
+msgid ""
+"Includes full Endless OS, preloaded with more than 100 apps and content. "
+"This version is ideal for computers without reliable internet access. Choose"
+" language for content and apps:"
+msgstr "Include sistem de operare Endless OS plin, încărcat în prealabil cu mai mult de 100 de aplicații și conținut. Această versiune este ideala pentru calculatoarele care nu au acces la internet de încredere. Alegeți limba pentru conținut și aplicații:"
+
+msgctxt "DownloadFullButton"
+msgid "Download EOS Full"
+msgstr "Descarca EOS Complet"
+
+msgctxt "SelectUSBPreviousButton"
+msgid "Previous"
+msgstr "Anterior"
+
+msgctxt "SelectUSBNextButton"
+msgid "Next"
+msgstr "Urmator"
+
+msgctxt "SelectUSBPageTitle"
+msgid "Select USB Drive"
+msgstr "Selectați USB Drive"
+
+msgctxt "SelectUSBSubtitle"
+msgid "Choose the USB device you would like to use."
+msgstr "Alegeți dispozitivul USB pe care doriți să îl utilizați."
+
+msgctxt "USBDisksFound"
+msgid "USB drive found:"
+msgstr "USB găsite:"
+
+msgctxt "NewDiskNameLabel"
+msgid "New USB device contents:"
+msgstr "Conținut nou dispozitiv USB:"
+
+msgctxt "NewDiskSizeLabel"
+msgid "Size:"
+msgstr "Marime:"
+
+msgctxt "AgreementCheckboxText"
+msgid ""
+"I understand that this will <b>erase all my files</b> on the USB device."
+msgstr "Înțeleg că acest lucru va <b> șterge toate fișierele mele </ b> de pe dispozitivul USB."
+
+msgctxt "InstallingPageTitle"
+msgid "Endless OS"
+msgstr "Endless OS"
+
+msgctxt "InstallCancelButton"
+msgid "Cancel"
+msgstr "Anuleaza"
+
+msgctxt "ThankYouPageTitle"
+msgid "Thank you"
+msgstr "Multumim"
+
+msgctxt "CloseAppButton"
+msgid "Close"
+msgstr "Inchide"
+
+msgctxt "InstallerVersion"
+msgid "Version:"
+msgstr "Versiune:"
+
+msgctxt "InstallerLanguage"
+msgid "Language:"
+msgstr "Limba:"
+
+msgctxt "InstallerContent"
+msgid "Content:"
+msgstr "Continut:"
+
+msgctxt "ThankYouDualBootReminder"
+msgid "Restart your computer and select \"Endless OS\" from the menu."
+msgstr "Reporniți computerul și selectați \"Endless OS\" din meniu."
+
+msgctxt "ThankYouLiveReminder"
+msgid "To try Endless OS now, restart your computer."
+msgstr "Pentru a încerca Endless OS, reporniți computerul."
+
+msgctxt "ThankYouReflasherReminder"
+msgid "Now you're ready to install Endless OS on more computers."
+msgstr "Acum sunteți gata să instalați Endless OS pe mai multe computere."
+
+msgctxt "UsbBootHowToLink"
+msgid "How to start your computer from a USB stick."
+msgstr "Cum sa pornesti computerul de pe un stick USB"
+
+msgctxt "ErrorPageTitle"
+msgid "Error"
+msgstr "Eroare"
+
+msgctxt "CloseAppButton1"
+msgid "Finish"
+msgstr "Sfarsit"
+
+msgctxt "ErrorMessage"
+msgid "Oops, something went wrong setting up Endless OS."
+msgstr "Oops, ceva a mers greșit la setarea sistemului de operare Endless OS."
+
+msgctxt "EndlessSupportContainer"
+msgid ""
+"If you keep having trouble, you can get help on the <a "
+"id='EndlessSupport'>Endless community forum</a>."
+msgstr "Dacă aveti probleme in continuare, puteți obține ajutor pe <a id='EndlessSupport'>  forumul comunității Endless </a>."
+
+msgctxt "DualBootPageTitle"
+msgid "Endless OS"
+msgstr "Endless OS"
+
+msgctxt "DualBootContentTitle"
+msgid "Download and Install Endless on this Computer"
+msgstr "Descarca si instaleaza Endless pe acest computer"
+
+msgctxt "DualBootContentDescription"
+msgid ""
+"Each time you start your computer, you will be able to choose between "
+"Endless and Windows. Your apps and files on Windows will not be affected."
+msgstr "De fiecare data cand pornesti computerul,vei putea sa alegi intre Endless si Windows.Aplicatiile si fisierele din Windows nu vor fi afectate."
+
+msgctxt "DualBootInstallButton"
+msgid "Install Endless"
+msgstr "Instaleaza Endless"
+
+msgctxt "DualBootRecommendation"
+msgid "Recommended: At least 32 GB of free space on the system drive."
+msgstr "Recomandat: Cel putin 32 GB de spatiu liber pe sistem."
+
+msgctxt "AdvancedOptionsText"
+msgid ""
+"For advanced install options using an <b>Endless USB Stick</b>, <a "
+"id='AdvancedOptionsLink'>click here</a>."
+msgstr "Pentru optiuni de instalare avansate folosind un <b> Stick USB Endless </b>,<a id='AdvancedOptionsLink'>apasa aici</a>."
+
+msgctxt "SelectStorageNextButton"
+msgid "Next"
+msgstr "Urmator"
+
+msgctxt "SelectStoragePreviousButton"
+msgid "Previous"
+msgstr "Anterior"
+
+msgctxt "SelectStoragePageTitle"
+msgid "Storage Space for Endless OS"
+msgstr "Spatiu de stocare pentru Endless OS"
+
+msgctxt "StorageAgreementText"
+msgid ""
+"Note: We recommend backing up any important files before continuing. Should "
+"you experience any problems with your computer after installation, you can "
+"find help at <a id='StorageSupportLink'>Endless Support</a>."
+msgstr "Notă: Vă recomandăm copierea de rezervă a tututor fișiereleol importante înainte de a continua. În cazul în care aveți probleme cu computerul după instalare, puteți găsi ajutor la <a id='StorageSupportLink'>Suport Endless </a>."
+
+msgctxt "DualBootLanguageLabel"
+msgid "Select Language"
+msgstr "Selecteaza limba"
+
+msgctxt "AdvancedInstallReminder"
+msgid ""
+"To create an Endless USB Stick you will need a USB device with at least 8 GB"
+" of storage space."
+msgstr "Pentru a crea un stick USB Endless OS aveți nevoie de un dispozitiv USB cu cel puțin 8 GB de spațiu de stocare."
+
+msgctxt "AdvancedOptionsSubtitle"
+msgid "With an <b>Endless USB Stick</b> you can:"
+msgstr "Cu un <b>Stick USB Endless</b>puteti:"
+
+msgctxt "CombinedUsbButton"
+msgid "Create Endless USB Stick"
+msgstr "Creeaza Stick USB Endless"
+
+msgctxt "USBLearnMore"
+msgid "Learn more about the Endless USB Stick"
+msgstr "Aflați mai multe despre Stick-ul USB Endless"
+
+msgctxt "MSG_020"
+msgid "bytes"
+msgstr "biți"
+
+msgctxt "MSG_021"
+msgid "Kb"
+msgstr "Kb"
+
+msgctxt "MSG_022"
+msgid "Mb"
+msgstr "Mb"
+
+msgctxt "MSG_023"
+msgid "Gb"
+msgstr "Gb"
+
+msgctxt "MSG_024"
+msgid "Tb"
+msgstr "Tb"
+
+msgctxt "MSG_025"
+msgid "Pb"
+msgstr "Pb"
+
+#, c-format
+msgctxt "MSG_045"
+msgid "USB Storage Device (Generic)"
+msgstr "Unitate de stocare USB (generic)"
+
+#, c-format
+msgctxt "MSG_046"
+msgid "%s (Disk %d) [%s]"
+msgstr "%s (Disk %d) [%s]"
+
+#, c-format
+msgctxt "MSG_047"
+msgid "Multiple Partitions"
+msgstr "Volume multiple"
+
+#, c-format
+msgctxt "MSG_049"
+msgid "Endless - Cancellation"
+msgstr "Anulare - Endless"
+
+#, c-format
+msgctxt "MSG_095"
+msgid "Endless Image"
+msgstr "Imagine Endless"
+
+#, c-format
+msgctxt "MSG_105"
+msgid ""
+"Warning: Cancelling may cause the device to malfunction. If you are sure you"
+" want to cancel, click YES. Otherwise, click NO."
+msgstr "Avertizare: Anularea poate cauza funcționare defectuoasă a dispozitivului. Dacă nu sunteți sigur că doriți să anulați, faceți clic pe DA. În caz contrar, faceți clic pe NU."
+
+#, c-format
+msgctxt "MSG_107"
+msgid "All files"
+msgstr "Toate fisierele"
+
+#, c-format
+msgctxt "MSG_201"
+msgid "Cancelling, please wait"
+msgstr "Se anuleaza,va rugam sa asteptati"
+
+#, c-format
+msgctxt "MSG_300"
+msgid "Error downloading file."
+msgstr "Eroare la descarcarea fisierului"
+
+#, c-format
+msgctxt "MSG_302"
+msgid "%s of %s (%s/s)"
+msgstr "%s din %s (%s/s)"
+
+#, c-format
+msgctxt "MSG_303"
+msgid "Something is wrong with your Endless OS file."
+msgstr "Ceva este în neregulă cu fișierul dumneavoastra Endless OS."
+
+#, c-format
+msgctxt "MSG_304"
+msgid "Downloading"
+msgstr "Se descarca"
+
+#, c-format
+msgctxt "MSG_305"
+msgid "Step %d"
+msgstr "Pasul %d"
+
+#, c-format
+msgctxt "MSG_306"
+msgid "of %d:"
+msgstr "din %d"
+
+#, c-format
+msgctxt "MSG_307"
+msgid "No Label"
+msgstr "Fara eticheta"
+
+#, c-format
+msgctxt "MSG_309"
+msgid "Installing"
+msgstr "Se instaleaza"
+
+#, c-format
+msgctxt "MSG_310"
+msgid "Verifying"
+msgstr "Se verifica"
+
+#, c-format
+msgctxt "MSG_311"
+msgid "Writing"
+msgstr "Scrie"
+
+#, c-format
+msgctxt "MSG_312"
+msgid "https://support.endlessm.com/hc/en-us/articles/208895726"
+msgstr "https://support.endlessm.com/hc/en-us/articles/208895726"
+
+#, c-format
+msgctxt "MSG_314"
+msgid "http://community.endlessm.com/"
+msgstr "http://community.endlessm.com/"
+
+#, c-format
+msgctxt "MSG_315"
+msgid "%s/%s Download"
+msgstr "%s/%s Descarca"
+
+#, c-format
+msgctxt "MSG_316"
+msgid "Full"
+msgstr "Complet"
+
+#, c-format
+msgctxt "MSG_319"
+msgid "%s (%s)"
+msgstr "%s (%s)"
+
+#, c-format
+msgctxt "MSG_320"
+msgid "Great! Endless OS has been successfully installed."
+msgstr "Felicitari! Endless OS a fost instalat cu success."
+
+#, c-format
+msgctxt "MSG_343"
+msgid "Great! Your Endless OS Live USB has been created."
+msgstr "Felicitari! USB Live Endless OS a fost creeat."
+
+#, c-format
+msgctxt "MSG_344"
+msgid "Great! Your Endless OS Reflasher USB has been created."
+msgstr "Felicitari! Endless OS Reflasher USB a fost creeat."
+
+#, c-format
+msgctxt "MSG_321"
+msgid "Select Your Endless OS Version"
+msgstr "Selectați versiunea pentru Endless OS"
+
+#, c-format
+msgctxt "MSG_322"
+msgid "Is this the version you’d like to use? If not, select another."
+msgstr "Este aceasta varianta pe care doriți să o utilizați? Dacă nu, selectați alta."
+
+#, c-format
+msgctxt "MSG_323"
+msgid ""
+"We couldn’t finish getting Endless OS. Check your internet connection and "
+"click \"Resume\" to carry on downloading."
+msgstr "Nu am putut finaliza obtinerea Endless OS. Verificați conexiunea la internet și faceți clic pe \"Reluare\" pentru a continua descărcarea."
+
+#, c-format
+msgctxt "MSG_324"
+msgid ""
+"Something is wrong with your Endless OS file. Click \"Download Again\" to "
+"try downloading it again."
+msgstr "Ceva este în neregulă cu fișierul dumneavoastra Endless OS.Click pe \"Descarca din nou\" pentru a reincerca descarcarea."
+
+#, c-format
+msgctxt "MSG_325"
+msgid ""
+"Something went wrong writing Endless OS to your USB device. Find a different"
+" device and click \"Try Again\"."
+msgstr "Ceva nu a functionat cu scrierea sistemului de operarea Endless OS pe dispozitivul USB.Cauta un alt dispozitiv si apasa pe \"Incearca din nou\"."
+
+#, c-format
+msgctxt "MSG_358"
+msgid "Something went wrong installing Endless OS to your computer."
+msgstr "Ceva nu a funcționat la instalarea sistemului de operare Endless OS pe computer."
+
+#, c-format
+msgctxt "MSG_326"
+msgid "Resume"
+msgstr "Reia"
+
+#, c-format
+msgctxt "MSG_327"
+msgid "Download again"
+msgstr "Descarca din nou"
+
+#, c-format
+msgctxt "MSG_328"
+msgid "Try again"
+msgstr "Încearcă din nou"
+
+#, c-format
+msgctxt "MSG_329"
+msgid "https://support.endlessm.com/hc/en-us/articles/210527103"
+msgstr "https://support.endlessm.com/hc/en-us/articles/210527103"
+
+#, c-format
+msgctxt "MSG_330"
+msgid ""
+"You have selected a slow USB device (USB 1.0). Please use a USB 3.0 device "
+"for the best experience."
+msgstr "Ai selectat un dispozitiv USB lent (USB 1.0).Foloseste un dispozitiv USB 3.0 pentru o experienta mai buna."
+
+#, c-format
+msgctxt "MSG_331"
+msgid ""
+"You have selected a slow USB device (USB 1.0). Please use a USB 2.0 device "
+"for a better experience."
+msgstr "Ai selectat un dispozitiv USB lent (USB 1.0).Foloseste un dispozitiv USB 2.0 pentru o experienta mai buna."
+
+#, c-format
+msgctxt "MSG_332"
+msgid ""
+"You have selected a slower USB device (USB 2.0). Please use a USB 3.0 device"
+" for the best experience."
+msgstr "Ai selectat un dispozitiv USB lent (USB 2.0).Foloseste un dispozitiv USB 3.0 pentru o experienta mai buna."
+
+#, c-format
+msgctxt "MSG_333"
+msgid ""
+"Your USB 3.0 device is inserted into a USB 2.0 port. Please insert it into a"
+" USB 3.0 port (usually blue) for the best experience."
+msgstr "Dispozitivul USB 3.0 a fost introdus intr-un port USB 2.0.Introdu dispozitivul intr-un port USB 3.0 (de obicei albastru)pentru o experienta mai buna."
+
+#, c-format
+msgctxt "MSG_334"
+msgid ""
+"There isn’t enough disk space for downloading Endless OS. Please free up %s "
+"and click \"Resume\" to start downloading."
+msgstr "Nu exista destul spatiu pe disc pentru a descarca Endless OS.Elibereaza %s spatiu si click pe \"Reia\" pentru a incepe descarcarea."
+
+#, c-format
+msgctxt "MSG_335"
+msgid ""
+"The selected version of Endless OS requires %s of free disk space, but only "
+"%s is available. Please free up some space on drive %s to continue."
+msgstr "Versiunea  selectata de Endless OS necesita %s spatiu pe disc,insa este disponibil doar %s.Elibereaza spatiu pe discul %s pentru a continua."
+
+#, c-format
+msgctxt "MSG_336"
+msgid "Delete the invalid file (%s)."
+msgstr "Sterge fisierul invalid (%s)."
+
+#, c-format
+msgctxt "MSG_337"
+msgid ""
+"For Endless OS %s, we recommend selecting at least %s of storage space."
+msgstr "Pentru Endless Os %s,recomandam sa selectati cel putin %s din spatiu de stocare."
+
+#, c-format
+msgctxt "MSG_338"
+msgid "%s (Minimum)"
+msgstr "%s (Minim)"
+
+#, c-format
+msgctxt "MSG_339"
+msgid "%s (Recommended)"
+msgstr "%s (Recomandat)"
+
+#, c-format
+msgctxt "MSG_340"
+msgid "%s (Maximum)"
+msgstr "%s (maxim)"
+
+#, c-format
+msgctxt "MSG_341"
+msgid "You currently have %s free on your %s %s drive."
+msgstr "Pentru moment ai %s liber pe drive-ul %s %s."
+
+#, c-format
+msgctxt "MSG_342"
+msgid "Select how much of your %s drive to dedicate to Endless OS."
+msgstr "Selecteaza cat spatiu din %s vrei sa dedici sistemului Endless OS."
+
+#, c-format
+msgctxt "MSG_350"
+msgid "Unfortunately, there is not enough storage space."
+msgstr "Din pacate,nu exista suficient spatiu de stocare."
+
+#, c-format
+msgctxt "MSG_351"
+msgid ""
+"To continue installing Endless OS, please free up at least %s by deleting "
+"videos, photos, or other large files on your %s drive."
+msgstr "Pentru a continua instalarea Endless OS,goleste cel putin %s ,stergand videoclipuri,poze sau alte fisiere mari pe drive-ul %s."
+
+#, c-format
+msgctxt "MSG_352"
+msgid "Unfortunately, your %s drive uses an unsupported format."
+msgstr "Din pacate,drive-ul %s foloseste un format care nu este suportat."
+
+#, c-format
+msgctxt "MSG_353"
+msgid "Endless OS can only be installed on an NTFS drive."
+msgstr "Endless OS paote fi instalat doar pe un drive NTFS."
+
+#, c-format
+msgctxt "MSG_354"
+msgid "Unfortunately, your computer is incompatible with Endless OS."
+msgstr "Din pacate,computerul dumneavoastra este incompatibil cu Endless OS."
+
+#, c-format
+msgctxt "MSG_355"
+msgid "Endless OS only supports 64-bit computers."
+msgstr "Endless OS suporta doar computere cu 64-bit"
+
+#, c-format
+msgctxt "MSG_356"
+msgid "Unfortunately, your %s drive is encrypted."
+msgstr "Din pacate,drive-ul %s este criptat."
+
+#, c-format
+msgctxt "MSG_357"
+msgid ""
+"Endless OS cannot be installed on drives which are protected with Device "
+"Encryption or BitLocker."
+msgstr "Endless OS nu poate fi instalat pe drive-urile care sunt protejate cu criptare dispozitiv sau BitLocker."
+
+#, c-format
+msgctxt "MSG_359"
+msgid "Unfortunately, your computer has another OS installed already."
+msgstr "Din pacate,computerul dumneavoastra are alt OS instalat deja"
+
+#, c-format
+msgctxt "MSG_360"
+msgid "Endless OS only supports dual-boot on Windows-only systems."
+msgstr "Endless OS suporta dual-boot doar pe sistemele Windows"
+
+#, c-format
+msgctxt "MSG_361"
+msgid ""
+"Are you sure you want to uninstall Endless OS? This will erase all apps and "
+"documents stored within your Endless OS installation."
+msgstr "Esti sigur ca vrei sa dezinstalezi Endless OS?Ti se vor sterge toate aplicatiile si documentele stocate la instalarea Endless OS"
+
+#, c-format
+msgctxt "MSG_362"
+msgid "Endless OS has been uninstalled successfully"
+msgstr "Endless OS a fost dezinstalat cu success"
+
+#, c-format
+msgctxt "MSG_363"
+msgid ""
+"There was a problem uninstalling Endless OS. Please contact us for "
+"assistance."
+msgstr "A apărut o problemă dezinstalând Endless OS. Va rugam sa ne contactati pentru asistență."
+
+#, c-format
+msgctxt "MSG_364"
+msgid "Uninstall Endless from this Computer"
+msgstr "Dezinstaleaza Endless de pe acest computer"
+
+#, c-format
+msgctxt "MSG_365"
+msgid ""
+"If you uninstall Endless, Windows will run automatically when you start your"
+" computer. Any apps and files stored in Endless will be erased."
+msgstr "Dacă dezinstalați Endless, Windows va rula automat atunci când porniți computerul. Toate aplicațiile și fișierele stocate în Endless vor fi șterse."
+
+#, c-format
+msgctxt "MSG_366"
+msgid "Uninstall Endless"
+msgstr "Dezinstaleaza Endless"
+
+#, c-format
+msgctxt "MSG_367"
+msgid ""
+"Make sure you back up any important documents from Endless before you "
+"uninstall."
+msgstr "Asigurați-vă că salvați orice document important de la Endless înainte de a dezinstala."
+
+#, c-format
+msgctxt "MSG_368"
+msgid ""
+"Internet Explorer %d is not supported. Please click OK to download Internet "
+"Explorer %d, install it, then run the Endless Installer again."
+msgstr "Internet Explorer %d nu este suportat.Click OK pentru a descarca Internet Explorer %d,instaleaza,apoi executați din nou Endless Installer."
+
+#, c-format
+msgctxt "MSG_369"
+msgid "%s Download"
+msgstr "%s Descarcat"
+
+#, c-format
+msgctxt "MSG_370"
+msgid "Oops, something went wrong setting up Endless OS."
+msgstr "Oops, ceva a mers gresit la setarea Endless OS."
+
+#, c-format
+msgctxt "MSG_371"
+msgid "https://support.endlessm.com/hc/en-us/articles/213585826"
+msgstr "https://support.endlessm.com/hc/en-us/articles/213585826"
+
+#, c-format
+msgctxt "MSG_372"
+msgid ""
+"No USB device found. If you've inserted one, try a different USB port or a "
+"different USB device."
+msgstr "Nici un dispozitiv USB gasit.Daca ai inserat unul,incearca cu al port USB sau un alt dispozitiv USB."
+
+#, c-format
+msgctxt "MSG_400"
+msgid "Basic"
+msgstr "De baza"
+
+#, c-format
+msgctxt "MSG_401"
+msgid "English"
+msgstr "Engleza"
+
+#, c-format
+msgctxt "MSG_402"
+msgid "Spanish"
+msgstr "Spaniola"
+
+#, c-format
+msgctxt "MSG_403"
+msgid "Portuguese (Brazilian)"
+msgstr "Portugheza (Brazilia)"
+
+#, c-format
+msgctxt "MSG_404"
+msgid "Arabic"
+msgstr "Araba"
+
+#, c-format
+msgctxt "MSG_405"
+msgid "French"
+msgstr "Franceza"
+
+#, c-format
+msgctxt "MSG_406"
+msgid "Chinese Simplified"
+msgstr "Chineza Simplificata"
+
+#, c-format
+msgctxt "MSG_407"
+msgid "Bengali"
+msgstr "Bengaleza"
+
+#, c-format
+msgctxt "MSG_408"
+msgid "Spanish (Guatemala)"
+msgstr "Spaniola (Guatemala)"

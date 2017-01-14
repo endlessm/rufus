@@ -1,0 +1,731 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# 
+# Translators:
+msgid ""
+msgstr ""
+"Project-Id-Version: rufus\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-03-08 02:28+0000\n"
+"PO-Revision-Date: 2017-01-09 06:17+0000\n"
+"Last-Translator: Roddy Shuler <roddy@endlessm.com>\n"
+"Language-Team: Chinese (Taiwan) (http://www.transifex.com/endless-mobile-inc/rufus/language/zh_TW/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: zh_TW\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+msgctxt "AdvancedPageTitle"
+msgid "Advanced Install Options"
+msgstr "進階安裝選項"
+
+msgctxt "LiveUsbButton"
+msgid "Create Live USB"
+msgstr "建立 Live USB"
+
+msgctxt "LiveUsbText"
+msgid "Try Endless OS by running it from a USB stick."
+msgstr "在 USD 隨身碟上試用 Endless OS。"
+
+msgctxt "ReformatterUsbButton"
+msgid "Create Reformatter USB"
+msgstr "建立格式化所用之 USB"
+
+msgctxt "ReformatterUsbText"
+msgid "Reformat any computer with Endless OS using a USB stick."
+msgstr "使用 USB 隨身碟將 Endless 作業系統安裝在任何電腦上。"
+
+msgctxt "CompareOptionsLink"
+msgid "Compare the two options"
+msgstr "比較兩種選項"
+
+msgctxt "SelectFilePreviousButton"
+msgid "Previous"
+msgstr "上一個"
+
+msgctxt "SelectFileNextButton"
+msgid "Next"
+msgstr "下一個"
+
+msgctxt "SelectFilePageTitle"
+msgid "Select Your Endless OS Version"
+msgstr "選取您的 Endless 作業系統版本"
+
+msgctxt "SelectFileSubtitle"
+msgid "Choose the version of Endless OS that’s best for you."
+msgstr "請選擇適合您的 Endless 作業系統版本。"
+
+msgctxt "NoInternetConnectionTitle"
+msgid "Unfortunately, there was a problem connecting to the server."
+msgstr "很抱歉，連線至伺服器時發生問題。"
+
+msgctxt "NoInternetConnectionSubtitle"
+msgid ""
+"Make sure you're <a id='ConnectedLink'>connected to the internet</a>, and if"
+" the problem persists, visit our <a id='ConnectedSupportLink'>support</a>."
+msgstr "確定您 <a id='ConnectedLink'>已連線至網際網路</a>，如果問題仍持續，請前往我們的 <a id='ConnectedSupportLink'>支援</a>。"
+
+msgctxt "ExistingImageFile"
+msgid "Use existing image file:"
+msgstr "使用現有的影像檔："
+
+msgctxt "DownloadNewImage"
+msgid "Download a new version:"
+msgstr "下載新版本："
+
+msgctxt "LightVersionText"
+msgid "BASIC"
+msgstr "基本"
+
+msgctxt "LightDownloadDescription"
+msgid ""
+"Includes basic features of Endless OS and the option to download more apps "
+"and content later. This version is best for computers with reliable internet"
+" access."
+msgstr "包含 Endless 作業系統的基本功能和隨後可下載更多應用程式和內容物的選項。這個版本最適合有穩定網路連接的電腦。"
+
+msgctxt "DownloadLightButton"
+msgid "Download EOS Basic"
+msgstr "下載 EOS 基本教學"
+
+msgctxt "FullVersionText"
+msgid "FULL"
+msgstr "完整"
+
+msgctxt "FullDownloadDescription"
+msgid ""
+"Includes full Endless OS, preloaded with more than 100 apps and content. "
+"This version is ideal for computers without reliable internet access. Choose"
+" language for content and apps:"
+msgstr "包含完整的 Endless 作業系統，預先安裝有超過 100 個應用程式和內容物。這個版本適合沒有穩定網路連接的電腦。選擇應用程式和內容物的語言："
+
+msgctxt "DownloadFullButton"
+msgid "Download EOS Full"
+msgstr "下載 EOS 完整版"
+
+msgctxt "SelectUSBPreviousButton"
+msgid "Previous"
+msgstr "往前"
+
+msgctxt "SelectUSBNextButton"
+msgid "Next"
+msgstr "下一步"
+
+msgctxt "SelectUSBPageTitle"
+msgid "Select USB Drive"
+msgstr "選取 USB 磁碟機"
+
+msgctxt "SelectUSBSubtitle"
+msgid "Choose the USB device you would like to use."
+msgstr "選擇想使用的 USB 裝置。"
+
+msgctxt "USBDisksFound"
+msgid "USB drive found:"
+msgstr "已找到 USB 磁碟機："
+
+msgctxt "NewDiskNameLabel"
+msgid "New USB device contents:"
+msgstr "新的 USB 裝置內容："
+
+msgctxt "NewDiskSizeLabel"
+msgid "Size:"
+msgstr "大小："
+
+msgctxt "AgreementCheckboxText"
+msgid ""
+"I understand that this will <b>erase all my files</b> on the USB device."
+msgstr "我瞭解這會 <b>清除我在 USB 裝置上的所有檔案</b>。"
+
+msgctxt "InstallingPageTitle"
+msgid "Endless OS"
+msgstr "Endless OS"
+
+msgctxt "InstallCancelButton"
+msgid "Cancel"
+msgstr "取消"
+
+msgctxt "ThankYouPageTitle"
+msgid "Thank you"
+msgstr "謝謝你"
+
+msgctxt "CloseAppButton"
+msgid "Close"
+msgstr "關閉"
+
+msgctxt "InstallerVersion"
+msgid "Version:"
+msgstr "版本："
+
+msgctxt "InstallerLanguage"
+msgid "Language:"
+msgstr "語言："
+
+msgctxt "InstallerContent"
+msgid "Content:"
+msgstr "內容："
+
+msgctxt "ThankYouDualBootReminder"
+msgid "Restart your computer and select \"Endless OS\" from the menu."
+msgstr "重新啟動電腦，選擇主選單中的「Endless OS」。"
+
+msgctxt "ThankYouLiveReminder"
+msgid "To try Endless OS now, restart your computer."
+msgstr "要現在試用 Endless 作業系統，請重新開啟你的電腦。"
+
+msgctxt "ThankYouReflasherReminder"
+msgid "Now you're ready to install Endless OS on more computers."
+msgstr "現在您已經可以在一台以上的電腦安裝 Endless OS 了。"
+
+msgctxt "UsbBootHowToLink"
+msgid "How to start your computer from a USB stick."
+msgstr "如何自 USB 隨身碟中開啟你的電腦。"
+
+msgctxt "ErrorPageTitle"
+msgid "Error"
+msgstr "錯誤"
+
+msgctxt "CloseAppButton1"
+msgid "Finish"
+msgstr "芬蘭語"
+
+msgctxt "ErrorMessage"
+msgid "Oops, something went wrong setting up Endless OS."
+msgstr "糟糕，設定  Endless OS 時發生錯誤。"
+
+msgctxt "EndlessSupportContainer"
+msgid ""
+"If you keep having trouble, you can get help on the <a "
+"id='EndlessSupport'>Endless community forum</a>."
+msgstr "如果您不斷遇到問題，可到 <a id='EndlessSupport'>Endless 社群論壇</a>尋求協助。"
+
+msgctxt "DualBootPageTitle"
+msgid "Endless OS"
+msgstr "Endless 作業系統"
+
+msgctxt "DualBootContentTitle"
+msgid "Download and Install Endless on this Computer"
+msgstr "下載並安裝 Endless 到這台電腦上"
+
+msgctxt "DualBootContentDescription"
+msgid ""
+"Each time you start your computer, you will be able to choose between "
+"Endless and Windows. Your apps and files on Windows will not be affected."
+msgstr "您每次啟動電腦，都可以選擇要使用 Endless 或 Windows。您在 Windows 中的應用程式和檔案不會受到影響。"
+
+msgctxt "DualBootInstallButton"
+msgid "Install Endless"
+msgstr "安裝 Endless"
+
+msgctxt "DualBootRecommendation"
+msgid "Recommended: At least 32 GB of free space on the system drive."
+msgstr "建議：系統磁碟機至少須有 32 GB 的可用空間。"
+
+msgctxt "AdvancedOptionsText"
+msgid ""
+"For advanced install options using an <b>Endless USB Stick</b>, <a "
+"id='AdvancedOptionsLink'>click here</a>."
+msgstr "使用 <b>Endless USB 隨身碟</b>的進階安裝選項，<a id='AdvancedOptionsLink'>請點擊此處</a>。"
+
+msgctxt "SelectStorageNextButton"
+msgid "Next"
+msgstr "下一個"
+
+msgctxt "SelectStoragePreviousButton"
+msgid "Previous"
+msgstr "往前"
+
+msgctxt "SelectStoragePageTitle"
+msgid "Storage Space for Endless OS"
+msgstr "Endless OS 儲存空間"
+
+msgctxt "StorageAgreementText"
+msgid ""
+"Note: We recommend backing up any important files before continuing. Should "
+"you experience any problems with your computer after installation, you can "
+"find help at <a id='StorageSupportLink'>Endless Support</a>."
+msgstr "注意：繼續下一步前，建議您備份重要檔案。若安裝後電腦有任何狀況，可至 <a id='StorageSupportLink'>Endless 支援中心</a>尋求協助。"
+
+msgctxt "DualBootLanguageLabel"
+msgid "Select Language"
+msgstr "選擇語言"
+
+msgctxt "AdvancedInstallReminder"
+msgid ""
+"To create an Endless USB Stick you will need a USB device with at least 8 GB"
+" of storage space."
+msgstr "要建立 Endless USB 隨身碟，您將需要有至少 8 GB 儲存空間的 USB 裝置。"
+
+msgctxt "AdvancedOptionsSubtitle"
+msgid "With an <b>Endless USB Stick</b> you can:"
+msgstr "有了<b>Endless USB 隨身碟</b>你可以："
+
+msgctxt "CombinedUsbButton"
+msgid "Create Endless USB Stick"
+msgstr "建立 Endless USB Stick"
+
+msgctxt "USBLearnMore"
+msgid "Learn more about the Endless USB Stick"
+msgstr "深入瞭解 Endless USB Stick"
+
+msgctxt "MSG_020"
+msgid "bytes"
+msgstr "位元組"
+
+msgctxt "MSG_021"
+msgid "Kb"
+msgstr "Kb"
+
+msgctxt "MSG_022"
+msgid "Mb"
+msgstr "Mb"
+
+msgctxt "MSG_023"
+msgid "Gb"
+msgstr "Gb"
+
+msgctxt "MSG_024"
+msgid "Tb"
+msgstr "兆位元組（Tb）"
+
+msgctxt "MSG_025"
+msgid "Pb"
+msgstr "千兆位元組（Pb）"
+
+#, c-format
+msgctxt "MSG_045"
+msgid "USB Storage Device (Generic)"
+msgstr "USB 儲存裝置（一般）"
+
+#, c-format
+msgctxt "MSG_046"
+msgid "%s (Disk %d) [%s]"
+msgstr "%s (磁碟 %d) [%s]"
+
+#, c-format
+msgctxt "MSG_047"
+msgid "Multiple Partitions"
+msgstr "多個分割區"
+
+#, c-format
+msgctxt "MSG_049"
+msgid "Endless - Cancellation"
+msgstr "Endless - 取消"
+
+#, c-format
+msgctxt "MSG_095"
+msgid "Endless Image"
+msgstr "Endless 圖片"
+
+#, c-format
+msgctxt "MSG_105"
+msgid ""
+"Warning: Cancelling may cause the device to malfunction. If you are sure you"
+" want to cancel, click YES. Otherwise, click NO."
+msgstr "警告：取消可能導致裝置故障。確定取消請按「是」，否則請按「否」。"
+
+#, c-format
+msgctxt "MSG_107"
+msgid "All files"
+msgstr "所有檔案"
+
+#, c-format
+msgctxt "MSG_201"
+msgid "Cancelling, please wait"
+msgstr "取消中，請稍候"
+
+#, c-format
+msgctxt "MSG_300"
+msgid "Error downloading file."
+msgstr "下載檔案時發生錯誤。"
+
+#, c-format
+msgctxt "MSG_302"
+msgid "%s of %s (%s/s)"
+msgstr "%s 之 %s（%s 每秒）"
+
+#, c-format
+msgctxt "MSG_303"
+msgid "Something is wrong with your Endless OS file."
+msgstr "您的 Endless OS 檔案發生錯誤。"
+
+#, c-format
+msgctxt "MSG_304"
+msgid "Downloading"
+msgstr "下載中"
+
+#, c-format
+msgctxt "MSG_305"
+msgid "Step %d"
+msgstr "步驟 %d"
+
+#, c-format
+msgctxt "MSG_306"
+msgid "of %d:"
+msgstr "總步數 %d："
+
+#, c-format
+msgctxt "MSG_307"
+msgid "No Label"
+msgstr "無標籤"
+
+#, c-format
+msgctxt "MSG_309"
+msgid "Installing"
+msgstr "安裝中"
+
+#, c-format
+msgctxt "MSG_310"
+msgid "Verifying"
+msgstr "驗證中"
+
+#, c-format
+msgctxt "MSG_311"
+msgid "Writing"
+msgstr "撰寫中"
+
+#, c-format
+msgctxt "MSG_312"
+msgid "https://support.endlessm.com/hc/en-us/articles/208895726"
+msgstr "https://support.endlessm.com/hc/en-us/articles/208895726"
+
+#, c-format
+msgctxt "MSG_314"
+msgid "http://community.endlessm.com/"
+msgstr "http://community.endlessm.com/"
+
+#, c-format
+msgctxt "MSG_315"
+msgid "%s/%s Download"
+msgstr "%s/%s 下載"
+
+#, c-format
+msgctxt "MSG_316"
+msgid "Full"
+msgstr "完整"
+
+#, c-format
+msgctxt "MSG_319"
+msgid "%s (%s)"
+msgstr "%s (%s)"
+
+#, c-format
+msgctxt "MSG_320"
+msgid "Great! Endless OS has been successfully installed."
+msgstr "太棒了！Endless 作業系統已安裝成功。"
+
+#, c-format
+msgctxt "MSG_343"
+msgid "Great! Your Endless OS Live USB has been created."
+msgstr "太棒了！您的 Endless OS Live USB 已建立完成。"
+
+#, c-format
+msgctxt "MSG_344"
+msgid "Great! Your Endless OS Reflasher USB has been created."
+msgstr "很好！你的 Endless 作業系統檔案存放 USB 已經建立完畢。"
+
+#, c-format
+msgctxt "MSG_321"
+msgid "Select Your Endless OS Version"
+msgstr "選擇您的 Endless OS 版本"
+
+#, c-format
+msgctxt "MSG_322"
+msgid "Is this the version you’d like to use? If not, select another."
+msgstr "這是您想使用的版本嗎？不是的話，請選取另一個版本。"
+
+#, c-format
+msgctxt "MSG_323"
+msgid ""
+"We couldn’t finish getting Endless OS. Check your internet connection and "
+"click \"Resume\" to carry on downloading."
+msgstr "無法成功取得  Endless OS。請檢查您的網路連線並點選「重新開始」以繼續下載。"
+
+#, c-format
+msgctxt "MSG_324"
+msgid ""
+"Something is wrong with your Endless OS file. Click \"Download Again\" to "
+"try downloading it again."
+msgstr "你的 Endless 作業系統檔案有些錯誤。點擊「重新下載」嘗試再次下載。"
+
+#, c-format
+msgctxt "MSG_325"
+msgid ""
+"Something went wrong writing Endless OS to your USB device. Find a different"
+" device and click \"Try Again\"."
+msgstr "Endless OS 寫入您的 USB 裝置時發生錯誤。請換一個裝置並點選「再試一次」。"
+
+#, c-format
+msgctxt "MSG_358"
+msgid "Something went wrong installing Endless OS to your computer."
+msgstr "在您的電腦上安裝 Endless 作業系統時發生問題。"
+
+#, c-format
+msgctxt "MSG_326"
+msgid "Resume"
+msgstr "繼續"
+
+#, c-format
+msgctxt "MSG_327"
+msgid "Download again"
+msgstr "再下載一次"
+
+#, c-format
+msgctxt "MSG_328"
+msgid "Try again"
+msgstr "再試一次"
+
+#, c-format
+msgctxt "MSG_329"
+msgid "https://support.endlessm.com/hc/en-us/articles/210527103"
+msgstr "https://support.endlessm.com/hc/en-us/articles/210527103"
+
+#, c-format
+msgctxt "MSG_330"
+msgid ""
+"You have selected a slow USB device (USB 1.0). Please use a USB 3.0 device "
+"for the best experience."
+msgstr "您已選擇慢速 USB 裝置 (USB 1.0)。請使用 USB 3.0 裝置以獲得最佳體驗。"
+
+#, c-format
+msgctxt "MSG_331"
+msgid ""
+"You have selected a slow USB device (USB 1.0). Please use a USB 2.0 device "
+"for a better experience."
+msgstr "你選擇了較為慢速的 USB 裝置（USB 1.0）。請使用 USB 2.0 裝置以獲得更好的使用體驗。"
+
+#, c-format
+msgctxt "MSG_332"
+msgid ""
+"You have selected a slower USB device (USB 2.0). Please use a USB 3.0 device"
+" for the best experience."
+msgstr "你選擇了較慢速的 USB 裝置（USB 2.0）。請使用 USB 3.0 裝置以獲得最佳的使用體驗。"
+
+#, c-format
+msgctxt "MSG_333"
+msgid ""
+"Your USB 3.0 device is inserted into a USB 2.0 port. Please insert it into a"
+" USB 3.0 port (usually blue) for the best experience."
+msgstr "您的 USB 3.0 裝置目前是連接到 USB 2.0 連接埠。為獲得最佳使用體驗，請將裝置插入 USB 3.0 連接埠（通常是藍色的）。"
+
+#, c-format
+msgctxt "MSG_334"
+msgid ""
+"There isn’t enough disk space for downloading Endless OS. Please free up %s "
+"and click \"Resume\" to start downloading."
+msgstr "磁碟空間不足，無法下載 Endless 作業系統。請釋出 %s，然後按一下「繼續」開始下載。"
+
+#, c-format
+msgctxt "MSG_335"
+msgid ""
+"The selected version of Endless OS requires %s of free disk space, but only "
+"%s is available. Please free up some space on drive %s to continue."
+msgstr "選取的 Endless 作業系統版本需要 %s 的可用磁碟空間，但只有 %s 可用。請釋放磁碟機 %s 的部分空間以繼續進行操作。"
+
+#, c-format
+msgctxt "MSG_336"
+msgid "Delete the invalid file (%s)."
+msgstr "刪除無效的檔案 (%s)。"
+
+#, c-format
+msgctxt "MSG_337"
+msgid ""
+"For Endless OS %s, we recommend selecting at least %s of storage space."
+msgstr "要使用 Endless 作業系統 %s, 我們建議您選擇至少 %s 的儲存空間。"
+
+#, c-format
+msgctxt "MSG_338"
+msgid "%s (Minimum)"
+msgstr "%s（最小）"
+
+#, c-format
+msgctxt "MSG_339"
+msgid "%s (Recommended)"
+msgstr "%s（建議）"
+
+#, c-format
+msgctxt "MSG_340"
+msgid "%s (Maximum)"
+msgstr "%s（最大值）"
+
+#, c-format
+msgctxt "MSG_341"
+msgid "You currently have %s free on your %s %s drive."
+msgstr "您目前在 %s %s 硬碟尚有 %s 可用空間。"
+
+#, c-format
+msgctxt "MSG_342"
+msgid "Select how much of your %s drive to dedicate to Endless OS."
+msgstr "選取要讓 Endless 作業系統使用多少的 %s 磁碟機。"
+
+#, c-format
+msgctxt "MSG_350"
+msgid "Unfortunately, there is not enough storage space."
+msgstr "糟糕，儲存空間不足。"
+
+#, c-format
+msgctxt "MSG_351"
+msgid ""
+"To continue installing Endless OS, please free up at least %s by deleting "
+"videos, photos, or other large files on your %s drive."
+msgstr "要繼續安裝 Endless 作業系統，請在您的 %s 磁碟機刪除影片、照片、或其它大型檔案來釋放至少 %s。"
+
+#, c-format
+msgctxt "MSG_352"
+msgid "Unfortunately, your %s drive uses an unsupported format."
+msgstr "很不巧，你的 %s 硬碟使用的是不支援的格式。"
+
+#, c-format
+msgctxt "MSG_353"
+msgid "Endless OS can only be installed on an NTFS drive."
+msgstr "Endless 作業系統只可以安裝在 NTFS 硬碟上。"
+
+#, c-format
+msgctxt "MSG_354"
+msgid "Unfortunately, your computer is incompatible with Endless OS."
+msgstr "很不巧，你的電腦與 Endless 作業系統並不相容。"
+
+#, c-format
+msgctxt "MSG_355"
+msgid "Endless OS only supports 64-bit computers."
+msgstr "Endless OS 僅支援 64-bit 電腦。"
+
+#, c-format
+msgctxt "MSG_356"
+msgid "Unfortunately, your %s drive is encrypted."
+msgstr "很抱歉，您的 %s 磁碟機已加密。"
+
+#, c-format
+msgctxt "MSG_357"
+msgid ""
+"Endless OS cannot be installed on drives which are protected with Device "
+"Encryption or BitLocker."
+msgstr "Endless 作業系統無法安裝在受到裝置加密（Device Encryption）或 BitLocker 磁碟機加密所保護的硬碟上。"
+
+#, c-format
+msgctxt "MSG_359"
+msgid "Unfortunately, your computer has another OS installed already."
+msgstr "很不巧，你的電腦已有安裝其他的作業系統。"
+
+#, c-format
+msgctxt "MSG_360"
+msgid "Endless OS only supports dual-boot on Windows-only systems."
+msgstr "Endless 作業系統僅支援 Windows 系統的雙重開機功能。"
+
+#, c-format
+msgctxt "MSG_361"
+msgid ""
+"Are you sure you want to uninstall Endless OS? This will erase all apps and "
+"documents stored within your Endless OS installation."
+msgstr "確定要解安裝 Endless OS 嗎？儲存在 Endless OS 裝置的所有應用程式及文件都將會遭到抹除。"
+
+#, c-format
+msgctxt "MSG_362"
+msgid "Endless OS has been uninstalled successfully"
+msgstr "Endless 作業系統已成功解除安裝"
+
+#, c-format
+msgctxt "MSG_363"
+msgid ""
+"There was a problem uninstalling Endless OS. Please contact us for "
+"assistance."
+msgstr "解除安裝 Endless 作業系統時發生了問題。請連絡我們以取得協助。"
+
+#, c-format
+msgctxt "MSG_364"
+msgid "Uninstall Endless from this Computer"
+msgstr "解除安裝此電腦中的 Endless"
+
+#, c-format
+msgctxt "MSG_365"
+msgid ""
+"If you uninstall Endless, Windows will run automatically when you start your"
+" computer. Any apps and files stored in Endless will be erased."
+msgstr "如果解除安裝 Endless，Windows 就會在您啟動電腦時自動執行。任何儲存在 Endless 的應用程式和檔案都會被清除。"
+
+#, c-format
+msgctxt "MSG_366"
+msgid "Uninstall Endless"
+msgstr "移除 Endless"
+
+#, c-format
+msgctxt "MSG_367"
+msgid ""
+"Make sure you back up any important documents from Endless before you "
+"uninstall."
+msgstr "解除安裝前請先從 Endless 備份重要文件。"
+
+#, c-format
+msgctxt "MSG_368"
+msgid ""
+"Internet Explorer %d is not supported. Please click OK to download Internet "
+"Explorer %d, install it, then run the Endless Installer again."
+msgstr "不支援 Internet Explorer %d。請點擊「好」以下載 Internet Explorer %d，安裝之後，再次執行 Endless 安裝程式。"
+
+#, c-format
+msgctxt "MSG_369"
+msgid "%s Download"
+msgstr "下載 %s"
+
+#, c-format
+msgctxt "MSG_370"
+msgid "Oops, something went wrong setting up Endless OS."
+msgstr "唉呀，設定 Endless 作業系統時出了問題。"
+
+#, c-format
+msgctxt "MSG_371"
+msgid "https://support.endlessm.com/hc/en-us/articles/213585826"
+msgstr "https://support.endlessm.com/hc/en-us/articles/213585826"
+
+#, c-format
+msgctxt "MSG_372"
+msgid ""
+"No USB device found. If you've inserted one, try a different USB port or a "
+"different USB device."
+msgstr "未找到任何 USB 裝置。如果你已有插入 USB 裝置，請嘗試插入不同的 USB 插槽或使用不同的 USB 裝置。"
+
+#, c-format
+msgctxt "MSG_400"
+msgid "Basic"
+msgstr "基本"
+
+#, c-format
+msgctxt "MSG_401"
+msgid "English"
+msgstr "英文"
+
+#, c-format
+msgctxt "MSG_402"
+msgid "Spanish"
+msgstr "西班牙語"
+
+#, c-format
+msgctxt "MSG_403"
+msgid "Portuguese (Brazilian)"
+msgstr "葡萄牙語（巴西）"
+
+#, c-format
+msgctxt "MSG_404"
+msgid "Arabic"
+msgstr "阿拉伯文"
+
+#, c-format
+msgctxt "MSG_405"
+msgid "French"
+msgstr "法文"
+
+#, c-format
+msgctxt "MSG_406"
+msgid "Chinese Simplified"
+msgstr "簡體中文"
+
+#, c-format
+msgctxt "MSG_407"
+msgid "Bengali"
+msgstr "孟加拉語"
+
+#, c-format
+msgctxt "MSG_408"
+msgid "Spanish (Guatemala)"
+msgstr "西班牙語（瓜地馬拉地區）"
