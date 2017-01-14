@@ -28,6 +28,9 @@ LANGS = collections.OrderedDict([
     ('bn', {'tag': 'bn-BD',
             'name': 'Bangla (বাংলা)',
             'lcids': '0x0845, 0x0445'}),
+    ('de', {'tag': 'de-DE',
+            'name': 'German (Deutsch)',
+            'lcids': '0x0407, 0x0807, 0x0c07, 0x1007, 0x1407'}),
     ('es', {'tag': 'es-ES',
             'name': 'Spanish (Español)',
             'lcids': '0x040a, 0x080a, 0x0c0a, 0x100a, 0x140a, 0x180a, 0x1c0a, 0x200a, 0x240a, 0x280a, 0x2c0a, 0x300a, 0x340a, 0x380a, 0x3c0a, 0x400a, 0x440a, 0x480a, 0x4c0a, 0x500a, 0x540a, 0x580a'}),
@@ -43,6 +46,9 @@ LANGS = collections.OrderedDict([
     ('pt_BR', {'tag': 'pt-BR',
                'name': 'Portuguese Brazilian (Português do Brasil)',
                'lcids': '0x0416'}),
+    ('ro', {'tag': 'ro-RO',
+            'name': 'Romanian (Română)',
+            'lcids': '0x0418, 0x0818'}),
     ('th', {'tag': 'th-TH',
             'name': 'Thai (ไทย)',
             'lcids': '0x041e'}),
@@ -51,7 +57,10 @@ LANGS = collections.OrderedDict([
             'lcids': '0x042A'}),
     ('zh_CN', {'tag': 'zh-CN',
                'name': 'Chinese Simplified (简体中文)',
-               'lcids': '0x0804, 0x1004'})])
+               'lcids': '0x0804, 0x1004'}),
+    ('zh_TW', {'tag': 'zh-TW',
+               'name': 'Chinese Traditional (正體中文)',
+               'lcids': '0x0404, 0x0c04, 0x1404, 0x7c04'})])
 
 
 for lang in LANGS:
