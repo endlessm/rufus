@@ -5,13 +5,14 @@
 # Translators:
 # georgian balan <braila222@gmail.com>, 2016
 # Roddy Shuler <roddy@endlessm.com>, 2016-2017
+# Will Thompson <wjt@endlessm.com>, 2017
 msgid ""
 msgstr ""
 "Project-Id-Version: rufus\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-03-08 02:28+0000\n"
-"PO-Revision-Date: 2017-01-14 07:20+0000\n"
-"Last-Translator: Roddy Shuler <roddy@endlessm.com>\n"
+"PO-Revision-Date: 2017-01-18 11:46+0000\n"
+"Last-Translator: Will Thompson <wjt@endlessm.com>\n"
 "Language-Team: Romanian (http://www.transifex.com/endless-mobile-inc/rufus/language/ro/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -79,7 +80,7 @@ msgstr "Descarca o versiune noua:"
 
 msgctxt "LightVersionText"
 msgid "BASIC"
-msgstr "SIMPLIFICAT"
+msgstr "SIMPLU"
 
 msgctxt "LightDownloadDescription"
 msgid ""
@@ -90,7 +91,7 @@ msgstr "Include caracteristicile de bază ale sistemului de operare Endless OS �
 
 msgctxt "DownloadLightButton"
 msgid "Download EOS Basic"
-msgstr "Descarca EOS "
+msgstr "Descarca EOS Simplu"
 
 msgctxt "FullVersionText"
 msgid "FULL"
@@ -228,7 +229,7 @@ msgctxt "AdvancedOptionsText"
 msgid ""
 "For advanced install options using an <b>Endless USB Stick</b>, <a "
 "id='AdvancedOptionsLink'>click here</a>."
-msgstr "Pentru optiuni de instalare avansate folosind un <b> Stick USB Endless </b>,<a id='AdvancedOptionsLink'>apasa aici</a>."
+msgstr "Pentru optiuni de instalare avansate folosind un <b> Stick USB Endless</b>, <a id='AdvancedOptionsLink'>apasa aici</a>."
 
 msgctxt "SelectStorageNextButton"
 msgid "Next"
@@ -261,7 +262,7 @@ msgstr "Pentru a crea un stick USB Endless OS aveți nevoie de un dispozitiv USB
 
 msgctxt "AdvancedOptionsSubtitle"
 msgid "With an <b>Endless USB Stick</b> you can:"
-msgstr "Cu un <b>Stick USB Endless</b>puteti:"
+msgstr "Cu un <b>Stick USB Endless</b> puteti:"
 
 msgctxt "CombinedUsbButton"
 msgid "Create Endless USB Stick"
@@ -690,7 +691,7 @@ msgstr "Nici un dispozitiv USB gasit.Daca ai inserat unul,incearca cu al port US
 #, c-format
 msgctxt "MSG_400"
 msgid "Basic"
-msgstr "De baza"
+msgstr "Simplu"
 
 #, c-format
 msgctxt "MSG_401"
