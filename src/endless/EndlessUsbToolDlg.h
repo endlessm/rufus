@@ -300,6 +300,7 @@ private:
         LPVOID        lpData
     );
 
+    const CString LocalizePersonalityName(const CString &personality);
     void GetImgDisplayName(CString &displayName, const CString &version, const CString &personality, ULONGLONG size = 0);
 	static int GetCompressionType(const CString& filename);
     static ULONGLONG GetExtractedSize(const CString& filename, BOOL isInstallerImage);

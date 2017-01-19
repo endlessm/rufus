@@ -2728,7 +2728,7 @@ void CEndlessUsbToolDlg::AddDownloadOptionsToUI()
             htmlElemId = _T(ELEMENT_DOWNLOAD_LIGHT_SIZE);
         }
         else {
-            CString imageLanguage = UTF8ToCString(lmprintf(m_personalityToLocaleMsg[imageEntry.personality]));
+            CString imageLanguage = LocalizePersonalityName(imageEntry.personality);
             CString indexStr;
             indexStr.Format(L"%d", selectIndex);
             hr = AddEntryToSelect(_T(ELEMENT_SELFILE_DOWN_LANG), CComBSTR(indexStr), CComBSTR(imageLanguage), NULL, matchesLanguage);
@@ -2872,7 +2872,7 @@ HRESULT CEndlessUsbToolDlg::OnSelectFileNextClicked(IHTMLElement* pElement)
 	}
 
 	CString finalMessageStr = UTF8ToCString(lmprintf(headlineMsg));
-	CString imageLanguage = UTF8ToCString(lmprintf(m_personalityToLocaleMsg[personality]));
+	CString imageLanguage = LocalizePersonalityName(personality);
 	CStringA imageTypeA = lmprintf(personality == PERSONALITY_BASE ? MSG_400 : MSG_316); // Basic or Full
 	CString imageType = UTF8ToCString(imageTypeA);
 
@@ -3965,6 +3965,11 @@ DWORD CALLBACK CEndlessUsbToolDlg::CopyProgressRoutine(
     return PROGRESS_CONTINUE;
 }
 
+const CString CEndlessUsbToolDlg::LocalizePersonalityName(const CString &personality)
+{
+    return UTF8ToCString(lmprintf(m_personalityToLocaleMsg[personality]));
+}
+
 void CEndlessUsbToolDlg::GetImgDisplayName(CString &displayName, const CString &version, const CString &personality, ULONGLONG size)
 {
     FUNCTION_ENTER;
@@ -3977,7 +3982,8 @@ void CEndlessUsbToolDlg::GetImgDisplayName(CString &displayName, const CString &
     displayName += " ";
     displayName += version;
     displayName += " ";
-    displayName += UTF8ToCString(lmprintf(m_personalityToLocaleMsg[personality]));
+    // TODO: again, we parse the JSON file only once, so if the user changes the UI language after it's parsed the image names will be in the wrong language in some bits of the UI.
+    displayName += LocalizePersonalityName(personality);
     if (personality != PERSONALITY_BASE) {
         displayName += " ";
         displayName += UTF8ToCString(lmprintf(MSG_316));
