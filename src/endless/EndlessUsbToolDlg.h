@@ -300,7 +300,6 @@ private:
         LPVOID        lpData
     );
 
-    static bool ParseImgFileName(const CString& filename, CString &personality, CString &version, CString &date, bool &installerImage);
     void GetImgDisplayName(CString &displayName, const CString &version, const CString &personality, ULONGLONG size = 0);
 	static int GetCompressionType(const CString& filename);
     static ULONGLONG GetExtractedSize(const CString& filename, BOOL isInstallerImage);
