@@ -2270,8 +2270,6 @@ void CEndlessUsbToolDlg::UpdateFileEntries(bool shouldInit)
             bool isInstallerImage = false;
 			CString fileNameToParse = isUnpackedFile ? (currentFile + L"." + _T(FILE_GZ_EXTENSION)) : currentFile;
             if (!ParseImgFileName(fileNameToParse, personality, version, date, isInstallerImage)) continue;
-            uint32_t msgId;
-            if (!m_personalityToLocaleMsg.Lookup(personality, msgId)) continue;
             if (!isUnpackedFile && 0 == GetExtractedSize(fullPathFile, isInstallerImage)) continue;
             CFile file(isUnpackedFile ? unpackedFullPathFile : fullPathFile, CFile::modeRead);
             GetImgDisplayName(displayName, version, personality, file.GetLength());
@@ -2597,13 +2595,11 @@ bool CEndlessUsbToolDlg::ParseJsonFile(LPCTSTR filename, bool isInstallerJson)
         latestVersion = latestEntry[JSON_IMG_VERSION].asCString();
         uprintf("Selected version '%ls'", latestVersion);
         m_downloadManager.SetLatestEosVersion(latestVersion);
-        uint32_t personalityMsgId = 0;
         personalities = latestEntry[JSON_IMG_PERSONALITIES];
         persImages = latestEntry[JSON_IMG_PERS_IMAGES];
         for (Json::ValueIterator persIt = personalities.begin(); persIt != personalities.end(); persIt++) {
             IFFALSE_CONTINUE(persIt->isString(), "Entry is not string, continuing");
             IFFALSE_CONTINUE(!isInstallerJson || CString(persIt->asCString()) == PERSONALITY_BASE, "Installer JSON parsing: not base personality");
-            IFFALSE_CONTINUE(m_personalityToLocaleMsg.Lookup(CString(persIt->asCString()), personalityMsgId), "Unknown personality. Continuing.");
 
             persImage = persImages[persIt->asString()];
             IFFALSE_CONTINUE(!persImage.isNull(), CString("Personality image entry not found - ") + persIt->asCString());
@@ -3967,7 +3963,14 @@ DWORD CALLBACK CEndlessUsbToolDlg::CopyProgressRoutine(
 
 const CString CEndlessUsbToolDlg::LocalizePersonalityName(const CString &personality)
 {
-    return UTF8ToCString(lmprintf(m_personalityToLocaleMsg[personality]));
+    uint32_t msgId;
+    if (m_personalityToLocaleMsg.Lookup(personality, msgId)) {
+        return UTF8ToCString(lmprintf(msgId));
+    }
+
+    uprintf("unknown personality ID '%ls'", personality);
+    Analytics::instance()->eventTracking(L"FIXME", L"UnknownPersonality", personality);
+    return personality;
 }
 
 void CEndlessUsbToolDlg::GetImgDisplayName(CString &displayName, const CString &version, const CString &personality, ULONGLONG size)
