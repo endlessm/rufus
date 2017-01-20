@@ -673,3 +673,8 @@ msgstr ""
 msgctxt "MSG_408"
 msgid "Spanish (Guatemala)"
 msgstr ""
+
+#, c-format
+msgctxt "MSG_409"
+msgid "Spanish (Mexico)"
+msgstr ""
