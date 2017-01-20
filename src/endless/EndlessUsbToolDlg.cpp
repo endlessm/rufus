@@ -312,11 +312,6 @@ enum endless_action_type {
 #define	IMAGE_FILE_EXT			L".img"
 
 #define ENDLESS_OS "Endless OS"
-#define EOS_PRODUCT_TEXT            "eos"
-#define EOS_INSTALLER_PRODUCT_TEXT  "eosinstaller"
-#define EOS_NONFREE_PRODUCT_TEXT    "eosnonfree"
-#define EOS_OEM_PRODUCT_TEXT		"eosoem"
-#define EOS_RETAIL_PRODUCT_TEXT     "eosretail"
 const wchar_t* mainWindowTitle = L"Endless Installer";
 
 #define ALL_FILES					L"*.*"
@@ -2600,13 +2595,11 @@ bool CEndlessUsbToolDlg::ParseJsonFile(LPCTSTR filename, bool isInstallerJson)
         latestVersion = latestEntry[JSON_IMG_VERSION].asCString();
         uprintf("Selected version '%ls'", latestVersion);
         m_downloadManager.SetLatestEosVersion(latestVersion);
-        uint32_t personalityMsgId = 0;
         personalities = latestEntry[JSON_IMG_PERSONALITIES];
         persImages = latestEntry[JSON_IMG_PERS_IMAGES];
         for (Json::ValueIterator persIt = personalities.begin(); persIt != personalities.end(); persIt++) {
             IFFALSE_CONTINUE(persIt->isString(), "Entry is not string, continuing");
             IFFALSE_CONTINUE(!isInstallerJson || CString(persIt->asCString()) == PERSONALITY_BASE, "Installer JSON parsing: not base personality");
-            IFFALSE_CONTINUE(m_personalityToLocaleMsg.Lookup(CString(persIt->asCString()), personalityMsgId), "Unknown personality. Continuing.");
 
             persImage = persImages[persIt->asString()];
             IFFALSE_CONTINUE(!persImage.isNull(), CString("Personality image entry not found - ") + persIt->asCString());
@@ -2731,7 +2724,7 @@ void CEndlessUsbToolDlg::AddDownloadOptionsToUI()
             htmlElemId = _T(ELEMENT_DOWNLOAD_LIGHT_SIZE);
         }
         else {
-            CString imageLanguage = UTF8ToCString(lmprintf(m_personalityToLocaleMsg[imageEntry.personality]));
+            CString imageLanguage = LocalizePersonalityName(imageEntry.personality);
             CString indexStr;
             indexStr.Format(L"%d", selectIndex);
             hr = AddEntryToSelect(_T(ELEMENT_SELFILE_DOWN_LANG), CComBSTR(indexStr), CComBSTR(imageLanguage), NULL, matchesLanguage);
@@ -2875,7 +2868,7 @@ HRESULT CEndlessUsbToolDlg::OnSelectFileNextClicked(IHTMLElement* pElement)
 	}
 
 	CString finalMessageStr = UTF8ToCString(lmprintf(headlineMsg));
-	CString imageLanguage = UTF8ToCString(lmprintf(m_personalityToLocaleMsg[personality]));
+	CString imageLanguage = LocalizePersonalityName(personality);
 	CStringA imageTypeA = lmprintf(personality == PERSONALITY_BASE ? MSG_400 : MSG_316); // Basic or Full
 	CString imageType = UTF8ToCString(imageTypeA);
 
@@ -3968,62 +3961,16 @@ DWORD CALLBACK CEndlessUsbToolDlg::CopyProgressRoutine(
     return PROGRESS_CONTINUE;
 }
 
-
-
-bool CEndlessUsbToolDlg::ParseImgFileName(const CString& filename, CString &personality, CString &version, CString &date, bool &installerImage)
+const CString CEndlessUsbToolDlg::LocalizePersonalityName(const CString &personality)
 {
-    FUNCTION_ENTER;
-
-    // parse filename to get personality and version
-    CString lastPart;
-    PCTSTR t1 = _T("-"), t2 = _T(".");
-    int pos = 0;
-
-    // RADU: Add some more validation here for the filename
-    CString resToken = filename.Tokenize(t1, pos);
-    CString product;
-    int elemIndex = 0;
-    while (!resToken.IsEmpty()) {
-        switch (elemIndex) {
-        case 0: product = resToken; break;
-        case 1: version = resToken; break;
-        case 3: date = resToken; break;
-        case 4: lastPart = resToken; break;
-        }
-        resToken = filename.Tokenize(t1, pos);
-        elemIndex++;
-    };
-
-    version.Replace(_T(EOS_PRODUCT_TEXT), _T(""));
-    IFFALSE_GOTOERROR(!version.IsEmpty() && !lastPart.IsEmpty(), "");
-    installerImage = product == _T(EOS_INSTALLER_PRODUCT_TEXT);
-    if (product != _T(EOS_PRODUCT_TEXT) &&
-        product != _T(EOS_NONFREE_PRODUCT_TEXT) &&
-        product != _T(EOS_OEM_PRODUCT_TEXT) &&
-        product != _T(EOS_RETAIL_PRODUCT_TEXT) &&
-        !installerImage) {
-        uprintf("Unrecognised product name '%ls'; assuming it's some new product", product);
+    uint32_t msgId;
+    if (m_personalityToLocaleMsg.Lookup(personality, msgId)) {
+        return UTF8ToCString(lmprintf(msgId));
     }
 
-    date = date.Right(date.GetLength() - date.Find('.') - 1);
-
-    pos = 0;
-    resToken = lastPart.Tokenize(t2, pos);
-    elemIndex = 0;
-    while (!resToken.IsEmpty()) {
-        switch (elemIndex) {
-        case 1: personality = resToken; break;
-        case 4: goto error; break; // we also have diskX
-        }
-        resToken = lastPart.Tokenize(t2, pos);
-        elemIndex++;
-    };
-    uint32_t msgId;
-    IFFALSE_GOTOERROR(!personality.IsEmpty() && m_personalityToLocaleMsg.Lookup(personality, msgId), "");
-
-    return true;
-error:
-    return false;
+    uprintf("unknown personality ID '%ls'", personality);
+    Analytics::instance()->eventTracking(L"FIXME", L"UnknownPersonality", personality);
+    return personality;
 }
 
 void CEndlessUsbToolDlg::GetImgDisplayName(CString &displayName, const CString &version, const CString &personality, ULONGLONG size)
@@ -4038,7 +3985,8 @@ void CEndlessUsbToolDlg::GetImgDisplayName(CString &displayName, const CString &
     displayName += " ";
     displayName += version;
     displayName += " ";
-    displayName += UTF8ToCString(lmprintf(m_personalityToLocaleMsg[personality]));
+    // TODO: again, we parse the JSON file only once, so if the user changes the UI language after it's parsed the image names will be in the wrong language in some bits of the UI.
+    displayName += LocalizePersonalityName(personality);
     if (personality != PERSONALITY_BASE) {
         displayName += " ";
         displayName += UTF8ToCString(lmprintf(MSG_316));
