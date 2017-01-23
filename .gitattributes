@@ -16,3 +16,5 @@ install-sh      eol=lf
 .gitattributes  export-ignore
 .gitignore      export-ignore
 *.creole        export-ignore
+*.po            eol=lf
+*.pot           eol=lf

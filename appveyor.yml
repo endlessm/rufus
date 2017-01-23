@@ -36,3 +36,8 @@ after_build:
   - appveyor PushArtifact %APPVEYOR_BUILD_FOLDER%\endless-installer-%EI_VERSION%.exe
   - 7z a endless-installer-%EI_VERSION%.zip %APPVEYOR_BUILD_FOLDER%\endless-installer-%EI_VERSION%.exe
   - appveyor PushArtifact endless-installer-%EI_VERSION%.zip
+
+test_script:
+  - echo "Checking rufus.pot is up-to-date"
+  - C:\Python35-x64\python.exe %APPVEYOR_BUILD_FOLDER%\po\loc2pot
+  - git diff --exit-code -- %APPVEYOR_BUILD_FOLDER%\po\rufus.pot

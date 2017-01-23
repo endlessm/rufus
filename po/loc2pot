@@ -7,7 +7,8 @@ import re
 # that can be used with standard translation tools such as Transifex
 
 PO_DIR = os.path.dirname(__file__)
-LOC_FILE = os.path.join(PO_DIR, '../src/endless/res/endless.loc')
+LOC_FILE = os.path.normpath(os.path.join(
+    PO_DIR, '..', 'src', 'endless', 'res', 'endless.loc'))
 POT_FILE = os.path.join(PO_DIR, 'rufus.pot')
 
 PREAMBLE = '''# SOME DESCRIPTIVE TITLE.
@@ -38,7 +39,8 @@ def is_c_format_string(label):
     return m is not None and not m.group(1).startswith('02')
 
 
-with open(LOC_FILE) as loc_file, open(POT_FILE, 'w') as pot_file:
+with open(LOC_FILE, 'r', encoding='utf-8') as loc_file, \
+     open(POT_FILE, 'w', newline='\n', encoding='utf-8') as pot_file:
     pot_file.write(PREAMBLE)
     found = False
     in_debug_block = False
