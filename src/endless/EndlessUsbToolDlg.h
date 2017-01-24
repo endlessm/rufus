@@ -273,6 +273,7 @@ private:
     void StartJSONDownload();
     void UpdateDownloadOptions();
     bool UnpackFile(const CString &archive, const CString &destination, int compressionType = 0, void* progress_function = NULL, unsigned long* cancel_request = NULL);
+    bool UnpackImage(const CString &image, const CString &destination);
     bool ParseJsonFile(LPCTSTR filename, bool isInstallerJson);
     void AddDownloadOptionsToUI();
     void UpdateDownloadableState();
