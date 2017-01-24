@@ -2529,6 +2529,22 @@ error:
     return result >= 0;
 }
 
+bool CEndlessUsbToolDlg::UnpackImage(const CString &image, const CString &destination)
+{
+    FUNCTION_ENTER_FMT("%ls -> %ls", image, destination);
+
+    if (CSTRING_GET_LAST(image, '\\') == ENDLESS_IMG_FILE_NAME) {
+        BOOL result = CopyFileEx(image, destination, CEndlessUsbToolDlg::CopyProgressRoutine, this, NULL, 0);
+        IFFALSE_RETURN_VALUE(result, "Copying uncompressed image failed/cancelled", false);
+    }
+    else {
+        bool unpackResult = UnpackFile(image, destination, 0, ImageUnpackCallback, &this->m_cancelImageUnpack);
+        IFFALSE_RETURN_VALUE(unpackResult, "Error unpacking image", false);
+    }
+
+    return true;
+}
+
 static bool FindLatestVersion(const Json::Value &rootValue, Json::Value &latestEntry)
 {
     FUNCTION_ENTER;
@@ -4822,14 +4838,8 @@ bool CEndlessUsbToolDlg::CopyFilesToexFAT(CEndlessUsbToolDlg *dlg, const CString
 	CEndlessUsbToolDlg::ImageUnpackPercentStart = USB_PROGRESS_EXFAT_PREPARED;
 	CEndlessUsbToolDlg::ImageUnpackPercentEnd = USB_PROGRESS_IMG_COPY_DONE;
 	CEndlessUsbToolDlg::ImageUnpackFileSize = dlg->m_selectedFileSize;
-	if (CSTRING_GET_LAST(dlg->m_localFile, '\\') == ENDLESS_IMG_FILE_NAME) {
-		BOOL result = CopyFileEx(dlg->m_localFile, usbFilesPath + ENDLESS_IMG_FILE_NAME, CEndlessUsbToolDlg::CopyProgressRoutine, dlg, NULL, 0);
-		IFFALSE_GOTOERROR(result, "Copying live image failed/cancelled.");
-	} else {
-		bool unpackResult = dlg->UnpackFile(dlg->m_localFile, (usbFilesPath + ENDLESS_IMG_FILE_NAME), 0, ImageUnpackCallback, &dlg->m_cancelImageUnpack);
-		IFFALSE_GOTOERROR(unpackResult, "Error unpacking image to USB drive");
-	}
 
+    IFFALSE_GOTOERROR(dlg->UnpackImage(dlg->m_localFile, usbFilesPath + ENDLESS_IMG_FILE_NAME), "Error unpacking image to USB drive");
 	IFFALSE_GOTOERROR(0 != CopyFile(dlg->m_unpackedImageSig, usbFilesPath + CSTRING_GET_LAST(dlg->m_unpackedImageSig, '\\'), FALSE), "Error copying image signature file to drive.");
 
 	FILE *liveFile;
@@ -5004,19 +5014,11 @@ DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 	CEndlessUsbToolDlg::ImageUnpackPercentStart = DB_PROGRESS_UNPACK_BOOT_ZIP;
 	CEndlessUsbToolDlg::ImageUnpackPercentEnd = DB_PROGRESS_FINISHED_UNPACK;
 	CEndlessUsbToolDlg::ImageUnpackFileSize = dlg->m_selectedFileSize;
-	if (CSTRING_GET_LAST(dlg->m_localFile, '\\') == ENDLESS_IMG_FILE_NAME) {
-		BOOL result = CopyFileEx(dlg->m_localFile, endlessImgPath, CEndlessUsbToolDlg::CopyProgressRoutine, dlg, NULL, 0);
-		IFFALSE_GOTOERROR(result, "Copying unpacked dual-boot image failed/cancelled.");
+    IFFALSE_GOTOERROR(dlg->UnpackImage(dlg->m_localFile, endlessImgPath), "Error unpacking dual-boot image");
 
-		// Clear READONLY flag inherited from endless.img on live USB.
-		IFFALSE_PRINTERROR(SetFileAttributes(endlessImgPath, FILE_ATTRIBUTE_SYSTEM | FILE_ATTRIBUTE_HIDDEN),
-			"Failed to clear FILE_ATTRIBUTE_READONLY; ExtendImageFile will probably now fail");
-	} else {
-		// Unpack img file
-		bool unpackResult = dlg->UnpackFile(dlg->m_localFile, endlessImgPath, 0, ImageUnpackCallback, &dlg->m_cancelImageUnpack);
-		IFFALSE_GOTOERROR(unpackResult, "Error unpacking image to endless folder.");
-	}
-
+	// Clear READONLY flag inherited from endless.img on live USB.
+	IFFALSE_PRINTERROR(SetFileAttributes(endlessImgPath, FILE_ATTRIBUTE_SYSTEM | FILE_ATTRIBUTE_HIDDEN),
+		"Failed to clear FILE_ATTRIBUTE_READONLY; ExtendImageFile will probably now fail");
 	// extend this file so it reaches the required size
 	IFFALSE_GOTOERROR(ExtendImageFile(endlessImgPath, dlg->m_nrGigsSelected), "Error extending Endless image file");
 
