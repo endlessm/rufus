@@ -246,18 +246,17 @@ void CEndlessUsbToolApp::Log(const char *logMessage)
 	static CStringA strMessage;
 	static bool firstMessage = true;
 
-	if (firstMessage) {
-		// calling uprintf here works because it will only be executed once
-		firstMessage = false;
-		CStringA debugMessage;
-		debugMessage.Format("Log original file name %ls\r\n", m_logFile.GetFileName()); Log(debugMessage);
-		debugMessage.Format("Application version: %s\r\n", RELEASE_VER_STR); Log(debugMessage);
-		debugMessage.Format("Windows version: %s\r\n", WindowsVersionStr); Log(debugMessage);
-		debugMessage.Format("Windows version number: 0x%X\r\n", nWindowsVersion); Log(debugMessage);
-		debugMessage.Format("-----------------------------------\r\n"); Log(debugMessage);
-	}
-
 	if (CEndlessUsbToolApp::m_enableLogDebugging) {
+		if (firstMessage) {
+			firstMessage = false;
+			CStringA debugMessage;
+			debugMessage.Format("Log original file name %ls\r\n", m_logFile.GetFileName()); Log(debugMessage);
+			debugMessage.Format("Application version: %s\r\n", RELEASE_VER_STR); Log(debugMessage);
+			debugMessage.Format("Windows version: %s\r\n", WindowsVersionStr); Log(debugMessage);
+			debugMessage.Format("Windows version number: 0x%X\r\n", nWindowsVersion); Log(debugMessage);
+			debugMessage.Format("-----------------------------------\r\n"); Log(debugMessage);
+		}
+
 		CStringA time(CTime::GetCurrentTime().Format(_T("%H:%M:%S - ")));
 		strMessage = time + CStringA(logMessage);
 		m_logFile.Write(strMessage, strMessage.GetLength());
