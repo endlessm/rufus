@@ -1670,52 +1670,54 @@ void CEndlessUsbToolDlg::ChangePage(PCTSTR newPage)
 
 void CEndlessUsbToolDlg::ErrorOccured(ErrorCause_t errorCause)
 {
-    uint32_t recoverButtonMsgId = 0, suggestionMsgId = 0, headlineMsgId = MSG_370;
+    uint32_t recoverButtonMsgId = 0, suggestionMsgId = 0, headlineMsgId = IsCoding() ? MSG_381 : MSG_370;
     bool driveLetterInHeading = false;
 
     switch (errorCause) {
     case ErrorCause_t::ErrorCauseDownloadFailed:
         recoverButtonMsgId = MSG_RECOVER_RESUME;
-        suggestionMsgId = MSG_323;
+        suggestionMsgId = IsCoding() ? MSG_382 : MSG_323;
         break;
     case ErrorCause_t::ErrorCauseDownloadFailedDiskFull:
         recoverButtonMsgId = MSG_RECOVER_RESUME;
         headlineMsgId = MSG_350;
-        suggestionMsgId = MSG_334;
+        suggestionMsgId = IsCoding() ? MSG_303 : MSG_334;
     case ErrorCause_t::ErrorCauseInstallFailedDiskFull:
         recoverButtonMsgId = MSG_RECOVER_RESUME;
         headlineMsgId = MSG_350;
-        suggestionMsgId = MSG_351;
+        suggestionMsgId = IsCoding() ? MSG_301 : MSG_351;
         break;
     case ErrorCause_t::ErrorCauseVerificationFailed:
         recoverButtonMsgId = MSG_RECOVER_DOWNLOAD_AGAIN;
-        suggestionMsgId = MSG_324;
+        suggestionMsgId = IsCoding() ? MSG_383 : MSG_324;
         break;
     case ErrorCause_t::ErrorCauseCancelled:
     case ErrorCause_t::ErrorCauseGeneric:
     case ErrorCause_t::ErrorCauseWriteFailed:
     case ErrorCause_t::ErrorCauseSuspended: // TODO: new string here
         recoverButtonMsgId = MSG_RECOVER_TRY_AGAIN;
-        suggestionMsgId = m_selectedInstallMethod == InstallMethod_t::InstallDualBoot ? MSG_358 : MSG_325;
+        suggestionMsgId = m_selectedInstallMethod == InstallMethod_t::InstallDualBoot
+	    ? (IsCoding() ? MSG_385 : MSG_358)
+	    : (IsCoding() ? MSG_384 : MSG_325);
         break;
     case ErrorCause_t::ErrorCauseNot64Bit:
     case ErrorCause_t::ErrorCause32BitEFI:
-        headlineMsgId = MSG_354;
-        suggestionMsgId = MSG_355;
+        headlineMsgId = IsCoding() ? MSG_313 : MSG_354;
+        suggestionMsgId = IsCoding() ? MSG_375 : MSG_355;
         break;
     case ErrorCause_t::ErrorCauseBitLocker:
         headlineMsgId = MSG_356;
         driveLetterInHeading = true;
-        suggestionMsgId = MSG_357;
+        suggestionMsgId = IsCoding() ? MSG_378 : MSG_357;
         break;
     case ErrorCause_t::ErrorCauseNotNTFS:
         headlineMsgId = MSG_352;
         driveLetterInHeading = true;
-        suggestionMsgId = MSG_353;
+        suggestionMsgId = IsCoding() ? MSG_308 : MSG_353;
         break;
     case ErrorCause_t::ErrorCauseNonWindowsMBR:
         headlineMsgId = MSG_359;
-        suggestionMsgId = MSG_360;
+        suggestionMsgId = IsCoding() ? MSG_379 : MSG_360;
         break;
     case ErrorCause_t::ErrorCauseCantCheckMBR:
         // TODO: new string here; or, better, eliminate this failure mode
@@ -1775,7 +1777,7 @@ void CEndlessUsbToolDlg::ErrorOccured(ErrorCause_t errorCause)
     // Update the error description and "recovery" suggestion
     if (suggestionMsgId != 0) {
         CComBSTR message;
-        if (suggestionMsgId == MSG_334) {
+        if (suggestionMsgId == MSG_334 || suggestionMsgId == MSG_303) {
             POSITION p = m_remoteImages.FindIndex(m_selectedRemoteIndex);
             ULONGLONG size = 0;
             if (p != NULL) {
@@ -1785,7 +1787,7 @@ void CEndlessUsbToolDlg::ErrorOccured(ErrorCause_t errorCause)
             // we don't take the signature files into account but we are taking about ~2KB compared to >2GB
             ULONGLONG totalSize = size + (m_selectedInstallMethod == InstallMethod_t::ReformatterUsb ? m_installerImage.compressedSize : 0);
             message = UTF8ToBSTR(lmprintf(suggestionMsgId, SizeToHumanReadable(totalSize, FALSE, use_fake_units)));
-        } else if(suggestionMsgId == MSG_351) {
+        } else if(suggestionMsgId == MSG_351 || suggestionMsgId == MSG_301) {
             int nrGigsNeeded;
             ULONGLONG neededSize = GetNeededSpaceForDualBoot(nrGigsNeeded);
             message = UTF8ToBSTR(lmprintf(suggestionMsgId, SizeToHumanReadable(neededSize, FALSE, use_fake_units), ConvertUnicodeToUTF8(GetSystemDrive())));
@@ -2100,7 +2102,7 @@ void CEndlessUsbToolDlg::GoToSelectFilePage()
     CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(HTML_BUTTON_ID(ELEMENT_SELFILE_NEXT_BUTTON)), CComVariant(canUseLocal));
 
     if (canUseLocal) {
-        SetElementText(_T(ELEMENT_SET_FILE_TITLE), UTF8ToBSTR(lmprintf(MSG_321)));
+        SetElementText(_T(ELEMENT_SET_FILE_TITLE), UTF8ToBSTR(lmprintf(IsCoding() ? MSG_373 : MSG_321)));
         SetElementText(_T(ELEMENT_SET_FILE_SUBTITLE), UTF8ToBSTR(lmprintf(MSG_322)));
     } else if(CanUseRemoteFile()) {
         ApplyRufusLocalization();
@@ -2946,18 +2948,18 @@ HRESULT CEndlessUsbToolDlg::OnSelectFileNextClicked(IHTMLElement* pElement)
 	uint32_t headlineMsg;
 	switch (m_selectedInstallMethod) {
 	case InstallDualBoot:
-		headlineMsg = MSG_320;
+		headlineMsg = IsCoding() ? MSG_347 : MSG_320;
 		break;
 	case ReformatterUsb:
-		headlineMsg = MSG_344;
+		headlineMsg = IsCoding() ? MSG_349 : MSG_344;
 		break;
 	case LiveUsb:
 	case CombinedUsb:
-		headlineMsg = MSG_343;
+		headlineMsg = IsCoding() ? MSG_348 : MSG_343;
 		break;
 	default:
 		uprintf("Unexpected install method %ls", InstallMethodToStr(m_selectedInstallMethod));
-		headlineMsg = MSG_343;
+		headlineMsg = IsCoding() ? MSG_348 : MSG_343;
 	}
 
 	CString finalMessageStr = UTF8ToCString(lmprintf(headlineMsg));
@@ -3524,7 +3526,7 @@ void CEndlessUsbToolDlg::GoToSelectStoragePage()
 	if (!enoughBytesAvailable) {
 		uprintf("Not enough bytes available.");
 
-		message = UTF8ToCString(lmprintf(MSG_335, SizeToHumanReadable(neededSize, FALSE, use_fake_units), freeSize, systemDriveA));
+		message = UTF8ToCString(lmprintf(IsCoding() ? MSG_374 : MSG_335, SizeToHumanReadable(neededSize, FALSE, use_fake_units), freeSize, systemDriveA));
 		SetElementText(_T(ELEMENT_STORAGE_SPACE_WARNING), CComBSTR(message));
 
 		ChangePage(_T(ELEMENT_STORAGE_PAGE));
@@ -6046,7 +6048,7 @@ BOOL CEndlessUsbToolDlg::UninstallDualBoot(CEndlessUsbToolDlg *dlg)
 	FUNCTION_ENTER;
 
 	BOOL retResult = FALSE;
-	uint32_t popupMsgId = MSG_363;
+	uint32_t popupMsgId = IsCoding() ? MSG_380 : MSG_363;
 	UINT popupStyle = MB_OK | MB_ICONERROR;
 
 	CString systemDriveLetter = GetSystemDrive();
@@ -6116,7 +6118,7 @@ done_with_mbr:
 	DelayDeleteFolder(endlessFilesPath);
 
 	// set success message and icon
-	popupMsgId = MSG_362;
+	popupMsgId = IsCoding() ? MSG_377 : MSG_362;
 	popupStyle = MB_OK | MB_ICONINFORMATION;
 	retResult = TRUE;
 
@@ -6416,7 +6418,7 @@ void CEndlessUsbToolDlg::UpdateDualBootTexts()
 
 void CEndlessUsbToolDlg::QueryAndDoUninstall()
 {
-	int selected = AfxMessageBox(UTF8ToCString(lmprintf(MSG_361)), MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2);
+	int selected = AfxMessageBox(UTF8ToCString(lmprintf(IsCoding() ? MSG_376 : MSG_361)), MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2);
 
 	if (selected != IDYES)
 		return;
