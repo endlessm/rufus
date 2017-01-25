@@ -77,7 +77,6 @@ const loc_control_id control_id[] = {
 	LOC_CTRL_HTML(InstallerLanguage),
 	LOC_CTRL_HTML(InstallerContent),
 	LOC_CTRL_HTML(ThankYouDualBootReminder),
-	LOC_CTRL_HTML(ThankYouDualBootReminderCoding),
     LOC_CTRL_HTML(ThankYouLiveReminder),
     LOC_CTRL_HTML(ThankYouLiveReminderCoding),
     LOC_CTRL_HTML(ThankYouReflasherReminder),

@@ -109,7 +109,6 @@
 #define HTML_ELEM_LiveUsbTextCoding               2071
 #define HTML_ELEM_DualBootPageTitleCoding         2072
 #define HTML_ELEM_InstallingPageTitleCoding       2073
-#define HTML_ELEM_ThankYouDualBootReminderCoding  2074
 #define HTML_ELEM_ThankYouLiveReminderCoding      2075
 #define HTML_ELEM_ThankYouReflasherReminderCoding 2076
 #define HTML_ELEM_ErrorMessageCoding              2077
