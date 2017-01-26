@@ -1682,6 +1682,7 @@ void CEndlessUsbToolDlg::ErrorOccured(ErrorCause_t errorCause)
         recoverButtonMsgId = MSG_RECOVER_RESUME;
         headlineMsgId = MSG_350;
         suggestionMsgId = IsCoding() ? MSG_303 : MSG_334;
+	break;
     case ErrorCause_t::ErrorCauseInstallFailedDiskFull:
         recoverButtonMsgId = MSG_RECOVER_RESUME;
         headlineMsgId = MSG_350;
