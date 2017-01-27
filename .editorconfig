@@ -9,6 +9,9 @@ indent_style = tab
 [src/endless/*]
 indent_style = space
 
+[src/endless/gpt/*]
+indent_style = space
+
 [src/endless/Analytics.*]
 indent_style = tab
 
