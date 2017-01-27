@@ -156,19 +156,33 @@ uint64_t get_disk_size(struct ptable *pt)
         pt->header.last_usable_lba * SECTOR_SIZE; // rest of the usable disk size
 }
 
+// compression_type: an element of bled_compression_type
 uint64_t get_eos_archive_disk_image_size(const char *filepath, int compression_type, BOOL isInstallerImage)
 {
     int64_t bytes_read;
-    int size;
     int64_t result = 0;
     struct ptable pt;
+    const int size = sizeof(pt); // should be 2048
 
     if (NULL == filepath) return 0;
 
-    bled_init(_uprintf, NULL, NULL);
-    size = sizeof(pt); // should be 2048
-    bytes_read = bled_uncompress_to_buffer(filepath, (char*)&pt, size, compression_type);
-    bled_exit();
+    if (compression_type == BLED_COMPRESSION_NONE) {
+        FILE *file = NULL;
+        errno_t err = fopen_s(&file, filepath, "rb");
+        if (err == 0) {
+            // The 'size' and 'count' arguments are "backwards" because this
+            // function returns the number of items read; by making the item
+            // size 1 we get the number of byets
+            bytes_read = fread((void *)&pt, 1, size, file);
+            fclose(file);
+        } else {
+            uprintf("Error opening %s: %d", filepath, err);
+        }
+    } else {
+        bled_init(_uprintf, NULL, NULL);
+        bytes_read = bled_uncompress_to_buffer(filepath, (char*)&pt, size, compression_type);
+        bled_exit();
+    }
 
     if (bytes_read < size) {
         // not enough bytes read
