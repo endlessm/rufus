@@ -5890,7 +5890,6 @@ BOOL CEndlessUsbToolDlg::UninstallDualBoot(CEndlessUsbToolDlg *dlg)
 	BOOL retResult = FALSE;
 	uint32_t popupMsgId = MSG_363;
 	UINT popupStyle = MB_OK | MB_ICONERROR;
-	FILE *boottrackImgFile = NULL;
 
 	CString systemDriveLetter = GetSystemDrive();
 	CString endlessFilesPath = systemDriveLetter + PATH_ENDLESS_SUBDIRECTORY;
