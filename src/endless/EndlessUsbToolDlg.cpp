@@ -2301,7 +2301,7 @@ void CEndlessUsbToolDlg::UpdateFileEntries(bool shouldInit)
                     currentEntry->date = date;
                     currentEntry->isUnpackedImage = isUnpackedFile;
 
-                    AddEntryToSelect(selectElement, CComBSTR(currentEntry->filePath), CComBSTR(displayName), &currentEntry->htmlIndex, 0);
+                    hr = AddEntryToSelect(selectElement, CComBSTR(currentEntry->filePath), CComBSTR(displayName), &currentEntry->htmlIndex, 0);
                     IFFALSE_RETURN(SUCCEEDED(hr), "Error adding item in image file list.");
 
                     m_imageFiles.SetAt(currentEntry->filePath, currentEntry);
