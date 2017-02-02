@@ -197,10 +197,7 @@ private:
     BOOL m_lgpSet;
     BOOL m_lgpExistingKey;	// For LGP set/restore
     BOOL m_automount;
-    HANDLE m_FilesChangedHandle;
     HANDLE m_cancelOperationEvent;
-    HANDLE m_closeFileScanThreadEvent;
-    HANDLE m_fileScanThread;
     HANDLE m_operationThread;
     HANDLE m_downloadUpdateThread;
     HANDLE m_checkConnectionThread;
@@ -286,8 +283,7 @@ private:
 
 	void LeavingDevicesPage();
 
-    void UpdateFileEntries(bool shouldInit = false);
-    static DWORD WINAPI FileScanThread(void* param);
+    void UpdateFileEntries();
 
     void StartJSONDownload();
     void UpdateDownloadOptions();

@@ -506,8 +506,6 @@ CEndlessUsbToolDlg::CEndlessUsbToolDlg(UINT globalMessage, CWnd* pParent /*=NULL
     m_spHtmlDoc3(NULL),
     m_lgpSet(FALSE),
     m_lgpExistingKey(FALSE),
-    m_FilesChangedHandle(INVALID_HANDLE_VALUE),
-    m_fileScanThread(INVALID_HANDLE_VALUE),
     m_operationThread(INVALID_HANDLE_VALUE),
     m_downloadUpdateThread(INVALID_HANDLE_VALUE),
     m_checkConnectionThread(INVALID_HANDLE_VALUE),
@@ -521,7 +519,6 @@ CEndlessUsbToolDlg::CEndlessUsbToolDlg(UINT globalMessage, CWnd* pParent /*=NULL
     m_usbDeleteAgreement(false),
     m_currentStep(OP_NO_OPERATION_IN_PROGRESS),
     m_cancelOperationEvent(CreateEvent(NULL, TRUE, FALSE, NULL)),
-    m_closeFileScanThreadEvent(CreateEvent(NULL, TRUE, FALSE, NULL)),
     m_closeRequested(false),
     m_ieVersion(0),
     m_globalWndMessage(globalMessage),
@@ -866,14 +863,12 @@ void CEndlessUsbToolDlg::Uninit()
 	if (h != INVALID_HANDLE_VALUE) handlesToWaitFor[handlesCount++] = h; \
 } while (0)
     await_handle(analyticsHandle);
-    await_handle(m_fileScanThread);
     await_handle(m_operationThread);
     await_handle(m_downloadUpdateThread);
     await_handle(m_checkConnectionThread);
 #undef await_handle
 
     if (handlesCount > 0) {
-        if (m_closeFileScanThreadEvent != INVALID_HANDLE_VALUE) SetEvent(m_closeFileScanThreadEvent);
         if (m_cancelOperationEvent != INVALID_HANDLE_VALUE) SetEvent(m_cancelOperationEvent);
         DWORD waitStatus = WaitForMultipleObjects(handlesCount, handlesToWaitFor, TRUE, THREADS_WAIT_TIMEOUT);
 
@@ -885,11 +880,6 @@ void CEndlessUsbToolDlg::Uninit()
     if (m_cancelOperationEvent != INVALID_HANDLE_VALUE) {
         CloseHandle(m_cancelOperationEvent);
         m_cancelOperationEvent = INVALID_HANDLE_VALUE;
-    }
-
-    if (m_closeFileScanThreadEvent != INVALID_HANDLE_VALUE) {
-        CloseHandle(m_closeFileScanThreadEvent);
-        m_closeFileScanThreadEvent = INVALID_HANDLE_VALUE;
     }
 
     m_downloadManager.Uninit();
@@ -2071,7 +2061,7 @@ void CEndlessUsbToolDlg::GoToSelectFilePage()
     RemoteImageEntry_t r;
 
     // Check locally available images
-    UpdateFileEntries(true);
+    UpdateFileEntries();
 
     // Update UI based on what was found
     bool canUseLocal = CanUseLocalFile();
@@ -2193,7 +2183,7 @@ error:
 	return S_OK;
 }
 
-void CEndlessUsbToolDlg::UpdateFileEntries(bool shouldInit)
+void CEndlessUsbToolDlg::UpdateFileEntries()
 {
     FUNCTION_ENTER;
 
@@ -2397,57 +2387,6 @@ checkEntries:
             image_path = wchar_to_utf8(selectedValue);
         }
     }
-
-    if (shouldInit) {
-        //// start the change notifications thread
-        //if (hasLocalImages && m_fileScanThread == INVALID_HANDLE_VALUE) {
-        //    m_fileScanThread = CreateThread(NULL, 0, CEndlessUsbToolDlg::FileScanThread, (LPVOID)this, 0, NULL);
-        //}
-    }
-}
-
-DWORD WINAPI CEndlessUsbToolDlg::FileScanThread(void* param)
-{
-    FUNCTION_ENTER;
-
-    CEndlessUsbToolDlg *dlg = (CEndlessUsbToolDlg*)param;
-    DWORD error = 0;
-    HANDLE handlesToWaitFor[2];
-    DWORD changeNotifyFilter = FILE_NOTIFY_CHANGE_FILE_NAME;
-    //changeNotifyFilter |= FILE_NOTIFY_CHANGE_SIZE;
-
-    handlesToWaitFor[0] = dlg->m_closeFileScanThreadEvent;
-    handlesToWaitFor[1] = FindFirstChangeNotification(CEndlessUsbToolApp::m_appDir, FALSE, changeNotifyFilter);
-    if (handlesToWaitFor[1] == INVALID_HANDLE_VALUE) {
-        error = GetLastError();
-        uprintf("Error on FindFirstChangeNotificationA error=[%d]", error);
-        return error;
-    }
-
-    while (TRUE)
-    {
-        DWORD dwWaitStatus = WaitForMultipleObjects(2, handlesToWaitFor, FALSE, INFINITE);
-        switch (dwWaitStatus)
-        {
-        case WAIT_OBJECT_0:
-            uprintf("FileScanThread: exit requested.");
-            FindCloseChangeNotification(handlesToWaitFor[1]);
-            return 0;
-        case WAIT_OBJECT_0 + 1:
-            ::PostMessage(hMainDialog, WM_FILES_CHANGED, 0, 0);
-            if (FindNextChangeNotification(handlesToWaitFor[1]) == FALSE) {
-                error = GetLastError();
-                uprintf("FileScanThread ERROR: FindNextChangeNotification function failed with error [%d].", GetLastError());
-                return error;
-            }
-            break;
-        default:
-            uprintf("FileScanThread: unhandled wait status [%d]", dwWaitStatus);
-            return GetLastError();
-        }
-    }
-
-    return 0;
 }
 
 void CEndlessUsbToolDlg::StartJSONDownload()
@@ -3265,16 +3204,6 @@ void CEndlessUsbToolDlg::StartInstallationProcess()
 	}
 
 	ChangePage(_T(ELEMENT_INSTALL_PAGE));
-
-	// RADU: wait for File scanning thread
-	if (m_fileScanThread != INVALID_HANDLE_VALUE) {
-		SetEvent(m_closeFileScanThreadEvent);
-		uprintf("Waiting for scan files thread.");
-		WaitForSingleObject(m_fileScanThread, 5000);
-		m_fileScanThread = INVALID_HANDLE_VALUE;
-		CloseHandle(m_closeFileScanThreadEvent);
-		m_closeFileScanThreadEvent = INVALID_HANDLE_VALUE;
-	}
 }
 
 void CEndlessUsbToolDlg::StartOperationThread(int operation, LPTHREAD_START_ROUTINE threadRoutine, LPVOID param)
@@ -3580,7 +3509,6 @@ HRESULT CEndlessUsbToolDlg::OnRecoverErrorButtonClicked(IHTMLElement* pElement)
     m_localFilesScanned = false;
     SetJSONDownloadState(JSONDownloadState::Pending);
     ResetEvent(m_cancelOperationEvent);
-    ResetEvent(m_closeFileScanThreadEvent);
     StartCheckInternetConnectionThread();
     CallJavascript(_T(JS_ENABLE_BUTTON), CComVariant(HTML_BUTTON_ID(_T(ELEMENT_INSTALL_CANCEL))), CComVariant(TRUE));
 
