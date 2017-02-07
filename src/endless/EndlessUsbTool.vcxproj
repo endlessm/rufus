@@ -105,7 +105,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>ENDLESSUSB_TOOL;_OFF_T_DEFINED;_off_t=__int64;off_t=_off_t;_CRTDBG_MAP_ALLOC;WIN32;_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\endless;..\msvc-missing;..\ms-sys\inc;..\syslinux\libinstaller;..\syslinux\libfat;..\syslinux\win;..\libcdio;..\getopt;..\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\endless;..\msvc-missing;..\ms-sys\inc;..\syslinux\libinstaller;..\syslinux\libfat;..\syslinux\win;..\libcdio;..\getopt;..\7zip-cpp;..\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>
       </MultiProcessorCompilation>
       <MinimalRebuild>true</MinimalRebuild>
@@ -149,7 +149,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>ENDLESSUSB_TOOL;_OFF_T_DEFINED;_off_t=__int64;off_t=_off_t;_CRTDBG_MAP_ALLOC;_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\endless;..\msvc-missing;..\ms-sys\inc;..\syslinux\libinstaller;..\syslinux\libfat;..\syslinux\win;..\libcdio;..\getopt;..\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\endless;..\msvc-missing;..\ms-sys\inc;..\syslinux\libinstaller;..\syslinux\libfat;..\syslinux\win;..\libcdio;..\getopt;..\7zip-cpp;..\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <DisableSpecificWarnings>4091</DisableSpecificWarnings>
     </ClCompile>
@@ -190,7 +190,7 @@
       <PreprocessorDefinitions>ENDLESSUSB_TOOL;_OFF_T_DEFINED;_off_t=__int64;off_t=_off_t;WIN32;_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <ExceptionHandling>false</ExceptionHandling>
-      <AdditionalIncludeDirectories>..\endless;..\msvc-missing;..\ms-sys\inc;..\syslinux\libinstaller;..\syslinux\libfat;..\syslinux\win;..\libcdio;..\getopt;..\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\endless;..\msvc-missing;..\ms-sys\inc;..\syslinux\libinstaller;..\syslinux\libfat;..\syslinux\win;..\libcdio;..\getopt;..\7zip-cpp;..\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4091</DisableSpecificWarnings>
     </ClCompile>
     <Link>
@@ -233,7 +233,7 @@
       <IntrinsicFunctions>false</IntrinsicFunctions>
       <PreprocessorDefinitions>ENDLESSUSB_TOOL;_OFF_T_DEFINED;_off_t=__int64;off_t=_off_t;_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\endless;..\msvc-missing;..\ms-sys\inc;..\syslinux\libinstaller;..\syslinux\libfat;..\syslinux\win;..\libcdio;..\getopt;..\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\endless;..\msvc-missing;..\ms-sys\inc;..\syslinux\libinstaller;..\syslinux\libfat;..\syslinux\win;..\libcdio;..\getopt;..\7zip-cpp;..\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4091</DisableSpecificWarnings>
     </ClCompile>
     <Link>
@@ -556,6 +556,9 @@
     <Manifest Include="EndlessUsbTool.manifest" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\7zip-cpp\7zpp\7zpp.vcxproj">
+      <Project>{87675a89-d1c2-4c3d-aba6-497e75a89962}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\bled\.msvc\bled.vcxproj">
       <Project>{fb6d52d4-a2f8-c358-db85-bbcaecfddd7d}</Project>
     </ProjectReference>
