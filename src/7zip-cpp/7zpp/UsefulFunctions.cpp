@@ -50,6 +50,10 @@ namespace SevenZip
 			guid = &SevenZip::intl::CLSID_CFormatLzma86;
 			break;
 
+		case CompressionFormat::SquashFS:
+			guid = &SevenZip::intl::CLSID_CFormatSquashFS;
+			break;
+
 		default:
 			guid = &SevenZip::intl::CLSID_CFormat7z;
 			break;
@@ -208,6 +212,7 @@ namespace SevenZip
 		myAvailableFormats.push_back(CompressionFormat::Lzma86);
 		myAvailableFormats.push_back(CompressionFormat::Cab);
 		myAvailableFormats.push_back(CompressionFormat::Iso);
+		myAvailableFormats.push_back(CompressionFormat::SquashFS);
 
 		// Check each format for one that works
 		for (int i = 0; i < myAvailableFormats.size(); i++)
