@@ -26,7 +26,7 @@ namespace SevenZip
 
 		virtual size_t GetNumberOfItems();
 		virtual std::vector<TString> GetItemsNames();
-		virtual std::vector<size_t>  GetOrigSizes();
+		virtual std::vector<UINT64>  GetOrigSizes();
 
 	protected:
 		bool m_ReadMetadata = false;
@@ -37,7 +37,7 @@ namespace SevenZip
 		CompressionLevelEnum m_compressionLevel;
 		size_t m_numberofitems = 0;
 		std::vector<TString> m_itemnames;
-		std::vector<size_t> m_origsizes;
+		std::vector<UINT64> m_origsizes;
 
 	private:
 		bool pri_GetNumberOfItems();

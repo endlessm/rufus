@@ -116,7 +116,7 @@ namespace SevenZip
 
 	bool UsefulFunctions::GetItemsNames(const SevenZipLibrary & library, const TString & archivePath,
 		CompressionFormatEnum &format, size_t & numberofitems, 
-		std::vector<TString> & itemnames, std::vector<size_t> & origsizes)
+		std::vector<TString> & itemnames, std::vector<UINT64> & origsizes)
 	{
 		CComPtr< IStream > fileStream = FileSys::OpenFileToRead(archivePath);
 
@@ -164,8 +164,8 @@ namespace SevenZip
 					//throw SevenZipException( GetCOMErrMsg( _T( "Open archive" ), hr ) );
 				}
 
-				int size = prop.intVal;
-				origsizes[i] = size_t(size);
+				ULARGE_INTEGER size = prop.uhVal;
+				origsizes[i] = size.QuadPart;
 
 				// Get name of file
 				hr = archive->GetProperty(i, kpidPath, &prop);
