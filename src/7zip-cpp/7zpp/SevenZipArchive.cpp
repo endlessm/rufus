@@ -64,7 +64,7 @@ namespace SevenZip
 		return m_itemnames;
 	}
 
-	std::vector<size_t> SevenZipArchive::GetOrigSizes()
+	std::vector<UINT64> SevenZipArchive::GetOrigSizes()
 	{
 		if (!m_ReadMetadata)
 		{
