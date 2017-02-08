@@ -89,9 +89,9 @@ STDMETHODIMP ArchiveExtractCallback::SetCompleted( const UInt64* completeValue )
 	*/
 	if (m_callback != nullptr) 
 	{
-		//Don't call this directly, it will be called per file which is more consistent across archive types
-		//TODO: incorporate better progress tracking
-		//m_callback->OnProgress(m_absPath, *completeValue);
+		// Whether *completeValue is measured in compressed or decompressed bytes depends on the archive format(!)
+		// Fortunately, we only care about one archive format, SquashFS, where decompressed bytes are reported.
+		m_callback->OnProgress(m_absPath, *completeValue);
 	}
 	return S_OK;
 }
