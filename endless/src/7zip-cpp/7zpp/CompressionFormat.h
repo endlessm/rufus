@@ -20,7 +20,8 @@ namespace SevenZip
 			Iso,
 			Cab,
 			Lzma,
-			Lzma86
+			Lzma86,
+			SquashFS
 		};
 	
 		typedef intl::EnumerationDefinitionNoStrings _Definition;
