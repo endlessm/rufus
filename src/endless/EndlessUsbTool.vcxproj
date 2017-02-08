@@ -278,6 +278,7 @@
     <ClInclude Include="..\usb.h" />
     <ClInclude Include="Analytics.h" />
     <ClInclude Include="DownloadManager.h" />
+    <ClInclude Include="EndlessISO.h" />
     <ClInclude Include="EndlessUsbTool.h" />
     <ClInclude Include="EndlessUsbToolDlg.h" />
     <ClInclude Include="GeneralCode.h" />
@@ -477,6 +478,7 @@
     </ClCompile>
     <ClCompile Include="Analytics.cpp" />
     <ClCompile Include="DownloadManager.cpp" />
+    <ClCompile Include="EndlessISO.cpp" />
     <ClCompile Include="EndlessUsbTool.cpp" />
     <ClCompile Include="EndlessUsbToolDlg.cpp" />
     <ClCompile Include="gpt\crc32.c">

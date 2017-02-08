@@ -322,9 +322,6 @@ const wchar_t* mainWindowTitle = L"Endless Installer";
 #define ENDLESS_UNINSTALLER_NAME L"endless-uninstaller.exe"
 #define ENDLESS_OS_NAME L"Endless OS"
 
-#define ENDLESS_IMG_FILE_NAME			L"endless.img"
-#define EXFAT_ENDLESS_LIVE_FILE_NAME	L"live"
-
 // Radu: How much do we need to reserve for the exfat partition header?
 // reserve 10 mb for now; this will also include the signature file
 #define INSTALLER_DELTA_SIZE (10*1024*1024)
@@ -814,6 +811,10 @@ BOOL CEndlessUsbToolDlg::OnInitDialog()
     CheckDlgButton(IDC_QUICK_FORMAT, BST_CHECKED);
 
     bool result = m_downloadManager.Init(m_hWnd, WM_FILE_DOWNLOAD_STATUS);
+    IFFALSE_PRINTERROR(result, "DownloadManager.Init failed");
+
+    result = m_iso.Init();
+    IFFALSE_PRINTERROR(result, "EndlessISO.Init failed");
 
     SetWindowTextW(L"");
 
@@ -892,6 +893,7 @@ void CEndlessUsbToolDlg::Uninit()
         m_closeFileScanThreadEvent = INVALID_HANDLE_VALUE;
     }
 
+    m_iso.Uninit();
     m_downloadManager.Uninit();
 
     // unregister from notifications and delete drive list related memory
@@ -2207,6 +2209,7 @@ void CEndlessUsbToolDlg::UpdateFileEntries(bool shouldInit)
     BOOL fileAccessException = false;
     CString currentInstallerVersion;
 	CString searchPath = GET_IMAGE_PATH(ALL_FILES);
+    const CString liveFilePath = GET_IMAGE_PATH(EXFAT_ENDLESS_LIVE_FILE_NAME);
     HANDLE findFilesHandle = FindFirstFile(searchPath, &findFileData);
 
     m_localFilesScanned = true;
@@ -2239,8 +2242,10 @@ void CEndlessUsbToolDlg::UpdateFileEntries(bool shouldInit)
         // If running from a live USB, the image file is named endless.img;
         // trueName is the filename it *should* have had (eos-...base.img, for example)
         CString trueName = currentFile;
-        const CString liveFilePath = GET_IMAGE_PATH(EXFAT_ENDLESS_LIVE_FILE_NAME);
-		if (currentFile == ENDLESS_IMG_FILE_NAME && PathFileExists(liveFilePath)) {
+        if ((
+                currentFile == ENDLESS_IMG_FILE_NAME ||
+                currentFile == ENDLESS_SQUASH_FILE_NAME
+            ) && PathFileExists(liveFilePath)) {
 			uprintf("Found %ls; checking %ls to find image name", currentFile, liveFilePath);
 			bool foundTrueName = false;
 			FILE *liveFile = NULL;
@@ -2265,8 +2270,6 @@ void CEndlessUsbToolDlg::UpdateFileEntries(bool shouldInit)
 
         const CString currentFilePath =  GET_IMAGE_PATH(currentFile);
         const CString trueNamePath = GET_IMAGE_PATH(trueName);
-        CompressionType compressionType = GetCompressionType(currentFilePath);
-        if (compressionType == CompressionType::CompressionTypeUnknown) continue;
 
         if (!PathFileExists(currentFilePath)) continue; // file is present
 
@@ -2277,7 +2280,8 @@ void CEndlessUsbToolDlg::UpdateFileEntries(bool shouldInit)
             CString displayName, personality, version, date;
             bool isInstallerImage = false;
             if (!ParseImgFileName(trueName, personality, version, date, isInstallerImage)) continue;
-            ULONGLONG extractedSize = GetExtractedSize(currentFilePath, isInstallerImage);
+            CompressionType compressionType;
+            ULONGLONG extractedSize = GetExtractedSize(currentFilePath, isInstallerImage, compressionType);
             if (0 == extractedSize) continue;
             CFile file(currentFilePath, CFile::modeRead);
             GetImgDisplayName(displayName, version, personality, file.GetLength());
@@ -2319,7 +2323,9 @@ void CEndlessUsbToolDlg::UpdateFileEntries(bool shouldInit)
                     UpdateSelectOptionText(selectElement, displayName, currentEntry->htmlIndex);
                 }
                 currentEntry->stillPresent = TRUE;
-                CString basePath = compressionType == CompressionTypeNone
+                CString basePath = (
+                    compressionType == CompressionTypeNone ||
+                    compressionType == CompressionTypeSquash)
                     ? CSTRING_GET_PATH(trueNamePath, '.')
                     : CSTRING_GET_PATH(CSTRING_GET_PATH(trueNamePath, '.'), '.');
 
@@ -2541,6 +2547,13 @@ bool CEndlessUsbToolDlg::UnpackImage(const CString &image, const CString &destin
     {
         BOOL result = CopyFileEx(image, destination, CEndlessUsbToolDlg::CopyProgressRoutine, this, NULL, 0);
         IFFALSE_RETURN_VALUE(result, "Copying uncompressed image failed/cancelled", false);
+        return true;
+    }
+    case CompressionTypeSquash:
+    {
+        auto result = m_iso.UnpackSquashFS(image, destination,
+            CEndlessUsbToolDlg::UpdateUnpackProgress, m_cancelOperationEvent);
+        IFFALSE_RETURN_VALUE(result, "Unpacking SquashFS image failed/cancelled", false);
         return true;
     }
     case CompressionTypeUnknown:
@@ -4052,12 +4065,13 @@ void CEndlessUsbToolDlg::GetImgDisplayName(CString &displayName, const CString &
 
 CompressionType CEndlessUsbToolDlg::GetCompressionType(const CString& filename)
 {
-    FUNCTION_ENTER;
+    FUNCTION_ENTER_FMT("%ls", filename);
 
     CString ext = CSTRING_GET_LAST(filename, '.');
     if (ext == "gz")  return CompressionTypeGz;
     if (ext == "xz")  return CompressionTypeXz;
     if (ext == "img") return CompressionTypeNone;
+    if (ext == "squash") return CompressionTypeSquash;
 
     uprintf("%ls has unknown compression type %ls", filename, ext);
     return CompressionTypeUnknown;
@@ -4078,15 +4092,23 @@ int CEndlessUsbToolDlg::GetBledCompressionType(const CompressionType type)
     }
 }
 
-ULONGLONG CEndlessUsbToolDlg::GetExtractedSize(const CString& filename, BOOL isInstallerImage)
+ULONGLONG CEndlessUsbToolDlg::GetExtractedSize(const CString& filename, BOOL isInstallerImage, CompressionType &compressionType)
 {
     FUNCTION_ENTER;
 
-    int compression_type = GetBledCompressionType(GetCompressionType(filename));
-    IFFALSE_RETURN_VALUE(compression_type >= BLED_COMPRESSION_NONE && compression_type < BLED_COMPRESSION_MAX, "unknown compression", 0);
+    compressionType = GetCompressionType(filename);
+    switch (compressionType) {
+    case CompressionTypeUnknown:
+        return 0;
+    case CompressionTypeSquash:
+        return m_iso.GetExtractedSize(filename, isInstallerImage);
+    default:
+        int bled_type = GetBledCompressionType(compressionType);
+        IFFALSE_RETURN_VALUE(bled_type >= BLED_COMPRESSION_NONE && bled_type < BLED_COMPRESSION_MAX, "unknown compression", 0);
 
-    CStringA asciiFileName = ConvertUnicodeToUTF8(filename);
-    return get_eos_archive_disk_image_size(asciiFileName, compression_type, isInstallerImage);
+        CStringA asciiFileName = ConvertUnicodeToUTF8(filename);
+        return get_eos_archive_disk_image_size(asciiFileName, bled_type, isInstallerImage);
+    }
 }
 
 void CEndlessUsbToolDlg::GetIEVersion()
@@ -4820,10 +4842,15 @@ error:
 
 void CEndlessUsbToolDlg::ImageUnpackCallback(const uint64_t read_bytes)
 {
+    UpdateUnpackProgress(read_bytes, CEndlessUsbToolDlg::ImageUnpackFileSize);
+}
+
+void CEndlessUsbToolDlg::UpdateUnpackProgress(const uint64_t current_bytes, const uint64_t total_bytes)
+{
 	static int oldPercent = 0;
 	static int oldOp = -1;
 
-	float perecentageUnpacked = 100.0f * read_bytes / CEndlessUsbToolDlg::ImageUnpackFileSize;
+	float perecentageUnpacked = 100.0f * current_bytes / total_bytes;
 	float percentage = (float)CEndlessUsbToolDlg::ImageUnpackPercentStart;
 	percentage += (CEndlessUsbToolDlg::ImageUnpackPercentEnd - CEndlessUsbToolDlg::ImageUnpackPercentStart) * perecentageUnpacked / 100;
 
@@ -4838,10 +4865,14 @@ void CEndlessUsbToolDlg::ImageUnpackCallback(const uint64_t read_bytes)
 	}
 
 	if (change) {
-		uprintf("Operation %ls(%d) - unpacked %s",
+		// SizeToHumanReadable returns a static buffer
+		CStringA current_bytes_str(SizeToHumanReadable(current_bytes, FALSE, use_fake_units));
+		CStringA total_bytes_str(SizeToHumanReadable(total_bytes, FALSE, use_fake_units));
+		uprintf("Operation %ls(%d) - unpacked %s/%s",
 			OperationToStr(CEndlessUsbToolDlg::ImageUnpackOperation),
 			CEndlessUsbToolDlg::ImageUnpackOperation,
-			SizeToHumanReadable(read_bytes, FALSE, use_fake_units));
+			current_bytes_str,
+			total_bytes_str);
 	}
 	UpdateProgress(CEndlessUsbToolDlg::ImageUnpackOperation, percentage);
 }
@@ -6150,7 +6181,8 @@ bool CEndlessUsbToolDlg::PackedImageAlreadyExists(const CString &filePath, ULONG
 	CString actualFile = isUnpackedImage ? GET_IMAGE_PATH(ENDLESS_IMG_FILE_NAME) : filePath;
 	IFFALSE_GOTOERROR(PathFileExists(actualFile), "File doesn't exists");
 
-	ULONGLONG extractedSize = GetExtractedSize(actualFile, isInstaller);
+	CompressionType unused;
+	ULONGLONG extractedSize = GetExtractedSize(actualFile, isInstaller, unused);
 	file.Open(actualFile, CFile::modeRead);
 	uprintf("size=%I64u, extracted size=%I64u", file.GetLength(), extractedSize);
 	if (isUnpackedImage) {

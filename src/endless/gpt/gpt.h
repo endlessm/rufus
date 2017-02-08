@@ -70,6 +70,7 @@ PACK(struct ptable {
 });
 
 uint64_t get_eos_archive_disk_image_size(const char *filepath, int compression_type, BOOL isInstallerImage);
+uint64_t get_disk_size(struct ptable *pt);
 int is_eos_gpt_valid(struct ptable *pt, BOOL isInstallerImage);
 uint8_t is_nth_flag_set(uint64_t flags, uint8_t n);
 
