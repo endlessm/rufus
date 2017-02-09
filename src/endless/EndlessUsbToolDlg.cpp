@@ -5146,11 +5146,16 @@ bool CEndlessUsbToolDlg::ExtendImageFile(const CString &endlessImgPath, ULONGLON
 	LARGE_INTEGER lsize;
 	lsize.QuadPart = selectedGigs * BYTES_IN_GIGABYTE;
 	
-	uprintf("Trying to extend Endless image from %I64i bytes to %I64i bytes which is about %s", lCurrentSize.QuadPart, lsize.QuadPart, SizeToHumanReadable(lsize.QuadPart, FALSE, use_fake_units));
-	IFFALSE_GOTOERROR(SetFilePointerEx(endlessImage, lsize, NULL, FILE_BEGIN) != 0, "Error on SetFilePointerEx");
-	IFFALSE_GOTOERROR(SetEndOfFile(endlessImage), "Error on SetEndOfFile");
-	IFFALSE_GOTOERROR(SetFileValidData(endlessImage, lsize.QuadPart), "Error on SetFileValidData");
-	uprintf("Extended Endless image");
+    if (lCurrentSize.QuadPart < lsize.QuadPart) {
+        uprintf("Trying to extend Endless image from %I64i bytes to %I64i bytes which is about %s", lCurrentSize.QuadPart, lsize.QuadPart, SizeToHumanReadable(lsize.QuadPart, FALSE, use_fake_units));
+        IFFALSE_GOTOERROR(SetFilePointerEx(endlessImage, lsize, NULL, FILE_BEGIN) != 0, "Error on SetFilePointerEx");
+        IFFALSE_GOTOERROR(SetEndOfFile(endlessImage), "Error on SetEndOfFile");
+        IFFALSE_GOTOERROR(SetFileValidData(endlessImage, lsize.QuadPart), "Error on SetFileValidData");
+        uprintf("Extended Endless image");
+    } else {
+        uprintf("Image size == %I64iB >= %I64iB == selected size", lCurrentSize.QuadPart, lsize.QuadPart);
+        uprintf("This is a bug -- continuing without truncating the image");
+    }
 
 	IFFALSE_PRINTERROR(SetPrivilege(hToken, SE_MANAGE_VOLUME_NAME, FALSE), "Can't release MANAGE_VOLUME privilege.");
 
