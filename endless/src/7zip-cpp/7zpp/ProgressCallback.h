@@ -17,9 +17,10 @@ namespace SevenZip
 		virtual void OnStartWithTotal(TString filePath, unsigned __int64 totalBytes) {}
 
 		/*
-		Called Whenever progress has updated with a bytes complete
+		Called Whenever progress has updated with a bytes complete. Return 'true' to
+		continue extracting, or 'false' to cancel.
 		*/
-		virtual void OnProgress(TString filePath, unsigned __int64 bytesCompleted) {}
+		virtual bool OnProgress(TString filePath, unsigned __int64 bytesCompleted) { return true; }
 
 
 		/*

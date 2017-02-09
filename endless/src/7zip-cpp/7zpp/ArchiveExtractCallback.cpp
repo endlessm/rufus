@@ -81,6 +81,7 @@ STDMETHODIMP ArchiveExtractCallback::SetTotal( UInt64 size )
 
 STDMETHODIMP ArchiveExtractCallback::SetCompleted( const UInt64* completeValue )
 {
+	bool proceed = true;
 	//Callback Event calls
 	/*
 	NB:
@@ -91,9 +92,9 @@ STDMETHODIMP ArchiveExtractCallback::SetCompleted( const UInt64* completeValue )
 	{
 		// Whether *completeValue is measured in compressed or decompressed bytes depends on the archive format(!)
 		// Fortunately, we only care about one archive format, SquashFS, where decompressed bytes are reported.
-		m_callback->OnProgress(m_absPath, *completeValue);
+		proceed = m_callback->OnProgress(m_absPath, *completeValue);
 	}
-	return S_OK;
+	return proceed ? S_OK : E_ABORT;
 }
 
 STDMETHODIMP ArchiveExtractCallback::GetStream( UInt32 index, ISequentialOutStream** outStream, Int32 askExtractMode )
