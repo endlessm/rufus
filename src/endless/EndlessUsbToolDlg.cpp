@@ -3809,50 +3809,12 @@ DWORD WINAPI CEndlessUsbToolDlg::FileVerificationThread(void* param)
     FUNCTION_ENTER;
 
     CEndlessUsbToolDlg *dlg = (CEndlessUsbToolDlg*) param;
-    CString filename = dlg->m_localFile;
-    CString signatureFilename = dlg->m_localFileSig;
-    BOOL verificationResult = FALSE;    
+    const CString &filename = dlg->m_localFile;
+    const CString &signatureFilename = dlg->m_localFileSig;
 
-    signature_packet_t p_sig = { 0 };
-    public_key_t p_pkey = { 0 };
-    HCRYPTPROV hCryptProv = NULL;
-    HCRYPTHASH hHash = NULL;
+    bool verificationResult = VerifyFile(filename, signatureFilename, FileHashingCallback, dlg);
 
-    uprintf("Verifying file '%ls' with signature '%ls'", dlg->m_localFile, dlg->m_localFileSig);
-
-    /*verificationResult = TRUE;
-    goto error;*/
-
-    IFFALSE_GOTOERROR(0 == LoadSignature(signatureFilename, &p_sig), "Error on LoadSignature");
-    IFFALSE_GOTOERROR(0 == parse_public_key(endless_public_key, sizeof(endless_public_key), &p_pkey, nullptr), "Error on parse_public_key");
-    IFFALSE_GOTOERROR(CryptAcquireContext(&hCryptProv, nullptr, nullptr, map_algo(p_pkey.key.algo), CRYPT_VERIFYCONTEXT), "Error on CryptAcquireContext");
-
-    memcpy(p_pkey.longid, endless_public_key_longid, sizeof(endless_public_key_longid));
-    IFFALSE_GOTOERROR(0 == memcmp(p_sig.issuer_longid, p_pkey.longid, 8), "Error: signature key id differs from Endless key id");
-
-    IFFALSE_GOTOERROR(CryptCreateHash(hCryptProv, map_digestalgo(p_sig.digest_algo), 0, 0, &hHash), "Error on CryptCreateHash");
-
-    IFFALSE_GOTOERROR(0 == hash_from_file(hHash, filename, &p_sig, FileHashingCallback, dlg), "Error on hash_from_file");
-    IFFALSE_GOTOERROR(0 == check_hash(hHash, &p_sig), "Error on check_hash");
-    IFFALSE_GOTOERROR(0 == verify_signature(hCryptProv, hHash, p_pkey, p_sig), "Error on verify_signature");
-
-    verificationResult = TRUE;
-
-error:
     ::PostMessage(hMainDialog, WM_FINISHED_FILE_VERIFICATION, (WPARAM)verificationResult, 0);
-
-    // cleanup wincrypto
-    if(hHash != NULL) CryptDestroyHash(hHash);
-    if(hCryptProv != NULL) CryptReleaseContext(hCryptProv, 0);
-
-    // cleanup key
-    free(p_pkey.psz_username);
-    // cleanup signature
-    if (p_sig.version == 4)
-    {
-        free(p_sig.specific.v4.hashed_data);
-        free(p_sig.specific.v4.unhashed_data);
-    }
 
     return 0;
 }

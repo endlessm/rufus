@@ -296,6 +296,7 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="StringHelperMethods.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="ImageSigningKey.h" />
     <ClInclude Include="Version.h" />
     <ClInclude Include="WindowsUsbDefines.h" />
   </ItemGroup>

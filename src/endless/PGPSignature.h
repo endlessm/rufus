@@ -160,10 +160,4 @@ typedef struct _RSAKEY
 
 typedef bool(*HashingCallback_t) (__int64, __int64, LPVOID);
 
-int hash_from_file(HCRYPTHASH hHash, CString filename, signature_packet_t* p_sig, HashingCallback_t hashingCallback = NULL, LPVOID hashingContext = NULL);
-int check_hash(HCRYPTHASH hHash, signature_packet_t *p_sig);
-int verify_signature(HCRYPTPROV hCryptProv, HCRYPTHASH hHash, public_key_t& p_key, signature_packet_t& sign);
-ALG_ID map_digestalgo(uint8_t digest_algo);
-DWORD map_algo(uint8_t digest_algo);
-int parse_public_key(const uint8_t *p_key_data, size_t i_key_len, public_key_t *p_key, const uint8_t *p_sig_issuer);
-int LoadSignature(const CString &signatureFilename, signature_packet_t *p_sig);
+bool VerifyFile(const CString &filename, const CString &signatureFilename, HashingCallback_t hashingCallback = NULL, LPVOID hashingContext = NULL);
