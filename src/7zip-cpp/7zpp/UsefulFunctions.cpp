@@ -127,6 +127,11 @@ namespace SevenZip
 		}
 
 		CComPtr< IInArchive > archive = UsefulFunctions::GetArchiveReader(library, format);
+		if (archive == NULL)
+		{
+			return false;
+		}
+
 		CComPtr< InStreamWrapper > inFile = new InStreamWrapper(fileStream);
 		CComPtr< ArchiveOpenCallback > openCallback = new ArchiveOpenCallback();
 

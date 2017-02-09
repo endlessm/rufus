@@ -9,6 +9,12 @@
 
 namespace SevenZip
 {
+	class SevenZipExtractStream
+	{
+	public:
+		virtual UINT32 Read(void *buf, UINT32 size) = 0;
+	};
+
 	class SevenZipExtractor : public SevenZipArchive
 	{
 	public:
@@ -17,6 +23,9 @@ namespace SevenZip
 		virtual ~SevenZipExtractor();
 
 		virtual bool ExtractArchive( const TString& directory, ProgressCallback* callback);
+		virtual bool ExtractBytes(const UINT32 index, void *data, const UINT32 size);
+
+		virtual SevenZipExtractStream * ExtractStream(const UINT32 index);
 
 	private:
 
