@@ -2283,7 +2283,7 @@ void CEndlessUsbToolDlg::UpdateFileEntries(bool shouldInit)
             CompressionType compressionType;
             ULONGLONG extractedSize = GetExtractedSize(currentFilePath, isInstallerImage, compressionType);
             if (0 == extractedSize) continue;
-            CFile file(currentFilePath, CFile::modeRead);
+            CFile file(currentFilePath, CFile::modeRead | CFile::shareDenyNone);
             GetImgDisplayName(displayName, version, personality, file.GetLength());
 
             if (isInstallerImage) {
