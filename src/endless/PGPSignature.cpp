@@ -738,27 +738,19 @@ static int hash_from_public_key(HCRYPTHASH hHash, public_key_t* p_pkey)
     return hash_finish(hHash, &p_pkey->sig);
 }
 
-static int hash_from_file(HCRYPTHASH hHash, CString filename, signature_packet_t* p_sig, HashingCallback_t hashingCallback, LPVOID hashingContext)
+template <typename Reader>
+static int hash_from_stream(HCRYPTHASH hHash, Reader reader, __int64 fileSize, signature_packet_t* p_sig, HashingCallback_t hashingCallback, LPVOID hashingContext)
 {
     __int64 sizeRead = 0;
-    __int64 fileSize = 0;
-    FILE* pFile = _tfsopen(filename, _T("rb"), SH_DENYWR);
-    if (!pFile) return -1;
-
-    // get file size
-    fseek(pFile, 0L, SEEK_END);
-    fileSize = _ftelli64(pFile);
-    rewind(pFile);
 
     // create the hash
     char buf[4097] = { 0 };
     int read = 0;
     int nlHandling = 0;
-    while ((read = (int)fread(buf, sizeof(char), sizeof(buf) - 1, pFile)) > 0)
+    while ((read = (int)reader(buf, sizeof(buf) - 1)) > 0)
     {
         // Notify the caller
         if (hashingCallback && !hashingCallback(sizeRead, fileSize, hashingContext)) {
-            fclose(pFile);
             return -1;
         }
         sizeRead += read;
@@ -822,8 +814,6 @@ static int hash_from_file(HCRYPTHASH hHash, CString filename, signature_packet_t
         else
             CryptHashData(hHash, (BYTE *)buf, read, 0);
     }
-
-    fclose(pFile);
 
     return hash_finish(hHash, p_sig);
 }
@@ -961,7 +951,8 @@ static int verify_signature(HCRYPTPROV hCryptProv, HCRYPTHASH hHash, public_key_
 #include "GeneralCode.h"
 #include "ImageSigningKey.h"
 
-bool VerifyFile(const CString &filename, const CString &signatureFilename, HashingCallback_t hashingCallback, LPVOID hashingContext)
+// 'reader' is a generalization of fread(3); it should return 0 on error or EOF and bytes read otherwise.
+bool VerifyStream(std::function<size_t(void *, size_t)> reader, __int64 fileSize, const CString &signatureFilename, HashingCallback_t hashingCallback, LPVOID hashingContext)
 {
     FUNCTION_ENTER;
 
@@ -972,8 +963,6 @@ bool VerifyFile(const CString &filename, const CString &signatureFilename, Hashi
     HCRYPTPROV hCryptProv = NULL;
     HCRYPTHASH hHash = NULL;
 
-    uprintf("Verifying file '%ls' with signature '%ls'", filename, signatureFilename);
-
     IFFALSE_GOTOERROR(0 == LoadSignature(signatureFilename, &p_sig), "Error on LoadSignature");
     IFFALSE_GOTOERROR(0 == parse_public_key(endless_public_key, sizeof(endless_public_key), &p_pkey, nullptr), "Error on parse_public_key");
     IFFALSE_GOTOERROR(CryptAcquireContext(&hCryptProv, nullptr, nullptr, map_algo(p_pkey.key.algo), CRYPT_VERIFYCONTEXT), "Error on CryptAcquireContext");
@@ -983,7 +972,7 @@ bool VerifyFile(const CString &filename, const CString &signatureFilename, Hashi
 
     IFFALSE_GOTOERROR(CryptCreateHash(hCryptProv, map_digestalgo(p_sig.digest_algo), 0, 0, &hHash), "Error on CryptCreateHash");
 
-    IFFALSE_GOTOERROR(0 == hash_from_file(hHash, filename, &p_sig, hashingCallback, hashingContext), "Error on hash_from_file");
+    IFFALSE_GOTOERROR(0 == hash_from_stream(hHash, reader, fileSize, &p_sig, hashingCallback, hashingContext), "Error on hash_from_stream");
     IFFALSE_GOTOERROR(0 == check_hash(hHash, &p_sig), "Error on check_hash");
     IFFALSE_GOTOERROR(0 == verify_signature(hCryptProv, hHash, p_pkey, p_sig), "Error on verify_signature");
 
@@ -1003,5 +992,30 @@ error:
         free(p_sig.specific.v4.unhashed_data);
     }
 
+    return verificationResult;
+}
+
+bool VerifyFile(const CString &filename, const CString &signatureFilename, HashingCallback_t hashingCallback, LPVOID hashingContext)
+{
+    FUNCTION_ENTER;
+
+    uprintf("Verifying file '%ls' with signature '%ls'", filename, signatureFilename);
+
+    __int64 fileSize = 0;
+    FILE* pFile = _tfsopen(filename, _T("rb"), SH_DENYWR);
+    if (!pFile) return false;
+
+    // get file size
+    fseek(pFile, 0L, SEEK_END);
+    fileSize = _ftelli64(pFile);
+    rewind(pFile);
+
+    auto reader = [&](void *buf, size_t size) {
+        return fread(buf, sizeof(char), size, pFile);
+    };
+
+    bool verificationResult = VerifyStream(reader, fileSize, signatureFilename, hashingCallback, hashingContext);
+
+    fclose(pFile);
     return verificationResult;
 }

@@ -25,6 +25,7 @@
 
 #include <stdint.h>
 #include <WinCrypt.h>
+#include <functional>
 
 enum    /* Public key algorithms */
 {
@@ -161,3 +162,4 @@ typedef struct _RSAKEY
 typedef bool(*HashingCallback_t) (__int64, __int64, LPVOID);
 
 bool VerifyFile(const CString &filename, const CString &signatureFilename, HashingCallback_t hashingCallback = NULL, LPVOID hashingContext = NULL);
+bool VerifyStream(std::function<size_t(void *, size_t)> reader, __int64 fileSize, const CString &signatureFilename, HashingCallback_t hashingCallback, LPVOID hashingContext);
