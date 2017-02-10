@@ -91,6 +91,25 @@ ULONGLONG EndlessISO::GetExtractedSize(const CString & image, const BOOL isInsta
     return get_disk_size(&pt);
 }
 
+static_assert(sizeof(size_t) == sizeof(UINT32), "this is assumed below");
+
+bool EndlessISO::VerifySquashFS(const CString & image, const CString & signatureFilename, HashingCallback_t hashingCallback, LPVOID hashingContext)
+{
+    FUNCTION_ENTER;
+
+    auto extractor = SevenZip::SevenZipExtractor(pImpl->sevenZip, image.GetString());
+    extractor.SetCompressionFormat(SevenZip::CompressionFormat::SquashFS);
+
+    UINT32 i = 0;
+    auto size = extractor.GetOrigSizes()[i];
+    std::unique_ptr<SevenZip::SevenZipExtractStream> stream(extractor.ExtractStream(i));
+
+    auto reader = [&](void *buf, size_t bytes) {
+        return stream->Read(buf, (UINT32)bytes);
+    };
+    return VerifyStream(reader, size, signatureFilename, hashingCallback, hashingContext);
+}
+
 bool EndlessISO::UnpackSquashFS(const CString & image, const CString & destination, UnpackProgressCallback callback, HANDLE cancelEvent)
 {
     FUNCTION_ENTER;

@@ -3812,7 +3812,15 @@ DWORD WINAPI CEndlessUsbToolDlg::FileVerificationThread(void* param)
     const CString &filename = dlg->m_localFile;
     const CString &signatureFilename = dlg->m_localFileSig;
 
-    bool verificationResult = VerifyFile(filename, signatureFilename, FileHashingCallback, dlg);
+    bool verificationResult;
+
+    switch (GetCompressionType(filename)) {
+    case CompressionTypeSquash:
+        verificationResult = dlg->m_iso.VerifySquashFS(filename, signatureFilename, FileHashingCallback, dlg);
+        break;
+    default:
+        verificationResult = VerifyFile(filename, signatureFilename, FileHashingCallback, dlg);
+    }
 
     ::PostMessage(hMainDialog, WM_FINISHED_FILE_VERIFICATION, (WPARAM)verificationResult, 0);
 

@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include "PGPSignature.h"
 
 typedef void(*UnpackProgressCallback)(const uint64_t current_bytes, const uint64_t total_bytes);
 
@@ -11,6 +12,7 @@ public:
     void Uninit();
 
     ULONGLONG GetExtractedSize(const CString &image, const BOOL isInstallerImage);
+    bool VerifySquashFS(const CString &image, const CString &signatureFilename, HashingCallback_t hashingCallback = NULL, LPVOID hashingContext = NULL);
     bool UnpackSquashFS(const CString &image, const CString &destination, UnpackProgressCallback callback, HANDLE cancelEvent);
 
 private:
