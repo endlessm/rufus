@@ -2,10 +2,6 @@
 #include "Analytics.h"
 #include <afxinet.h>
 
-extern "C" {
-	#include "rufus.h"
-}
-
 #include "json/json.h"
 
 #include "Version.h"

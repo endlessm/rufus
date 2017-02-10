@@ -23,9 +23,6 @@
 #include <WinIoCtl.h>
 
 #include "GeneralCode.h"
-extern "C" {
-#include "rufus.h"
-}
 
 #pragma pack(1)
 

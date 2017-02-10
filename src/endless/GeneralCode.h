@@ -2,6 +2,15 @@
 
 #include <stdint.h>
 
+// Needed for 'uprintf'
+#ifdef __cplusplus
+extern "C" {
+#endif
+#include "rufus.h"
+#ifdef __cplusplus
+}
+#endif
+
 // helper methods
 #define TOSTR(value) case value: return _T(#value)
 
