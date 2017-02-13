@@ -166,6 +166,7 @@ void AnalyticsRequestThread::SendRequest(const CStringA &bodyUtf8)
 		TCHAR err[256];
 		ex->GetErrorMessage(err, 256);
 		uprintf("Analytics req error: %ls\n", (LPCTSTR)err);
+		ex->Delete();
 	}
 }
 
