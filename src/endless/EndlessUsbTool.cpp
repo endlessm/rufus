@@ -195,29 +195,38 @@ void CEndlessUsbToolApp::InitLogging()
 	fileName.Replace(L" ", L"");
 	fileName += s;
 	fileName += L".log";
-	if (CEndlessUsbToolDlg::IsUninstaller()) {
-		fileName = TempFilePath(fileName);
-	} else {
-		fileName = GET_LOCAL_PATH(fileName);
-	}
 
-	try {
-		BOOL result = m_logFile.Open(fileName, CFile::modeWrite | CFile::typeUnicode | CFile::shareDenyWrite | CFile::modeCreate | CFile::osWriteThrough);
-		if (!result) {
-			m_enableLogDebugging = false;
-		}
-
-		//uprintf("Log original date time %ls\n", s);
-		//uprintf("Application version: %s\n", RELEASE_VER_STR);
-		//uprintf("Windows version: %s\n", WindowsVersionStr);
-		//uprintf("Windows version number: 0x%X\n", nWindowsVersion);
-		//uprintf("-----------------------------------\n", s);
+	BOOL result = false;
+	// Try to write log alongside ourself, provided we're not in C:\endless
+	// which is unwriteable and about to be deleted(!)
+	if (!CEndlessUsbToolDlg::IsUninstaller()) {
+		result = TryOpenLogFile(GET_LOCAL_PATH(fileName));
 	}
-	catch (CFileException *ex) {
+	if (!result) {
+		// Perhaps we're on a read-only device; try a temp file instead
+		result = TryOpenLogFile(TempFilePath(fileName));
+	}
+	if (!result) {
 		m_enableLogDebugging = false;
-		uprintf("CFileException on file [%ls] with cause [%d] and OS error [%d]", fileName, ex->m_cause, ex->m_lOsError);
-		ex->Delete();
 	}
+}
+
+bool CEndlessUsbToolApp::TryOpenLogFile(const CString & fileName)
+{
+	CFileException ex;
+	bool result = !!m_logFile.Open(fileName,
+		CFile::modeWrite | CFile::typeUnicode | CFile::shareDenyWrite | CFile::modeCreate | CFile::osWriteThrough,
+		&ex);
+	if (!result) {
+		TCHAR szError[1024];
+		ex.GetErrorMessage(szError, ARRAYSIZE(szError));
+		// No log file yet, but maybe there's a debugger
+		CString msg;
+		msg.Format(L"CFileException on file [%ls] with cause [%d] and OS error [%d]: %ls", fileName, ex.m_cause, ex.m_lOsError, szError);
+		OutputDebugString(msg);
+	}
+
+	return result;
 }
 
 void CEndlessUsbToolApp::UninitLogging()
@@ -237,18 +246,17 @@ void CEndlessUsbToolApp::Log(const char *logMessage)
 	static CStringA strMessage;
 	static bool firstMessage = true;
 
-	if (firstMessage) {
-		// calling uprintf here works because it will only be executed once
-		firstMessage = false;
-		CStringA debugMessage;
-		debugMessage.Format("Log original file name %ls\r\n", m_logFile.GetFileName()); Log(debugMessage);
-		debugMessage.Format("Application version: %s\r\n", RELEASE_VER_STR); Log(debugMessage);
-		debugMessage.Format("Windows version: %s\r\n", WindowsVersionStr); Log(debugMessage);
-		debugMessage.Format("Windows version number: 0x%X\r\n", nWindowsVersion); Log(debugMessage);
-		debugMessage.Format("-----------------------------------\r\n"); Log(debugMessage);
-	}
-
 	if (CEndlessUsbToolApp::m_enableLogDebugging) {
+		if (firstMessage) {
+			firstMessage = false;
+			CStringA debugMessage;
+			debugMessage.Format("Log original file name %ls\r\n", m_logFile.GetFileName()); Log(debugMessage);
+			debugMessage.Format("Application version: %s\r\n", RELEASE_VER_STR); Log(debugMessage);
+			debugMessage.Format("Windows version: %s\r\n", WindowsVersionStr); Log(debugMessage);
+			debugMessage.Format("Windows version number: 0x%X\r\n", nWindowsVersion); Log(debugMessage);
+			debugMessage.Format("-----------------------------------\r\n"); Log(debugMessage);
+		}
+
 		CStringA time(CTime::GetCurrentTime().Format(_T("%H:%M:%S - ")));
 		strMessage = time + CStringA(logMessage);
 		m_logFile.Write(strMessage, strMessage.GetLength());

@@ -8,21 +8,33 @@
 #include "DownloadManager.h"
 
 typedef struct FileImageEntry {
+    // Full, real path on disk
     CString filePath;
-    ULONGLONG size;
+    // Size of file on disk
+    ULONGLONG fileSize;
+    // Size of Endless OS image (identical to fileSize for uncompressed images,
+    // substantially larger for compressed images)
+    ULONGLONG extractedSize;
     BOOL autoAdded;
     LONG htmlIndex;
     BOOL stillPresent;
-	CString personality;
-	CString bootArchivePath;
-	CString bootArchiveSigPath;
-	CString unpackedImgSigPath;
-	BOOL hasBootArchive;
-	BOOL hasBootArchiveSig;
-	BOOL hasUnpackedImgSig;
-	BOOL isUnpackedImage;
-	CString version;
-	CString date;
+    CString personality;
+    CString bootArchivePath;
+    CString bootArchiveSigPath;
+    // Signature for 'filePath' (usually filePath + ".asc", except when
+    // operating on a live USB)
+    CString imgSigPath;
+    // Signature matching the uncompressed image inside 'filePath' (equal to
+    // imgSigPath if the image is already uncompressed)
+    CString unpackedImgSigPath;
+    // TRUE if bootArchivePath exists
+    BOOL hasBootArchive;
+    // TRUE if bootArchiveSigPath exists
+    BOOL hasBootArchiveSig;
+    // TRUE if unpackedImgSigPath exists
+    BOOL hasUnpackedImgSig;
+    CString version;
+    CString date;
 } FileImageEntry_t, *pFileImageEntry_t;
 
 typedef enum ErrorCause {
@@ -72,6 +84,13 @@ enum JSONDownloadState {
     Retrying,
     Failed,
     Succeeded
+};
+
+enum CompressionType {
+    CompressionTypeUnknown = 0,
+    CompressionTypeNone,
+    CompressionTypeGz,
+    CompressionTypeXz,
 };
 
 // CEndlessUsbToolDlg dialog
@@ -273,6 +292,7 @@ private:
     void StartJSONDownload();
     void UpdateDownloadOptions();
     bool UnpackFile(const CString &archive, const CString &destination, int compressionType = 0, void* progress_function = NULL, unsigned long* cancel_request = NULL);
+    bool UnpackImage(const CString &image, const CString &destination);
     bool ParseJsonFile(LPCTSTR filename, bool isInstallerJson);
     void AddDownloadOptionsToUI();
     void UpdateDownloadableState();
@@ -302,7 +322,8 @@ private:
 
     const CString LocalizePersonalityName(const CString &personality);
     void GetImgDisplayName(CString &displayName, const CString &version, const CString &personality, ULONGLONG size = 0);
-	static int GetCompressionType(const CString& filename);
+    static CompressionType GetCompressionType(const CString& filename);
+    static int GetBledCompressionType(const CompressionType type);
     static ULONGLONG GetExtractedSize(const CString& filename, BOOL isInstallerImage);
 
     void GetIEVersion();

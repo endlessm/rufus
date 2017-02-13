@@ -40,6 +40,7 @@ public:
 
 private:
 	static void InitLogging();
+	static bool TryOpenLogFile(const CString &fileName);
 	static void UninitLogging();
 	static CFile m_logFile;
 };

@@ -1207,11 +1207,11 @@ LRESULT CEndlessUsbToolDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lPara
 					// We are talking about 6 MB compared to more than 2 GB
 				} else {
 					if (m_selectedInstallMethod == InstallMethod_t::ReformatterUsb) {
-						ULONGLONG totalSize = m_selectedFileSize + m_localInstallerImage.size;
+						ULONGLONG totalSize = m_selectedFileSize + m_localInstallerImage.fileSize;
 						ULONGLONG currentSize = 0;
 						bool isInstallerImage = (m_localFile == m_localInstallerImage.filePath);
 						if (isInstallerImage) {
-							currentSize = m_selectedFileSize + (m_localInstallerImage.size * percent / 100);
+							currentSize = m_selectedFileSize + (m_localInstallerImage.fileSize * percent / 100);
 						}
 						else {
 							currentSize = m_selectedFileSize * percent / 100;
@@ -1745,7 +1745,7 @@ void CEndlessUsbToolDlg::ErrorOccured(ErrorCause_t errorCause)
     CComBSTR deleteFilesText("");
     if (fileVerificationFailed) {
         bool isInstallerImage = (m_localFile == m_localInstallerImage.filePath);
-        ULONGLONG invalidFileSize = isInstallerImage ? m_localInstallerImage.size : m_selectedFileSize;
+        ULONGLONG invalidFileSize = isInstallerImage ? m_localInstallerImage.fileSize : m_selectedFileSize;
         deleteFilesText = UTF8ToBSTR(lmprintf(MSG_336, SizeToHumanReadable(invalidFileSize, FALSE, use_fake_units)));
         CallJavascript(_T(JS_RESET_CHECK), CComVariant(_T(ELEMENT_ERROR_DELETE_CHECKBOX)));
     }
@@ -2234,12 +2234,15 @@ void CEndlessUsbToolDlg::UpdateFileEntries(bool shouldInit)
 
     do {
         if ((findFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0) continue;
-        CString currentFile = findFileData.cFileName;
-		bool isUnpackedFile = false;
-		// support being run from a USB drive 
-		CString liveFilePath = GET_IMAGE_PATH(EXFAT_ENDLESS_LIVE_FILE_NAME);
+        // The real filename on disk
+        const CString currentFile = findFileData.cFileName;
+        // If running from a live USB, the image file is named endless.img;
+        // trueName is the filename it *should* have had (eos-...base.img, for example)
+        CString trueName = currentFile;
+        const CString liveFilePath = GET_IMAGE_PATH(EXFAT_ENDLESS_LIVE_FILE_NAME);
 		if (currentFile == ENDLESS_IMG_FILE_NAME && PathFileExists(liveFilePath)) {
 			uprintf("Found %ls; checking %ls to find image name", currentFile, liveFilePath);
+			bool foundTrueName = false;
 			FILE *liveFile = NULL;
 			char originalFileName[MAX_PATH];
 			memset(originalFileName, 0, MAX_PATH);
@@ -2247,46 +2250,51 @@ void CEndlessUsbToolDlg::UpdateFileEntries(bool shouldInit)
 			if (result == 0) {
 				fread(originalFileName, 1, MAX_PATH - 1, liveFile);
 				if (feof(liveFile)) {
-					currentFile = UTF8ToCString(originalFileName);
-					currentFile.TrimRight();
-					isUnpackedFile = true;
-					uprintf("image name is %ls", currentFile);
+					trueName = UTF8ToCString(originalFileName);
+					trueName.TrimRight();
+					uprintf("image name is %ls", trueName);
+					foundTrueName = true;
 				}
 				fclose(liveFile);
 			}
 
-			if (!isUnpackedFile) {
+			if (!foundTrueName) {
 				uprintf("couldn't determine the unpacked image's true name");
 			}
 		}
 
-        CString fullPathFile = GET_IMAGE_PATH(currentFile);
-		CString unpackedFullPathFile = GET_IMAGE_PATH(ENDLESS_IMG_FILE_NAME);
-        CString extension = CSTRING_GET_LAST(currentFile, '.');
-        if (!isUnpackedFile && extension != _T(FILE_GZ_EXTENSION) && extension != _T(FILE_XZ_EXTENSION)) continue;
+        const CString currentFilePath =  GET_IMAGE_PATH(currentFile);
+        const CString trueNamePath = GET_IMAGE_PATH(trueName);
+        CompressionType compressionType = GetCompressionType(currentFilePath);
+        if (compressionType == CompressionType::CompressionTypeUnknown) continue;
 
-        if (!isUnpackedFile && !PathFileExists(fullPathFile)) continue; // file is present
-        if (!PathFileExists(fullPathFile + SIGNATURE_FILE_EXT)) continue; // signature file is present
+        if (!PathFileExists(currentFilePath)) continue; // file is present
+
+        const CString imgSigPath = trueNamePath + SIGNATURE_FILE_EXT;
+        if (!PathFileExists(imgSigPath)) continue; // signature file is present
 
         try {
             CString displayName, personality, version, date;
             bool isInstallerImage = false;
-			CString fileNameToParse = isUnpackedFile ? (currentFile + L"." + _T(FILE_GZ_EXTENSION)) : currentFile;
-            if (!ParseImgFileName(fileNameToParse, personality, version, date, isInstallerImage)) continue;
-            if (!isUnpackedFile && 0 == GetExtractedSize(fullPathFile, isInstallerImage)) continue;
-            CFile file(isUnpackedFile ? unpackedFullPathFile : fullPathFile, CFile::modeRead);
+            if (!ParseImgFileName(trueName, personality, version, date, isInstallerImage)) continue;
+            ULONGLONG extractedSize = GetExtractedSize(currentFilePath, isInstallerImage);
+            if (0 == extractedSize) continue;
+            CFile file(currentFilePath, CFile::modeRead);
             GetImgDisplayName(displayName, version, personality, file.GetLength());
 
             if (isInstallerImage) {
+                // TODO: version comparison again!
                 if (version > currentInstallerVersion) {
                     currentInstallerVersion = version;
                     m_localInstallerImage.stillPresent = TRUE;
                     m_localInstallerImage.filePath = file.GetFilePath();
-                    m_localInstallerImage.size = file.GetLength();
+                    m_localInstallerImage.fileSize = file.GetLength();
+                    m_localInstallerImage.extractedSize = extractedSize;
+                    m_localInstallerImage.imgSigPath = imgSigPath;
                 }
             } else {
                 if (IsDualBootOrCombinedUsb() && !HasImageBootSupport(version, date)) {
-                    uprintf("Skiping '%ls' because it doesn't have image boot support.", file.GetFileName());
+                    uprintf("Skipping '%ls' because it doesn't have image boot support.", file.GetFileName());
                     continue;
                 }
                 // add entry to list or update it
@@ -2295,13 +2303,14 @@ void CEndlessUsbToolDlg::UpdateFileEntries(bool shouldInit)
                     currentEntry = new FileImageEntry_t;
                     currentEntry->autoAdded = TRUE;
                     currentEntry->filePath = file.GetFilePath();
-                    currentEntry->size = file.GetLength();
+                    currentEntry->fileSize = file.GetLength();
+                    currentEntry->imgSigPath = imgSigPath;
+                    currentEntry->extractedSize = extractedSize;
                     currentEntry->personality = personality;
                     currentEntry->version = version;
                     currentEntry->date = date;
-                    currentEntry->isUnpackedImage = isUnpackedFile;
 
-                    AddEntryToSelect(selectElement, CComBSTR(currentEntry->filePath), CComBSTR(displayName), &currentEntry->htmlIndex, 0);
+                    hr = AddEntryToSelect(selectElement, CComBSTR(currentEntry->filePath), CComBSTR(displayName), &currentEntry->htmlIndex, 0);
                     IFFALSE_RETURN(SUCCEEDED(hr), "Error adding item in image file list.");
 
                     m_imageFiles.SetAt(currentEntry->filePath, currentEntry);
@@ -2310,7 +2319,9 @@ void CEndlessUsbToolDlg::UpdateFileEntries(bool shouldInit)
                     UpdateSelectOptionText(selectElement, displayName, currentEntry->htmlIndex);
                 }
                 currentEntry->stillPresent = TRUE;
-                CString basePath = isUnpackedFile ? CSTRING_GET_PATH(fullPathFile, '.') : CSTRING_GET_PATH(CSTRING_GET_PATH(fullPathFile, '.'), '.');
+                CString basePath = compressionType == CompressionTypeNone
+                    ? CSTRING_GET_PATH(trueNamePath, '.')
+                    : CSTRING_GET_PATH(CSTRING_GET_PATH(trueNamePath, '.'), '.');
 
                 currentEntry->bootArchivePath = basePath + BOOT_ARCHIVE_SUFFIX;
                 currentEntry->bootArchiveSigPath = basePath + BOOT_ARCHIVE_SUFFIX + SIGNATURE_FILE_EXT;
@@ -2321,9 +2332,6 @@ void CEndlessUsbToolDlg::UpdateFileEntries(bool shouldInit)
             }
 
 			uprintf("Found local image '%ls'", file.GetFilePath());
-
-            // RADU: do we need to care about the size?
-
         } catch (CFileException *ex) {
             uprintf("CFileException on file [%ls] with cause [%d] and OS error [%d]", findFileData.cFileName, ex->m_cause, ex->m_lOsError);
             ex->Delete();
@@ -2513,11 +2521,6 @@ bool CEndlessUsbToolDlg::UnpackFile(const CString &archive, const CString &desti
 
     int64_t result = -1;
 
-	if (compressionType == 0) {
-		compressionType = GetCompressionType(archive);
-		IFFALSE_GOTOERROR(compressionType != BLED_COMPRESSION_NONE, "can't determine compression type");
-	}
-
     // RADU: provide a progress function and move this from UI thread
     // For initial release this is ok as the operation should be very fast for the JSON
     // Unpack the file
@@ -2525,8 +2528,32 @@ bool CEndlessUsbToolDlg::UnpackFile(const CString &archive, const CString &desti
     result = bled_uncompress(ConvertUnicodeToUTF8(archive), ConvertUnicodeToUTF8(destination), compressionType);
     bled_exit();
 
-error:
     return result >= 0;
+}
+
+bool CEndlessUsbToolDlg::UnpackImage(const CString &image, const CString &destination)
+{
+    FUNCTION_ENTER_FMT("%ls -> %ls", image, destination);
+    CompressionType type = GetCompressionType(image);
+
+    switch (type) {
+    case CompressionTypeNone:
+    {
+        BOOL result = CopyFileEx(image, destination, CEndlessUsbToolDlg::CopyProgressRoutine, this, NULL, 0);
+        IFFALSE_RETURN_VALUE(result, "Copying uncompressed image failed/cancelled", false);
+        return true;
+    }
+    case CompressionTypeUnknown:
+        PRINT_ERROR_MSG("Unknown compression type");
+        return false;
+    default:
+    {
+        int bled_type = GetBledCompressionType(type);
+        bool unpackResult = UnpackFile(image, destination, bled_type, ImageUnpackCallback, &this->m_cancelImageUnpack);
+        IFFALSE_RETURN_VALUE(unpackResult, "Error unpacking image", false);
+        return true;
+    }
+    }
 }
 
 static bool FindLatestVersion(const Json::Value &rootValue, Json::Value &latestEntry)
@@ -2845,10 +2872,8 @@ HRESULT CEndlessUsbToolDlg::OnSelectFileNextClicked(IHTMLElement* pElement)
 
 		personality = localEntry->personality;
 		version = localEntry->version;
-
-		size = (willUnpackImage && !localEntry->isUnpackedImage) ? GetExtractedSize(selectedImage, FALSE) : localEntry->size;
-
-        m_selectedFileSize = localEntry->size;
+		size = localEntry->extractedSize;
+		m_selectedFileSize = localEntry->fileSize;
     } else {
 		POSITION p = m_remoteImages.FindIndex(m_selectedRemoteIndex);
 		if (p == NULL) {
@@ -3230,7 +3255,8 @@ void CEndlessUsbToolDlg::StartInstallationProcess()
 		// add remote installer data to local installer data
 		m_localInstallerImage.stillPresent = TRUE;
 		m_localInstallerImage.filePath = GET_IMAGE_PATH(CSTRING_GET_LAST(m_installerImage.urlFile, '/'));
-		m_localInstallerImage.size = m_installerImage.compressedSize;
+		m_localInstallerImage.fileSize = m_installerImage.compressedSize;
+		m_localInstallerImage.extractedSize = m_installerImage.extractedSize;
 
 		if (IsDualBootOrCombinedUsb()) {
 			m_localFile = m_bootArchive;
@@ -3396,7 +3422,7 @@ ULONGLONG CEndlessUsbToolDlg::GetNeededSpaceForDualBoot(int &neededGigs, bool *i
 			uprintf("ERROR: Selected local file not found.");
 		} else {
 			if (isBaseImage != NULL)  *isBaseImage = (localEntry->personality == PERSONALITY_BASE);
-			neededSize = localEntry->isUnpackedImage ? localEntry->size : GetExtractedSize(selectedImage, FALSE);
+			neededSize = localEntry->extractedSize;
 		}
 	} else {
 		POSITION p = m_remoteImages.FindIndex(m_selectedRemoteIndex);
@@ -4024,25 +4050,40 @@ void CEndlessUsbToolDlg::GetImgDisplayName(CString &displayName, const CString &
     }
 }
 
-int CEndlessUsbToolDlg::GetCompressionType(const CString& filename)
+CompressionType CEndlessUsbToolDlg::GetCompressionType(const CString& filename)
 {
-	FUNCTION_ENTER;
+    FUNCTION_ENTER;
 
-	CString ext = CSTRING_GET_LAST(filename, '.');
-	if (ext == "gz") return BLED_COMPRESSION_GZIP;
-	if (ext == "xz") return BLED_COMPRESSION_XZ;
+    CString ext = CSTRING_GET_LAST(filename, '.');
+    if (ext == "gz")  return CompressionTypeGz;
+    if (ext == "xz")  return CompressionTypeXz;
+    if (ext == "img") return CompressionTypeNone;
 
-	uprintf("%ls has unknown compression type %ls", filename, ext);
-	return 0;
+    uprintf("%ls has unknown compression type %ls", filename, ext);
+    return CompressionTypeUnknown;
 }
 
+int CEndlessUsbToolDlg::GetBledCompressionType(const CompressionType type)
+{
+    switch (type) {
+    case CompressionTypeGz:
+        return BLED_COMPRESSION_GZIP;
+    case CompressionTypeXz:
+        return BLED_COMPRESSION_XZ;
+    case CompressionTypeNone:
+        return BLED_COMPRESSION_NONE;
+    case CompressionTypeUnknown:
+    default:
+        return BLED_COMPRESSION_MAX;
+    }
+}
 
 ULONGLONG CEndlessUsbToolDlg::GetExtractedSize(const CString& filename, BOOL isInstallerImage)
 {
     FUNCTION_ENTER;
 
-	int compression_type = GetCompressionType(filename);
-	IFFALSE_RETURN_VALUE(compression_type > BLED_COMPRESSION_NONE && compression_type < BLED_COMPRESSION_MAX, "unknown compression", 0);
+    int compression_type = GetBledCompressionType(GetCompressionType(filename));
+    IFFALSE_RETURN_VALUE(compression_type >= BLED_COMPRESSION_NONE && compression_type < BLED_COMPRESSION_MAX, "unknown compression", 0);
 
     CStringA asciiFileName = ConvertUnicodeToUTF8(filename);
     return get_eos_archive_disk_image_size(asciiFileName, compression_type, isInstallerImage);
@@ -4822,14 +4863,8 @@ bool CEndlessUsbToolDlg::CopyFilesToexFAT(CEndlessUsbToolDlg *dlg, const CString
 	CEndlessUsbToolDlg::ImageUnpackPercentStart = USB_PROGRESS_EXFAT_PREPARED;
 	CEndlessUsbToolDlg::ImageUnpackPercentEnd = USB_PROGRESS_IMG_COPY_DONE;
 	CEndlessUsbToolDlg::ImageUnpackFileSize = dlg->m_selectedFileSize;
-	if (CSTRING_GET_LAST(dlg->m_localFile, '\\') == ENDLESS_IMG_FILE_NAME) {
-		BOOL result = CopyFileEx(dlg->m_localFile, usbFilesPath + ENDLESS_IMG_FILE_NAME, CEndlessUsbToolDlg::CopyProgressRoutine, dlg, NULL, 0);
-		IFFALSE_GOTOERROR(result, "Copying live image failed/cancelled.");
-	} else {
-		bool unpackResult = dlg->UnpackFile(dlg->m_localFile, (usbFilesPath + ENDLESS_IMG_FILE_NAME), 0, ImageUnpackCallback, &dlg->m_cancelImageUnpack);
-		IFFALSE_GOTOERROR(unpackResult, "Error unpacking image to USB drive");
-	}
 
+	IFFALSE_GOTOERROR(dlg->UnpackImage(dlg->m_localFile, usbFilesPath + ENDLESS_IMG_FILE_NAME), "Error unpacking image to USB drive");
 	IFFALSE_GOTOERROR(0 != CopyFile(dlg->m_unpackedImageSig, usbFilesPath + CSTRING_GET_LAST(dlg->m_unpackedImageSig, '\\'), FALSE), "Error copying image signature file to drive.");
 
 	FILE *liveFile;
@@ -4994,7 +5029,7 @@ DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 		IFFALSE_GOTOERROR(EnsureUncompressed(folderName), "Error setting folder to uncompressed.");
 	}
 
-	// Copy ourseleves to the <SYSDRIVE>:\endless directory
+	// Copy ourselves to the <SYSDRIVE>:\endless directory
 	IFFALSE_GOTOERROR(0 != CopyFile(exeFilePath, endlessFilesPath + ENDLESS_UNINSTALLER_NAME, FALSE), "Error copying exe uninstaller file.");
 
 	// Add uninstall entry for Control Panel
@@ -5004,19 +5039,11 @@ DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 	CEndlessUsbToolDlg::ImageUnpackPercentStart = DB_PROGRESS_UNPACK_BOOT_ZIP;
 	CEndlessUsbToolDlg::ImageUnpackPercentEnd = DB_PROGRESS_FINISHED_UNPACK;
 	CEndlessUsbToolDlg::ImageUnpackFileSize = dlg->m_selectedFileSize;
-	if (CSTRING_GET_LAST(dlg->m_localFile, '\\') == ENDLESS_IMG_FILE_NAME) {
-		BOOL result = CopyFileEx(dlg->m_localFile, endlessImgPath, CEndlessUsbToolDlg::CopyProgressRoutine, dlg, NULL, 0);
-		IFFALSE_GOTOERROR(result, "Copying unpacked dual-boot image failed/cancelled.");
+	IFFALSE_GOTOERROR(dlg->UnpackImage(dlg->m_localFile, endlessImgPath), "Error unpacking dual-boot image");
 
-		// Clear READONLY flag inherited from endless.img on live USB.
-		IFFALSE_PRINTERROR(SetFileAttributes(endlessImgPath, FILE_ATTRIBUTE_SYSTEM | FILE_ATTRIBUTE_HIDDEN),
-			"Failed to clear FILE_ATTRIBUTE_READONLY; ExtendImageFile will probably now fail");
-	} else {
-		// Unpack img file
-		bool unpackResult = dlg->UnpackFile(dlg->m_localFile, endlessImgPath, 0, ImageUnpackCallback, &dlg->m_cancelImageUnpack);
-		IFFALSE_GOTOERROR(unpackResult, "Error unpacking image to endless folder.");
-	}
-
+	// Clear READONLY flag inherited from endless.img on live USB.
+	IFFALSE_PRINTERROR(SetFileAttributes(endlessImgPath, FILE_ATTRIBUTE_SYSTEM | FILE_ATTRIBUTE_HIDDEN),
+		"Failed to clear FILE_ATTRIBUTE_READONLY; ExtendImageFile will probably now fail");
 	// extend this file so it reaches the required size
 	IFFALSE_GOTOERROR(ExtendImageFile(endlessImgPath, dlg->m_nrGigsSelected), "Error extending Endless image file");
 
@@ -5888,7 +5915,6 @@ BOOL CEndlessUsbToolDlg::UninstallDualBoot(CEndlessUsbToolDlg *dlg)
 	BOOL retResult = FALSE;
 	uint32_t popupMsgId = MSG_363;
 	UINT popupStyle = MB_OK | MB_ICONERROR;
-	FILE *boottrackImgFile = NULL;
 
 	CString systemDriveLetter = GetSystemDrive();
 	CString endlessFilesPath = systemDriveLetter + PATH_ENDLESS_SUBDIRECTORY;
@@ -6156,16 +6182,15 @@ ULONGLONG CEndlessUsbToolDlg::GetActualDownloadSize(const RemoteImageEntry &r, b
 
 bool CEndlessUsbToolDlg::GetSignatureForLocalFile(const CString &file, CString &signature)
 {
-	pFileImageEntry_t localEntry = NULL;
+    pFileImageEntry_t localEntry = NULL;
 
-	if (0 != m_imageFiles.Lookup(file, localEntry) && localEntry->isUnpackedImage) {
-		signature = localEntry->unpackedImgSigPath;
-	} else {
-		uprintf("Could not find entry for local file '%ls'", file);
-		signature = file + SIGNATURE_FILE_EXT;
-	}
-
-	return true;
+    if (0 != m_imageFiles.Lookup(file, localEntry)) {
+        signature = localEntry->imgSigPath;
+        return true;
+    } else {
+        uprintf("Could not find entry for local file '%ls'", file);
+        return false;
+    }
 }
 
 bool CEndlessUsbToolDlg::RemoteMatchesUnpackedImg(const CString &remoteFilePath, CString *unpackedImgSig)
