@@ -7,7 +7,6 @@ COMMON_OBJS = \
   $O\MyString.obj \
   $O\MyVector.obj \
   $O\MyXml.obj \
-  $O\NewHandler.obj \
   $O\Sha1Reg.obj \
   $O\Sha256Reg.obj \
   $O\StringConvert.obj \
@@ -15,6 +14,13 @@ COMMON_OBJS = \
   $O\UTFConvert.obj \
   $O\Wildcard.obj \
   $O\XzCrc64Reg.obj \
+
+# Per DOC/lzma.txt, we can omit this with modern Visual C++ versions which
+# throw std::bad_alloc when 'new' fails.
+!IFNDEF ENDLESS_STATIC_BUILD
+COMMON_OBJS = $(COMMON_OBJS) \
+  $O\NewHandler.obj \
+!ENDIF
 
 WIN_OBJS = \
   $O\FileDir.obj \
