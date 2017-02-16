@@ -4037,7 +4037,7 @@ CompressionType CEndlessUsbToolDlg::GetCompressionType(const CString& filename)
 {
     FUNCTION_ENTER_FMT("%ls", filename);
 
-    CString ext = CSTRING_GET_LAST(filename, '.');
+    CString ext = CSTRING_GET_LAST(filename, '.').MakeLower();
     if (ext == "gz")  return CompressionTypeGz;
     if (ext == "xz")  return CompressionTypeXz;
     if (ext == "img") return CompressionTypeNone;
