@@ -65,7 +65,6 @@ typedef struct RemoteImageEntry {
     CString urlBootArchive;
     CString urlBootArchiveSignature;
 	ULONGLONG bootArchiveSize;
-    CString displayName;
     CString downloadJobName;
     CString version;
 } RemoteImageEntry_t, *pRemoteImageEntry_t;

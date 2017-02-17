@@ -2691,9 +2691,6 @@ bool CEndlessUsbToolDlg::ParseJsonFile(LPCTSTR filename, bool isInstallerJson)
                 remoteImage.urlBootArchiveSignature = bootImage[JSON_IMG_URL_SIG].asCString();
                 remoteImage.bootArchiveSize = bootImage[JSON_IMG_COMPRESSED_SIZE].asUInt64();
 
-                // Create display name
-                GetImgDisplayName(remoteImage.displayName, remoteImage.version, remoteImage.personality, remoteImage.compressedSize);
-
                 // Create dowloadJobName
                 remoteImage.downloadJobName = latestVersion;
                 remoteImage.downloadJobName += pCStr;
@@ -2766,7 +2763,11 @@ void CEndlessUsbToolDlg::AddDownloadOptionsToUI()
         RemoteImageEntry_t imageEntry = m_remoteImages.GetNext(pos);
         bool matchesLanguage = languagePersonalty == imageEntry.personality;
 
-        hr = AddEntryToSelect(_T(ELEMENT_REMOTE_SELECT), CComBSTR(""), CComBSTR(imageEntry.displayName), &selectIndex, matchesLanguage);
+        // Create display name for advanced-mode dropdown list
+        CString displayName;
+        GetImgDisplayName(displayName, imageEntry.version, imageEntry.personality, imageEntry.compressedSize);
+
+        hr = AddEntryToSelect(_T(ELEMENT_REMOTE_SELECT), CComBSTR(""), CComBSTR(displayName), &selectIndex, matchesLanguage);
         IFFALSE_PRINTERROR(SUCCEEDED(hr), "Error adding remote image to list.");
 
         // option size
@@ -3019,7 +3020,7 @@ HRESULT CEndlessUsbToolDlg::OnSelectedRemoteFileChanged(IHTMLElement* pElement)
     POSITION p = m_remoteImages.FindIndex(selectedIndex);
     IFFALSE_RETURN_VALUE(p != NULL, "Index value not valid.", S_OK);
     RemoteImageEntry_t r = m_remoteImages.GetAt(p);
-    uprintf("OnSelectedRemoteFileChanged to REMOTE [%ls]", r.displayName);
+    uprintf("OnSelectedRemoteFileChanged to REMOTE [%ls]", r.urlFile);
 
     if (r.personality != PERSONALITY_BASE) {
         SetElementText(_T(ELEMENT_DOWNLOAD_FULL_SIZE), GetDownloadString(r));
@@ -4030,15 +4031,12 @@ void CEndlessUsbToolDlg::GetImgDisplayName(CString &displayName, const CString &
 {
     FUNCTION_ENTER;
 
-    // TODO: the JSON file is only parsed once, so m_selectedInstallMethod might well be a different value to what the user ultimately selects.
-    // We should format the image size at the last possible moment.
     ULONGLONG actualsize = m_selectedInstallMethod == InstallMethod_t::ReformatterUsb ? (size + m_installerImage.compressedSize) : size;
     // Create display name
     displayName = _T(ENDLESS_OS);
     displayName += " ";
     displayName += version;
     displayName += " ";
-    // TODO: again, we parse the JSON file only once, so if the user changes the UI language after it's parsed the image names will be in the wrong language in some bits of the UI.
     displayName += LocalizePersonalityName(personality);
     if (personality != PERSONALITY_BASE) {
         displayName += " ";
