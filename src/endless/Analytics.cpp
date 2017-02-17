@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Analytics.h"
 #include <afxinet.h>
+#include <memory>
 
 extern "C" {
 	#include "rufus.h"
@@ -114,11 +115,28 @@ error:
 	return ret;
 }
 
+// In debug builds, CHttpConnection and CHttpFile print a warning (in debug
+// builds) from the destructor if they've not been explicitly Close()d.
+template <class T>
+class CloseDelete
+{
+public:
+	void operator()(T *x)
+	{
+		x->Close();
+		delete x;
+	}
+};
+
+template <class T>
+using close_ptr = std::unique_ptr<T, CloseDelete<T> >;
+
 void AnalyticsRequestThread::SendRequest(const CStringA &bodyUtf8)
 {
 	try {
 		CString headers = _T("Content-type: application/x-www-form-urlencoded");
-		CHttpConnection *conn = m_session.GetHttpConnection(_T(SERVER_NAME), (INTERNET_PORT)SERVER_PORT);
+		close_ptr<CHttpConnection> conn(
+			m_session.GetHttpConnection(_T(SERVER_NAME), (INTERNET_PORT)SERVER_PORT));
 		CString path = m_debug ? SERVER_DEBUG_PATH : SERVER_PATH;
 		const DWORD flags = INTERNET_FLAG_EXISTING_CONNECT
 			| INTERNET_FLAG_KEEP_CONNECTION
@@ -126,9 +144,10 @@ void AnalyticsRequestThread::SendRequest(const CStringA &bodyUtf8)
 			| INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTP
 			| INTERNET_FLAG_NO_COOKIES
 			| INTERNET_FLAG_NO_UI;
-		CHttpFile *file = conn->OpenRequest(CHttpConnection::HTTP_VERB_POST, path,
-			/* Referer */ NULL, /* context */ 1, /* Accept */ NULL,
-			_T("HTTP/1.1"), flags);
+		close_ptr<CHttpFile> file(
+			conn->OpenRequest(CHttpConnection::HTTP_VERB_POST, path,
+				/* Referer */ NULL, /* context */ 1, /* Accept */ NULL,
+				_T("HTTP/1.1"), flags));
 		if (file) {
 			file->SendRequest(headers, (LPVOID)(LPCSTR)bodyUtf8, bodyUtf8.GetLength());
 			uprintf("Analytics req: %s\n", (LPCSTR)bodyUtf8);
@@ -136,21 +155,18 @@ void AnalyticsRequestThread::SendRequest(const CStringA &bodyUtf8)
 			IFFALSE_PRINTERROR(file->QueryInfoStatusCode(responseCode), "QueryInfoStatusCode failed");
 			uprintf("Analytics: response code %d", responseCode);
 			if (m_debug) {
-				HandleDebugResponse(file);
+				HandleDebugResponse(file.get());
 			}
-			file->Close();
-			delete file;
 		}
 		else {
 			uprintf("Analytics req failed\n");
 		}
-		conn->Close();
-		delete conn;
 	}
 	catch (CInternetException *ex) {
 		TCHAR err[256];
 		ex->GetErrorMessage(err, 256);
 		uprintf("Analytics req error: %ls\n", (LPCTSTR)err);
+		ex->Delete();
 	}
 }
 
