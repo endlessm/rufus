@@ -4037,10 +4037,11 @@ void CEndlessUsbToolDlg::GetImgDisplayName(CString &displayName, const CString &
     displayName += " ";
     displayName += version;
     displayName += " ";
-    displayName += LocalizePersonalityName(personality);
+    bool isBase = personality == PERSONALITY_BASE;
+    displayName += UTF8ToCString(lmprintf(isBase ? MSG_400 : MSG_316));
     if (personality != PERSONALITY_BASE) {
-        displayName += " ";
-        displayName += UTF8ToCString(lmprintf(MSG_316));
+        displayName += " - ";
+        displayName += LocalizePersonalityName(personality);
     }
     if (size != 0) {
         displayName += " - ";
