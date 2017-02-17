@@ -6,6 +6,7 @@
 
 #include "localization.h"
 #include "DownloadManager.h"
+#include "EndlessISO.h"
 
 typedef struct FileImageEntry {
     // Full, real path on disk
@@ -90,6 +91,7 @@ enum CompressionType {
     CompressionTypeNone,
     CompressionTypeGz,
     CompressionTypeXz,
+    CompressionTypeSquash,
 };
 
 // CEndlessUsbToolDlg dialog
@@ -250,6 +252,7 @@ private:
 	CComPtr<ITaskbarList3> m_taskbarProgress;
 
     DownloadManager m_downloadManager;
+    EndlessISO m_iso;
     DWORD m_ieVersion;
     UINT m_globalWndMessage;
 
@@ -291,7 +294,9 @@ private:
 
     void StartJSONDownload();
     void UpdateDownloadOptions();
+    // Unpack a file, using BLED. 'compressionType' must be a member of enum bled_compression_type
     bool UnpackFile(const CString &archive, const CString &destination, int compressionType = 0, void* progress_function = NULL, unsigned long* cancel_request = NULL);
+    // Unpack an OS image to the given destination, by whatever means are necessary
     bool UnpackImage(const CString &image, const CString &destination);
     bool ParseJsonFile(LPCTSTR filename, bool isInstallerJson);
     void GetPreferredPersonality(CString &personality);
@@ -326,7 +331,7 @@ private:
     void GetImgDisplayName(CString &displayName, const CString &version, const CString &personality, ULONGLONG size = 0);
     static CompressionType GetCompressionType(const CString& filename);
     static int GetBledCompressionType(const CompressionType type);
-    static ULONGLONG GetExtractedSize(const CString& filename, BOOL isInstallerImage);
+    ULONGLONG GetExtractedSize(const CString& filename, BOOL isInstallerImage, CompressionType &compressionType);
 
     void GetIEVersion();
 
@@ -360,6 +365,7 @@ private:
 	static void RemoveNonEmptyDirectory(const CString directoryPath);
 	static bool CopyFilesToESP(const CString &fromFolder, const CString &driveLetter);
 	static void ImageUnpackCallback(const uint64_t read_bytes);
+	static void UpdateUnpackProgress(const uint64_t current_bytes, const uint64_t total_bytes);
 	static bool CopyFilesToexFAT(CEndlessUsbToolDlg *dlg, const CString &fromFolder, const CString &driveLetter);
 	static bool WriteMBRAndSBRToUSB(HANDLE hPhysical, const CString &bootFilesPath, DWORD bytesPerSector);
 

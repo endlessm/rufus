@@ -112,7 +112,7 @@ static long crc_octets(uint8_t *octets, size_t len)
     return crc & 0xFFFFFFL;
 }
 
-ALG_ID map_digestalgo(uint8_t digest_algo)
+static ALG_ID map_digestalgo(uint8_t digest_algo)
 {
     switch (digest_algo)
     {
@@ -129,7 +129,7 @@ ALG_ID map_digestalgo(uint8_t digest_algo)
     }
 }
 
-DWORD map_algo(uint8_t digest_algo)
+static DWORD map_algo(uint8_t digest_algo)
 {
     switch (digest_algo)
     {
@@ -415,7 +415,7 @@ static int pgp_unarmor(const char *p_ibuf, size_t i_ibuf_len, uint8_t *p_obuf, s
 * fill a public_key_packet_t structure from public key packet data
 * verify that it is a version 4 public key packet, using DSA or RSA
 */
-int parse_public_key_packet(public_key_packet_t *p_key, const uint8_t *p_buf, size_t i_packet_len)
+static int parse_public_key_packet(public_key_packet_t *p_key, const uint8_t *p_buf, size_t i_packet_len)
 {
     if (i_packet_len < 6)
         return -1;
@@ -460,7 +460,7 @@ error:
 *   * signature packet issued by key which long id is p_sig_issuer
 *   * user id packet
 */
-int parse_public_key(const uint8_t *p_key_data, size_t i_key_len, public_key_t *p_key, const uint8_t *p_sig_issuer)
+static int parse_public_key(const uint8_t *p_key_data, size_t i_key_len, public_key_t *p_key, const uint8_t *p_sig_issuer)
 {
     const uint8_t *pos = p_key_data;
     const uint8_t *max_pos = pos + i_key_len;
@@ -572,7 +572,7 @@ error:
     return -1;
 }
 
-int LoadSignature(const CString &signatureFilename, signature_packet_t *p_sig)
+static int LoadSignature(const CString &signatureFilename, signature_packet_t *p_sig)
 {
     FILE* pFile = _tfsopen(signatureFilename, _T("rb"), SH_DENYWR);
     if (!pFile)
@@ -738,27 +738,19 @@ static int hash_from_public_key(HCRYPTHASH hHash, public_key_t* p_pkey)
     return hash_finish(hHash, &p_pkey->sig);
 }
 
-int hash_from_file(HCRYPTHASH hHash, CString filename, signature_packet_t* p_sig, HashingCallback_t hashingCallback, LPVOID hashingContext)
+template <typename Reader>
+static int hash_from_stream(HCRYPTHASH hHash, Reader reader, __int64 fileSize, signature_packet_t* p_sig, HashingCallback_t hashingCallback, LPVOID hashingContext)
 {
     __int64 sizeRead = 0;
-    __int64 fileSize = 0;
-    FILE* pFile = _tfsopen(filename, _T("rb"), SH_DENYWR);
-    if (!pFile) return -1;
-
-    // get file size
-    fseek(pFile, 0L, SEEK_END);
-    fileSize = _ftelli64(pFile);
-    rewind(pFile);
 
     // create the hash
     char buf[4097] = { 0 };
     int read = 0;
     int nlHandling = 0;
-    while ((read = (int)fread(buf, sizeof(char), sizeof(buf) - 1, pFile)) > 0)
+    while ((read = (int)reader(buf, sizeof(buf) - 1)) > 0)
     {
         // Notify the caller
         if (hashingCallback && !hashingCallback(sizeRead, fileSize, hashingContext)) {
-            fclose(pFile);
             return -1;
         }
         sizeRead += read;
@@ -823,12 +815,10 @@ int hash_from_file(HCRYPTHASH hHash, CString filename, signature_packet_t* p_sig
             CryptHashData(hHash, (BYTE *)buf, read, 0);
     }
 
-    fclose(pFile);
-
     return hash_finish(hHash, p_sig);
 }
 
-int check_hash(HCRYPTHASH hHash, signature_packet_t *p_sig)
+static int check_hash(HCRYPTHASH hHash, signature_packet_t *p_sig)
 {
     DWORD hashLen;
     DWORD hashLenLen = sizeof(DWORD);
@@ -847,7 +837,7 @@ int check_hash(HCRYPTHASH hHash, signature_packet_t *p_sig)
 /*
 * Verify an OpenPGP signature made with some RSA public key
 */
-int verify_signature_rsa(HCRYPTPROV hCryptProv, HCRYPTHASH hHash, public_key_t& p_pkey, signature_packet_t& p_sig)
+static int verify_signature_rsa(HCRYPTPROV hCryptProv, HCRYPTHASH hHash, public_key_t& p_pkey, signature_packet_t& p_sig)
 {
     int i_n_len = min(mpi_len(p_pkey.key.sig.rsa.n), sizeof(p_pkey.key.sig.rsa.n) - 2);
     int i_s_len = min(mpi_len(p_sig.algo_specific.rsa.s), sizeof(p_sig.algo_specific.rsa.s) - 2);
@@ -948,7 +938,7 @@ static int verify_signature_dsa(HCRYPTPROV hCryptProv, HCRYPTHASH hHash, public_
 /*
 * Verify an OpenPGP signature made with some public key
 */
-int verify_signature(HCRYPTPROV hCryptProv, HCRYPTHASH hHash, public_key_t& p_key, signature_packet_t& sign)
+static int verify_signature(HCRYPTPROV hCryptProv, HCRYPTHASH hHash, public_key_t& p_key, signature_packet_t& sign)
 {
     if (sign.public_key_algo == PUBLIC_KEY_ALGO_DSA)
         return verify_signature_dsa(hCryptProv, hHash, p_key, sign);
@@ -956,4 +946,76 @@ int verify_signature(HCRYPTPROV hCryptProv, HCRYPTHASH hHash, public_key_t& p_ke
         return verify_signature_rsa(hCryptProv, hHash, p_key, sign);
     else
         return -1;
+}
+
+#include "GeneralCode.h"
+#include "ImageSigningKey.h"
+
+// 'reader' is a generalization of fread(3); it should return 0 on error or EOF and bytes read otherwise.
+bool VerifyStream(std::function<size_t(void *, size_t)> reader, __int64 fileSize, const CString &signatureFilename, HashingCallback_t hashingCallback, LPVOID hashingContext)
+{
+    FUNCTION_ENTER;
+
+    bool verificationResult = FALSE;
+
+    signature_packet_t p_sig = { 0 };
+    public_key_t p_pkey = { 0 };
+    HCRYPTPROV hCryptProv = NULL;
+    HCRYPTHASH hHash = NULL;
+
+    IFFALSE_GOTOERROR(0 == LoadSignature(signatureFilename, &p_sig), "Error on LoadSignature");
+    IFFALSE_GOTOERROR(0 == parse_public_key(endless_public_key, sizeof(endless_public_key), &p_pkey, nullptr), "Error on parse_public_key");
+    IFFALSE_GOTOERROR(CryptAcquireContext(&hCryptProv, nullptr, nullptr, map_algo(p_pkey.key.algo), CRYPT_VERIFYCONTEXT), "Error on CryptAcquireContext");
+
+    memcpy(p_pkey.longid, endless_public_key_longid, sizeof(endless_public_key_longid));
+    IFFALSE_GOTOERROR(0 == memcmp(p_sig.issuer_longid, p_pkey.longid, 8), "Error: signature key id differs from Endless key id");
+
+    IFFALSE_GOTOERROR(CryptCreateHash(hCryptProv, map_digestalgo(p_sig.digest_algo), 0, 0, &hHash), "Error on CryptCreateHash");
+
+    IFFALSE_GOTOERROR(0 == hash_from_stream(hHash, reader, fileSize, &p_sig, hashingCallback, hashingContext), "Error on hash_from_stream");
+    IFFALSE_GOTOERROR(0 == check_hash(hHash, &p_sig), "Error on check_hash");
+    IFFALSE_GOTOERROR(0 == verify_signature(hCryptProv, hHash, p_pkey, p_sig), "Error on verify_signature");
+
+    verificationResult = TRUE;
+
+error:
+    // cleanup wincrypto
+    if (hHash != NULL) CryptDestroyHash(hHash);
+    if (hCryptProv != NULL) CryptReleaseContext(hCryptProv, 0);
+
+    // cleanup key
+    free(p_pkey.psz_username);
+    // cleanup signature
+    if (p_sig.version == 4)
+    {
+        free(p_sig.specific.v4.hashed_data);
+        free(p_sig.specific.v4.unhashed_data);
+    }
+
+    return verificationResult;
+}
+
+bool VerifyFile(const CString &filename, const CString &signatureFilename, HashingCallback_t hashingCallback, LPVOID hashingContext)
+{
+    FUNCTION_ENTER;
+
+    uprintf("Verifying file '%ls' with signature '%ls'", filename, signatureFilename);
+
+    __int64 fileSize = 0;
+    FILE* pFile = _tfsopen(filename, _T("rb"), SH_DENYWR);
+    if (!pFile) return false;
+
+    // get file size
+    fseek(pFile, 0L, SEEK_END);
+    fileSize = _ftelli64(pFile);
+    rewind(pFile);
+
+    auto reader = [&](void *buf, size_t size) {
+        return fread(buf, sizeof(char), size, pFile);
+    };
+
+    bool verificationResult = VerifyStream(reader, fileSize, signatureFilename, hashingCallback, hashingContext);
+
+    fclose(pFile);
+    return verificationResult;
 }

@@ -2,10 +2,6 @@
 #include "DownloadManager.h"
 #include <algorithm>
 
-extern "C" {
-    #include "rufus.h"
-}
-
 #define DOWNLOAD_JOB_PREFIX _T("Endless")
 
 #define MINIMUM_RETRY_DELAY_SEC_JSON    5

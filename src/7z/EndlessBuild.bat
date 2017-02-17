@@ -1,0 +1,2 @@
+cd CPP\7zip\Bundles\Format7zF
+nmake -nologo NEW_COMPILER=1 MY_STATIC_LINK=1 ENDLESS_STATIC_BUILD=1 %*

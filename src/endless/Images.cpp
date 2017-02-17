@@ -3,10 +3,6 @@
 
 #include <iostream>
 
-extern "C" {
-#include "rufus.h"
-}
-
 #include "GeneralCode.h"
 
 #define EOS_PRODUCT_TEXT            "eos"

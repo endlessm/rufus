@@ -3,10 +3,6 @@
 #include <afxinet.h>
 #include <memory>
 
-extern "C" {
-	#include "rufus.h"
-}
-
 #include "json/json.h"
 
 #include "Version.h"

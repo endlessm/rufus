@@ -135,6 +135,12 @@
     <ClInclude Include="Images.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="EndlessISO.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ImageSigningKey.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EndlessUsbTool.cpp">
@@ -225,6 +231,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Images.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="EndlessISO.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
