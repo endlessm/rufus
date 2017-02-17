@@ -231,6 +231,19 @@ DWORD usbDevicesCount;
 #define PERSONALITY_BENGALI             L"bn"
 #define PERSONALITY_SPANISH_GT          L"es_GT"
 #define PERSONALITY_SPANISH_MX          L"es_MX"
+// Real personality:
+#define PERSONALITY_SOUTHEAST_ASIA      L"sea"
+// "Virtual" personalities, proxies for sea
+#define PERSONALITY_INDONESIAN          L"id"
+#define PERSONALITY_THAI                L"th"
+#define PERSONALITY_VIETNAMESE          L"vi"
+
+static const wchar_t * const seaVirtualPersonalities[] =
+{
+    PERSONALITY_INDONESIAN,
+    PERSONALITY_THAI,
+    PERSONALITY_VIETNAMESE,
+};
 
 static const wchar_t *globalAvailablePersonalities[] =
 {
@@ -244,6 +257,9 @@ static const wchar_t *globalAvailablePersonalities[] =
     PERSONALITY_BENGALI,
     PERSONALITY_SPANISH_GT,
     PERSONALITY_SPANISH_MX,
+    PERSONALITY_INDONESIAN,
+    PERSONALITY_THAI,
+    PERSONALITY_VIETNAMESE,
 };
 
 static_assert(
@@ -259,6 +275,9 @@ static_assert(
 #define RUFUS_LOCALE_FR     "fr-FR"
 #define RUFUS_LOCALE_ZH_CN  "zh-CN"
 #define RUFUS_LOCALE_BN     "bn-BD"
+#define RUFUS_LOCALE_VI     "vi-VN"
+#define RUFUS_LOCALE_TH     "th-TH"
+#define RUFUS_LOCALE_ID     "id-ID"
 
 // INI file language codes
 #define INI_LOCALE_EN       "en_US.utf8"
@@ -268,6 +287,9 @@ static_assert(
 #define INI_LOCALE_FR       "fr_FR.utf8"
 #define INI_LOCALE_ZH       "zh_CN.utf8"
 #define INI_LOCALE_BN       "bn_BD.utf8"
+#define INI_LOCALE_VI       "vi_VN.utf8"
+#define INI_LOCALE_TH       "th_TH.utf8"
+#define INI_LOCALE_ID       "id_ID.utf8"
 
 enum custom_message {
     WM_FILES_CHANGED = UM_NO_UPDATE + 1,
@@ -487,6 +509,7 @@ END_DISPATCH_MAP()
 
 CMap<CString, LPCTSTR, uint32_t, uint32_t> CEndlessUsbToolDlg::m_personalityToLocaleMsg;
 CMap<CStringA, LPCSTR, CString, LPCTSTR> CEndlessUsbToolDlg::m_localeToPersonality;
+CMap<CStringA, LPCSTR, CString, LPCTSTR> CEndlessUsbToolDlg::m_localeToDisplayPersonality;
 CMap<CStringA, LPCSTR, CStringA, LPCSTR> CEndlessUsbToolDlg::m_localeToIniLocale;
 
 int CEndlessUsbToolDlg::ImageUnpackOperation;
@@ -547,6 +570,13 @@ CEndlessUsbToolDlg::CEndlessUsbToolDlg(UINT globalMessage, CWnd* pParent /*=NULL
     m_localeToPersonality[RUFUS_LOCALE_ZH_CN] = PERSONALITY_CHINESE;
     m_localeToPersonality[RUFUS_LOCALE_BN] = PERSONALITY_BENGALI;
 
+    m_localeToPersonality[RUFUS_LOCALE_ID] = PERSONALITY_SOUTHEAST_ASIA;
+    m_localeToPersonality[RUFUS_LOCALE_TH] = PERSONALITY_SOUTHEAST_ASIA;
+    m_localeToPersonality[RUFUS_LOCALE_VI] = PERSONALITY_SOUTHEAST_ASIA;
+    m_localeToDisplayPersonality[RUFUS_LOCALE_ID] = PERSONALITY_INDONESIAN;
+    m_localeToDisplayPersonality[RUFUS_LOCALE_TH] = PERSONALITY_THAI;
+    m_localeToDisplayPersonality[RUFUS_LOCALE_VI] = PERSONALITY_VIETNAMESE;
+
     m_localeToIniLocale[RUFUS_LOCALE_EN] = INI_LOCALE_EN;
     m_localeToIniLocale[RUFUS_LOCALE_ES] = INI_LOCALE_ES;
     m_localeToIniLocale[RUFUS_LOCALE_PT] = INI_LOCALE_PT;
@@ -554,6 +584,9 @@ CEndlessUsbToolDlg::CEndlessUsbToolDlg(UINT globalMessage, CWnd* pParent /*=NULL
     m_localeToIniLocale[RUFUS_LOCALE_FR] = INI_LOCALE_FR;
     m_localeToIniLocale[RUFUS_LOCALE_ZH_CN] = INI_LOCALE_ZH;
     m_localeToIniLocale[RUFUS_LOCALE_BN] = INI_LOCALE_BN;
+    m_localeToIniLocale[RUFUS_LOCALE_ID] = INI_LOCALE_ID;
+    m_localeToIniLocale[RUFUS_LOCALE_TH] = INI_LOCALE_TH;
+    m_localeToIniLocale[RUFUS_LOCALE_VI] = INI_LOCALE_VI;
 }
 
 CEndlessUsbToolDlg::~CEndlessUsbToolDlg() {
@@ -2742,20 +2775,32 @@ error:
     SetJSONDownloadState(JSONDownloadState::Failed);
 }
 
+void CEndlessUsbToolDlg::GetPreferredPersonality(CString & personality)
+{
+    if (!m_localeToPersonality.Lookup(m_selectedLocale->txt[0], personality)) {
+        uprintf("ERROR: Selected language personality not found. Defaulting to English");
+        personality = PERSONALITY_ENGLISH;
+    }
+}
+
+void CEndlessUsbToolDlg::GetPreferredDisplayPersonality(CString & personality)
+{
+    if (!m_localeToDisplayPersonality.Lookup(m_selectedLocale->txt[0], personality)) {
+        GetPreferredPersonality(personality);
+    }
+}
+
+
 void CEndlessUsbToolDlg::AddDownloadOptionsToUI()
 {
-    CString languagePersonalty = PERSONALITY_ENGLISH;
+    CString languagePersonalty;
+    GetPreferredPersonality(languagePersonalty);
 
     // remove all options from UI
     HRESULT hr = ClearSelectElement(_T(ELEMENT_REMOTE_SELECT));
     IFFALSE_PRINTERROR(SUCCEEDED(hr), "Error clearing remote images select.");
     hr = ClearSelectElement(_T(ELEMENT_SELFILE_DOWN_LANG));
     IFFALSE_PRINTERROR(SUCCEEDED(hr), "Error clearing remote images select.");
-
-    // get selected language
-    if (!m_localeToPersonality.Lookup(m_selectedLocale->txt[0], languagePersonalty)) {
-        uprintf("ERROR: Selected language personality not found. Defaulting to English");
-    }
 
     // add options to UI
     long selectIndex = -1;
@@ -4018,6 +4063,37 @@ DWORD CALLBACK CEndlessUsbToolDlg::CopyProgressRoutine(
 const CString CEndlessUsbToolDlg::LocalizePersonalityName(const CString &personality)
 {
     uint32_t msgId;
+    CString localePersonality;
+
+    GetPreferredDisplayPersonality(localePersonality);
+
+    if (personality == PERSONALITY_SOUTHEAST_ASIA) {
+        size_t i;
+        CString seaName;
+        for (i = 0; i < ARRAYSIZE(seaVirtualPersonalities); i++) {
+            auto p = seaVirtualPersonalities[i];
+            if (m_personalityToLocaleMsg.Lookup(p, msgId)) {
+                auto m = UTF8ToCString(lmprintf(msgId));
+
+                // If running in a sea language, label the personality as
+                // that language alone.
+                if (p == localePersonality) {
+                    return m;
+                }
+
+                if (!seaName.IsEmpty()) {
+                    seaName += L", ";
+                }
+
+                seaName += m;
+            }
+        }
+
+        if (!seaName.IsEmpty()) {
+            return seaName;
+        }
+    }
+
     if (m_personalityToLocaleMsg.Lookup(personality, msgId)) {
         return UTF8ToCString(lmprintf(msgId));
     }

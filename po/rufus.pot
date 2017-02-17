@@ -678,3 +678,18 @@ msgstr ""
 msgctxt "MSG_409"
 msgid "Spanish (Mexico)"
 msgstr ""
+
+#, c-format
+msgctxt "MSG_410"
+msgid "Indonesian"
+msgstr ""
+
+#, c-format
+msgctxt "MSG_411"
+msgid "Thai"
+msgstr ""
+
+#, c-format
+msgctxt "MSG_412"
+msgid "Vietnamese"
+msgstr ""

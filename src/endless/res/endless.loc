@@ -284,6 +284,9 @@ t MSG_406 "Chinese Simplified"
 t MSG_407 "Bengali"
 t MSG_408 "Spanish (Guatemala)"
 t MSG_409 "Spanish (Mexico)"
+t MSG_410 "Indonesian"
+t MSG_411 "Thai"
+t MSG_412 "Vietnamese"
 
 ################################################################################
 ############################# TRANSLATOR END COPY ##############################
