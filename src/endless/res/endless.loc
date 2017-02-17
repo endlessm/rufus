@@ -284,6 +284,9 @@ t MSG_406 "Chinese Simplified"
 t MSG_407 "Bengali"
 t MSG_408 "Spanish (Guatemala)"
 t MSG_409 "Spanish (Mexico)"
+t MSG_410 "Indonesian"
+t MSG_411 "Thai"
+t MSG_412 "Vietnamese"
 
 ################################################################################
 ############################# TRANSLATOR END COPY ##############################
@@ -1354,6 +1357,7 @@ t MSG_405 "Perancis"
 t MSG_406 "Tionghoa Sederhana"
 t MSG_407 "Bengali"
 t MSG_408 "Spanyol (Guatemala)"
+t MSG_410 "Bahasa Indonesia"
 
 ################################################################################
 l "pt-BR" "Portuguese Brazilian (Português do Brasil)" 0x0416
@@ -1810,6 +1814,7 @@ t MSG_406 "อักษรจีนตัวย่อ"
 t MSG_407 "เบงกาลี"
 t MSG_408 "สเปน (กัวเตมาลา)"
 t MSG_409 "สเปน (เม็กซิโก)"
+t MSG_411 "ไทย"
 
 ################################################################################
 l "vi-VN" "Vietnamese (Tiếng Việt)" 0x042A
@@ -1962,6 +1967,7 @@ t MSG_406 "Tiếng Trung giản thể"
 t MSG_407 "Tiếng Bengal"
 t MSG_408 "Tiếng Tây Ban Nha (Guatemala)"
 t MSG_409 "Tiếng Tây Ban Nha (Mexico)"
+t MSG_412 "Tiếng Việt"
 
 ################################################################################
 l "zh-CN" "Chinese Simplified (简体中文)" 0x0804, 0x1004

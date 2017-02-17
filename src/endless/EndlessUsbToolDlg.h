@@ -65,7 +65,6 @@ typedef struct RemoteImageEntry {
     CString urlBootArchive;
     CString urlBootArchiveSignature;
 	ULONGLONG bootArchiveSize;
-    CString displayName;
     CString downloadJobName;
     CString version;
 } RemoteImageEntry_t, *pRemoteImageEntry_t;
@@ -220,6 +219,7 @@ private:
     FileImageEntry_t m_localInstallerImage;
     static CMap<CString, LPCTSTR, uint32_t, uint32_t> m_personalityToLocaleMsg;
     static CMap<CStringA, LPCSTR, CString, LPCTSTR> m_localeToPersonality;
+    static CMap<CStringA, LPCSTR, CString, LPCTSTR> CEndlessUsbToolDlg::m_localeToDisplayPersonality;
     static CMap<CStringA, LPCSTR, CStringA, LPCSTR> m_localeToIniLocale;
 
     CString m_localFile;
@@ -294,6 +294,8 @@ private:
     bool UnpackFile(const CString &archive, const CString &destination, int compressionType = 0, void* progress_function = NULL, unsigned long* cancel_request = NULL);
     bool UnpackImage(const CString &image, const CString &destination);
     bool ParseJsonFile(LPCTSTR filename, bool isInstallerJson);
+    void GetPreferredPersonality(CString &personality);
+    void GetPreferredDisplayPersonality(CString & personality);
     void AddDownloadOptionsToUI();
     void UpdateDownloadableState();
 
