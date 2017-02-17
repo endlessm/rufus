@@ -1232,29 +1232,6 @@ LRESULT CEndlessUsbToolDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lPara
             
             // Ignore exFAT format progress.
             if ((m_currentStep == OP_FILE_COPY || m_currentStep == OP_NEW_LIVE_CREATION) && (op == OP_FORMAT || op == OP_CREATE_FS)) break;
-
-            // Radu: pass all the files to be verified to verfication thread and do the percent calculation there
-            // Not very happy about this but eh, needs refactoring
-            if (op == OP_VERIFYING_SIGNATURE) {
-				if (IsDualBootOrCombinedUsb()) {
-					// Radu: do we need to do anything special here?
-					// Does it make sense to add the boot archive signature verification to the percentage calculation also?
-					// We are talking about 6 MB compared to more than 2 GB
-				} else {
-					if (m_selectedInstallMethod == InstallMethod_t::ReformatterUsb) {
-						ULONGLONG totalSize = m_selectedFileSize + m_localInstallerImage.fileSize;
-						ULONGLONG currentSize = 0;
-						bool isInstallerImage = (m_localFile == m_localInstallerImage.filePath);
-						if (isInstallerImage) {
-							currentSize = m_selectedFileSize + (m_localInstallerImage.fileSize * percent / 100);
-						}
-						else {
-							currentSize = m_selectedFileSize * percent / 100;
-						}
-						percent = (int)(currentSize * 100 / totalSize);
-					}
-				}
-            }
             
             // Radu: maybe divide the progress bar also based on the size of the image to be copied to disk after format is complete
             if (op == OP_FORMAT && m_selectedInstallMethod == InstallMethod_t::ReformatterUsb) {
@@ -1332,8 +1309,9 @@ LRESULT CEndlessUsbToolDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lPara
                     if (m_jsonDownloadState != JSONDownloadState::Succeeded) {
                         UpdateDownloadOptions();
                     }
-                } else {
-                    StartOperationThread(OP_VERIFYING_SIGNATURE, CEndlessUsbToolDlg::FileVerificationThread);
+                } else if (m_currentStep == OP_DOWNLOADING_FILES) {
+                    // ->done can be signaled more than once; only proceed to verification the first time
+                    StartFileVerificationThread();
                 }
             } else {
 				CStringA part, total;
@@ -1390,38 +1368,22 @@ LRESULT CEndlessUsbToolDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lPara
             BOOL result = (BOOL)wParam;
             m_operationThread = INVALID_HANDLE_VALUE;
             if (result) {
-                uprintf("Verification passed.");
-
-                bool verifiedInstallerImage = (m_localFile == m_localInstallerImage.filePath);
-				bool verifiedBootFilesZip = (m_localFile == m_bootArchive);
-
-				if (IsDualBootOrCombinedUsb()) {
-					if (verifiedBootFilesZip) {
-						// we checked the boot archive signature, now check the image
-						m_localFile = UTF8ToCString(image_path);
-						GetSignatureForLocalFile(m_localFile, m_localFileSig);
-						StartOperationThread(OP_VERIFYING_SIGNATURE, CEndlessUsbToolDlg::FileVerificationThread);
-					} else {
-						m_cancelImageUnpack = 0;
-						if (m_selectedInstallMethod == InstallMethod_t::CombinedUsb) {
-							StartOperationThread(OP_NEW_LIVE_CREATION, CEndlessUsbToolDlg::CreateUSBStick);
-						} else {
-							StartOperationThread(OP_SETUP_DUALBOOT, CEndlessUsbToolDlg::SetupDualBoot);
-						}
-					}
-				} else if (m_selectedInstallMethod == InstallMethod_t::ReformatterUsb && !verifiedInstallerImage) {
-                    safe_free(image_path);
-                    image_path = wchar_to_utf8(m_localInstallerImage.filePath);
-
-                    // Radu: please make time to refactor this.
-                    // store this to copy them
-                    m_LiveFile = m_localFile;
-                    m_LiveFileSig = m_localFileSig;
-
-                    m_localFile = UTF8ToCString(image_path);
-                    m_localFileSig = m_localFile + SIGNATURE_FILE_EXT;
-                    StartOperationThread(OP_VERIFYING_SIGNATURE, CEndlessUsbToolDlg::FileVerificationThread);
+                if (IsDualBootOrCombinedUsb()) {
+                    m_cancelImageUnpack = 0;
+                    if (m_selectedInstallMethod == InstallMethod_t::CombinedUsb) {
+                        StartOperationThread(OP_NEW_LIVE_CREATION, CEndlessUsbToolDlg::CreateUSBStick);
+                    } else {
+                        StartOperationThread(OP_SETUP_DUALBOOT, CEndlessUsbToolDlg::SetupDualBoot);
+                    }
                 } else {
+                    // RufusISOScanThread and FormatThread use a global variable for the image path
+                    CString &diskImage = m_localFile;
+                    if (m_selectedInstallMethod == InstallMethod_t::ReformatterUsb) {
+                        diskImage = m_localInstallerImage.filePath;
+                    }
+
+                    safe_free(image_path);
+                    image_path = wchar_to_utf8(diskImage);
                     StartOperationThread(OP_FLASHING_DEVICE, CEndlessUsbToolDlg::RufusISOScanThread);
                 }
             }
@@ -1775,15 +1737,31 @@ void CEndlessUsbToolDlg::ErrorOccured(ErrorCause_t errorCause)
     // Ask user to delete the file that didn't pass signature verification
     // Trying again with the same file will result in the same verification error
     bool fileVerificationFailed = (errorCause == ErrorCause_t::ErrorCauseVerificationFailed);
-    CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_ERROR_DELETE_CHECKBOX), CComVariant(fileVerificationFailed));
-    CallJavascript(_T(JS_ENABLE_BUTTON), CComVariant(HTML_BUTTON_ID(_T(ELEMENT_ERROR_BUTTON))), CComVariant(!fileVerificationFailed));
     CComBSTR deleteFilesText("");
     if (fileVerificationFailed) {
-        bool isInstallerImage = (m_localFile == m_localInstallerImage.filePath);
-        ULONGLONG invalidFileSize = isInstallerImage ? m_localInstallerImage.fileSize : m_selectedFileSize;
+        CSingleLock lock(&m_verifyFilesMutex);
+        lock.Lock();
+        ULONGLONG invalidFileSize = 0;
+
+        if (m_verifyFiles.empty()) {
+            uprintf("Verification failed, but no file is invalid(?)");
+        } else {
+            auto path = m_verifyFiles.front().filePath;
+            try {
+                CFile file(path, CFile::modeRead | CFile::shareDenyNone);
+                invalidFileSize = file.GetLength();
+            }
+            catch (CFileException *ex) {
+                TCHAR szError[1024];
+                ex->GetErrorMessage(szError, ARRAYSIZE(szError));
+                uprintf("CFileException on file [%ls] with cause [%d] and OS error [%d]: %ls", path, ex->m_cause, ex->m_lOsError, szError);
+                ex->Delete();
+            }
+        }
         deleteFilesText = UTF8ToBSTR(lmprintf(MSG_336, SizeToHumanReadable(invalidFileSize, FALSE, use_fake_units)));
         CallJavascript(_T(JS_RESET_CHECK), CComVariant(_T(ELEMENT_ERROR_DELETE_CHECKBOX)));
     }
+    CallJavascript(_T(JS_ENABLE_BUTTON), CComVariant(HTML_BUTTON_ID(_T(ELEMENT_ERROR_BUTTON))), CComVariant(!fileVerificationFailed));
     CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_ERROR_DELETE_CHECKBOX), CComVariant(fileVerificationFailed));
     SetElementText(_T(ELEMENT_ERROR_DELETE_TEXT), deleteFilesText);
 
@@ -2364,6 +2342,13 @@ void CEndlessUsbToolDlg::UpdateFileEntries(bool shouldInit)
 
                 currentEntry->bootArchivePath = basePath + BOOT_ARCHIVE_SUFFIX;
                 currentEntry->bootArchiveSigPath = basePath + BOOT_ARCHIVE_SUFFIX + SIGNATURE_FILE_EXT;
+                try {
+                    CFile bootArchive(currentEntry->bootArchivePath, CFile::modeRead | CFile::shareDenyNone);
+                    currentEntry->bootArchiveSize = bootArchive.GetLength();
+                } catch (CFileException *ex) {
+                    currentEntry->bootArchiveSize = 0;
+                    ex->Delete();
+                }
                 currentEntry->unpackedImgSigPath = basePath + IMAGE_FILE_EXT + SIGNATURE_FILE_EXT;
                 currentEntry->hasBootArchive = PathFileExists(currentEntry->bootArchivePath);
                 currentEntry->hasBootArchiveSig = PathFileExists(currentEntry->bootArchiveSigPath);
@@ -3187,6 +3172,7 @@ void CEndlessUsbToolDlg::StartInstallationProcess()
 		if (m_imageFiles.Lookup(selectedImage, localEntry) && localEntry->hasBootArchive && localEntry->hasBootArchiveSig && localEntry->hasUnpackedImgSig) {
 			m_bootArchive = localEntry->bootArchivePath;
 			m_bootArchiveSig = localEntry->bootArchiveSigPath;
+			m_bootArchiveSize = localEntry->bootArchiveSize;
 			m_unpackedImageSig = localEntry->unpackedImgSigPath;
 		} else {
 			m_useLocalFile = false;
@@ -3195,22 +3181,17 @@ void CEndlessUsbToolDlg::StartInstallationProcess()
 
 	// Radu: we need to download an installer if only a live image is found and full install was selected
 	if (m_useLocalFile) {
-		if (IsDualBootOrCombinedUsb()) {
-			m_localFile = m_bootArchive;
-			m_localFileSig = m_bootArchiveSig;
-		} else {
-			m_localFile = UTF8ToCString(image_path);
-			if (!GetSignatureForLocalFile(m_localFile, m_localFileSig)) {
-				ChangePage(_T(ELEMENT_INSTALL_PAGE));
-				uprintf("Error: couldn't find local entry for selected local file '%ls'", m_localFile);
-				FormatStatus = FORMAT_STATUS_CANCEL;
-				m_lastErrorCause = ErrorCause_t::ErrorCauseGeneric;
-				PostMessage(WM_FINISHED_ALL_OPERATIONS, 0, 0);
-				return;
-			}
+		m_localFile = UTF8ToCString(image_path);
+		if (!GetSignatureForLocalFile(m_localFile, m_localFileSig)) {
+			ChangePage(_T(ELEMENT_INSTALL_PAGE));
+			uprintf("Error: couldn't find local entry for selected local file '%ls'", m_localFile);
+			FormatStatus = FORMAT_STATUS_CANCEL;
+			m_lastErrorCause = ErrorCause_t::ErrorCauseGeneric;
+			PostMessage(WM_FINISHED_ALL_OPERATIONS, 0, 0);
+			return;
 		}
 
-		StartOperationThread(OP_VERIFYING_SIGNATURE, CEndlessUsbToolDlg::FileVerificationThread);
+		StartFileVerificationThread();
 	} else {
 		UpdateCurrentStep(OP_DOWNLOADING_FILES);
 
@@ -3245,6 +3226,8 @@ void CEndlessUsbToolDlg::StartInstallationProcess()
 
 			urlBootFilesAsc = CString(RELEASE_JSON_URLPATH) + remote.urlBootArchiveSignature;
 			m_bootArchiveSig = GET_IMAGE_PATH(CSTRING_GET_LAST(urlBootFilesAsc, '/'));
+
+			m_bootArchiveSize = remote.bootArchiveSize;
 
 			urlImageSig = CString(RELEASE_JSON_URLPATH) + remote.urlUnpackedSignature;
 			m_unpackedImageSig = GET_IMAGE_PATH(CSTRING_GET_LAST(urlImageSig, '/'));
@@ -3314,13 +3297,9 @@ void CEndlessUsbToolDlg::StartInstallationProcess()
 		// add remote installer data to local installer data
 		m_localInstallerImage.stillPresent = TRUE;
 		m_localInstallerImage.filePath = GET_IMAGE_PATH(CSTRING_GET_LAST(m_installerImage.urlFile, '/'));
+		m_localInstallerImage.imgSigPath = GET_IMAGE_PATH(CSTRING_GET_LAST(m_installerImage.urlSignature, '/'));
 		m_localInstallerImage.fileSize = m_installerImage.compressedSize;
 		m_localInstallerImage.extractedSize = m_installerImage.extractedSize;
-
-		if (IsDualBootOrCombinedUsb()) {
-			m_localFile = m_bootArchive;
-			m_localFileSig = m_bootArchiveSig;
-		}
 	}
 
 	ChangePage(_T(ELEMENT_INSTALL_PAGE));
@@ -3652,17 +3631,26 @@ HRESULT CEndlessUsbToolDlg::OnRecoverErrorButtonClicked(IHTMLElement* pElement)
     case ErrorCause_t::ErrorCauseWriteFailed:
         if (m_selectedInstallMethod == InstallMethod_t::ReformatterUsb) {
             safe_free(image_path);
-            image_path = wchar_to_utf8(m_LiveFile);
+            image_path = wchar_to_utf8(m_localFile);
         }
         OnSelectFileNextClicked(NULL);
         break;
     case ErrorCause_t::ErrorCauseVerificationFailed:
     {
-        BOOL result = DeleteFile(m_localFile);
-        uprintf("%s on deleting file '%ls' - %s", result ? "Success" : "Error", m_localFile, WindowsErrorString());
-        SetLastError(ERROR_SUCCESS);
-        result = DeleteFile(m_localFileSig);
-        uprintf("%s on deleting file '%ls' - %s", result ? "Success" : "Error", m_localFileSig, WindowsErrorString());
+        CSingleLock lock(&m_verifyFilesMutex);
+        lock.Lock();
+
+        if (m_verifyFiles.empty()) {
+            uprintf("Verification failed, but no file is invalid(?)");
+        } else {
+            auto &p = m_verifyFiles.front();
+            BOOL result = DeleteFile(p.filePath);
+            uprintf("%s on deleting file '%ls' - %s", result ? "Success" : "Error", p.filePath, WindowsErrorString());
+            SetLastError(ERROR_SUCCESS);
+            result = DeleteFile(p.sigPath);
+            uprintf("%s on deleting sig '%ls' - %s", result ? "Success" : "Error", p.sigPath, WindowsErrorString());
+        }
+        m_verifyFiles.clear();
         ChangePage(_T(ELEMENT_DUALBOOT_PAGE));
         break;
     }
@@ -3834,17 +3822,45 @@ void CEndlessUsbToolDlg::UpdateCurrentStep(int currentStep)
     TrackEvent(action);
 }
 
+void CEndlessUsbToolDlg::StartFileVerificationThread()
+{
+    FUNCTION_ENTER;
+
+    {
+        CSingleLock lock(&m_verifyFilesMutex);
+        lock.Lock();
+
+        m_verifyFiles.clear();
+        if (IsDualBootOrCombinedUsb()) {
+            m_verifyFiles.push_back(SignedFile_t(m_bootArchive, m_bootArchiveSize, m_bootArchiveSig));
+        }
+        else if (m_selectedInstallMethod == ReformatterUsb) {
+            m_verifyFiles.push_back(SignedFile_t(
+                m_localInstallerImage.filePath, m_localInstallerImage.fileSize, m_localInstallerImage.imgSigPath));
+        }
+
+        m_verifyFiles.push_back(SignedFile_t(m_localFile, m_selectedFileSize, m_localFileSig));
+    }
+
+    StartOperationThread(OP_VERIFYING_SIGNATURE, CEndlessUsbToolDlg::FileVerificationThread, this);
+}
+
+struct FileHashingContext {
+    HANDLE cancelOperationEvent;
+    ULONGLONG totalSize;
+    ULONGLONG previousFilesSize;
+};
+
 bool CEndlessUsbToolDlg::FileHashingCallback(__int64 currentSize, __int64 totalSize, LPVOID context)
 {
-    // RADU: do param verification
-    CEndlessUsbToolDlg *dlg = (CEndlessUsbToolDlg *)context;    
-    DWORD dwWaitStatus = WaitForSingleObject((HANDLE)dlg->m_cancelOperationEvent, 0);
+    FileHashingContext *ctx = (FileHashingContext *) context;
+    DWORD dwWaitStatus = WaitForSingleObject(ctx->cancelOperationEvent, 0);
     if(dwWaitStatus == WAIT_OBJECT_0) {
         uprintf("FileHashingCallback: Cancel requested.");
         return false;
     }
     
-    float current = (float)(currentSize * 100 / totalSize);
+    float current = (float)((ctx->previousFilesSize + currentSize) * 100 / ctx->totalSize);
     UpdateProgress(OP_VERIFYING_SIGNATURE, current);
 
     return true;
@@ -3854,20 +3870,46 @@ DWORD WINAPI CEndlessUsbToolDlg::FileVerificationThread(void* param)
 {
     FUNCTION_ENTER;
 
-    CEndlessUsbToolDlg *dlg = (CEndlessUsbToolDlg*) param;
-    const CString &filename = dlg->m_localFile;
-    const CString &signatureFilename = dlg->m_localFileSig;
+    CEndlessUsbToolDlg *dlg = (CEndlessUsbToolDlg *)param;
+    FileHashingContext ctx = { dlg->m_cancelOperationEvent, 0, 0 };
+    CSingleLock lock(&dlg->m_verifyFilesMutex);
+    lock.Lock();
 
-    bool verificationResult;
+    auto &verifyFiles = dlg->m_verifyFiles;
+    bool verificationResult = false;
+    IFFALSE_GOTOERROR(!verifyFiles.empty(), "nothing to verify");
 
-    switch (GetCompressionType(filename)) {
-    case CompressionTypeSquash:
-        verificationResult = dlg->m_iso.VerifySquashFS(filename, signatureFilename, FileHashingCallback, dlg);
-        break;
-    default:
-        verificationResult = VerifyFile(filename, signatureFilename, FileHashingCallback, dlg);
+    for (auto &p : verifyFiles) {
+        ctx.totalSize += p.fileSize;
     }
 
+    verificationResult = true;
+    while (!verifyFiles.empty()) {
+        auto &p = verifyFiles.front();
+        const CString &filePath = p.filePath;
+        const CString &sigPath = p.sigPath;
+        uprintf("Verifying %ls against %ls", filePath, sigPath);
+        bool v;
+
+        switch (GetCompressionType(filePath)) {
+        case CompressionTypeSquash:
+            v = dlg->m_iso.VerifySquashFS(filePath, sigPath, FileHashingCallback, &ctx);
+            break;
+        default:
+            v = VerifyFile(filePath, sigPath, FileHashingCallback, &ctx);
+        }
+
+        if (!v) {
+            uprintf("Verification failed for %ls against %ls", filePath, sigPath);
+            verificationResult = false;
+            break;
+        }
+
+        ctx.previousFilesSize += p.fileSize;
+        verifyFiles.pop_front();
+    }
+
+error:
     ::PostMessage(hMainDialog, WM_FINISHED_FILE_VERIFICATION, (WPARAM)verificationResult, 0);
 
     return 0;
@@ -3961,17 +4003,17 @@ DWORD WINAPI CEndlessUsbToolDlg::FileCopyThread(void* param)
 	IFFALSE_GOTOERROR(MountFirstPartitionOnDrive(DriveIndex, driveDestination), "Error on MountFirstPartitionOnDrive");
 
     // Copy Files
-	liveFileName = CSTRING_GET_LAST(dlg->m_LiveFile, L'\\');
+	liveFileName = CSTRING_GET_LAST(dlg->m_localFile, L'\\');
 	if (liveFileName == ENDLESS_IMG_FILE_NAME) {
-		fileDestination = driveDestination + CSTRING_GET_PATH(CSTRING_GET_LAST(dlg->m_LiveFileSig, L'\\'), L'.');
+		fileDestination = driveDestination + CSTRING_GET_PATH(CSTRING_GET_LAST(dlg->m_localFileSig, L'\\'), L'.');
 	} else {
 		fileDestination = driveDestination + liveFileName;
 	}
-    result = CopyFileEx(dlg->m_LiveFile, fileDestination, CEndlessUsbToolDlg::CopyProgressRoutine, dlg, NULL, 0);
+    result = CopyFileEx(dlg->m_localFile, fileDestination, CEndlessUsbToolDlg::CopyProgressRoutine, dlg, NULL, 0);
     IFFALSE_GOTOERROR(result, "Copying live image failed/cancelled.");
 
-    fileDestination = driveDestination + CSTRING_GET_LAST(dlg->m_LiveFileSig, L'\\');
-    result = CopyFileEx(dlg->m_LiveFileSig, fileDestination, NULL, NULL, NULL, 0);
+    fileDestination = driveDestination + CSTRING_GET_LAST(dlg->m_localFileSig, L'\\');
+    result = CopyFileEx(dlg->m_localFileSig, fileDestination, NULL, NULL, NULL, 0);
     IFFALSE_GOTOERROR(result, "Copying live image signature failed.");
 
     // Create settings file

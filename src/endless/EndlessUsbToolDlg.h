@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <list>
+
 #include "localization.h"
 #include "DownloadManager.h"
 #include "EndlessISO.h"
@@ -22,6 +24,7 @@ typedef struct FileImageEntry {
     CString personality;
     CString bootArchivePath;
     CString bootArchiveSigPath;
+    ULONGLONG bootArchiveSize;
     // Signature for 'filePath' (usually filePath + ".asc", except when
     // operating on a live USB)
     CString imgSigPath;
@@ -92,6 +95,19 @@ enum CompressionType {
     CompressionTypeGz,
     CompressionTypeXz,
     CompressionTypeSquash,
+};
+
+struct SignedFile_t {
+    SignedFile_t(const CString &filePath_, ULONGLONG fileSize_, const CString &sigPath_)
+        :
+        filePath(filePath_),
+        fileSize(fileSize_),
+        sigPath(sigPath_)
+    {}
+
+    CString filePath;
+    ULONGLONG fileSize;
+    CString sigPath;
 };
 
 // CEndlessUsbToolDlg dialog
@@ -224,8 +240,20 @@ private:
     static CMap<CStringA, LPCSTR, CString, LPCTSTR> CEndlessUsbToolDlg::m_localeToDisplayPersonality;
     static CMap<CStringA, LPCSTR, CStringA, LPCSTR> m_localeToIniLocale;
 
+    // The OS image file. For ReformatterUsb, this is still the 'eos' image;
+    // for the 'eosinstaller' image see m_localInstallerImage. Note that
+    // ReformatterUsb and LiveUsb delegate to Rufus proper to write an image
+    // to disk, using a global variable 'image_path'.
     CString m_localFile;
+    // Path to signature for m_localFile. In the ISO case, this is a signature
+    // for the uncompressed image inside 'endless.squash'.
     CString m_localFileSig;
+    // Path to signature for the decompressed contents of m_localFile.
+    // If m_localFile is not compressed or is a SquashFS, this will be
+    // identical to m_localFileSig. Used for CombinedUsb.
+    CString m_unpackedImageSig;
+
+    // (Compressed) size of m_localFile.
     ULONGLONG m_selectedFileSize;
 
     /* The size of data ultimately written to disk, taking into account the
@@ -236,12 +264,17 @@ private:
     */
     ULONGLONG m_finalSize;
 
-    CString m_LiveFile;
-    CString m_LiveFileSig;
+    // Path to boot archive; used for CombinedUsb and DualBoot
+    CString m_bootArchive;
+    // Path to signature for m_bootArchive
+    CString m_bootArchiveSig;
+    ULONGLONG m_bootArchiveSize;
 
-	CString m_bootArchive;
-	CString m_bootArchiveSig;
-	CString m_unpackedImageSig;
+    // Files to verify. When verification fails, the head of this list is the
+    // mismatching file/sig pair.
+    std::list<SignedFile_t> m_verifyFiles;
+    // Guards access to m_verifyFiles
+    CCriticalSection m_verifyFilesMutex;
 
 	CComPtr<IHTMLDocument3> m_spHtmlDoc3;
     CComPtr<IHTMLElement> m_spStatusElem;
@@ -311,6 +344,7 @@ private:
     bool CancelInstall();
     DownloadType_t GetSelectedDownloadType();
 
+    void StartFileVerificationThread();
     static DWORD WINAPI FileVerificationThread(void* param);
     static bool FileHashingCallback(__int64 currentSize, __int64 totalSize, LPVOID context);
     
