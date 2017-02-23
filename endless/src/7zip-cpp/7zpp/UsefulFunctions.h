@@ -7,7 +7,6 @@
 #include "GUIDs.h"
 #include "FileSys.h"
 #include "ArchiveOpenCallback.h"
-#include "InStreamWrapper.h"
 
 namespace SevenZip
 {
@@ -20,6 +19,8 @@ namespace SevenZip
 
 		static CComPtr< IInArchive > GetArchiveReader(const SevenZipLibrary& library, const CompressionFormatEnum& format);
 		static CComPtr< IOutArchive > GetArchiveWriter(const SevenZipLibrary& library, const CompressionFormatEnum& format);
+
+		static CComPtr< IInStream > GetFileStream(const TString &archivePath);
 
 		static bool DetectCompressionFormat(const SevenZipLibrary& library, const TString& archivePath,
 			CompressionFormatEnum & archiveCompressionFormat);
