@@ -16,6 +16,9 @@ extern "C" {
 
 #define PRINT_ERROR_MSG(__ERROR_MSG__) uprintf("%s:%d %s (GLE=[%d])",__FILE__, __LINE__, __ERROR_MSG__, GetLastError())
 
+void _print_hresult(const char *file, int line, const char *msg, HRESULT hr);
+#define PRINT_HRESULT(hr, msg) _print_hresult(__FILE__, __LINE__, msg, hr)
+
 #define IFFALSE_PRINTERROR(__CONDITION__, __ERRROR_MSG__) if(!(__CONDITION__)) { if(strlen(__ERRROR_MSG__)) PRINT_ERROR_MSG(__ERRROR_MSG__); }
 #define IFFALSE_GOTOERROR(__CONDITION__, __ERRROR_MSG__) if(!(__CONDITION__)) { if(strlen(__ERRROR_MSG__)) PRINT_ERROR_MSG(__ERRROR_MSG__); goto error; }
 #define IFFALSE_GOTO(__CONDITION__, __ERRROR_MSG__, __LABEL__) if(!(__CONDITION__)) { PRINT_ERROR_MSG(__ERRROR_MSG__); goto __LABEL__; }
@@ -27,6 +30,11 @@ extern "C" {
 #define IFTRUE_GOTO(__CONDITION__, __ERRROR_MSG__, __LABEL__) if((__CONDITION__)) { PRINT_ERROR_MSG(__ERRROR_MSG__); goto __LABEL__; }
 #define IFTRUE_GOTOERROR(__CONDITION__, __ERRROR_MSG__) if((__CONDITION__)) { PRINT_ERROR_MSG(__ERRROR_MSG__); goto error; }
 #define IFTRUE_RETURN(__CONDITION__, __ERRROR_MSG__) if((__CONDITION__)) { PRINT_ERROR_MSG(__ERRROR_MSG__); return; }
+
+#define IFFAILED_PRINTERROR(hr, msg)  { HRESULT __hr__ = (hr); if (FAILED(__hr__)) { PRINT_HRESULT(__hr__, msg); } }
+#define IFFAILED_GOTO(hr, msg, label) { HRESULT __hr__ = (hr); if (FAILED(__hr__)) { PRINT_HRESULT(__hr__, msg); goto label; } }
+#define IFFAILED_CONTINUE(hr, msg)    { HRESULT __hr__ = (hr); if (FAILED(__hr__)) { PRINT_HRESULT(__hr__, msg); continue; } }
+#define IFFAILED_GOTOERROR(hr, msg)   IFFAILED_GOTO(hr, msg, error)
 
 #define safe_closefile(__file__) if (__file__ != NULL) { fclose(__file__); __file__ = NULL; }
 
