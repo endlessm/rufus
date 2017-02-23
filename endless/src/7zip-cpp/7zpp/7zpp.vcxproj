@@ -325,7 +325,6 @@
     <ClCompile Include="ArchiveUpdateCallback.cpp" />
     <ClCompile Include="FileSys.cpp" />
     <ClCompile Include="GUIDs.cpp" />
-    <ClCompile Include="InStreamWrapper.cpp" />
     <ClCompile Include="OutStreamWrapper.cpp" />
     <ClCompile Include="PathScanner.cpp" />
     <ClCompile Include="PropVariant.cpp" />
@@ -358,7 +357,6 @@
     <ClInclude Include="FileInfo.h" />
     <ClInclude Include="FileSys.h" />
     <ClInclude Include="GUIDs.h" />
-    <ClInclude Include="InStreamWrapper.h" />
     <ClInclude Include="ListCallback.h" />
     <ClInclude Include="SevenString.h" />
     <ClInclude Include="OutStreamWrapper.h" />
