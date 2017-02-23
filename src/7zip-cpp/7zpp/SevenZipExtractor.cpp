@@ -4,7 +4,6 @@
 #include "FileSys.h"
 #include "ArchiveOpenCallback.h"
 #include "ArchiveExtractCallback.h"
-#include "InStreamWrapper.h"
 #include "PropVariant.h"
 #include "UsefulFunctions.h"
 #include <memory>
@@ -56,20 +55,14 @@ namespace SevenZip
 
 	bool SevenZipExtractor::ExtractArchive( const TString& destDirectory, ProgressCallback* callback )
 	{
-		CComPtr< IStream > fileStream = FileSys::OpenFileToRead( m_archivePath );
+		CComPtr< IInStream > inFile = FileSys::OpenFileToRead( m_archivePath );
 
-		if ( fileStream == NULL )
+		if ( inFile == NULL )
 		{
 			return false;	//Could not open archive
 		}
 
-		return ExtractArchive( fileStream, destDirectory, callback);
-	}
-
-	bool SevenZipExtractor::ExtractArchive( const CComPtr< IStream >& archiveStream, const TString& destDirectory, ProgressCallback* callback)
-	{
 		CComPtr< IInArchive > archive = UsefulFunctions::GetArchiveReader( m_library, m_compressionFormat );
-		CComPtr< InStreamWrapper > inFile = new InStreamWrapper( archiveStream );
 		CComPtr< ArchiveOpenCallback > openCallback = new ArchiveOpenCallback();
 
 		HRESULT hr = archive->Open( inFile, 0, openCallback );
@@ -108,15 +101,14 @@ namespace SevenZip
 
 	SevenZipExtractStream * SevenZipExtractor::ExtractStream(const UINT32 index)
 	{
-		CComPtr< IStream > archiveStream = FileSys::OpenFileToRead(m_archivePath);
+		CComPtr< IInStream > inFile = FileSys::OpenFileToRead(m_archivePath);
 
-		if (archiveStream == NULL)
+		if (inFile == NULL)
 		{
 			return nullptr;	//Could not open archive
 		}
 
 		CComPtr< IInArchive > archive = UsefulFunctions::GetArchiveReader(m_library, m_compressionFormat);
-		CComPtr< InStreamWrapper > inFile = new InStreamWrapper(archiveStream);
 		CComPtr< ArchiveOpenCallback > openCallback = new ArchiveOpenCallback();
 
 		HRESULT hr = archive->Open(inFile, 0, openCallback);

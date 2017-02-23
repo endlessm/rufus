@@ -4,7 +4,6 @@
 #include "ArchiveUpdateCallback.h"
 #include "PropVariant.h"
 #include "FileSys.h"
-#include "InStreamWrapper.h"
 
 
 namespace SevenZip
@@ -158,14 +157,13 @@ STDMETHODIMP ArchiveUpdateCallback::GetStream( UInt32 index, ISequentialInStream
 		return S_OK;
 	}
 
-	CComPtr< IStream > fileStream = FileSys::OpenFileToRead( fileInfo.FilePath );
+	CComPtr< IInStream > fileStream = FileSys::OpenFileToRead( fileInfo.FilePath );
 	if ( fileStream == NULL )
 	{
 		return HRESULT_FROM_WIN32( GetLastError() );
 	}
 
-	CComPtr< InStreamWrapper > wrapperStream = new InStreamWrapper( fileStream );
-	*inStream = wrapperStream.Detach();
+	*inStream = fileStream.Detach();
 
 	return S_OK;
 }
