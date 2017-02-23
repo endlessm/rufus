@@ -4,7 +4,6 @@
 #include "FileSys.h"
 #include "ArchiveOpenCallback.h"
 #include "ArchiveExtractCallback.h"
-#include "InStreamWrapper.h"
 #include "PropVariant.h"
 #include "UsefulFunctions.h"
 
@@ -25,20 +24,14 @@ namespace SevenZip
 
 	bool SevenZipLister::ListArchive(ListCallback* callback)
 	{
-		CComPtr< IStream > fileStream = FileSys::OpenFileToRead(m_archivePath);
-		if (fileStream == NULL)
+		CComPtr< IInStream > inFile = FileSys::OpenFileToRead(m_archivePath);
+		if (inFile == NULL)
 		{
 			return false;
 			//throw SevenZipException( StrFmt( _T( "Could not open archive \"%s\"" ), m_archivePath.c_str() ) );
 		}
 
-		return ListArchive(fileStream, callback);
-	}
-
-	bool SevenZipLister::ListArchive(const CComPtr< IStream >& archiveStream, ListCallback* callback)
-	{
 		CComPtr< IInArchive > archive = UsefulFunctions::GetArchiveReader(m_library, m_compressionFormat);
-		CComPtr< InStreamWrapper > inFile = new InStreamWrapper(archiveStream);
 		CComPtr< ArchiveOpenCallback > openCallback = new ArchiveOpenCallback();
 
 		HRESULT hr = archive->Open(inFile, 0, openCallback);

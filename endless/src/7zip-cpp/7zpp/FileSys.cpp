@@ -181,22 +181,23 @@ std::vector< FilePathInfo > FileSys::GetFilesInDirectory( const TString& directo
 	return cb.GetFiles();
 }
 
-CComPtr< IStream > FileSys::OpenFileToRead( const TString& filePath )
+CComPtr< IInStream > FileSys::OpenFileToRead( const TString& filePath )
 {
-	CComPtr< IStream > fileStream;
+	CInFileStream *fileStream = new CInFileStream;
+	CComPtr< IInStream > inFile = fileStream;
 
 #ifdef _UNICODE
 	const WCHAR* filePathStr = filePath.c_str();
 #else
-	WCHAR filePathStr[MAX_PATH];
-	MultiByteToWideChar( CP_UTF8, 0, filePath.c_str(), filePath.length() + 1, filePathStr, MAX_PATH );
+# error "Not implemented: CInFileStream::Open always accepts wide strings on _WIN32"
 #endif
-	if ( FAILED( SHCreateStreamOnFileEx( filePathStr, STGM_READ, FILE_ATTRIBUTE_NORMAL, FALSE, NULL, &fileStream ) ) )
+
+	if (!fileStream->Open(filePathStr))
 	{
 		return NULL;
 	}
 
-	return fileStream;
+	return inFile;
 }
 
 CComPtr< IStream > FileSys::OpenFileToWrite( const TString& filePath )
