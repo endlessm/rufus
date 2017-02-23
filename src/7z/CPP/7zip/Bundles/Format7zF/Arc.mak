@@ -56,6 +56,12 @@ WIN_OBJS = \
   $O\UniqBlocks.obj \
   $O\VirtThread.obj \
 
+!IFDEF ENDLESS_STATIC_BUILD
+7ZIP_COMMON_OBJS = \
+  $(7ZIP_COMMON_OBJS) \
+  $O\FileStreams.obj \
+!ENDIF
+
 AR_OBJS = \
   $O\ApmHandler.obj \
   $O\ArHandler.obj \
