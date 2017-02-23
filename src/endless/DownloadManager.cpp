@@ -56,10 +56,10 @@ bool DownloadManager::Init(HWND window, DWORD statusMessageId)
 
     // Specify the appropriate COM threading model for your application.
     hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
-    IFFALSE_GOTOERROR(SUCCEEDED(hr), "Error on calling CoInitializeEx");
+    IFFAILED_GOTOERROR(hr, "Error on calling CoInitializeEx");
 
     hr = CoCreateInstance(__uuidof(BackgroundCopyManager), NULL, CLSCTX_LOCAL_SERVER, __uuidof(IBackgroundCopyManager), (void**)&m_bcManager);
-    IFFALSE_GOTOERROR(SUCCEEDED(hr), "Error creating instance of BackgroundCopyManager.");
+    IFFAILED_GOTOERROR(hr, "Error creating instance of BackgroundCopyManager.");
 
     ClearExtraDownloadJobs();    
 
@@ -108,7 +108,7 @@ bool DownloadManager::AddDownload(DownloadType_t type, ListOfStrings urls, ListO
         uprintf("Error: AddDownload NO SUFFIX ADDED");
     }
         
-    IFFALSE_GOTO(SUCCEEDED(GetExistingJob(m_bcManager, jobName, currentJob)), "No previous download job found", usecurrentjob);
+    IFFAILED_GOTO(GetExistingJob(m_bcManager, jobName, currentJob), "No previous download job found", usecurrentjob);
     IFFALSE_GOTO(resumeExisting, "Canceling exiting download on request.", canceljob);
     
     if (currentJob != NULL) {
@@ -116,14 +116,16 @@ bool DownloadManager::AddDownload(DownloadType_t type, ListOfStrings urls, ListO
         CComPtr<IBackgroundCopyFile> pFile;
         ULONG cFileCount = 0, index = 0;
 
-        IFFALSE_GOTO(SUCCEEDED(currentJob->EnumFiles(&pFileList)) && pFileList != NULL, "Error getting filelist.", canceljob);
-        IFFALSE_GOTO(SUCCEEDED(pFileList->GetCount(&cFileCount)) && cFileCount == urls.size(), "Number of files doesn't match.", canceljob);
+        IFFAILED_GOTO(currentJob->EnumFiles(&pFileList), "Error getting filelist.", canceljob);
+        IFFALSE_GOTO(pFileList != NULL, "Error getting filelist.", canceljob);
+        IFFAILED_GOTO(pFileList->GetCount(&cFileCount), "Error getting file count.", canceljob);
+        IFFALSE_GOTO(cFileCount == urls.size(), "Number of files doesn't match.", canceljob);
 
         //Enumerate the files in the job.
         for (index = 0; index < cFileCount; index++) {
             IFFALSE_GOTO(S_OK == pFileList->Next(1, &pFile, NULL), "Error querying for file object.", canceljob);
-            IFFALSE_GOTO(SUCCEEDED(pFile->GetLocalName(&pLocalFileName)), "Error querying for local file name.", canceljob);
-            IFFALSE_GOTO(SUCCEEDED(pFile->GetRemoteName(&pRemoteName)), "Error querying for remote file name.", canceljob);
+            IFFAILED_GOTO(pFile->GetLocalName(&pLocalFileName), "Error querying for local file name.", canceljob);
+            IFFAILED_GOTO(pFile->GetRemoteName(&pRemoteName), "Error querying for remote file name.", canceljob);
             
             ListOfStrings::iterator foundUrlItem = std::find_if(urls.begin(), urls.end(), [&pRemoteName](LPCTSTR url) { return 0 == wcscmp(url, pRemoteName); });
             IFFALSE_GOTO(foundUrlItem != urls.end(), "URL no found in list.", canceljob);
@@ -150,7 +152,7 @@ canceljob:
 usecurrentjob:
     if (currentJob == NULL) {
         hr = m_bcManager->CreateJob(jobName, BG_JOB_TYPE_DOWNLOAD, &jobId, &currentJob);
-        IFFALSE_GOTOERROR(SUCCEEDED(hr), "Error creating instance of IBackgroundCopyJob.");
+        IFFAILED_GOTOERROR(hr, "Error creating instance of IBackgroundCopyJob.");
 
         ULONG secondsRetry = MINIMUM_RETRY_DELAY_SEC;
         if (type == DownloadType_t::DownloadTypeReleseJson) {
@@ -158,27 +160,27 @@ usecurrentjob:
         }
         currentJob->SetPriority(BG_JOB_PRIORITY_FOREGROUND);
         hr = currentJob->SetMinimumRetryDelay(secondsRetry);
-        IFFALSE_PRINTERROR(SUCCEEDED(hr), "Error on SetMinimumRetryDelay");
+        IFFAILED_PRINTERROR(hr, "Error on SetMinimumRetryDelay");
 
         for (auto url = urls.begin(), file = files.begin(); url != urls.end(); url++, file++) {
             uprintf("Adding download [%ls]->[%ls]", *url, *file);
             hr = currentJob->AddFile(*url, *file);
-            IFFALSE_GOTOERROR(SUCCEEDED(hr), "Error adding file to download job");
+            IFFAILED_GOTOERROR(hr, "Error adding file to download job");
         }
     }
 
     hr = currentJob->SetNotifyInterface(this);
-    IFFALSE_GOTOERROR(SUCCEEDED(hr), "Error calling SetNotifyInterface.");
+    IFFAILED_GOTOERROR(hr, "Error calling SetNotifyInterface.");
     
     ULONG flags = BG_NOTIFY_JOB_TRANSFERRED | BG_NOTIFY_JOB_ERROR | BG_NOTIFY_JOB_MODIFICATION;
     if (nWindowsVersion > WINDOWS_XP) { // BG_NOTIFY_FILE_TRANSFERRED makes the call fail on XP
         flags = flags | BG_NOTIFY_FILE_TRANSFERRED;
     }
     hr = currentJob->SetNotifyFlags(flags);
-    IFFALSE_GOTOERROR(SUCCEEDED(hr), "Error calling SetNotifyFlags.");
+    IFFAILED_GOTOERROR(hr, "Error calling SetNotifyFlags.");
 
     hr = currentJob->Resume();
-    IFFALSE_GOTOERROR(SUCCEEDED(hr), "Error resuming download.");
+    IFFAILED_GOTOERROR(hr, "Error resuming download.");
 
     return true;
 
@@ -225,18 +227,18 @@ STDMETHODIMP DownloadManager::JobError(IBackgroundCopyJob *pJob, IBackgroundCopy
     downloadStatus.error = true;
 
     hr = pError->GetError(&downloadStatus.errorContext, &downloadStatus.errorCode);
-    IFFALSE_PRINTERROR(SUCCEEDED(hr), "GetError failed");
+    IFFAILED_PRINTERROR(hr, "GetError failed");
 
     hr = pJob->GetProgress(&downloadStatus.progress);
-    IFFALSE_PRINTERROR(SUCCEEDED(hr), "GetProgress failed");
+    IFFAILED_PRINTERROR(hr, "GetProgress failed");
 
     hr = pJob->GetDisplayName(&jobName);
-    IFFALSE_PRINTERROR(SUCCEEDED(hr), "GetDisplayName failed");
+    IFFAILED_PRINTERROR(hr, "GetDisplayName failed");
     downloadStatus.jobName = jobName;
 
     // This fails, apparently because the message catalogue isn't loaded
     hr = pError->GetErrorDescription(LANGIDFROMLCID(GetThreadLocale()), &errorDescription);
-    IFFALSE_PRINTERROR(SUCCEEDED(hr), "GetErrorDescription failed");
+    IFFAILED_PRINTERROR(hr, "GetErrorDescription failed");
 
     uprintf("Job %ls error 0x%x in context %d: %ls", jobName,
         downloadStatus.errorCode, downloadStatus.errorContext,
@@ -257,14 +259,14 @@ STDMETHODIMP DownloadManager::JobModification(IBackgroundCopyJob *JobModificatio
     DownloadStatus_t downloadStatus = DownloadStatusNull;
 
     hr = JobModification->GetDisplayName(&pszJobName);
-    IFFALSE_GOTOERROR(SUCCEEDED(hr), "GetDisplayName failed");
+    IFFAILED_GOTOERROR(hr, "GetDisplayName failed");
     downloadStatus.jobName = pszJobName;
 
     hr = JobModification->GetProgress(&downloadStatus.progress);
-    IFFALSE_GOTOERROR(SUCCEEDED(hr), "GetProgress failed");
+    IFFAILED_GOTOERROR(hr, "GetProgress failed");
 
     hr = JobModification->GetState(&State);
-    IFFALSE_GOTOERROR(SUCCEEDED(hr), "GetState failed");
+    IFFAILED_GOTOERROR(hr, "GetState failed");
 
     uprintf("Job %ls %ls (0x%X)", pszJobName, JobStateToStr(State), State);
 
@@ -337,23 +339,24 @@ HRESULT DownloadManager::GetExistingJob(CComPtr<IBackgroundCopyManager> &bcManag
     IFFALSE_GOTOERROR(bcManager != NULL, "Manager or job is NULL. Nothing to uninit.");
 
     hr = bcManager->EnumJobs(0, &enumJobs);
-    IFFALSE_GOTOERROR(SUCCEEDED(hr), "Error calling EnumJobs.");
+    IFFAILED_GOTOERROR(hr, "Error calling EnumJobs.");
     
     hr = enumJobs->GetCount(&jobCount);
-    IFFALSE_GOTOERROR(SUCCEEDED(hr), "Error calling IEnumBackgroundCopyJobs::GetCount.");
+    IFFAILED_GOTOERROR(hr, "Error calling IEnumBackgroundCopyJobs::GetCount.");
 
     uprintf("Found a total of %d download jobs.", jobCount);
 
     for (index = 0; index < jobCount; index++) {
         hr = enumJobs->Next(1, &job, NULL);
-        IFFALSE_GOTOERROR(SUCCEEDED(hr) && job != NULL, "Error querying for next job.");
+        IFFAILED_GOTOERROR(hr, "Error querying for next job.");
+        IFFALSE_GOTOERROR(job != NULL, "Error querying for next job.");
         
         hr = job->GetDisplayName(&displayName);
-        IFFALSE_GOTOERROR(SUCCEEDED(hr), "Error querying for display name.");
+        IFFAILED_GOTOERROR(hr, "Error querying for display name.");
         uprintf("Found job %d name %ls", index, displayName);
         if (0 == _tcscmp(jobName, displayName)) {            
             hr = job->GetState(&state);
-            IFFALSE_GOTOERROR(SUCCEEDED(hr), "Error querying for job state.");
+            IFFAILED_GOTOERROR(hr, "Error querying for job state.");
             if (state != BG_JOB_STATE_CANCELLED && state != BG_JOB_STATE_ERROR) {
                 existingJob = job;
                 return S_OK;
@@ -386,19 +389,20 @@ void DownloadManager::ClearExtraDownloadJobs(bool forceCancel)
     IFFALSE_GOTOERROR(m_bcManager != NULL, "Manager or job is NULL. Nothing to uninit.");
 
     hr = m_bcManager->EnumJobs(0, &enumJobs);
-    IFFALSE_GOTOERROR(SUCCEEDED(hr), "Error calling EnumJobs.");
+    IFFAILED_GOTOERROR(hr, "Error calling EnumJobs.");
 
     hr = enumJobs->GetCount(&jobCount);
-    IFFALSE_GOTOERROR(SUCCEEDED(hr), "Error calling IEnumBackgroundCopyJobs::GetCount.");
+    IFFAILED_GOTOERROR(hr, "Error calling IEnumBackgroundCopyJobs::GetCount.");
 
     uprintf("Found a total of %d download jobs.", jobCount);
 
     for (index = 0; index < jobCount; index++) {
         hr = enumJobs->Next(1, &job, NULL);
-        IFFALSE_GOTOERROR(SUCCEEDED(hr) && job != NULL, "Error querying for next job.");
+        IFFAILED_GOTOERROR(hr, "Error querying for next job.");
+        IFFALSE_GOTOERROR(job != NULL, "Next job is NULL.");
 
         hr = job->GetDisplayName(&displayName);
-        IFFALSE_CONTINUE(SUCCEEDED(hr), "Error querying for display name.");
+        IFFAILED_CONTINUE(hr, "Error querying for display name.");
         if (displayName == _tcsstr(displayName, DOWNLOAD_JOB_PREFIX)) {
             bool cancelJob = forceCancel || (m_latestEosVersion != _T("") && NULL == _tcsstr(displayName, m_latestEosVersion));
             if (!cancelJob && NULL == foundJobs.Find(displayName)) {
@@ -436,7 +440,7 @@ bool DownloadManager::GetDownloadProgress(CComPtr<IBackgroundCopyJob> &currentJo
     downloadStatus = DownloadStatusNull;
 
     hr = currentJob->GetState(&State);
-    IFFALSE_GOTOERROR(SUCCEEDED(hr), "Error querying for job state");
+    IFFAILED_GOTOERROR(hr, "Error querying for job state");
 
     switch (State) {
     case BG_JOB_STATE_TRANSFERRED:
@@ -456,7 +460,7 @@ bool DownloadManager::GetDownloadProgress(CComPtr<IBackgroundCopyJob> &currentJo
     downloadStatus.jobName = jobName;
 
     hr = currentJob->GetProgress(&downloadStatus.progress);
-    IFFALSE_GOTOERROR(SUCCEEDED(hr), "Error querying for job progress");
+    IFFAILED_GOTOERROR(hr, "Error querying for job progress");
 
     result = true;
 error:
