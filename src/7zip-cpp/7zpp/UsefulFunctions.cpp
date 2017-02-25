@@ -82,16 +82,15 @@ namespace SevenZip
 	bool UsefulFunctions::GetNumberOfItems(const SevenZipLibrary & library, const TString & archivePath,
 		CompressionFormatEnum &format, size_t & numberofitems)
 	{
-		CComPtr< IStream > fileStream = FileSys::OpenFileToRead(archivePath);
+		CComPtr< IInStream > inFile = FileSys::OpenFileToRead(archivePath);
 
-		if (fileStream == NULL)
+		if (inFile == NULL)
 		{
 			return false;
 			//throw SevenZipException( StrFmt( _T( "Could not open archive \"%s\"" ), m_archivePath.c_str() ) );
 		}
 
 		CComPtr< IInArchive > archive = UsefulFunctions::GetArchiveReader(library, format);
-		CComPtr< InStreamWrapper > inFile = new InStreamWrapper(fileStream);
 		CComPtr< ArchiveOpenCallback > openCallback = new ArchiveOpenCallback();
 
 		HRESULT hr = archive->Open(inFile, 0, openCallback);
@@ -118,9 +117,9 @@ namespace SevenZip
 		CompressionFormatEnum &format, size_t & numberofitems, 
 		std::vector<TString> & itemnames, std::vector<UINT64> & origsizes)
 	{
-		CComPtr< IStream > fileStream = FileSys::OpenFileToRead(archivePath);
+		CComPtr< IInStream > inFile = FileSys::OpenFileToRead(archivePath);
 
-		if (fileStream == NULL)
+		if (inFile == NULL)
 		{
 			return false;
 			//throw SevenZipException( StrFmt( _T( "Could not open archive \"%s\"" ), m_archivePath.c_str() ) );
@@ -132,7 +131,6 @@ namespace SevenZip
 			return false;
 		}
 
-		CComPtr< InStreamWrapper > inFile = new InStreamWrapper(fileStream);
 		CComPtr< ArchiveOpenCallback > openCallback = new ArchiveOpenCallback();
 
 		HRESULT hr = archive->Open(inFile, 0, openCallback);
@@ -196,9 +194,9 @@ namespace SevenZip
 	bool UsefulFunctions::DetectCompressionFormat(const SevenZipLibrary & library, const TString & archivePath, 
 		CompressionFormatEnum & archiveCompressionFormat)
 	{
-		CComPtr< IStream > fileStream = FileSys::OpenFileToRead(archivePath);
+		CComPtr< IInStream > inFile = FileSys::OpenFileToRead(archivePath);
 
-		if (fileStream == NULL)
+		if (inFile == NULL)
 		{
 			return false;
 			//throw SevenZipException( StrFmt( _T( "Could not open archive \"%s\"" ), m_archivePath.c_str() ) );
@@ -225,7 +223,6 @@ namespace SevenZip
 			archiveCompressionFormat = myAvailableFormats[i];
 
 			CComPtr< IInArchive > archive = UsefulFunctions::GetArchiveReader(library, archiveCompressionFormat);
-			CComPtr< InStreamWrapper > inFile = new InStreamWrapper(fileStream);
 			CComPtr< ArchiveOpenCallback > openCallback = new ArchiveOpenCallback();
 
 			HRESULT hr = archive->Open(inFile, 0, openCallback);

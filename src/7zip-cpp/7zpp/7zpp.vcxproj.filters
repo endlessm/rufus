@@ -16,9 +16,6 @@
     <ClCompile Include="GUIDs.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="InStreamWrapper.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
     <ClCompile Include="OutStreamWrapper.cpp">
       <Filter>Source</Filter>
     </ClCompile>
@@ -82,9 +79,6 @@
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="GUIDs.h">
-      <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="InStreamWrapper.h">
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="OutStreamWrapper.h">

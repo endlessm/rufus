@@ -3847,8 +3847,14 @@ void CEndlessUsbToolDlg::StartFileVerificationThread()
 
 struct FileHashingContext {
     HANDLE cancelOperationEvent;
-    ULONGLONG totalSize;
-    ULONGLONG previousFilesSize;
+
+    // The sum of sizes of files that have already been verified, divided by
+    // the total size of all files to be verified.
+    float previousFiles;
+
+    // The size of the file being verified, divided by the total size of all
+    // files being verified.
+    float currentScale;
 };
 
 bool CEndlessUsbToolDlg::FileHashingCallback(__int64 currentSize, __int64 totalSize, LPVOID context)
@@ -3860,8 +3866,17 @@ bool CEndlessUsbToolDlg::FileHashingCallback(__int64 currentSize, __int64 totalS
         return false;
     }
     
-    float current = (float)((ctx->previousFilesSize + currentSize) * 100 / ctx->totalSize);
-    UpdateProgress(OP_VERIFYING_SIGNATURE, current);
+    // When verifying a SquashFS image, we actually decompress on the fly and
+    // verify the uncompressed image within. In this case, currentSize and
+    // totalSize are measured in *uncompressed* bytes. We allocate proportions
+    // of the progress bar based on the compressed size of the files, and
+    // assume that the proportion of decompressed bytes processed increases at
+    // approximately the same rate as the proportion of compressed bytes.
+    // (In the common case, the two files to be verified are a tiny boot.zip
+    // bundle and an enormous OS image, so the files will get none and all of
+    // the progress bar, respectively!)
+    float current = ctx->currentScale * currentSize / totalSize;
+    UpdateProgress(OP_VERIFYING_SIGNATURE, 100 * (ctx->previousFiles + current));
 
     return true;
 }
@@ -3872,6 +3887,7 @@ DWORD WINAPI CEndlessUsbToolDlg::FileVerificationThread(void* param)
 
     CEndlessUsbToolDlg *dlg = (CEndlessUsbToolDlg *)param;
     FileHashingContext ctx = { dlg->m_cancelOperationEvent, 0, 0 };
+    ULONGLONG totalSize = 0;
     CSingleLock lock(&dlg->m_verifyFilesMutex);
     lock.Lock();
 
@@ -3880,7 +3896,7 @@ DWORD WINAPI CEndlessUsbToolDlg::FileVerificationThread(void* param)
     IFFALSE_GOTOERROR(!verifyFiles.empty(), "nothing to verify");
 
     for (auto &p : verifyFiles) {
-        ctx.totalSize += p.fileSize;
+        totalSize += p.fileSize;
     }
 
     verificationResult = true;
@@ -3890,6 +3906,8 @@ DWORD WINAPI CEndlessUsbToolDlg::FileVerificationThread(void* param)
         const CString &sigPath = p.sigPath;
         uprintf("Verifying %ls against %ls", filePath, sigPath);
         bool v;
+
+        ctx.currentScale = (float) p.fileSize / totalSize;
 
         switch (GetCompressionType(filePath)) {
         case CompressionTypeSquash:
@@ -3905,7 +3923,7 @@ DWORD WINAPI CEndlessUsbToolDlg::FileVerificationThread(void* param)
             break;
         }
 
-        ctx.previousFilesSize += p.fileSize;
+        ctx.previousFiles += ctx.currentScale;
         verifyFiles.pop_front();
     }
 
