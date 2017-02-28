@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: rufus\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-03-08 02:28+0000\n"
-"PO-Revision-Date: 2017-01-24 05:24+0000\n"
+"PO-Revision-Date: 2017-02-21 04:37+0000\n"
 "Last-Translator: endlessmobile_build <philip@endlessm.com>\n"
 "Language-Team: Arabic (http://www.transifex.com/endless-mobile-inc/rufus/language/ar/)\n"
 "MIME-Version: 1.0\n"
@@ -734,4 +734,19 @@ msgstr "الإسبانية (جواتيمالا)"
 #, c-format
 msgctxt "MSG_409"
 msgid "Spanish (Mexico)"
+msgstr ""
+
+#, c-format
+msgctxt "MSG_410"
+msgid "Indonesian"
+msgstr ""
+
+#, c-format
+msgctxt "MSG_411"
+msgid "Thai"
+msgstr ""
+
+#, c-format
+msgctxt "MSG_412"
+msgid "Vietnamese"
 msgstr ""
