@@ -1377,7 +1377,7 @@ LRESULT CEndlessUsbToolDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lPara
                     }
                 } else {
                     // RufusISOScanThread and FormatThread use a global variable for the image path
-                    CString &diskImage = m_localFile;
+                    CString diskImage = m_localFile;
                     if (m_selectedInstallMethod == InstallMethod_t::ReformatterUsb) {
                         diskImage = m_localInstallerImage.filePath;
                     }
