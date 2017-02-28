@@ -449,7 +449,6 @@ private:
 	bool PackedImageAlreadyExists(const CString &filePath, ULONGLONG expectedSize, ULONGLONG expectedUnpackedSize, bool isInstaller);
 
 	ULONGLONG GetActualDownloadSize(const RemoteImageEntry &r, bool fullSize = false);
-	bool GetSignatureForLocalFile(const CString &file, CString &signature);
 	bool RemoteMatchesUnpackedImg(const CString &remoteFilePath, CString *unpackedImgSig = NULL);
 	bool IsDualBootOrCombinedUsb();
 	void UpdateDualBootTexts();
