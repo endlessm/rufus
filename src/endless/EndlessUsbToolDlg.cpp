@@ -3950,6 +3950,9 @@ const GUID PARTITION_BIOS_BOOT_GUID =
 #define EXFAT_PARTITION_NAME_IMAGES		L"eosimages"
 #define EXFAT_PARTITION_NAME_LIVE		L"eoslive"
 
+// Used in ReformatterUsb mode, after the eosinstaller image has been written
+// to the target device. Appends an exFAT partition (renumbered to be logically
+// first) and copies the OS image, signature, and language preset across.
 DWORD WINAPI CEndlessUsbToolDlg::FileCopyThread(void* param)
 {
     FUNCTION_ENTER;
