@@ -1377,7 +1377,7 @@ LRESULT CEndlessUsbToolDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lPara
                     }
                 } else {
                     // RufusISOScanThread and FormatThread use a global variable for the image path
-                    CString &diskImage = m_localFile;
+                    CString diskImage = m_localFile;
                     if (m_selectedInstallMethod == InstallMethod_t::ReformatterUsb) {
                         diskImage = m_localInstallerImage.filePath;
                     }
@@ -2413,13 +2413,10 @@ checkEntries:
     // set selected image for Rufus code
     CComBSTR selectedValue;
     hr = selectElement->get_value(&selectedValue);
-    IFFALSE_RETURN(SUCCEEDED(hr) && selectElement != NULL, "Error getting selected file value");
+    IFFALSE_RETURN(SUCCEEDED(hr) && selectedValue != NULL, "Error getting selected file value");
 
     if (m_useLocalFile) {
-        safe_free(image_path);
-        if (selectedValue != NULL) {
-            image_path = wchar_to_utf8(selectedValue);
-        }
+        m_localFile = selectedValue;
     }
 
     if (shouldInit) {
@@ -2899,15 +2896,14 @@ HRESULT CEndlessUsbToolDlg::OnSelectFileNextClicked(IHTMLElement* pElement)
     IFFALSE_RETURN_VALUE(!IsButtonDisabled(pElement), "OnSelectFileNextClicked: Button is disabled. ", S_OK);
 
     // Get display name with actual image size, not compressed
-    CString selectedImage, personality, version;
+    CString personality, version;
     ULONGLONG size = 0;
     bool willUnpackImage = m_selectedInstallMethod == LiveUsb || m_selectedInstallMethod == CombinedUsb;
 
     if (m_useLocalFile) {
-        selectedImage = UTF8ToCString(image_path);
         pFileImageEntry_t localEntry = NULL;
 
-		m_imageFiles.Lookup(selectedImage, localEntry);
+		m_imageFiles.Lookup(m_localFile, localEntry);
 		if (localEntry == NULL) {
 			uprintf("ERROR: Selected local file not found.");
 			ErrorOccured(ErrorCause_t::ErrorCauseGeneric);
@@ -2931,7 +2927,7 @@ HRESULT CEndlessUsbToolDlg::OnSelectFileNextClicked(IHTMLElement* pElement)
 		personality = remote.personality;
 		version = remote.version;
 
-        selectedImage = CSTRING_GET_LAST(remote.urlFile, '/');
+        CString selectedImage = CSTRING_GET_LAST(remote.urlFile, '/');
 		CString selectedImagePath = GET_IMAGE_PATH(selectedImage);
         size = (willUnpackImage || RemoteMatchesUnpackedImg(selectedImagePath)) ? remote.extractedSize : remote.compressedSize;
 
@@ -3035,11 +3031,10 @@ HRESULT CEndlessUsbToolDlg::OnSelectedImageFileChanged(IHTMLElement* pElement)
     IFFALSE_RETURN_VALUE(SUCCEEDED(hr) && selectElement != NULL, "Error querying for IHTMLSelectElement interface", S_OK);
 
     hr = selectElement->get_value(&selectedValue);
-    IFFALSE_RETURN_VALUE(SUCCEEDED(hr) && selectElement != NULL, "Error getting selected file value", S_OK);
+    IFFALSE_RETURN_VALUE(SUCCEEDED(hr) && selectedValue != NULL, "Error getting selected file value", S_OK);
 
-    safe_free(image_path);
-    image_path = wchar_to_utf8(selectedValue);
-    uprintf("OnSelectedImageFileChanged to LOCAL [%s]", image_path);
+    m_localFile = selectedValue;
+    uprintf("OnSelectedImageFileChanged to LOCAL [%ls]", m_localFile);
 
     m_useLocalFile = true;
 
@@ -3166,23 +3161,9 @@ void CEndlessUsbToolDlg::StartInstallationProcess()
 
 	if(m_selectedInstallMethod != InstallMethod_t::InstallDualBoot) ChangeDriveAutoRunAndMount(true);
 
-	if (IsDualBootOrCombinedUsb() && m_useLocalFile) {
-		pFileImageEntry_t localEntry = NULL;
-		CString selectedImage = UTF8ToCString(image_path);
-		if (m_imageFiles.Lookup(selectedImage, localEntry) && localEntry->hasBootArchive && localEntry->hasBootArchiveSig && localEntry->hasUnpackedImgSig) {
-			m_bootArchive = localEntry->bootArchivePath;
-			m_bootArchiveSig = localEntry->bootArchiveSigPath;
-			m_bootArchiveSize = localEntry->bootArchiveSize;
-			m_unpackedImageSig = localEntry->unpackedImgSigPath;
-		} else {
-			m_useLocalFile = false;
-		}
-	}
-
-	// Radu: we need to download an installer if only a live image is found and full install was selected
 	if (m_useLocalFile) {
-		m_localFile = UTF8ToCString(image_path);
-		if (!GetSignatureForLocalFile(m_localFile, m_localFileSig)) {
+		pFileImageEntry_t localEntry = NULL;
+		if (!m_imageFiles.Lookup(m_localFile, localEntry)) {
 			ChangePage(_T(ELEMENT_INSTALL_PAGE));
 			uprintf("Error: couldn't find local entry for selected local file '%ls'", m_localFile);
 			FormatStatus = FORMAT_STATUS_CANCEL;
@@ -3191,6 +3172,21 @@ void CEndlessUsbToolDlg::StartInstallationProcess()
 			return;
 		}
 
+		m_localFileSig = localEntry->imgSigPath;
+		if (IsDualBootOrCombinedUsb()) {
+			if (localEntry->hasBootArchive && localEntry->hasBootArchiveSig && localEntry->hasUnpackedImgSig) {
+				m_bootArchive = localEntry->bootArchivePath;
+				m_bootArchiveSig = localEntry->bootArchiveSigPath;
+				m_bootArchiveSize = localEntry->bootArchiveSize;
+				m_unpackedImageSig = localEntry->unpackedImgSigPath;
+			} else {
+				m_useLocalFile = false;
+			}
+		}
+	}
+
+	// Radu: we need to download an installer if only a live image is found and full install was selected
+	if (m_useLocalFile) {
 		StartFileVerificationThread();
 	} else {
 		UpdateCurrentStep(OP_DOWNLOADING_FILES);
@@ -3211,10 +3207,6 @@ void CEndlessUsbToolDlg::StartInstallationProcess()
 		} else {
 			m_localFileSig = GET_IMAGE_PATH(CSTRING_GET_LAST(remote.urlSignature, '/'));
 		}
-
-		// add image file path for Rufus
-		safe_free(image_path);
-		image_path = wchar_to_utf8(m_localFile);
 
 		// List of files to download
 		ListOfStrings urls, files;
@@ -3454,10 +3446,9 @@ ULONGLONG CEndlessUsbToolDlg::GetNeededSpaceForDualBoot(int &neededGigs, bool *i
 	ULONGLONG bytesInGig = BYTES_IN_GIGABYTE;
 	if (m_useLocalFile) {
 		pFileImageEntry_t localEntry = NULL;
-		CString selectedImage = UTF8ToCString(image_path);
 
-		if (!m_imageFiles.Lookup(selectedImage, localEntry)) {
-			uprintf("ERROR: Selected local file not found.");
+		if (!m_imageFiles.Lookup(m_localFile, localEntry)) {
+			uprintf("ERROR: Selected local file '%ls' not found.", m_localFile);
 		} else {
 			if (isBaseImage != NULL)  *isBaseImage = (localEntry->personality == PERSONALITY_BASE);
 			neededSize = localEntry->extractedSize;
@@ -3629,10 +3620,6 @@ HRESULT CEndlessUsbToolDlg::OnRecoverErrorButtonClicked(IHTMLElement* pElement)
         StartInstallationProcess();
         break;
     case ErrorCause_t::ErrorCauseWriteFailed:
-        if (m_selectedInstallMethod == InstallMethod_t::ReformatterUsb) {
-            safe_free(image_path);
-            image_path = wchar_to_utf8(m_localFile);
-        }
         OnSelectFileNextClicked(NULL);
         break;
     case ErrorCause_t::ErrorCauseVerificationFailed:
@@ -3950,6 +3937,9 @@ const GUID PARTITION_BIOS_BOOT_GUID =
 #define EXFAT_PARTITION_NAME_IMAGES		L"eosimages"
 #define EXFAT_PARTITION_NAME_LIVE		L"eoslive"
 
+// Used in ReformatterUsb mode, after the eosinstaller image has been written
+// to the target device. Appends an exFAT partition (renumbered to be logically
+// first) and copies the OS image, signature, and language preset across.
 DWORD WINAPI CEndlessUsbToolDlg::FileCopyThread(void* param)
 {
     FUNCTION_ENTER;
@@ -6320,19 +6310,6 @@ ULONGLONG CEndlessUsbToolDlg::GetActualDownloadSize(const RemoteImageEntry &r, b
 	}
 
 	return size;
-}
-
-bool CEndlessUsbToolDlg::GetSignatureForLocalFile(const CString &file, CString &signature)
-{
-    pFileImageEntry_t localEntry = NULL;
-
-    if (0 != m_imageFiles.Lookup(file, localEntry)) {
-        signature = localEntry->imgSigPath;
-        return true;
-    } else {
-        uprintf("Could not find entry for local file '%ls'", file);
-        return false;
-    }
 }
 
 bool CEndlessUsbToolDlg::RemoteMatchesUnpackedImg(const CString &remoteFilePath, CString *unpackedImgSig)
