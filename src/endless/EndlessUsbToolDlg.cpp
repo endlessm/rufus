@@ -2410,7 +2410,6 @@ checkEntries:
         m_useLocalFile = false;
     }
 
-    // set selected image for Rufus code
     CComBSTR selectedValue;
     hr = selectElement->get_value(&selectedValue);
     IFFALSE_RETURN(SUCCEEDED(hr) && selectedValue != NULL, "Error getting selected file value");
