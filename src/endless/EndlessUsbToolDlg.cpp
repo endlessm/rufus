@@ -324,16 +324,17 @@ enum endless_action_type {
 #define FILE_XZ_EXTENSION	"xz"
 
 #define RELEASE_JSON_URLPATH       _T("https://d1anzknqnc1kmb.cloudfront.net/")
+#define PRIVATE_JSON_URLPATH       _T("http://images.endlessm-sf.com/")
+
 #define JSON_LIVE_FILE             "releases-eos-3.json"
 #define JSON_CODING_LIVE_FILE      "releases-coding-3.json"
 #define JSON_INSTALLER_FILE        "releases-eosinstaller-3.json"
-#define JSON_GZIP                  "." FILE_GZ_EXTENSION
-#define JSON_PACKED(__file__)      __file__ JSON_GZIP
 #ifdef ENABLE_JSON_COMPRESSION
-#define JSON_URL(__file__)         RELEASE_JSON_URLPATH _T(JSON_PACKED(__file__))
+# define JSON_SUFFIX               "." FILE_GZ_EXTENSION
 #else
-#define JSON_URL(__file__)         RELEASE_JSON_URLPATH _T(__file__)
+# define JSON_SUFFIX               ""
 #endif // ENABLE_JSON_COMPRESSION
+
 #define SIGNATURE_FILE_EXT         L".asc"
 #define	BOOT_ARCHIVE_SUFFIX		   L".boot.zip"
 #define	IMAGE_FILE_EXT			   L".img"
@@ -6287,13 +6288,11 @@ const wchar_t* CEndlessUsbToolDlg::UninstallerFileName()
 
 const char* CEndlessUsbToolDlg::JsonLiveFile(bool withCompressedSuffix)
 {
-#ifdef ENABLE_JSON_COMPRESSION
 	if (withCompressedSuffix) {
 		return IsCoding()
-			? JSON_PACKED(JSON_CODING_LIVE_FILE)
-			: JSON_PACKED(JSON_LIVE_FILE);
+			? JSON_CODING_LIVE_FILE JSON_SUFFIX
+			: JSON_LIVE_FILE        JSON_SUFFIX;
 	}
-#endif // ENABLE_JSON_COMPRESSION
 	return IsCoding()
 		? JSON_CODING_LIVE_FILE
 		: JSON_LIVE_FILE;
@@ -6301,24 +6300,22 @@ const char* CEndlessUsbToolDlg::JsonLiveFile(bool withCompressedSuffix)
 
 const wchar_t* CEndlessUsbToolDlg::JsonLiveFileURL()
 {
-	return IsCoding()
-		? JSON_URL(JSON_CODING_LIVE_FILE)
-		: JSON_URL(JSON_LIVE_FILE);
+    return IsCoding()
+        ? (PRIVATE_JSON_URLPATH _T(JSON_CODING_LIVE_FILE JSON_SUFFIX))
+        : (RELEASE_JSON_URLPATH _T(JSON_LIVE_FILE        JSON_SUFFIX));
 }
 
 const char* CEndlessUsbToolDlg::JsonInstallerFile(bool withCompressedSuffix)
 {
-#ifdef ENABLE_JSON_COMPRESSION
 	if (withCompressedSuffix) {
-		return JSON_PACKED(JSON_INSTALLER_FILE);
+        return JSON_INSTALLER_FILE JSON_SUFFIX;
 	}
-#endif
 	return JSON_INSTALLER_FILE;
 }
 
 const wchar_t* CEndlessUsbToolDlg::JsonInstallerFileURL()
 {
-	return JSON_URL(JSON_INSTALLER_FILE);
+    return RELEASE_JSON_URLPATH _T(JSON_INSTALLER_FILE JSON_SUFFIX);
 }
 
 bool CEndlessUsbToolDlg::ShouldUninstall()
