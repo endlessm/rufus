@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: rufus\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-03-08 02:28+0000\n"
-"PO-Revision-Date: 2017-02-21 04:37+0000\n"
+"PO-Revision-Date: 2017-03-04 04:49+0000\n"
 "Last-Translator: endlessmobile_build <philip@endlessm.com>\n"
 "Language-Team: Chinese (Taiwan) (http://www.transifex.com/endless-mobile-inc/rufus/language/zh_TW/)\n"
 "MIME-Version: 1.0\n"
@@ -733,19 +733,19 @@ msgstr "西班牙語（瓜地馬拉地區）"
 #, c-format
 msgctxt "MSG_409"
 msgid "Spanish (Mexico)"
-msgstr ""
+msgstr "西班牙文（墨西哥）"
 
 #, c-format
 msgctxt "MSG_410"
 msgid "Indonesian"
-msgstr ""
+msgstr "印尼文"
 
 #, c-format
 msgctxt "MSG_411"
 msgid "Thai"
-msgstr ""
+msgstr "泰文"
 
 #, c-format
 msgctxt "MSG_412"
 msgid "Vietnamese"
-msgstr ""
+msgstr "越南文"
