@@ -399,6 +399,7 @@ static LPCTSTR ErrorCauseToStr(ErrorCause_t errorCause)
         TOSTR(ErrorCauseNotNTFS);
         TOSTR(ErrorCauseNonWindowsMBR);
         TOSTR(ErrorCauseNonEndlessMBR);
+        TOSTR(ErrorCauseCantCheckMBR);
         TOSTR(ErrorCauseInstallFailedDiskFull);
         TOSTR(ErrorCauseSuspended);
         TOSTR(ErrorCauseNone);
@@ -1713,6 +1714,10 @@ void CEndlessUsbToolDlg::ErrorOccured(ErrorCause_t errorCause)
     case ErrorCause_t::ErrorCauseNonWindowsMBR:
         headlineMsgId = MSG_359;
         suggestionMsgId = MSG_360;
+        break;
+    case ErrorCause_t::ErrorCauseCantCheckMBR:
+        // TODO: new string here; or, better, eliminate this failure mode
+        suggestionMsgId = MSG_358;
         break;
     default:
         uprintf("Unhandled error cause %ls(%d)", ErrorCauseToStr(errorCause), errorCause);
@@ -5361,8 +5366,8 @@ bool CEndlessUsbToolDlg::CanInstallToDrive(const CString & systemDriveLetter, co
 				cause = ErrorCauseNonWindowsMBR;
 			}
 		} else {
-			PRINT_ERROR_MSG("can't check MBR, assuming non-Windows");
-			cause = ErrorCauseNonWindowsMBR;
+			PRINT_ERROR_MSG("can't check MBR; installation would fail so giving up now");
+			cause = ErrorCauseCantCheckMBR;
 		}
 		safe_closehandle(hPhysical);
 		return ret;

@@ -53,8 +53,9 @@ typedef enum ErrorCause {
     ErrorCauseBitLocker,
     ErrorCauseNotNTFS,
     ErrorCauseNonWindowsMBR,
-	ErrorCauseNonEndlessMBR,
-	ErrorCauseInstallFailedDiskFull,
+    ErrorCauseNonEndlessMBR,
+    ErrorCauseCantCheckMBR,
+    ErrorCauseInstallFailedDiskFull,
     ErrorCauseSuspended,
     ErrorCauseNone
 } ErrorCause_t;
