@@ -446,6 +446,9 @@ t MSG_406 "الصينية المبسطة"
 t MSG_407 "البنغالية"
 t MSG_408 "الإسبانية (جواتيمالا)"
 t MSG_409 "الإسبانية (المكسيك)"
+t MSG_410 "الأندونيسية"
+t MSG_411 "التايلاندية"
+t MSG_412 "الفيتنامية"
 
 ################################################################################
 l "bn-BD" "Bangla (বাংলা)" 0x0845, 0x0445
@@ -597,7 +600,10 @@ t MSG_405 "ফ্রেঞ্চ"
 t MSG_406 "সহজ চাইনিজ"
 t MSG_407 "বাংলা"
 t MSG_408 "স্প্যানিশ (গুয়াতেমালা)"
-t MSG_409 "স্প্যানিশ (মেক্সিকো)"
+t MSG_409 "Spanish (Mexico)"
+t MSG_410 "Indonesian"
+t MSG_411 "Thai"
+t MSG_412 "Vietnamese"
 
 ################################################################################
 l "de-DE" "German (Deutsch)" 0x0407, 0x0807, 0x0c07, 0x1007, 0x1407
@@ -625,8 +631,8 @@ t DownloadLightButton "EOS-Basis Laden"
 t FullVersionText "Komplett"
 t FullDownloadDescription "Beinhaltet das komplette Endless-OS, mit mehr als 100 Programmen.Diese Version eignet sich für Computer ohne zuverlässige Internetverbindung. Es gibt verschiedene Versionen für verschiedene Sprachen."
 t DownloadFullButton "EOS-Komplett laden"
-t SelectUSBPreviousButton "Weiter"
-t SelectUSBNextButton "Zurück"
+t SelectUSBPreviousButton "Zurück"
+t SelectUSBNextButton "Weiter"
 t SelectUSBPageTitle "USB-Gerät auswählen"
 t SelectUSBSubtitle "Wähle das USB-Gerät, das du benutzen möchtest."
 t USBDisksFound "USB-Gerät gefunden:"
@@ -750,6 +756,9 @@ t MSG_406 "Chinesisch vereinfacht"
 t MSG_407 "Bengali"
 t MSG_408 "Spanisch (Guatemala)"
 t MSG_409 "Spanisch (Mexiko)"
+t MSG_410 "Indonesian"
+t MSG_411 "Thai"
+t MSG_412 "Vietnamese"
 
 ################################################################################
 l "es-ES" "Spanish (Español)" 0x040a, 0x080a, 0x0c0a, 0x100a, 0x140a, 0x180a, 0x1c0a, 0x200a, 0x240a, 0x280a, 0x2c0a, 0x300a, 0x340a, 0x380a, 0x3c0a, 0x400a, 0x440a, 0x480a, 0x4c0a, 0x500a, 0x540a, 0x580a
@@ -902,6 +911,9 @@ t MSG_406 "Chino simplificado"
 t MSG_407 "Bengalí"
 t MSG_408 "Español (Guatemala)"
 t MSG_409 "Español (México)"
+t MSG_410 "Indonesian"
+t MSG_411 "Thai"
+t MSG_412 "Vietnamese"
 
 ################################################################################
 l "fr-FR" "French (Français)" 0x040c, 0x080c, 0x0c0c, 0x100c, 0x140c, 0x180c, 0x1c0c, 0x200c, 0x240c, 0x280c, 0x2c0c, 0x300c, 0x340c, 0x380c, 0xe40c
@@ -1053,7 +1065,10 @@ t MSG_405 "Français"
 t MSG_406 "Chinois simplifié"
 t MSG_407 "Bengali"
 t MSG_408 "Espagnol (Guatemala)"
-t MSG_409 "Espagnol (Mexico)"
+t MSG_409 "Espagnol (Mexique)"
+t MSG_410 "Indonésien"
+t MSG_411 "Thaï"
+t MSG_412 "Vietnamien"
 
 ################################################################################
 l "hi-IN" "Hindi (हिन्दी)" 0x0439
@@ -1206,6 +1221,9 @@ t MSG_406 "चाइनीज सिम्प्लिफाइड"
 t MSG_407 "बंगाली"
 t MSG_408 "स्पेनिश (गुआटेमाला)"
 t MSG_409 "स्पेनिश (मेक्सिको)"
+t MSG_410 "इन्डोनेशियाई"
+t MSG_411 "थाई"
+t MSG_412 "वियतनामी"
 
 ################################################################################
 l "id-ID" "Indonesian (Bahasa Indonesia)" 0x0421
@@ -1216,7 +1234,7 @@ g IDD_ENDLESSUSBTOOL_DIALOG
 t AdvancedPageTitle "Opsi Instal Lanjutan"
 t LiveUsbButton "Buat Live USB"
 t LiveUsbText "Cobalah Endless OS dengan menjalankannya dari USB stick."
-t ReformatterUsbButton "Buat USB Pemformat Ulang"
+t ReformatterUsbButton "Buat Pemformat Ulang USB"
 t ReformatterUsbText "Format ulang komputer mana saja dengan Endless OS menggunakan stik USB."
 t CompareOptionsLink "Membandingkan dua pilihan"
 t SelectFilePreviousButton "Sebelumnya"
@@ -1357,7 +1375,10 @@ t MSG_405 "Perancis"
 t MSG_406 "Tionghoa Sederhana"
 t MSG_407 "Bengali"
 t MSG_408 "Spanyol (Guatemala)"
+t MSG_409 "Spanyol (Mexico)"
 t MSG_410 "Bahasa Indonesia"
+t MSG_411 "Thai"
+t MSG_412 "Vietnam"
 
 ################################################################################
 l "pt-BR" "Portuguese Brazilian (Português do Brasil)" 0x0416
@@ -1509,7 +1530,10 @@ t MSG_405 "Francês"
 t MSG_406 "Chinês Simplificado"
 t MSG_407 "Bengalês"
 t MSG_408 "Espanhol (Guatemala)"
-t MSG_409 "Espanhol (Meksiko)"
+t MSG_409 "Espanhol (México)"
+t MSG_410 "Indonésio"
+t MSG_411 "Tailandês"
+t MSG_412 "Vietnamita"
 
 ################################################################################
 l "ro-RO" "Romanian (Română)" 0x0418, 0x0818
@@ -1569,7 +1593,7 @@ t AdvancedOptionsText "Pentru optiuni de instalare avansate folosind un <b> Stic
 t SelectStorageNextButton "Urmator"
 t SelectStoragePreviousButton "Anterior"
 t SelectStoragePageTitle "Spatiu de stocare pentru Endless OS"
-t StorageAgreementText "Notă: Vă recomandăm copierea de rezervă a tututor fișiereleol importante înainte de a continua. În cazul în care aveți probleme cu computerul după instalare, puteți găsi ajutor la <a id='StorageSupportLink'>Suport Endless </a>."
+t StorageAgreementText "Notă: Vă recomandăm copierea de rezervă a tututor fișierelor importante înainte de a continua. În cazul în care aveți probleme cu computerul după instalare, puteți găsi ajutor la <a id='StorageSupportLink'>Suport Endless </a>."
 t DualBootLanguageLabel "Selecteaza limba"
 t AdvancedInstallReminder "Pentru a crea un stick USB Endless OS aveți nevoie de un dispozitiv USB cu cel puțin 8 GB de spațiu de stocare."
 t AdvancedOptionsSubtitle "Cu un <b>Stick USB Endless</b> puteti:"
@@ -1662,6 +1686,9 @@ t MSG_406 "Chineza Simplificata"
 t MSG_407 "Bengaleza"
 t MSG_408 "Spaniola (Guatemala)"
 t MSG_409 "Spaniola (Mexic)"
+t MSG_410 "Indonesian"
+t MSG_411 "Thai"
+t MSG_412 "Vietnamese"
 
 ################################################################################
 l "th-TH" "Thai (ไทย)" 0x041e
@@ -1814,7 +1841,9 @@ t MSG_406 "อักษรจีนตัวย่อ"
 t MSG_407 "เบงกาลี"
 t MSG_408 "สเปน (กัวเตมาลา)"
 t MSG_409 "สเปน (เม็กซิโก)"
+t MSG_410 "อินโดนีเซีย"
 t MSG_411 "ไทย"
+t MSG_412 "เวียดนาม"
 
 ################################################################################
 l "vi-VN" "Vietnamese (Tiếng Việt)" 0x042A
@@ -1960,13 +1989,15 @@ t MSG_372 "Không tìm thấy thiết bị USB nào. Nếu bạn đã chèn mộ
 t MSG_400 "Cơ bản"
 t MSG_401 "Tiếng Anh"
 t MSG_402 "Tây Ban Nha"
-t MSG_403 "Tiếng"
+t MSG_403 "Tiếng Bồ Đào Nha (Braxin)"
 t MSG_404 "Tiếng Ả Rập"
 t MSG_405 "Pháp"
 t MSG_406 "Tiếng Trung giản thể"
 t MSG_407 "Tiếng Bengal"
 t MSG_408 "Tiếng Tây Ban Nha (Guatemala)"
-t MSG_409 "Tiếng Tây Ban Nha (Mexico)"
+t MSG_409 "Tiếng Tây Ban Nha (Mê-hi-cô)"
+t MSG_410 "Tiếng Indonesia"
+t MSG_411 "Tiếng Thái "
 t MSG_412 "Tiếng Việt"
 
 ################################################################################
@@ -2119,7 +2150,10 @@ t MSG_405 "法语"
 t MSG_406 "简体中文"
 t MSG_407 "孟加拉语"
 t MSG_408 "西班牙语(危地马拉)"
-t MSG_409 "西班牙语(墨西哥)"
+t MSG_409 "西班牙语（墨西哥）"
+t MSG_410 "印度尼西亚语"
+t MSG_411 "泰语"
+t MSG_412 "越南语"
 
 ################################################################################
 l "zh-TW" "Chinese Traditional (正體中文)" 0x0404, 0x0c04, 0x1404, 0x7c04
@@ -2271,4 +2305,7 @@ t MSG_405 "法文"
 t MSG_406 "簡體中文"
 t MSG_407 "孟加拉語"
 t MSG_408 "西班牙語（瓜地馬拉地區）"
-t MSG_409 "西班牙语(墨西哥)"
+t MSG_409 "西班牙文（墨西哥）"
+t MSG_410 "印尼文"
+t MSG_411 "泰文"
+t MSG_412 "越南文"
