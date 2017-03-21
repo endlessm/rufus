@@ -1686,9 +1686,9 @@ t MSG_406 "Chineza Simplificata"
 t MSG_407 "Bengaleza"
 t MSG_408 "Spaniola (Guatemala)"
 t MSG_409 "Spaniola (Mexic)"
-t MSG_410 "Indonesian"
-t MSG_411 "Thai"
-t MSG_412 "Vietnamese"
+t MSG_410 "Indoneziana"
+t MSG_411 "Tailandeza"
+t MSG_412 "Vietnameza"
 
 ################################################################################
 l "th-TH" "Thai (ไทย)" 0x041e
