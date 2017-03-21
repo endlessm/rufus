@@ -14,7 +14,7 @@ configuration:
   - Release
 
 install:
-  - curl -L -o upx.zip https://github.com/upx/upx/releases/download/v3.91/upx391w.zip
+  - appveyor DownloadFile https://github.com/upx/upx/releases/download/v3.91/upx391w.zip -FileName upx.zip
   - 7z e upx.zip *.exe -r
 
 # We assume tags are of the form VERSION_foo, and we assume that foo matches
