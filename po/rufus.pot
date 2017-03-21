@@ -390,18 +390,8 @@ msgid "Great! Endless OS has been successfully installed."
 msgstr ""
 
 #, c-format
-msgctxt "MSG_347"
-msgid "Great! Endless Code has been successfully installed."
-msgstr ""
-
-#, c-format
 msgctxt "MSG_343"
 msgid "Great! Your Endless OS Live USB has been created."
-msgstr ""
-
-#, c-format
-msgctxt "MSG_348"
-msgid "Great! Your Endless Code Live USB has been created."
 msgstr ""
 
 #, c-format
@@ -410,18 +400,8 @@ msgid "Great! Your Endless OS Reflasher USB has been created."
 msgstr ""
 
 #, c-format
-msgctxt "MSG_349"
-msgid "Great! Your Endless Code Reflasher USB has been created."
-msgstr ""
-
-#, c-format
 msgctxt "MSG_321"
 msgid "Select Your Endless OS Version"
-msgstr ""
-
-#, c-format
-msgctxt "MSG_373"
-msgid "Select Your Endless Code Version"
 msgstr ""
 
 #, c-format
@@ -435,18 +415,8 @@ msgid "We couldn’t finish getting Endless OS. Check your internet connection a
 msgstr ""
 
 #, c-format
-msgctxt "MSG_382"
-msgid "We couldn’t finish getting Endless Code. Check your internet connection and click \"Resume\" to carry on downloading."
-msgstr ""
-
-#, c-format
 msgctxt "MSG_324"
 msgid "Something is wrong with your Endless OS file. Click \"Download Again\" to try downloading it again."
-msgstr ""
-
-#, c-format
-msgctxt "MSG_383"
-msgid "Something is wrong with your Endless Code file. Click \"Download Again\" to try downloading it again."
 msgstr ""
 
 #, c-format
@@ -455,18 +425,8 @@ msgid "Something went wrong writing Endless OS to your USB device. Find a differ
 msgstr ""
 
 #, c-format
-msgctxt "MSG_384"
-msgid "Something went wrong writing Endless Code to your USB device. Find a different device and click \"Try Again\"."
-msgstr ""
-
-#, c-format
 msgctxt "MSG_358"
 msgid "Something went wrong installing Endless OS to your computer."
-msgstr ""
-
-#, c-format
-msgctxt "MSG_385"
-msgid "Something went wrong installing Endless Code to your computer."
 msgstr ""
 
 #, c-format
@@ -515,18 +475,8 @@ msgid "There isn’t enough disk space for downloading Endless OS. Please free u
 msgstr ""
 
 #, c-format
-msgctxt "MSG_303"
-msgid "There isn’t enough disk space for downloading Endless Code. Please free up %s and click \"Resume\" to start downloading."
-msgstr ""
-
-#, c-format
 msgctxt "MSG_335"
 msgid "The selected version of Endless OS requires %s of free disk space, but only %s is available. Please free up some space on drive %s to continue."
-msgstr ""
-
-#, c-format
-msgctxt "MSG_374"
-msgid "The selected version of Endless Code requires %s of free disk space, but only %s is available. Please free up som space on drive %s to continue."
 msgstr ""
 
 #, c-format
@@ -575,11 +525,6 @@ msgid "To continue installing Endless OS, please free up at least %s by deleting
 msgstr ""
 
 #, c-format
-msgctxt "MSG_301"
-msgid "To continue installing Endless Code, please free up at least %s by deleting videos, photos, or other large files on your %s drive."
-msgstr ""
-
-#, c-format
 msgctxt "MSG_352"
 msgid "Unfortunately, your %s drive uses an unsupported format."
 msgstr ""
@@ -590,28 +535,13 @@ msgid "Endless OS can only be installed on an NTFS drive."
 msgstr ""
 
 #, c-format
-msgctxt "MSG_308"
-msgid "Endless Code can only be installed on an NTFS drive."
-msgstr ""
-
-#, c-format
 msgctxt "MSG_354"
 msgid "Unfortunately, your computer is incompatible with Endless OS."
 msgstr ""
 
 #, c-format
-msgctxt "MSG_313"
-msgid "Unfortunately, your computer is incompatible with Endless Code."
-msgstr ""
-
-#, c-format
 msgctxt "MSG_355"
 msgid "Endless OS only supports 64-bit computers."
-msgstr ""
-
-#, c-format
-msgctxt "MSG_375"
-msgid "Endless Code only supports 64-bit computers."
 msgstr ""
 
 #, c-format
@@ -625,11 +555,6 @@ msgid "Endless OS cannot be installed on drives which are protected with Device 
 msgstr ""
 
 #, c-format
-msgctxt "MSG_378"
-msgid "Endless Code cannot be installed on drives which are protected with Device Encryption or BitLocker."
-msgstr ""
-
-#, c-format
 msgctxt "MSG_359"
 msgid "Unfortunately, your computer has another OS installed already."
 msgstr ""
@@ -640,18 +565,8 @@ msgid "Endless OS only supports dual-boot on Windows-only systems."
 msgstr ""
 
 #, c-format
-msgctxt "MSG_379"
-msgid "Endless Code only supports dual-boot on Windows-only systems."
-msgstr ""
-
-#, c-format
 msgctxt "MSG_361"
 msgid "Are you sure you want to uninstall Endless OS? This will erase all apps and documents stored within your Endless OS installation."
-msgstr ""
-
-#, c-format
-msgctxt "MSG_376"
-msgid "Are you sure you want to uninstall Endless Code? This will erase all apps and documents stored within your Endless Code installation."
 msgstr ""
 
 #, c-format
@@ -660,18 +575,8 @@ msgid "Endless OS has been uninstalled successfully"
 msgstr ""
 
 #, c-format
-msgctxt "MSG_377"
-msgid "Endless Code has been uninstalled successfully"
-msgstr ""
-
-#, c-format
 msgctxt "MSG_363"
 msgid "There was a problem uninstalling Endless OS. Please contact us for assistance."
-msgstr ""
-
-#, c-format
-msgctxt "MSG_380"
-msgid "There was a problem uninstalling Endless Code. Please contact us for assistance."
 msgstr ""
 
 #, c-format
@@ -707,11 +612,6 @@ msgstr ""
 #, c-format
 msgctxt "MSG_370"
 msgid "Oops, something went wrong setting up Endless OS."
-msgstr ""
-
-#, c-format
-msgctxt "MSG_381"
-msgid "Oops, something went wrong setting up Endless Code."
 msgstr ""
 
 #, c-format
