@@ -2055,7 +2055,7 @@ HRESULT CEndlessUsbToolDlg::OnInstallDualBootClicked(IHTMLElement* pElement)
 	} else if (!canInstall) {
 		ErrorOccured(cause);
 	} else {
-		GoToSelectFilePage();
+		GoToSelectFilePage(true);
 	}
 
 	return S_OK;
@@ -2068,7 +2068,7 @@ HRESULT CEndlessUsbToolDlg::OnLiveUsbClicked(IHTMLElement* pElement)
 
 	SetSelectedInstallMethod(InstallMethod_t::LiveUsb);
 
-    GoToSelectFilePage();
+    GoToSelectFilePage(true);
 
 	return S_OK;
 }
@@ -2081,12 +2081,12 @@ HRESULT CEndlessUsbToolDlg::OnReformatterUsbClicked(IHTMLElement* pElement)
 
 	SetSelectedInstallMethod(InstallMethod_t::ReformatterUsb);
 
-    GoToSelectFilePage();
+    GoToSelectFilePage(true);
 
 	return S_OK;
 }
 
-void CEndlessUsbToolDlg::GoToSelectFilePage()
+void CEndlessUsbToolDlg::GoToSelectFilePage(bool forwards)
 {
     FUNCTION_ENTER;
 
@@ -2119,16 +2119,26 @@ void CEndlessUsbToolDlg::GoToSelectFilePage()
 
         // Update light download size
         SetElementText(_T(ELEMENT_DOWNLOAD_LIGHT_SIZE), GetDownloadString(r));
-
-        // Update full download size
-        HRESULT hr = GetElement(_T(ELEMENT_REMOTE_SELECT), &selectElem);
-        IFFALSE_GOTOERROR(SUCCEEDED(hr), "GoToSelectFilePage: querying for local select element.");
-        bool useLocalFile = m_useLocalFile;
-        OnSelectedRemoteFileChanged(selectElem);
-        m_useLocalFile = useLocalFile;
     }
 
-    ChangePage(_T(ELEMENT_FILE_PAGE));
+    // Update full download size
+    HRESULT hr = GetElement(_T(ELEMENT_REMOTE_SELECT), &selectElem);
+    IFFALSE_GOTOERROR(SUCCEEDED(hr), "GoToSelectFilePage: querying for local select element.");
+    bool useLocalFile = m_useLocalFile;
+    OnSelectedRemoteFileChanged(selectElem);
+    m_useLocalFile = useLocalFile;
+
+    if (m_remoteImages.GetSize() == 1 && !canUseLocal) {
+        uprintf("No local images and one remote image, skipping selection screen");
+        m_useLocalFile = false;
+        if (forwards) {
+            OnSelectFileNextClicked(NULL);
+        } else {
+            OnSelectFilePreviousClicked(NULL);
+        }
+    } else {
+        ChangePage(_T(ELEMENT_FILE_PAGE));
+    }
 
     return;
 
@@ -2875,7 +2885,7 @@ HRESULT CEndlessUsbToolDlg::OnCombinedUsbButtonClicked(IHTMLElement* pElement)
 
 	SetSelectedInstallMethod(InstallMethod_t::CombinedUsb);
 
-	GoToSelectFilePage();
+	GoToSelectFilePage(true);
 
 	return S_OK;
 }
@@ -2898,7 +2908,7 @@ HRESULT CEndlessUsbToolDlg::OnSelectFileNextClicked(IHTMLElement* pElement)
     LPITEMIDLIST pidlDesktop = NULL;
     SHChangeNotifyEntry NotifyEntry;
     
-    IFFALSE_RETURN_VALUE(!IsButtonDisabled(pElement), "OnSelectFileNextClicked: Button is disabled. ", S_OK);
+    IFFALSE_RETURN_VALUE(pElement == NULL || !IsButtonDisabled(pElement), "OnSelectFileNextClicked: Button is disabled. ", S_OK);
 
     // Get display name with actual image size, not compressed
     CString personality, version;
@@ -3137,7 +3147,7 @@ HRESULT CEndlessUsbToolDlg::OnSelectUSBPreviousClicked(IHTMLElement* pElement)
     FUNCTION_ENTER;
 
 	LeavingDevicesPage();
-	ChangePage(_T(ELEMENT_FILE_PAGE));
+	GoToSelectFilePage(false);
 
     return S_OK;
 }
@@ -3398,7 +3408,7 @@ HRESULT CEndlessUsbToolDlg::OnSelectStoragePreviousClicked(IHTMLElement* pElemen
 {
 	FUNCTION_ENTER;
 
-	ChangePage(_T(ELEMENT_FILE_PAGE));
+	GoToSelectFilePage(false);
 
 	return S_OK;
 }
