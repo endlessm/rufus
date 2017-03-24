@@ -325,11 +325,6 @@ msgid "%s of %s (%s/s)"
 msgstr ""
 
 #, c-format
-msgctxt "MSG_303"
-msgid "Something is wrong with your Endless OS file."
-msgstr ""
-
-#, c-format
 msgctxt "MSG_304"
 msgid "Downloading"
 msgstr ""

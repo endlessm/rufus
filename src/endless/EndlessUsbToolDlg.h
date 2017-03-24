@@ -120,6 +120,7 @@ public:
     ~CEndlessUsbToolDlg();
 
 	static bool IsUninstaller();
+	static bool IsCoding();
 	static bool ShouldUninstall();
 
 	void Uninit();
@@ -373,7 +374,7 @@ private:
     static DWORD WINAPI UpdateDownloadProgressThread(void* param);
     static DWORD WINAPI CheckInternetConnectionThread(void* param);
 
-    void GoToSelectFilePage();
+    void GoToSelectFilePage(bool forwards);
     void InitLogging();
     void EnableHibernate(bool enable = true);
     void CancelRunningOperation(bool userCancel = false);
@@ -462,4 +463,10 @@ private:
 	ULONGLONG GetNeededSpaceForDualBoot(int &neededGigs, bool *isBaseImage = NULL);
 
 	static const UINT m_uTaskbarBtnCreatedMsg;
+
+	static const wchar_t* UninstallerFileName();
+	static const char* JsonLiveFile(bool withCompressedSuffix=true);
+	static const char* JsonInstallerFile(bool withCompressedSuffix=true);
+	static const wchar_t* JsonLiveFileURL();
+	static const wchar_t* JsonInstallerFileURL();
 };

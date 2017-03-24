@@ -14,7 +14,8 @@
         <div id="DualBootInstallPage" class="WizardPage">
             <div class="PageHeader">
                 <div class="Button ButtonRight ButtonClose" id="DualBootPageCloseButton"></div>
-                <div id="DualBootPageTitle" class="PageHeaderTitle">Endless OS</div>
+                <div id="DualBootPageTitle" class="PageHeaderTitle ModeNormal">Endless OS</div>
+                <div id="DualBootPageTitleCoding" class="PageHeaderTitle ModeCoding">Endless Coding</div>
             </div>
 
             <div class="FullWidthContent PageContent">
@@ -66,12 +67,14 @@
 
 				<div class="ContentContainer">
 					<div class="ContentPanel RoundedCornersContainer" id="LeftPanel">
-                        <div class="PanelText" id="LiveUsbText">Try Endless OS by running it from a USB stick.</div>
+                        <div class="PanelText ModeNormal" id="LiveUsbText">Try Endless OS by running it from a USB stick.</div>
+                        <div class="PanelText ModeCoding" id="LiveUsbTextCoding">Try Endless Code by running it from a USB stick.</div>
 						<div class="PanelImage" id="LeftPaneImage"> </div>
 						<div class="Button ButtonBlue hidden" id="LiveUsbButtonC"><div id="LiveUsbButton">Create Live USB</div></div>
 					</div>
 					<div class="ContentPanel RoundedCornersContainer" id="RightPanel" >
-                        <div class="PanelText" id="ReformatterUsbText">Reformat any computer with Endless OS using a USB stick.</div>
+                        <div class="PanelText ModeNormal" id="ReformatterUsbText">Reformat any computer with Endless OS using a USB stick.</div>
+                        <div class="PanelText ModeCoding" id="ReformatterUsbTextCoding">Reformat any computer with Endless Code using a USB stick.</div>
 						<div class="PanelImage" id="RightPaneImage"></div>
 						<div class="Button ButtonBlue hidden" id="ReformatterUsbButtonC"><div id="ReformatterUsbButton">Create Reformatter USB</div></div>
 					</div>
@@ -104,7 +107,8 @@
             <div class="PageHeader">
                 <div class="Button"><div id="SelectFilePreviousButton">Previous</div></div>
                 <div class="Button ButtonBlue ButtonRight" id="SelectFileNextButtonC"><div id="SelectFileNextButton">Next</div></div>
-                <div id="SelectFilePageTitle" class="PageHeaderTitle">Select Your Endless OS Version</div>
+                <div class="PageHeaderTitle ModeNormal" id="SelectFilePageTitle">Select Your Endless OS Version</div>
+                <div class="PageHeaderTitle ModeCoding" id="SelectFilePageTitleCoding">Select Your Endless Code Version</div>
             </div>
 
             <div class="PageContent">
@@ -129,22 +133,32 @@
 				
 				<div class="ContentContainer" id="SelectFileLocalNotPresent">
 					<div class="Fieldset">
-						<div class="FieldsetTitle"><span>Endless OS <b id="LightVersionText">BASIC</b></span></div>
+						<div class="FieldsetTitle ModeNormal"><span>Endless OS <b id="LightVersionText">BASIC</b></span></div>
+						<div class="FieldsetTitle ModeCoding"><span>Endless Code <b id="LightVersionText">BASIC</b></span></div>
 						<div class="FieldsetSubtitle" id="LightDownloadSubtitle">---</div>
-						<div class="FieldsetDescription" id="LightDownloadDescription">Includes basic features of Endless OS and the option to download more apps and content later. This version is best for computers with reliable internet access.</div>
-						<div id="DownloadLightButtonC" class="Button ButtonBlue ButtonDisabled"><div id="DownloadLightButton">Download EOS Light</div></div>
+						<div class="FieldsetDescription ModeNormal" id="LightDownloadDescription">Includes basic features of Endless OS and the option to download more apps and content later. This version is best for computers with reliable internet access.</div>
+						<div class="FieldsetDescription ModeCoding" id="LightDownloadDescriptionCoding">Includes basic features of Endless Code and the option to download more apps and content later. This version is best for computers with reliable internet access.</div>
+						<div id="DownloadLightButtonC" class="Button ButtonBlue ButtonDisabled">
+                            <div class="ModeNormal" id="DownloadLightButton">Download EOS Light</div>
+                            <div class="ModeCoding" id="DownloadLightButtonCoding">Download Code Light</div>
+                        </div>
 					</div>
 					
 					<div class="Fieldset">
-						<div class="FieldsetTitle"><span>Endless OS <b id="FullVersionText">Full</b></span></div>
+						<div class="FieldsetTitle ModeNormal"><span>Endless OS <b id="FullVersionText">Full</b></span></div>
+						<div class="FieldsetTitle ModeCoding"><span>Endless Code <b id="FullVersionText">Full</b></span></div>
 						<div class="FieldsetSubtitle" id="FullDownloadSubtitle">---</div>
-						<div class="FieldsetDescription" id="FullDownloadDescription">Includes full Endless OS, preloaded with more than 100 apps and content. This version is ideal for computers without reliable internet access. Choose language for content and apps:</div>
+						<div class="FieldsetDescription ModeNormal" id="FullDownloadDescription">Includes full Endless OS, preloaded with more than 100 apps and content. This version is ideal for computers without reliable internet access. Choose language for content and apps:</div>
+						<div class="FieldsetDescription ModeCoding" id="FullDownloadDescriptionCoding">Includes full Endless Code, preloaded with more than 100 apps and content. This version is ideal for computers without reliable internet access. Choose language for content and apps:</div>
 						<div class="FullWidthContent">
 							<select id="DownloadLanguageSelect" disabled="disabled" onchange="remoteSelectionChanged();">
 								<!-- These will be added at runtime -->
 							</select> 
 						</div>
-						<div id="DownloadFullButtonC" class="Button ButtonBlue ButtonDisabled"><div id="DownloadFullButton">Download EOS Full</div></div>						
+						<div id="DownloadFullButtonC" class="Button ButtonBlue ButtonDisabled">
+                            <div class="ModeNormal" id="DownloadFullButton">Download EOS Full</div>
+                            <div class="ModeCoding" id="DownloadFullButtonCoding">Download Code Full</div>
+                        </div>
 					</div>
 				</div>				
             </div>
@@ -207,7 +221,8 @@
             <div class="PageHeader">
                 <div class="Button"><div id="SelectStoragePreviousButton">Previous</div></div>
                 <div id="SelectStorageNextButtonC" class="Button ButtonBlue ButtonRight"><div id="SelectStorageNextButton">Next</div></div>
-                <div id="SelectStoragePageTitle" class="PageHeaderTitle">Storage Space for Endless OS</div>
+                <div class="PageHeaderTitle ModeNormal" id="SelectStoragePageTitle">Storage Space for Endless OS</div>
+                <div class="PageHeaderTitle ModeCoding" id="SelectStoragePageTitleCoding">Storage Space for Endless Code</div>
             </div>
 
             <div class="PageContent">
@@ -247,7 +262,8 @@
         <div id="InstallingPage" class="WizardPage hidden">
             <div class="PageHeader">
 				<div id="InstallCancelButtonC" class="Button ButtonRight"><div id="InstallCancelButton">Cancel</div></div>
-                <div id="InstallingPageTitle" class="PageHeaderTitle">Installing</div>
+                <div class="PageHeaderTitle ModeNormal" id="InstallingPageTitle">Installing</div>
+                <div class="PageHeaderTitle ModeCoding" id="InstallingPageTitleCoding">Installing</div>
             </div>
 
             <div class="PageContent">
@@ -306,8 +322,10 @@
 					<div id="SecureBootReminder" class="RoundedCornersContainer">
 						<div id="ReminderTextContainer">
                             <div class="ReminderTitle" id="ThankYouDualBootReminder">Restart your computer and select "Endless OS" from the menu.</div>
-                            <div class="ReminderTitle" id="ThankYouLiveReminder">To try Endless OS now, restart your computer.</div>
-                            <div class="ReminderTitle" id="ThankYouReflasherReminder">Now you're ready to install Endless OS on more computers.</div>
+                            <div class="ReminderTitle ModeNormal" id="ThankYouLiveReminder">To try Endless OS now, restart your computer.</div>
+                            <div class="ReminderTitle ModeCoding" id="ThankYouLiveReminderCoding">To try Endless Code now, restart your computer.</div>
+                            <div class="ReminderTitle ModeNormal" id="ThankYouReflasherReminder">Now you're ready to install Endless OS on more computers.</div>
+                            <div class="ReminderTitle ModeCoding" id="ThankYouReflasherReminderCoding">Now you're ready to install Endless Code on more computers.</div>
 							<a id="UsbBootHowToLink">How should I do it?</a>
 						</div>
 					</div>
@@ -332,7 +350,8 @@
             <div class="PageContent">
 				<div class="ContentContainer">
 					<div id="ErrorImage"></div>
-					<div class="ContentTitle" id="ErrorMessage">Oops, something went wrong setting up Endless OS.</div>
+					<div class="ContentTitle ModeNormal" id="ErrorMessage">Oops, something went wrong setting up Endless OS.</div>
+					<div class="ContentTitle ModeCoding" id="ErrorMessageCoding">Oops, something went wrong setting up Endless Code.</div>
 					<div class="ImageDataRow" id="ErrorMessageSuggestion">Please try again or contact us so we can help you troubleshoot.</div>
 					<div class="Button ButtonBlue hidden" id="ErrorContinueButtonC"><div id="ErrorContinueButton">Continue</div></div>
 					<div class="ImageDataRow " id="DeleteFilesContainer">

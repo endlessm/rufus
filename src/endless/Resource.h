@@ -105,6 +105,21 @@
 #define HTML_ELEM_CombinedUsbButton	      2068
 #define HTML_ELEM_USBLearnMore            2069
 
+// Endless Code specific strings
+#define HTML_ELEM_LiveUsbTextCoding               2071
+#define HTML_ELEM_DualBootPageTitleCoding         2072
+#define HTML_ELEM_InstallingPageTitleCoding       2073
+#define HTML_ELEM_ThankYouLiveReminderCoding      2075
+#define HTML_ELEM_ThankYouReflasherReminderCoding 2076
+#define HTML_ELEM_ErrorMessageCoding              2077
+#define HTML_ELEM_ReformatterUsbTextCoding        2078
+#define HTML_ELEM_SelectFilePageTitleCoding       2079
+#define HTML_ELEM_SelectFileSubtitleCoding        2080
+#define HTML_ELEM_LightDownloadDescriptionCoding  2081
+#define HTML_ELEM_DownloadLightButtonCoding       2082
+#define HTML_ELEM_FullDownloadDescriptionCoding   2083
+#define HTML_ELEM_DownloadFullButtonCoding        2084
+#define HTML_ELEM_SelectStoragePageTitleCoding    2085
 
 // Rufus messages
 #define MSG_000                         3000
@@ -154,6 +169,7 @@
 #define MSG_310							3310
 #define MSG_311							3311
 #define MSG_312							3312
+#define MSG_313							3313
 #define MSG_314							3314
 #define MSG_315							3315
 #define MSG_316							3316
@@ -186,6 +202,11 @@
 #define MSG_342							3342
 #define MSG_343							3343
 #define MSG_344							3344
+#define MSG_345                         3345
+#define MSG_346                         3346
+#define MSG_347                         3347
+#define MSG_348                         3348
+#define MSG_349                         3349
 #define MSG_350							3350
 #define MSG_351							3351
 #define MSG_352							3352
@@ -209,6 +230,19 @@
 #define MSG_370							3370
 #define MSG_371							3371
 #define MSG_372							3372
+#define MSG_373							3373
+#define MSG_374							3374
+#define MSG_375							3375
+#define MSG_376							3376
+#define MSG_377							3377
+#define MSG_378							3378
+#define MSG_379							3379
+#define MSG_380							3380
+#define MSG_381							3381
+#define MSG_382							3382
+#define MSG_383							3383
+#define MSG_384							3384
+#define MSG_385							3385
 
 // For languages
 #define MSG_400                         3400

@@ -11,6 +11,11 @@ body {
 	background: #363d41
 }
 
+body.ModeNormal .ModeCoding,
+body.ModeCoding .ModeNormal {
+    display: none;
+}
+
 b {
 	font-family: LatoBold;
 }

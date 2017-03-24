@@ -218,6 +218,7 @@ DWORD usbDevicesCount;
 #define JS_ENABLE_BUTTON                "enableButton"
 #define JS_SHOW_ELEMENT                 "showElement"
 #define JS_RESET_CHECK                  "resetCheck"
+#define JS_SET_CODING_MODE              "setCodingMode"
 
 // Personalities
 
@@ -322,26 +323,27 @@ enum endless_action_type {
 #define FILE_GZ_EXTENSION	"gz"
 #define FILE_XZ_EXTENSION	"xz"
 
-#define RELEASE_JSON_URLPATH    _T("https://d1anzknqnc1kmb.cloudfront.net/")
-#define JSON_LIVE_FILE          "releases-eos-3.json"
-#define JSON_INSTALLER_FILE     "releases-eosinstaller-3.json"
-#define JSON_GZIP               "." FILE_GZ_EXTENSION
-#define JSON_PACKED(__file__)   __file__ JSON_GZIP
+#define RELEASE_JSON_URLPATH       _T("https://d1anzknqnc1kmb.cloudfront.net/")
+#define PRIVATE_JSON_URLPATH       _T("http://images.endlessm-sf.com/")
+
+#define JSON_LIVE_FILE             "releases-eos-3.json"
+#define JSON_CODING_LIVE_FILE      "releases-coding-3.json"
+#define JSON_INSTALLER_FILE        "releases-eosinstaller-3.json"
 #ifdef ENABLE_JSON_COMPRESSION
-#define JSON_URL(__file__)      RELEASE_JSON_URLPATH _T(JSON_PACKED(__file__))
+# define JSON_SUFFIX               "." FILE_GZ_EXTENSION
 #else
-#define JSON_URL(__file__)      RELEASE_JSON_URLPATH _T(__file__)
+# define JSON_SUFFIX               ""
 #endif // ENABLE_JSON_COMPRESSION
-#define SIGNATURE_FILE_EXT      L".asc"
-#define	BOOT_ARCHIVE_SUFFIX		L".boot.zip"
-#define	IMAGE_FILE_EXT			L".img"
+
+#define SIGNATURE_FILE_EXT         L".asc"
+#define	BOOT_ARCHIVE_SUFFIX		   L".boot.zip"
+#define	IMAGE_FILE_EXT			   L".img"
 
 #define ENDLESS_OS "Endless OS"
 const wchar_t* mainWindowTitle = L"Endless Installer";
 
 #define ALL_FILES					L"*.*"
 
-#define ENDLESS_UNINSTALLER_NAME L"endless-uninstaller.exe"
 #define ENDLESS_OS_NAME L"Endless OS"
 
 // Radu: How much do we need to reserve for the exfat partition header?
@@ -646,6 +648,7 @@ void CEndlessUsbToolDlg::OnDocumentComplete(LPDISPATCH pDisp, LPCTSTR szUrl)
         CallJavascript(_T(JS_ENABLE_BUTTON), CComVariant(HTML_BUTTON_ID(_T(ELEMENT_REFORMATTER_USB_BUTTON))), CComVariant(FALSE));
     }
 
+	CallJavascript(_T(JS_SET_CODING_MODE), CComVariant(IsCoding()));
     SetElementText(_T(ELEMENT_VERSION_LINK), CComBSTR(RELEASE_VER_STR));
 
     StartCheckInternetConnectionThread();
@@ -1668,52 +1671,55 @@ void CEndlessUsbToolDlg::ChangePage(PCTSTR newPage)
 
 void CEndlessUsbToolDlg::ErrorOccured(ErrorCause_t errorCause)
 {
-    uint32_t recoverButtonMsgId = 0, suggestionMsgId = 0, headlineMsgId = MSG_370;
+    uint32_t recoverButtonMsgId = 0, suggestionMsgId = 0, headlineMsgId = IsCoding() ? MSG_381 : MSG_370;
     bool driveLetterInHeading = false;
 
     switch (errorCause) {
     case ErrorCause_t::ErrorCauseDownloadFailed:
         recoverButtonMsgId = MSG_RECOVER_RESUME;
-        suggestionMsgId = MSG_323;
+        suggestionMsgId = IsCoding() ? MSG_382 : MSG_323;
         break;
     case ErrorCause_t::ErrorCauseDownloadFailedDiskFull:
         recoverButtonMsgId = MSG_RECOVER_RESUME;
         headlineMsgId = MSG_350;
-        suggestionMsgId = MSG_334;
+        suggestionMsgId = IsCoding() ? MSG_303 : MSG_334;
+	break;
     case ErrorCause_t::ErrorCauseInstallFailedDiskFull:
         recoverButtonMsgId = MSG_RECOVER_RESUME;
         headlineMsgId = MSG_350;
-        suggestionMsgId = MSG_351;
+        suggestionMsgId = IsCoding() ? MSG_301 : MSG_351;
         break;
     case ErrorCause_t::ErrorCauseVerificationFailed:
         recoverButtonMsgId = MSG_RECOVER_DOWNLOAD_AGAIN;
-        suggestionMsgId = MSG_324;
+        suggestionMsgId = IsCoding() ? MSG_383 : MSG_324;
         break;
     case ErrorCause_t::ErrorCauseCancelled:
     case ErrorCause_t::ErrorCauseGeneric:
     case ErrorCause_t::ErrorCauseWriteFailed:
     case ErrorCause_t::ErrorCauseSuspended: // TODO: new string here
         recoverButtonMsgId = MSG_RECOVER_TRY_AGAIN;
-        suggestionMsgId = m_selectedInstallMethod == InstallMethod_t::InstallDualBoot ? MSG_358 : MSG_325;
+        suggestionMsgId = m_selectedInstallMethod == InstallMethod_t::InstallDualBoot
+	    ? (IsCoding() ? MSG_385 : MSG_358)
+	    : (IsCoding() ? MSG_384 : MSG_325);
         break;
     case ErrorCause_t::ErrorCauseNot64Bit:
     case ErrorCause_t::ErrorCause32BitEFI:
-        headlineMsgId = MSG_354;
-        suggestionMsgId = MSG_355;
+        headlineMsgId = IsCoding() ? MSG_313 : MSG_354;
+        suggestionMsgId = IsCoding() ? MSG_375 : MSG_355;
         break;
     case ErrorCause_t::ErrorCauseBitLocker:
         headlineMsgId = MSG_356;
         driveLetterInHeading = true;
-        suggestionMsgId = MSG_357;
+        suggestionMsgId = IsCoding() ? MSG_378 : MSG_357;
         break;
     case ErrorCause_t::ErrorCauseNotNTFS:
         headlineMsgId = MSG_352;
         driveLetterInHeading = true;
-        suggestionMsgId = MSG_353;
+        suggestionMsgId = IsCoding() ? MSG_308 : MSG_353;
         break;
     case ErrorCause_t::ErrorCauseNonWindowsMBR:
         headlineMsgId = MSG_359;
-        suggestionMsgId = MSG_360;
+        suggestionMsgId = IsCoding() ? MSG_379 : MSG_360;
         break;
     case ErrorCause_t::ErrorCauseCantCheckMBR:
         // TODO: new string here; or, better, eliminate this failure mode
@@ -1773,7 +1779,7 @@ void CEndlessUsbToolDlg::ErrorOccured(ErrorCause_t errorCause)
     // Update the error description and "recovery" suggestion
     if (suggestionMsgId != 0) {
         CComBSTR message;
-        if (suggestionMsgId == MSG_334) {
+        if (suggestionMsgId == MSG_334 || suggestionMsgId == MSG_303) {
             POSITION p = m_remoteImages.FindIndex(m_selectedRemoteIndex);
             ULONGLONG size = 0;
             if (p != NULL) {
@@ -1783,7 +1789,7 @@ void CEndlessUsbToolDlg::ErrorOccured(ErrorCause_t errorCause)
             // we don't take the signature files into account but we are taking about ~2KB compared to >2GB
             ULONGLONG totalSize = size + (m_selectedInstallMethod == InstallMethod_t::ReformatterUsb ? m_installerImage.compressedSize : 0);
             message = UTF8ToBSTR(lmprintf(suggestionMsgId, SizeToHumanReadable(totalSize, FALSE, use_fake_units)));
-        } else if(suggestionMsgId == MSG_351) {
+        } else if(suggestionMsgId == MSG_351 || suggestionMsgId == MSG_301) {
             int nrGigsNeeded;
             ULONGLONG neededSize = GetNeededSpaceForDualBoot(nrGigsNeeded);
             message = UTF8ToBSTR(lmprintf(suggestionMsgId, SizeToHumanReadable(neededSize, FALSE, use_fake_units), ConvertUnicodeToUTF8(GetSystemDrive())));
@@ -2049,7 +2055,7 @@ HRESULT CEndlessUsbToolDlg::OnInstallDualBootClicked(IHTMLElement* pElement)
 	} else if (!canInstall) {
 		ErrorOccured(cause);
 	} else {
-		GoToSelectFilePage();
+		GoToSelectFilePage(true);
 	}
 
 	return S_OK;
@@ -2060,11 +2066,11 @@ HRESULT CEndlessUsbToolDlg::OnLiveUsbClicked(IHTMLElement* pElement)
 {
     FUNCTION_ENTER;
 
-	SetSelectedInstallMethod(InstallMethod_t::LiveUsb);
+    SetSelectedInstallMethod(InstallMethod_t::LiveUsb);
 
-    GoToSelectFilePage();
+    GoToSelectFilePage(true);
 
-	return S_OK;
+    return S_OK;
 }
 
 HRESULT CEndlessUsbToolDlg::OnReformatterUsbClicked(IHTMLElement* pElement)
@@ -2073,14 +2079,14 @@ HRESULT CEndlessUsbToolDlg::OnReformatterUsbClicked(IHTMLElement* pElement)
 
     FUNCTION_ENTER;
 
-	SetSelectedInstallMethod(InstallMethod_t::ReformatterUsb);
+    SetSelectedInstallMethod(InstallMethod_t::ReformatterUsb);
 
-    GoToSelectFilePage();
+    GoToSelectFilePage(true);
 
-	return S_OK;
+    return S_OK;
 }
 
-void CEndlessUsbToolDlg::GoToSelectFilePage()
+void CEndlessUsbToolDlg::GoToSelectFilePage(bool forwards)
 {
     FUNCTION_ENTER;
 
@@ -2098,7 +2104,7 @@ void CEndlessUsbToolDlg::GoToSelectFilePage()
     CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(HTML_BUTTON_ID(ELEMENT_SELFILE_NEXT_BUTTON)), CComVariant(canUseLocal));
 
     if (canUseLocal) {
-        SetElementText(_T(ELEMENT_SET_FILE_TITLE), UTF8ToBSTR(lmprintf(MSG_321)));
+        SetElementText(_T(ELEMENT_SET_FILE_TITLE), UTF8ToBSTR(lmprintf(IsCoding() ? MSG_373 : MSG_321)));
         SetElementText(_T(ELEMENT_SET_FILE_SUBTITLE), UTF8ToBSTR(lmprintf(MSG_322)));
     } else if(CanUseRemoteFile()) {
         ApplyRufusLocalization();
@@ -2113,16 +2119,26 @@ void CEndlessUsbToolDlg::GoToSelectFilePage()
 
         // Update light download size
         SetElementText(_T(ELEMENT_DOWNLOAD_LIGHT_SIZE), GetDownloadString(r));
-
-        // Update full download size
-        HRESULT hr = GetElement(_T(ELEMENT_REMOTE_SELECT), &selectElem);
-        IFFALSE_GOTOERROR(SUCCEEDED(hr), "GoToSelectFilePage: querying for local select element.");
-        bool useLocalFile = m_useLocalFile;
-        OnSelectedRemoteFileChanged(selectElem);
-        m_useLocalFile = useLocalFile;
     }
 
-    ChangePage(_T(ELEMENT_FILE_PAGE));
+    // Update full download size
+    HRESULT hr = GetElement(_T(ELEMENT_REMOTE_SELECT), &selectElem);
+    IFFALSE_GOTOERROR(SUCCEEDED(hr), "GoToSelectFilePage: querying for local select element.");
+    bool useLocalFile = m_useLocalFile;
+    OnSelectedRemoteFileChanged(selectElem);
+    m_useLocalFile = useLocalFile;
+
+    if (m_remoteImages.GetSize() == 1 && !canUseLocal) {
+        uprintf("No local images and one remote image, skipping selection screen");
+        m_useLocalFile = false;
+        if (forwards) {
+            OnSelectFileNextClicked(NULL);
+        } else {
+            OnSelectFilePreviousClicked(NULL);
+        }
+    } else {
+        ChangePage(_T(ELEMENT_FILE_PAGE));
+    }
 
     return;
 
@@ -2488,18 +2504,13 @@ void CEndlessUsbToolDlg::StartJSONDownload()
     }
 
     // Add both JSONs to download, maybe user goes back and switches between Try and Install
-#ifdef ENABLE_JSON_COMPRESSION
-    CString liveJson(JSON_PACKED(JSON_LIVE_FILE));
-    CString installerJson(JSON_PACKED(JSON_INSTALLER_FILE));
-#else
-    CString liveJson(JSON_LIVE_FILE);
-    CString installerJson(JSON_INSTALLER_FILE);
-#endif // ENABLE_JSON_COMPRESSION
+	CString liveJson(JsonLiveFile());
+	CString installerJson(JsonInstallerFile());
 
     liveJson = CEndlessUsbToolApp::TempFilePath(liveJson);
     installerJson = CEndlessUsbToolApp::TempFilePath(installerJson);
 
-    ListOfStrings urls = { JSON_URL(JSON_LIVE_FILE), JSON_URL(JSON_INSTALLER_FILE) };
+    ListOfStrings urls = { JsonLiveFileURL(), JsonInstallerFileURL() };
     ListOfStrings files = { liveJson, installerJson };
 
     success = m_downloadManager.AddDownload(DownloadType_t::DownloadTypeReleseJson, urls, files, true);
@@ -2750,17 +2761,17 @@ void CEndlessUsbToolDlg::UpdateDownloadOptions()
     m_remoteImages.RemoveAll();
 
     // Parse JSON with normal images
-    filePath = CEndlessUsbToolApp::TempFilePath(CString(JSON_LIVE_FILE));
+    filePath = CEndlessUsbToolApp::TempFilePath(CString(JsonLiveFile(false)));
 #ifdef ENABLE_JSON_COMPRESSION
-    filePathGz = CEndlessUsbToolApp::TempFilePath(CString(JSON_PACKED(JSON_LIVE_FILE)));
+    filePathGz = CEndlessUsbToolApp::TempFilePath(CString(JsonLiveFile()));
     IFFALSE_GOTOERROR(UnpackFile(filePathGz, filePath, BLED_COMPRESSION_GZIP), "Error uncompressing eos JSON file.");
 #endif // ENABLE_JSON_COMPRESSION
     IFFALSE_GOTOERROR(ParseJsonFile(filePath, false), "Error parsing eos JSON file.");
 
     // Parse JSON with installer images
-    filePath = CEndlessUsbToolApp::TempFilePath(CString(JSON_INSTALLER_FILE));
+    filePath = CEndlessUsbToolApp::TempFilePath(CString(JsonInstallerFile(false)));
 #ifdef ENABLE_JSON_COMPRESSION
-    filePathGz = CEndlessUsbToolApp::TempFilePath(CString(JSON_PACKED(JSON_INSTALLER_FILE)));
+    filePathGz = CEndlessUsbToolApp::TempFilePath(CString(JsonInstallerFile()));
     IFFALSE_GOTOERROR(UnpackFile(filePathGz, filePath, BLED_COMPRESSION_GZIP), "Error uncompressing eosinstaller JSON file.");
 #endif // ENABLE_JSON_COMPRESSION
     IFFALSE_GOTOERROR(ParseJsonFile(filePath, true), "Error parsing eosinstaller JSON file.");
@@ -2872,11 +2883,11 @@ HRESULT CEndlessUsbToolDlg::OnCombinedUsbButtonClicked(IHTMLElement* pElement)
 {
     FUNCTION_ENTER;
 
-	SetSelectedInstallMethod(InstallMethod_t::CombinedUsb);
+    SetSelectedInstallMethod(InstallMethod_t::CombinedUsb);
 
-	GoToSelectFilePage();
+    GoToSelectFilePage(true);
 
-	return S_OK;
+    return S_OK;
 }
 
 // Select File Page Handlers
@@ -2897,7 +2908,7 @@ HRESULT CEndlessUsbToolDlg::OnSelectFileNextClicked(IHTMLElement* pElement)
     LPITEMIDLIST pidlDesktop = NULL;
     SHChangeNotifyEntry NotifyEntry;
     
-    IFFALSE_RETURN_VALUE(!IsButtonDisabled(pElement), "OnSelectFileNextClicked: Button is disabled. ", S_OK);
+    IFFALSE_RETURN_VALUE(pElement == NULL || !IsButtonDisabled(pElement), "OnSelectFileNextClicked: Button is disabled. ", S_OK);
 
     // Get display name with actual image size, not compressed
     CString personality, version;
@@ -2949,18 +2960,18 @@ HRESULT CEndlessUsbToolDlg::OnSelectFileNextClicked(IHTMLElement* pElement)
 	uint32_t headlineMsg;
 	switch (m_selectedInstallMethod) {
 	case InstallDualBoot:
-		headlineMsg = MSG_320;
+		headlineMsg = IsCoding() ? MSG_347 : MSG_320;
 		break;
 	case ReformatterUsb:
-		headlineMsg = MSG_344;
+		headlineMsg = IsCoding() ? MSG_349 : MSG_344;
 		break;
 	case LiveUsb:
 	case CombinedUsb:
-		headlineMsg = MSG_343;
+		headlineMsg = IsCoding() ? MSG_348 : MSG_343;
 		break;
 	default:
 		uprintf("Unexpected install method %ls", InstallMethodToStr(m_selectedInstallMethod));
-		headlineMsg = MSG_343;
+		headlineMsg = IsCoding() ? MSG_348 : MSG_343;
 	}
 
 	CString finalMessageStr = UTF8ToCString(lmprintf(headlineMsg));
@@ -3135,8 +3146,8 @@ HRESULT CEndlessUsbToolDlg::OnSelectUSBPreviousClicked(IHTMLElement* pElement)
 {
     FUNCTION_ENTER;
 
-	LeavingDevicesPage();
-	ChangePage(_T(ELEMENT_FILE_PAGE));
+    LeavingDevicesPage();
+    GoToSelectFilePage(false);
 
     return S_OK;
 }
@@ -3395,11 +3406,11 @@ void CEndlessUsbToolDlg::LeavingDevicesPage()
 // Select Storage Page Handlers
 HRESULT CEndlessUsbToolDlg::OnSelectStoragePreviousClicked(IHTMLElement* pElement)
 {
-	FUNCTION_ENTER;
+    FUNCTION_ENTER;
 
-	ChangePage(_T(ELEMENT_FILE_PAGE));
+    GoToSelectFilePage(false);
 
-	return S_OK;
+    return S_OK;
 }
 
 HRESULT CEndlessUsbToolDlg::OnSelectStorageNextClicked(IHTMLElement *pElement)
@@ -3499,13 +3510,14 @@ void CEndlessUsbToolDlg::GoToSelectStoragePage()
 	// update messages with needed space based on selected version
 	CStringA osVersion = lmprintf(isBaseImage ? MSG_400 : MSG_316);
 	CStringA osSizeText = SizeToHumanReadable((isBaseImage ? RECOMMENDED_GIGS_BASE : RECOMMENDED_GIGS_FULL) * bytesInGig, FALSE, use_fake_units);
-	CString message = UTF8ToCString(lmprintf(MSG_337, osVersion, osSizeText));
+
+	CString message = UTF8ToCString(lmprintf(IsCoding() ? MSG_346 : MSG_337, osVersion, osSizeText));
 	SetElementText(_T(ELEMENT_STORAGE_DESCRIPTION), CComBSTR(message));
 
 	message = UTF8ToCString(lmprintf(MSG_341, freeSize, totalSize, systemDriveA));
 	SetElementText(_T(ELEMENT_STORAGE_AVAILABLE), CComBSTR(message));
 
-	message = UTF8ToCString(lmprintf(MSG_342, systemDriveA));
+	message = UTF8ToCString(lmprintf(IsCoding() ? MSG_345 : MSG_342, systemDriveA));
 	SetElementText(_T(ELEMENT_STORAGE_MESSAGE), CComBSTR(message));
 
 	// Clear existing elements from the drop down
@@ -3526,7 +3538,7 @@ void CEndlessUsbToolDlg::GoToSelectStoragePage()
 	if (!enoughBytesAvailable) {
 		uprintf("Not enough bytes available.");
 
-		message = UTF8ToCString(lmprintf(MSG_335, SizeToHumanReadable(neededSize, FALSE, use_fake_units), freeSize, systemDriveA));
+		message = UTF8ToCString(lmprintf(IsCoding() ? MSG_374 : MSG_335, SizeToHumanReadable(neededSize, FALSE, use_fake_units), freeSize, systemDriveA));
 		SetElementText(_T(ELEMENT_STORAGE_SPACE_WARNING), CComBSTR(message));
 
 		ChangePage(_T(ELEMENT_STORAGE_PAGE));
@@ -5160,10 +5172,10 @@ DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 	}
 
 	// Copy ourselves to the <SYSDRIVE>:\endless directory
-	IFFALSE_GOTOERROR(0 != CopyFile(exeFilePath, endlessFilesPath + ENDLESS_UNINSTALLER_NAME, FALSE), "Error copying exe uninstaller file.");
+	IFFALSE_GOTOERROR(0 != CopyFile(exeFilePath, endlessFilesPath + UninstallerFileName(), FALSE), "Error copying exe uninstaller file.");
 
 	// Add uninstall entry for Control Panel
-	IFFALSE_GOTOERROR(AddUninstallRegistryKeys(endlessFilesPath + ENDLESS_UNINSTALLER_NAME, endlessFilesPath), "Error on AddUninstallRegistryKeys.");
+	IFFALSE_GOTOERROR(AddUninstallRegistryKeys(endlessFilesPath + UninstallerFileName(), endlessFilesPath), "Error on AddUninstallRegistryKeys.");
 
 	CEndlessUsbToolDlg::ImageUnpackOperation = OP_SETUP_DUALBOOT;
 	CEndlessUsbToolDlg::ImageUnpackPercentStart = DB_PROGRESS_UNPACK_BOOT_ZIP;
@@ -5613,7 +5625,7 @@ BOOL CEndlessUsbToolDlg::SetAttributesForFilesInFolder(CString path, DWORD attri
 		do {
 			if ((0 == wcscmp(findFileData.cFileName, L".") || 0 == wcscmp(findFileData.cFileName, L".."))) continue;
 
-			if (0 != wcscmp(findFileData.cFileName, ENDLESS_UNINSTALLER_NAME)) {
+			if (0 != wcscmp(findFileData.cFileName, UninstallerFileName())) {
 				IFFALSE_PRINTERROR(SetFileAttributes(path + findFileData.cFileName, attributes) != 0, "Error on SetFileAttributes for child");
 
 				// We deliberately do not recurse into subdirectories.
@@ -6048,7 +6060,7 @@ BOOL CEndlessUsbToolDlg::UninstallDualBoot(CEndlessUsbToolDlg *dlg)
 	FUNCTION_ENTER;
 
 	BOOL retResult = FALSE;
-	uint32_t popupMsgId = MSG_363;
+	uint32_t popupMsgId = IsCoding() ? MSG_380 : MSG_363;
 	UINT popupStyle = MB_OK | MB_ICONERROR;
 
 	CString systemDriveLetter = GetSystemDrive();
@@ -6118,7 +6130,7 @@ done_with_mbr:
 	DelayDeleteFolder(endlessFilesPath);
 
 	// set success message and icon
-	popupMsgId = MSG_362;
+	popupMsgId = IsCoding() ? MSG_377 : MSG_362;
 	popupStyle = MB_OK | MB_ICONINFORMATION;
 	retResult = TRUE;
 
@@ -6245,11 +6257,75 @@ error:
 	}
 }
 
+static int _lowerCaseExeNameFindSubstring(CStringW exePath, const wchar_t* substring, bool* isSuffix)
+{
+	CStringW exeName = CSTRING_GET_LAST(exePath, '\\');
+	exeName.MakeLower();
+	int pos = exeName.Find(substring);
+	if (pos >= 0 && isSuffix != NULL) {
+		size_t substringLen = wcslen(substring);
+		*isSuffix = (pos + substringLen == exeName.GetLength());
+	}
+	return pos;
+}
+
+static bool _matchesUninstallerSuffix(CStringW exePath)
+{
+	bool isSuffix = false;
+	int pos = _lowerCaseExeNameFindSubstring(exePath, L"-uninstaller.exe", &isSuffix);
+	return (pos > 0) && isSuffix;
+}
 
 bool CEndlessUsbToolDlg::IsUninstaller()
 {
-	CStringW exePath = GetExePath();
-	return CSTRING_GET_LAST(exePath, '\\') == ENDLESS_UNINSTALLER_NAME;
+	static const bool is_uninstaller = _matchesUninstallerSuffix(GetExePath());
+	return is_uninstaller;
+}
+
+bool CEndlessUsbToolDlg::IsCoding()
+{
+	static const bool is_coding =
+	    (_lowerCaseExeNameFindSubstring(GetExePath(), L"-code-", NULL) > 0);
+	return is_coding;
+}
+
+const wchar_t* CEndlessUsbToolDlg::UninstallerFileName()
+{
+	return IsCoding()
+		? L"endless-code-uninstaller.exe"
+		: L"endless-uninstaller.exe";
+}
+
+const char* CEndlessUsbToolDlg::JsonLiveFile(bool withCompressedSuffix)
+{
+	if (withCompressedSuffix) {
+		return IsCoding()
+			? JSON_CODING_LIVE_FILE JSON_SUFFIX
+			: JSON_LIVE_FILE        JSON_SUFFIX;
+	}
+	return IsCoding()
+		? JSON_CODING_LIVE_FILE
+		: JSON_LIVE_FILE;
+}
+
+const wchar_t* CEndlessUsbToolDlg::JsonLiveFileURL()
+{
+    return IsCoding()
+        ? (PRIVATE_JSON_URLPATH _T(JSON_CODING_LIVE_FILE JSON_SUFFIX))
+        : (RELEASE_JSON_URLPATH _T(JSON_LIVE_FILE        JSON_SUFFIX));
+}
+
+const char* CEndlessUsbToolDlg::JsonInstallerFile(bool withCompressedSuffix)
+{
+	if (withCompressedSuffix) {
+        return JSON_INSTALLER_FILE JSON_SUFFIX;
+	}
+	return JSON_INSTALLER_FILE;
+}
+
+const wchar_t* CEndlessUsbToolDlg::JsonInstallerFileURL()
+{
+    return RELEASE_JSON_URLPATH _T(JSON_INSTALLER_FILE JSON_SUFFIX);
 }
 
 bool CEndlessUsbToolDlg::ShouldUninstall()
@@ -6350,7 +6426,7 @@ void CEndlessUsbToolDlg::UpdateDualBootTexts()
 
 void CEndlessUsbToolDlg::QueryAndDoUninstall()
 {
-	int selected = AfxMessageBox(UTF8ToCString(lmprintf(MSG_361)), MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2);
+	int selected = AfxMessageBox(UTF8ToCString(lmprintf(IsCoding() ? MSG_376 : MSG_361)), MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2);
 
 	if (selected != IDYES)
 		return;

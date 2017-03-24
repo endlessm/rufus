@@ -63,6 +63,11 @@ with open(LOC_FILE, 'r', encoding='utf-8') as loc_file, \
             tokens = line.split()
             label = tokens[1]
             string = ' '.join(tokens[2:])
+
+            # Skip Endless Code-related strings, which are not yet finalized.
+            if 'Code' in string:
+                continue
+
             if found:
                 # Close the previously found string
                 pot_file.write('msgstr ""\n')

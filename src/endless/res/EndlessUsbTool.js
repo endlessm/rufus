@@ -110,3 +110,8 @@ function resetCheck(elemId) {
 	}
 	elem.checked = false;
 }
+
+function setCodingMode(isCoding) {
+	var cls = isCoding ? "ModeCoding" : "ModeNormal";
+	addClassName("CEndlessUsbToolDlg", false, cls);
+}
