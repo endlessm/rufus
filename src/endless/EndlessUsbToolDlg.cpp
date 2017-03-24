@@ -2066,11 +2066,11 @@ HRESULT CEndlessUsbToolDlg::OnLiveUsbClicked(IHTMLElement* pElement)
 {
     FUNCTION_ENTER;
 
-	SetSelectedInstallMethod(InstallMethod_t::LiveUsb);
+    SetSelectedInstallMethod(InstallMethod_t::LiveUsb);
 
     GoToSelectFilePage(true);
 
-	return S_OK;
+    return S_OK;
 }
 
 HRESULT CEndlessUsbToolDlg::OnReformatterUsbClicked(IHTMLElement* pElement)
@@ -2079,11 +2079,11 @@ HRESULT CEndlessUsbToolDlg::OnReformatterUsbClicked(IHTMLElement* pElement)
 
     FUNCTION_ENTER;
 
-	SetSelectedInstallMethod(InstallMethod_t::ReformatterUsb);
+    SetSelectedInstallMethod(InstallMethod_t::ReformatterUsb);
 
     GoToSelectFilePage(true);
 
-	return S_OK;
+    return S_OK;
 }
 
 void CEndlessUsbToolDlg::GoToSelectFilePage(bool forwards)
@@ -2883,11 +2883,11 @@ HRESULT CEndlessUsbToolDlg::OnCombinedUsbButtonClicked(IHTMLElement* pElement)
 {
     FUNCTION_ENTER;
 
-	SetSelectedInstallMethod(InstallMethod_t::CombinedUsb);
+    SetSelectedInstallMethod(InstallMethod_t::CombinedUsb);
 
-	GoToSelectFilePage(true);
+    GoToSelectFilePage(true);
 
-	return S_OK;
+    return S_OK;
 }
 
 // Select File Page Handlers
@@ -3146,8 +3146,8 @@ HRESULT CEndlessUsbToolDlg::OnSelectUSBPreviousClicked(IHTMLElement* pElement)
 {
     FUNCTION_ENTER;
 
-	LeavingDevicesPage();
-	GoToSelectFilePage(false);
+    LeavingDevicesPage();
+    GoToSelectFilePage(false);
 
     return S_OK;
 }
@@ -3406,11 +3406,11 @@ void CEndlessUsbToolDlg::LeavingDevicesPage()
 // Select Storage Page Handlers
 HRESULT CEndlessUsbToolDlg::OnSelectStoragePreviousClicked(IHTMLElement* pElement)
 {
-	FUNCTION_ENTER;
+    FUNCTION_ENTER;
 
-	GoToSelectFilePage(false);
+    GoToSelectFilePage(false);
 
-	return S_OK;
+    return S_OK;
 }
 
 HRESULT CEndlessUsbToolDlg::OnSelectStorageNextClicked(IHTMLElement *pElement)
