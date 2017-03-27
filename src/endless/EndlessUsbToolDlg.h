@@ -238,7 +238,8 @@ private:
     FileImageEntry_t m_localInstallerImage;
     static CMap<CString, LPCTSTR, uint32_t, uint32_t> m_personalityToLocaleMsg;
     static CMap<CStringA, LPCSTR, CString, LPCTSTR> m_localeToPersonality;
-    static CMap<CStringA, LPCSTR, CString, LPCTSTR> CEndlessUsbToolDlg::m_localeToDisplayPersonality;
+    // Language-specific personalities covered by the 'sea' personality.
+    static CList<CString> m_seaPersonalities;
     static CMap<CStringA, LPCSTR, CStringA, LPCSTR> m_localeToIniLocale;
 
     // The OS image file. For ReformatterUsb, this is still the 'eos' image;
@@ -334,7 +335,6 @@ private:
     bool UnpackImage(const CString &image, const CString &destination);
     bool ParseJsonFile(LPCTSTR filename, bool isInstallerJson);
     void GetPreferredPersonality(CString &personality);
-    void GetPreferredDisplayPersonality(CString & personality);
     void AddDownloadOptionsToUI();
     void UpdateDownloadableState();
 

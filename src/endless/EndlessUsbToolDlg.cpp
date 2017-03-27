@@ -231,19 +231,13 @@ DWORD usbDevicesCount;
 #define PERSONALITY_BENGALI             L"bn"
 #define PERSONALITY_SPANISH_GT          L"es_GT"
 #define PERSONALITY_SPANISH_MX          L"es_MX"
-// Real personality:
-#define PERSONALITY_SOUTHEAST_ASIA      L"sea"
-// "Virtual" personalities, proxies for sea
 #define PERSONALITY_INDONESIAN          L"id"
 #define PERSONALITY_THAI                L"th"
 #define PERSONALITY_VIETNAMESE          L"vi"
 
-static const wchar_t * const seaVirtualPersonalities[] =
-{
-    PERSONALITY_INDONESIAN,
-    PERSONALITY_THAI,
-    PERSONALITY_VIETNAMESE,
-};
+// For OEM images, this is the union of id, th and vi. Historically it was
+// available for download users too, but as of 3.1.4 we build separate images.
+#define PERSONALITY_SOUTHEAST_ASIA      L"sea"
 
 static const wchar_t *globalAvailablePersonalities[] =
 {
@@ -507,7 +501,7 @@ END_DISPATCH_MAP()
 
 CMap<CString, LPCTSTR, uint32_t, uint32_t> CEndlessUsbToolDlg::m_personalityToLocaleMsg;
 CMap<CStringA, LPCSTR, CString, LPCTSTR> CEndlessUsbToolDlg::m_localeToPersonality;
-CMap<CStringA, LPCSTR, CString, LPCTSTR> CEndlessUsbToolDlg::m_localeToDisplayPersonality;
+CList<CString> CEndlessUsbToolDlg::m_seaPersonalities;
 CMap<CStringA, LPCSTR, CStringA, LPCSTR> CEndlessUsbToolDlg::m_localeToIniLocale;
 
 int CEndlessUsbToolDlg::ImageUnpackOperation;
@@ -567,13 +561,13 @@ CEndlessUsbToolDlg::CEndlessUsbToolDlg(UINT globalMessage, CWnd* pParent /*=NULL
     m_localeToPersonality[RUFUS_LOCALE_FR] = PERSONALITY_FRENCH;
     m_localeToPersonality[RUFUS_LOCALE_ZH_CN] = PERSONALITY_CHINESE;
     m_localeToPersonality[RUFUS_LOCALE_BN] = PERSONALITY_BENGALI;
+    m_localeToPersonality[RUFUS_LOCALE_ID] = PERSONALITY_INDONESIAN;
+    m_localeToPersonality[RUFUS_LOCALE_TH] = PERSONALITY_THAI;
+    m_localeToPersonality[RUFUS_LOCALE_VI] = PERSONALITY_VIETNAMESE;
 
-    m_localeToPersonality[RUFUS_LOCALE_ID] = PERSONALITY_SOUTHEAST_ASIA;
-    m_localeToPersonality[RUFUS_LOCALE_TH] = PERSONALITY_SOUTHEAST_ASIA;
-    m_localeToPersonality[RUFUS_LOCALE_VI] = PERSONALITY_SOUTHEAST_ASIA;
-    m_localeToDisplayPersonality[RUFUS_LOCALE_ID] = PERSONALITY_INDONESIAN;
-    m_localeToDisplayPersonality[RUFUS_LOCALE_TH] = PERSONALITY_THAI;
-    m_localeToDisplayPersonality[RUFUS_LOCALE_VI] = PERSONALITY_VIETNAMESE;
+    m_seaPersonalities.AddTail(PERSONALITY_INDONESIAN);
+    m_seaPersonalities.AddTail(PERSONALITY_THAI);
+    m_seaPersonalities.AddTail(PERSONALITY_VIETNAMESE);
 
     m_localeToIniLocale[RUFUS_LOCALE_EN] = INI_LOCALE_EN;
     m_localeToIniLocale[RUFUS_LOCALE_ES] = INI_LOCALE_ES;
@@ -2782,14 +2776,6 @@ void CEndlessUsbToolDlg::GetPreferredPersonality(CString & personality)
     }
 }
 
-void CEndlessUsbToolDlg::GetPreferredDisplayPersonality(CString & personality)
-{
-    if (!m_localeToDisplayPersonality.Lookup(m_selectedLocale->txt[0], personality)) {
-        GetPreferredPersonality(personality);
-    }
-}
-
-
 void CEndlessUsbToolDlg::AddDownloadOptionsToUI()
 {
     CString languagePersonalty;
@@ -2806,6 +2792,11 @@ void CEndlessUsbToolDlg::AddDownloadOptionsToUI()
     for (POSITION pos = m_remoteImages.GetHeadPosition(); pos != NULL; ) {
         RemoteImageEntry_t imageEntry = m_remoteImages.GetNext(pos);
         bool matchesLanguage = languagePersonalty == imageEntry.personality;
+
+        if (!matchesLanguage && imageEntry.personality == PERSONALITY_SOUTHEAST_ASIA) {
+            /* Assume that if there's a sea image, there aren't language-specific images. */
+            matchesLanguage = m_seaPersonalities.Find(languagePersonalty) != NULL;
+        }
 
         // Create display name for advanced-mode dropdown list
         CString displayName;
@@ -4100,15 +4091,17 @@ DWORD CALLBACK CEndlessUsbToolDlg::CopyProgressRoutine(
 const CString CEndlessUsbToolDlg::LocalizePersonalityName(const CString &personality)
 {
     uint32_t msgId;
-    CString localePersonality;
-
-    GetPreferredDisplayPersonality(localePersonality);
 
     if (personality == PERSONALITY_SOUTHEAST_ASIA) {
-        size_t i;
+        CString localePersonality;
         CString seaName;
-        for (i = 0; i < ARRAYSIZE(seaVirtualPersonalities); i++) {
-            auto p = seaVirtualPersonalities[i];
+        POSITION pos;
+
+        GetPreferredPersonality(localePersonality);
+
+        pos = m_seaPersonalities.GetHeadPosition();
+        while (pos) {
+            auto p = m_seaPersonalities.GetNext(pos);
             if (m_personalityToLocaleMsg.Lookup(p, msgId)) {
                 auto m = UTF8ToCString(lmprintf(msgId));
 
