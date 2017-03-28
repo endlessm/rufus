@@ -5,14 +5,15 @@
 # Translators:
 # Hartono <hartono.s10@gmail.com>, 2017
 # Roddy Shuler <roddy@endlessm.com>, 2016
+# Septira Taruna <septira@endlessm.com>, 2017
 # Will Thompson <wjt@endlessm.com>, 2017
 msgid ""
 msgstr ""
 "Project-Id-Version: rufus\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-03-08 02:28+0000\n"
-"PO-Revision-Date: 2017-03-03 22:00+0000\n"
-"Last-Translator: Will Thompson <wjt@endlessm.com>\n"
+"PO-Revision-Date: 2017-03-24 04:16+0000\n"
+"Last-Translator: Septira Taruna <septira@endlessm.com>\n"
 "Language-Team: Indonesian (http://www.transifex.com/endless-mobile-inc/rufus/language/id/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -95,18 +96,18 @@ msgstr "Unduh EOS Dasar"
 
 msgctxt "FullVersionText"
 msgid "FULL"
-msgstr "PENUH"
+msgstr "LENGKAP"
 
 msgctxt "FullDownloadDescription"
 msgid ""
 "Includes full Endless OS, preloaded with more than 100 apps and content. "
 "This version is ideal for computers without reliable internet access. Choose"
 " language for content and apps:"
-msgstr "Termasuk Endless OS penuh, dilengkapi dengan lebih dari 100 aplikasi dan konten. Versi ini cocok untuk komputer tanpa akses internet yang tidak stabil. Pilih bahasa untuk konten dan aplikasi:"
+msgstr "Termasuk Endless OS yang telah dilengkapi dengan lebih dari 100 aplikasi dan konten. Versi ini cocok untuk komputer tanpa akses internet yang stabil. Pilih bahasa untuk konten dan aplikasi:"
 
 msgctxt "DownloadFullButton"
 msgid "Download EOS Full"
-msgstr "Unduh EOS Full"
+msgstr "Unduh EOS Lengkap"
 
 msgctxt "SelectUSBPreviousButton"
 msgid "Previous"
@@ -406,7 +407,7 @@ msgstr "%s/%s Unduhan"
 #, c-format
 msgctxt "MSG_316"
 msgid "Full"
-msgstr "Full"
+msgstr "Lengkap"
 
 #, c-format
 msgctxt "MSG_319"
