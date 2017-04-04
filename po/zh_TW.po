@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: rufus\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-03-08 02:28+0000\n"
-"PO-Revision-Date: 2017-03-04 04:49+0000\n"
+"PO-Revision-Date: 2017-03-28 03:54+0000\n"
 "Last-Translator: endlessmobile_build <philip@endlessm.com>\n"
 "Language-Team: Chinese (Taiwan) (http://www.transifex.com/endless-mobile-inc/rufus/language/zh_TW/)\n"
 "MIME-Version: 1.0\n"
@@ -344,11 +344,6 @@ msgstr "下載檔案時發生錯誤。"
 msgctxt "MSG_302"
 msgid "%s of %s (%s/s)"
 msgstr "%s 之 %s（%s 每秒）"
-
-#, c-format
-msgctxt "MSG_303"
-msgid "Something is wrong with your Endless OS file."
-msgstr "您的 Endless OS 檔案發生錯誤。"
 
 #, c-format
 msgctxt "MSG_304"

@@ -11,7 +11,7 @@ msgstr ""
 "Project-Id-Version: rufus\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-03-08 02:28+0000\n"
-"PO-Revision-Date: 2017-02-21 04:37+0000\n"
+"PO-Revision-Date: 2017-03-28 03:54+0000\n"
 "Last-Translator: endlessmobile_build <philip@endlessm.com>\n"
 "Language-Team: Bengali (http://www.transifex.com/endless-mobile-inc/rufus/language/bn/)\n"
 "MIME-Version: 1.0\n"
@@ -347,11 +347,6 @@ msgstr "ফাইল ডাউনলোপ করতে ভুল হয়েছ�
 msgctxt "MSG_302"
 msgid "%s of %s (%s/s)"
 msgstr "%s (%s/s) এর %s"
-
-#, c-format
-msgctxt "MSG_303"
-msgid "Something is wrong with your Endless OS file."
-msgstr "আপনার এন্ডলেস OS ফাইলসমূহে কোন সমস্যা হয়েছে।"
 
 #, c-format
 msgctxt "MSG_304"

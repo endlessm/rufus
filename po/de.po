@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: rufus\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-03-08 02:28+0000\n"
-"PO-Revision-Date: 2017-02-21 04:37+0000\n"
+"PO-Revision-Date: 2017-03-28 03:54+0000\n"
 "Last-Translator: endlessmobile_build <philip@endlessm.com>\n"
 "Language-Team: German (http://www.transifex.com/endless-mobile-inc/rufus/language/de/)\n"
 "MIME-Version: 1.0\n"
@@ -345,11 +345,6 @@ msgstr "Fehler beim Herunterladen."
 msgctxt "MSG_302"
 msgid "%s of %s (%s/s)"
 msgstr "%s of %s (%s/s)"
-
-#, c-format
-msgctxt "MSG_303"
-msgid "Something is wrong with your Endless OS file."
-msgstr "Die Endless-OS-Datei ist beschädigt."
 
 #, c-format
 msgctxt "MSG_304"

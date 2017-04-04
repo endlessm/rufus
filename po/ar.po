@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: rufus\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-03-08 02:28+0000\n"
-"PO-Revision-Date: 2017-03-03 22:10+0000\n"
+"PO-Revision-Date: 2017-03-28 03:54+0000\n"
 "Last-Translator: endlessmobile_build <philip@endlessm.com>\n"
 "Language-Team: Arabic (http://www.transifex.com/endless-mobile-inc/rufus/language/ar/)\n"
 "MIME-Version: 1.0\n"
@@ -345,11 +345,6 @@ msgstr "حدث خطأ أثناء تنزيل الملف."
 msgctxt "MSG_302"
 msgid "%s of %s (%s/s)"
 msgstr "%s من %s (%s/s)"
-
-#, c-format
-msgctxt "MSG_303"
-msgid "Something is wrong with your Endless OS file."
-msgstr "هناك خطأ ما في ملف Endless OS الخاص بك."
 
 #, c-format
 msgctxt "MSG_304"
