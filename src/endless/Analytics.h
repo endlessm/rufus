@@ -18,6 +18,7 @@ public:
 	void exceptionTracking(const CString &description, BOOL fatal);
 
 	void setLanguage(const CString &language);
+	void setManufacturerModel(const CString &manufacturer, const CString &model);
 
 private:
 	void sendRequest(const CString &body, BOOL lastRequest = FALSE);
@@ -32,6 +33,8 @@ private:
 	CString m_clientId;
 	BOOL m_disabled;
 	CString m_language;
+	CString m_manufacturer;
+	CString m_model;
 	CString m_windowsVersion;
 	CWinThread *m_workerThread;
 };

@@ -849,6 +849,12 @@ BOOL CEndlessUsbToolDlg::OnInitDialog()
 
     SetWindowTextW(L"");
 
+    // set up manufacturer/model dimensions before further interacting with Analytics
+    CString manufacturer, model;
+    IFFALSE_PRINTERROR(GetMachineInfo(manufacturer, model), "Couldn't query manufacturer & model");
+    uprintf("System manufacturer: %ls; Model: %ls", manufacturer, model);
+    Analytics::instance()->setManufacturerModel(manufacturer, model);
+
     Analytics::instance()->startSession();
     TrackEvent(_T("IEVersion"), m_ieVersion);
 
@@ -2019,10 +2025,6 @@ HRESULT CEndlessUsbToolDlg::OnInstallDualBootClicked(IHTMLElement* pElement)
 	BOOL x64BitSupported = Has64BitSupport() ? TRUE : FALSE;
 	uprintf("HW processor has 64 bit support: %s", x64BitSupported ? "YES" : "NO");
 
-	CString manufacturer, model;
-	IFFALSE_PRINTERROR(GetMachineInfo(manufacturer, model), "Couldn't query manufacturer & model");
-	uprintf("System manufacturer: %ls; Model: %ls", manufacturer, model);
-
 	BOOL isBitLockerEnabled = IsBitlockedDrive(systemDriveLetter.Left(2));
 	uprintf("Is BitLocker/device encryption enabled on '%ls': %s", systemDriveLetter, isBitLockerEnabled ? "YES" : "NO");
 
@@ -2039,8 +2041,6 @@ HRESULT CEndlessUsbToolDlg::OnInstallDualBootClicked(IHTMLElement* pElement)
 	SetSelectedInstallMethod(InstallMethod_t::InstallDualBoot);
 
 	TrackEvent(L"FirmwareType", isBIOS ? L"BIOS" : L"EFI");
-	TrackEvent(L"Manufacturer", manufacturer);
-	TrackEvent(L"Model", model);
 
 	if (!x64BitSupported) {
 		ErrorOccured(ErrorCauseNot64Bit);
