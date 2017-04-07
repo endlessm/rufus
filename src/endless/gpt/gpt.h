@@ -73,6 +73,7 @@ uint64_t get_eos_archive_disk_image_size(const char *filepath, int compression_t
 uint64_t get_disk_size(struct ptable *pt);
 int is_eos_gpt_valid(struct ptable *pt, BOOL isInstallerImage);
 uint8_t is_nth_flag_set(uint64_t flags, uint8_t n);
+BOOL is_eos_image_valid(const char *filepath, BOOL *booted);
 
 #ifdef DEBUG_PRINTS
 void attributes_to_ascii(const uint8_t *attr, char *s);
