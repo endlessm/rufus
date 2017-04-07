@@ -6052,12 +6052,12 @@ BOOL CEndlessUsbToolDlg::UninstallDualBoot(CEndlessUsbToolDlg *dlg)
 	const char *espMountLetter = NULL;
 	CString exePath = GetExePath();
 
+	IFFALSE_GOTOERROR(hPhysical != INVALID_HANDLE_VALUE, "Error on acquiring disk handle.");
+
 	if (IsLegacyBIOSBoot()) { // remove MBR entry
 		FAKE_FD fake_fd = { 0 };
 		FILE* fp = (FILE*)&fake_fd;
 		fake_fd._handle = (char*)hPhysical;
-
-		IFFALSE_GOTOERROR(hPhysical != INVALID_HANDLE_VALUE, "Error on acquiring disk handle.");
 
 		IFTRUE_GOTO(IsWindowsMBR(fp, systemDriveLetter), "Windows MBR detected so skipping MBR writing", done_with_mbr);
 		if (!CEndlessUsbToolApp::m_enableOverwriteMbr && !IsEndlessMBR(fp, endlessFilesPath)) {
