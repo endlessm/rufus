@@ -6083,7 +6083,10 @@ BOOL CEndlessUsbToolDlg::UninstallDualBoot(CEndlessUsbToolDlg *dlg)
 	} else { // remove EFI entry
 		CString windowsEspDriveLetter;
 		IFFALSE_PRINTERROR(EFIRequireNeededPrivileges(), "Error on EFIRequireNeededPrivileges.");
-		IFFALSE_PRINTERROR(EFIRemoveEntry(ENDLESS_OS_NAME), "Error on EFIRemoveEntry, continuing with uninstall anyway.");
+
+		bool found_boot_entry;
+		IFFALSE_PRINTERROR(EFIRemoveEntry(ENDLESS_OS_NAME, found_boot_entry), "Error on EFIRemoveEntry, continuing with uninstall anyway.");
+		dlg->TrackEvent(_T("FoundBootEntry"), found_boot_entry ? _T("True") : _T("False"));
 
 		IFFALSE_GOTOERROR(MountESPFromDrive(hPhysical, &espMountLetter, systemDriveLetter), "Error on MountESPFromDrive");
 		windowsEspDriveLetter = UTF8ToCString(espMountLetter);

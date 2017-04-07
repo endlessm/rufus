@@ -479,7 +479,7 @@ error:
 	return retResult;
 }
 
-bool EFIRemoveEntry(wchar_t *desc) {
+bool EFIRemoveEntry(wchar_t *desc, bool &found_entry) {
 	FUNCTION_ENTER;
 
 	wchar_t varname[9];
@@ -489,8 +489,10 @@ bool EFIRemoveEntry(wchar_t *desc) {
 	uprintf("=== Current boot configuration ===");
 	print_entries();
 
+	found_entry = false;
 	target = EFIGetBootEntryNumber(desc, false);
 	IFFALSE_RETURN_VALUE(target != -1, "Failed to find EFI entry for Endless OS", false);
+	found_entry = true;
 
 	swprintf(varname, sizeof(varname), UEFI_VAR_BOOT_ENTRY_FORMAT, target);
 	/* Writing a zero length variable deletes it */
