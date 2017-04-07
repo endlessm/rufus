@@ -291,6 +291,11 @@ void Analytics::setManufacturerModel(const CString &manufacturer, const CString 
 	urlEncode(model, m_model);
 }
 
+void Analytics::setFirmware(const CString &firmware)
+{
+	urlEncode(firmware, m_firmware);
+}
+
 void Analytics::sendRequest(const CString &body, BOOL lastRequest)
 {
 	FUNCTION_ENTER;
@@ -356,4 +361,7 @@ void Analytics::prefixId(CString &id)
 
 	if (m_manufacturer && m_model)
 	    id.AppendFormat(L"cd3=%s&cd4=%s&", m_manufacturer, m_model);
+
+	if (m_firmware)
+	    id.AppendFormat(L"cd5=%s&", m_firmware);
 }

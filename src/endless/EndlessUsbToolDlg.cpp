@@ -849,11 +849,14 @@ BOOL CEndlessUsbToolDlg::OnInitDialog()
 
     SetWindowTextW(L"");
 
-    // set up manufacturer/model dimensions before further interacting with Analytics
+    // set up manufacturer/model and firmware dimensions before further interacting with Analytics
     CString manufacturer, model;
     IFFALSE_PRINTERROR(GetMachineInfo(manufacturer, model), "Couldn't query manufacturer & model");
     uprintf("System manufacturer: %ls; Model: %ls", manufacturer, model);
     Analytics::instance()->setManufacturerModel(manufacturer, model);
+
+    auto isBIOS = IsLegacyBIOSBoot();
+    Analytics::instance()->setFirmware(isBIOS ? L"BIOS" : L"EFI");
 
     Analytics::instance()->startSession();
     TrackEvent(_T("IEVersion"), m_ieVersion);
@@ -2039,8 +2042,6 @@ HRESULT CEndlessUsbToolDlg::OnInstallDualBootClicked(IHTMLElement* pElement)
 	}
 
 	SetSelectedInstallMethod(InstallMethod_t::InstallDualBoot);
-
-	TrackEvent(L"FirmwareType", isBIOS ? L"BIOS" : L"EFI");
 
 	if (!x64BitSupported) {
 		ErrorOccured(ErrorCauseNot64Bit);
