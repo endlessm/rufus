@@ -6049,9 +6049,11 @@ BOOL CEndlessUsbToolDlg::UninstallDualBoot(CEndlessUsbToolDlg *dlg)
 
 	CString systemDriveLetter = GetSystemDrive();
 	CString endlessFilesPath = systemDriveLetter + PATH_ENDLESS_SUBDIRECTORY;
+	CStringA endlessImgPath = ConvertUnicodeToUTF8(endlessFilesPath + ENDLESS_IMG_FILE_NAME);
 	HANDLE hPhysical = GetPhysicalFromDriveLetter(systemDriveLetter);
 	const char *espMountLetter = NULL;
 	CString exePath = GetExePath();
+	CString image_state;
 
 	IFFALSE_GOTOERROR(hPhysical != INVALID_HANDLE_VALUE, "Error on acquiring disk handle.");
 
@@ -6111,8 +6113,19 @@ done_with_mbr:
 	} while (FALSE);
 
 
-	// remove <SYSDRIVE>:\Endless
+	// remove <SYSDRIVE>:\Endless after checking whether image is present and has been booted
 	IFFALSE_PRINTERROR(ChangeAccessPermissions(endlessFilesPath, false), "Error on granting Endless files permissions.");
+
+	image_state = L"Invalid";
+	BOOL booted;
+	if (is_eos_image_valid (endlessImgPath, &booted)) {
+		if (booted)
+			image_state = L"Booted";
+		else
+			image_state = L"Unbooted";
+	}
+	dlg->TrackEvent(L"ImageState", image_state);
+
 	uprintf("exePath=%ls, endless=%ls", exePath, endlessFilesPath);
 	DelayDeleteFolder(endlessFilesPath);
 
