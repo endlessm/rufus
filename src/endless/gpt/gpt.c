@@ -159,7 +159,7 @@ uint64_t get_disk_size(struct ptable *pt)
 // compression_type: an element of bled_compression_type
 uint64_t get_eos_archive_disk_image_size(const char *filepath, int compression_type, BOOL isInstallerImage)
 {
-    int64_t bytes_read;
+    int64_t bytes_read = 0;
     int64_t result = 0;
     struct ptable pt;
     const int size = sizeof(pt); // should be 2048
