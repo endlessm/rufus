@@ -456,6 +456,8 @@ private:
 	void UpdateDualBootTexts();
 	void QueryAndDoUninstall();
 	static bool IsEndlessMBR(FILE* fp, const CString &systemDriveLetter);
+	static bool UninstallEndlessMBR(const CString &systemDriveLetter, const CString &endlessFilesPath, HANDLE hPhysical, ErrorCause &cause);
+	static bool UninstallEndlessEFI(const CString &systemDriveLetter, HANDLE hPhysical, bool &found_boot_entry);
 	static bool RestoreOriginalBoottrack(const CString &endlessPath, HANDLE hPhysical, FILE *fp);
 
 	CComBSTR GetDownloadString(const RemoteImageEntry &imageEntry);

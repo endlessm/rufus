@@ -6051,6 +6051,55 @@ error:
 	return retResult;
 }
 
+bool CEndlessUsbToolDlg::UninstallEndlessMBR(const CString & systemDriveLetter, const CString & endlessFilesPath, HANDLE hPhysical, ErrorCause & cause)
+{
+    FAKE_FD fake_fd = { 0 };
+    FILE* fp = (FILE*)&fake_fd;
+    fake_fd._handle = (char*)hPhysical;
+
+    IFTRUE_RETURN_VALUE(IsWindowsMBR(fp, systemDriveLetter), "Windows MBR detected so skipping MBR writing", true);
+    if (!CEndlessUsbToolApp::m_enableOverwriteMbr && !IsEndlessMBR(fp, endlessFilesPath)) {
+        cause = ErrorCause_t::ErrorCauseNonEndlessMBR;
+        return false;
+    }
+
+    // restore boottrack.img if present and use embedded grub only as fallback
+    IFTRUE_RETURN_VALUE(RestoreOriginalBoottrack(endlessFilesPath, hPhysical, fp), "Success on restoring original boottrack", true);
+    uprintf("Failure on restoring original boottrack, falling back to embedded MBRs.");
+
+    if (nWindowsVersion >= WINDOWS_7) {
+        IFFALSE_RETURN_VALUE(write_win7_mbr(fp), "Error on write_win7_mbr", false);
+    } else if(nWindowsVersion == WINDOWS_VISTA) {
+        IFFALSE_RETURN_VALUE(write_vista_mbr(fp), "Error on write_vista_mbr", false);
+    } else if (nWindowsVersion == WINDOWS_2003 || nWindowsVersion == WINDOWS_XP) {
+        IFFALSE_RETURN_VALUE(write_2000_mbr(fp), "Error on write_2000_mbr", false);
+    } else {
+        uprintf("Restore MBR not supported for this windows version '%s', ver %d", WindowsVersionStr, nWindowsVersion);
+        return false;
+    }
+
+    return true;
+}
+
+bool CEndlessUsbToolDlg::UninstallEndlessEFI(const CString & systemDriveLetter, HANDLE hPhysical, bool & found_boot_entry)
+{
+    IFFALSE_PRINTERROR(EFIRequireNeededPrivileges(), "Error on EFIRequireNeededPrivileges.");
+
+    IFFALSE_PRINTERROR(EFIRemoveEntry(ENDLESS_OS_NAME, found_boot_entry), "Error on EFIRemoveEntry, continuing with uninstall anyway.");
+
+    const char *espMountLetter = NULL;
+    IFFALSE_RETURN_VALUE(MountESPFromDrive(hPhysical, &espMountLetter, systemDriveLetter), "Error on MountESPFromDrive", false);
+    CString windowsEspDriveLetter = UTF8ToCString(espMountLetter);
+
+    RemoveNonEmptyDirectory(windowsEspDriveLetter + L"\\" + ENDLESS_BOOT_SUBDIRECTORY);
+
+    if (espMountLetter != NULL) {
+        AltUnmountVolume(espMountLetter);
+    }
+
+    return true;
+}
+
 BOOL CEndlessUsbToolDlg::UninstallDualBoot(CEndlessUsbToolDlg *dlg)
 {
 	FUNCTION_ENTER;
@@ -6063,51 +6112,22 @@ BOOL CEndlessUsbToolDlg::UninstallDualBoot(CEndlessUsbToolDlg *dlg)
 	CString endlessFilesPath = systemDriveLetter + PATH_ENDLESS_SUBDIRECTORY;
 	CStringA endlessImgPath = ConvertUnicodeToUTF8(endlessFilesPath + ENDLESS_IMG_FILE_NAME);
 	HANDLE hPhysical = GetPhysicalFromDriveLetter(systemDriveLetter);
-	const char *espMountLetter = NULL;
 	CString exePath = GetExePath();
 	CString image_state;
 
 	IFFALSE_GOTOERROR(hPhysical != INVALID_HANDLE_VALUE, "Error on acquiring disk handle.");
 
 	if (IsLegacyBIOSBoot()) { // remove MBR entry
-		FAKE_FD fake_fd = { 0 };
-		FILE* fp = (FILE*)&fake_fd;
-		fake_fd._handle = (char*)hPhysical;
-
-		IFTRUE_GOTO(IsWindowsMBR(fp, systemDriveLetter), "Windows MBR detected so skipping MBR writing", done_with_mbr);
-		if (!CEndlessUsbToolApp::m_enableOverwriteMbr && !IsEndlessMBR(fp, endlessFilesPath)) {
-			dlg->m_lastErrorCause = ErrorCause_t::ErrorCauseNonEndlessMBR;
-			goto error;
-		}
-
-		// restore boottrack.img if present and use embedded grub only as fallback
-		IFTRUE_GOTO(RestoreOriginalBoottrack(endlessFilesPath, hPhysical, fp), "Success on restoring original boottrack", done_with_mbr);
-		uprintf("Failure on restoring original boottrack, falling back to embedded MBRs.");
-
-		if (nWindowsVersion >= WINDOWS_7) {
-			IFFALSE_GOTOERROR(write_win7_mbr(fp), "Error on write_win7_mbr");
-		} else if(nWindowsVersion == WINDOWS_VISTA) {
-			IFFALSE_GOTOERROR(write_vista_mbr(fp), "Error on write_vista_mbr");
-		} else if (nWindowsVersion == WINDOWS_2003 || nWindowsVersion == WINDOWS_XP) {
-			IFFALSE_GOTOERROR(write_2000_mbr(fp), "Error on write_2000_mbr");
-		} else {
-			uprintf("Restore MBR not supported for this windows version '%s', ver %d", WindowsVersionStr, nWindowsVersion);
-			goto error;
-		}
+		IFFALSE_GOTOERROR(
+			UninstallEndlessMBR(systemDriveLetter, endlessFilesPath, hPhysical, dlg->m_lastErrorCause),
+			"Couldn't uninstall Endless MBR");
 	} else { // remove EFI entry
-		CString windowsEspDriveLetter;
-		IFFALSE_PRINTERROR(EFIRequireNeededPrivileges(), "Error on EFIRequireNeededPrivileges.");
-
 		bool found_boot_entry;
-		IFFALSE_PRINTERROR(EFIRemoveEntry(ENDLESS_OS_NAME, found_boot_entry), "Error on EFIRemoveEntry, continuing with uninstall anyway.");
+		bool ret = UninstallEndlessEFI(systemDriveLetter, hPhysical, found_boot_entry);
 		dlg->TrackEvent(_T("FoundBootEntry"), found_boot_entry ? _T("True") : _T("False"));
-
-		IFFALSE_GOTOERROR(MountESPFromDrive(hPhysical, &espMountLetter, systemDriveLetter), "Error on MountESPFromDrive");
-		windowsEspDriveLetter = UTF8ToCString(espMountLetter);
-		RemoveNonEmptyDirectory(windowsEspDriveLetter + L"\\" + ENDLESS_BOOT_SUBDIRECTORY);
+		IFFALSE_GOTOERROR(ret, "UninstallEndlessEFI failed");
 	}
 
-done_with_mbr:
 	// restore the registry key for Windows clock in UTC
 	IFFALSE_PRINTERROR(ResetEndlessRegistryKey(HKEY_LOCAL_MACHINE, REGKEY_UTC_TIME_PATH, REGKEY_UTC_TIME), "Error on restoring Windows clock to UTC.");
 
@@ -6148,7 +6168,6 @@ done_with_mbr:
 
 error:
 	safe_closehandle(hPhysical);
-	if (espMountLetter != NULL) AltUnmountVolume(espMountLetter);
 
 	AfxMessageBox(UTF8ToCString(lmprintf(popupMsgId)), popupStyle);
 
@@ -6490,6 +6509,8 @@ error:
 
 bool CEndlessUsbToolDlg::RestoreOriginalBoottrack(const CString &endlessPath, HANDLE hPhysical, FILE *fp)
 {
+	FUNCTION_ENTER;
+
 	bool retResult = false;
 	DWORD size;
 	BYTE geometry[256] = { 0 };
