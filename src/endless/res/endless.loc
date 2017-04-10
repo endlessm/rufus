@@ -262,7 +262,7 @@ t MSG_334 "There isn’t enough disk space for downloading Endless OS. Please fr
 t MSG_303 "There isn’t enough disk space for downloading Endless Code. Please free up %s and click \"Resume\" to start downloading."
 
 t MSG_335 "The selected version of Endless OS requires %s of free disk space, but only %s is available. Please free up some space on drive %s to continue."
-t MSG_374 "The selected version of Endless Code requires %s of free disk space, but only %s is available. Please free up som space on drive %s to continue."
+t MSG_374 "The selected version of Endless Code requires %s of free disk space, but only %s is available. Please free up some space on drive %s to continue."
 t MSG_336 "Delete the invalid file (%s)."
 
 t MSG_337 "For Endless OS %s, we recommend selecting at least %s of storage space."
