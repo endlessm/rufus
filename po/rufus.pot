@@ -250,6 +250,7 @@ msgctxt "USBLearnMore"
 msgid "Learn more about the Endless USB Stick"
 msgstr ""
 
+#. *Short* size names. These can be used as suffixes
 msgctxt "MSG_020"
 msgid "bytes"
 msgstr ""
@@ -284,6 +285,7 @@ msgctxt "MSG_046"
 msgid "%s (Disk %d) [%s]"
 msgstr ""
 
+#. Used when a drive is detected that contains more than one partition
 #, c-format
 msgctxt "MSG_047"
 msgid "Multiple Partitions"
