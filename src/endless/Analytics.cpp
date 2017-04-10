@@ -285,6 +285,17 @@ void Analytics::setLanguage(const CString &language)
 	m_language = language;
 }
 
+void Analytics::setManufacturerModel(const CString &manufacturer, const CString &model)
+{
+	urlEncode(manufacturer, m_manufacturer);
+	urlEncode(model, m_model);
+}
+
+void Analytics::setFirmware(const CString &firmware)
+{
+	urlEncode(firmware, m_firmware);
+}
+
 void Analytics::sendRequest(const CString &body, BOOL lastRequest)
 {
 	FUNCTION_ENTER;
@@ -347,4 +358,10 @@ void Analytics::prefixId(CString &id)
 	id.Format(_T("v=1&tid=%s&cid=%s&an=Endless%%20Installer&av=%s&ul=%s&cd1=%s&cd2=%s&"),
 		m_trackingId, m_clientId, _T(RELEASE_VER_STR), m_language, m_windowsVersion,
 		CEndlessUsbToolDlg::IsCoding() ? L"code" : L"eos");
+
+	if (m_manufacturer && m_model)
+	    id.AppendFormat(L"cd3=%s&cd4=%s&", m_manufacturer, m_model);
+
+	if (m_firmware)
+	    id.AppendFormat(L"cd5=%s&", m_firmware);
 }

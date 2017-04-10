@@ -849,6 +849,15 @@ BOOL CEndlessUsbToolDlg::OnInitDialog()
 
     SetWindowTextW(L"");
 
+    // set up manufacturer/model and firmware dimensions before further interacting with Analytics
+    CString manufacturer, model;
+    IFFALSE_PRINTERROR(GetMachineInfo(manufacturer, model), "Couldn't query manufacturer & model");
+    uprintf("System manufacturer: %ls; Model: %ls", manufacturer, model);
+    Analytics::instance()->setManufacturerModel(manufacturer, model);
+
+    auto isBIOS = IsLegacyBIOSBoot();
+    Analytics::instance()->setFirmware(isBIOS ? L"BIOS" : L"EFI");
+
     Analytics::instance()->startSession();
     TrackEvent(_T("IEVersion"), m_ieVersion);
 
@@ -2019,10 +2028,6 @@ HRESULT CEndlessUsbToolDlg::OnInstallDualBootClicked(IHTMLElement* pElement)
 	BOOL x64BitSupported = Has64BitSupport() ? TRUE : FALSE;
 	uprintf("HW processor has 64 bit support: %s", x64BitSupported ? "YES" : "NO");
 
-	CString manufacturer, model;
-	IFFALSE_PRINTERROR(GetMachineInfo(manufacturer, model), "Couldn't query manufacturer & model");
-	uprintf("System manufacturer: %ls; Model: %ls", manufacturer, model);
-
 	BOOL isBitLockerEnabled = IsBitlockedDrive(systemDriveLetter.Left(2));
 	uprintf("Is BitLocker/device encryption enabled on '%ls': %s", systemDriveLetter, isBitLockerEnabled ? "YES" : "NO");
 
@@ -2037,10 +2042,6 @@ HRESULT CEndlessUsbToolDlg::OnInstallDualBootClicked(IHTMLElement* pElement)
 	}
 
 	SetSelectedInstallMethod(InstallMethod_t::InstallDualBoot);
-
-	TrackEvent(L"FirmwareType", isBIOS ? L"BIOS" : L"EFI");
-	TrackEvent(L"Manufacturer", manufacturer);
-	TrackEvent(L"Model", model);
 
 	if (!x64BitSupported) {
 		ErrorOccured(ErrorCauseNot64Bit);
@@ -6058,16 +6059,18 @@ BOOL CEndlessUsbToolDlg::UninstallDualBoot(CEndlessUsbToolDlg *dlg)
 
 	CString systemDriveLetter = GetSystemDrive();
 	CString endlessFilesPath = systemDriveLetter + PATH_ENDLESS_SUBDIRECTORY;
+	CStringA endlessImgPath = ConvertUnicodeToUTF8(endlessFilesPath + ENDLESS_IMG_FILE_NAME);
 	HANDLE hPhysical = GetPhysicalFromDriveLetter(systemDriveLetter);
 	const char *espMountLetter = NULL;
 	CString exePath = GetExePath();
+	CString image_state;
+
+	IFFALSE_GOTOERROR(hPhysical != INVALID_HANDLE_VALUE, "Error on acquiring disk handle.");
 
 	if (IsLegacyBIOSBoot()) { // remove MBR entry
 		FAKE_FD fake_fd = { 0 };
 		FILE* fp = (FILE*)&fake_fd;
 		fake_fd._handle = (char*)hPhysical;
-
-		IFFALSE_GOTOERROR(hPhysical != INVALID_HANDLE_VALUE, "Error on acquiring disk handle.");
 
 		IFTRUE_GOTO(IsWindowsMBR(fp, systemDriveLetter), "Windows MBR detected so skipping MBR writing", done_with_mbr);
 		if (!CEndlessUsbToolApp::m_enableOverwriteMbr && !IsEndlessMBR(fp, endlessFilesPath)) {
@@ -6092,7 +6095,10 @@ BOOL CEndlessUsbToolDlg::UninstallDualBoot(CEndlessUsbToolDlg *dlg)
 	} else { // remove EFI entry
 		CString windowsEspDriveLetter;
 		IFFALSE_PRINTERROR(EFIRequireNeededPrivileges(), "Error on EFIRequireNeededPrivileges.");
-		IFFALSE_PRINTERROR(EFIRemoveEntry(ENDLESS_OS_NAME), "Error on EFIRemoveEntry, continuing with uninstall anyway.");
+
+		bool found_boot_entry;
+		IFFALSE_PRINTERROR(EFIRemoveEntry(ENDLESS_OS_NAME, found_boot_entry), "Error on EFIRemoveEntry, continuing with uninstall anyway.");
+		dlg->TrackEvent(_T("FoundBootEntry"), found_boot_entry ? _T("True") : _T("False"));
 
 		IFFALSE_GOTOERROR(MountESPFromDrive(hPhysical, &espMountLetter, systemDriveLetter), "Error on MountESPFromDrive");
 		windowsEspDriveLetter = UTF8ToCString(espMountLetter);
@@ -6117,8 +6123,19 @@ done_with_mbr:
 	} while (FALSE);
 
 
-	// remove <SYSDRIVE>:\Endless
+	// remove <SYSDRIVE>:\Endless after checking whether image is present and has been booted
 	IFFALSE_PRINTERROR(ChangeAccessPermissions(endlessFilesPath, false), "Error on granting Endless files permissions.");
+
+	image_state = L"Invalid";
+	BOOL booted;
+	if (is_eos_image_valid (endlessImgPath, &booted)) {
+		if (booted)
+			image_state = L"Booted";
+		else
+			image_state = L"Unbooted";
+	}
+	dlg->TrackEvent(L"ImageState", image_state);
+
 	uprintf("exePath=%ls, endless=%ls", exePath, endlessFilesPath);
 	DelayDeleteFolder(endlessFilesPath);
 

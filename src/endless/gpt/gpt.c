@@ -159,7 +159,7 @@ uint64_t get_disk_size(struct ptable *pt)
 // compression_type: an element of bled_compression_type
 uint64_t get_eos_archive_disk_image_size(const char *filepath, int compression_type, BOOL isInstallerImage)
 {
-    int64_t bytes_read;
+    int64_t bytes_read = 0;
     int64_t result = 0;
     struct ptable pt;
     const int size = sizeof(pt); // should be 2048
@@ -194,6 +194,52 @@ uint64_t get_eos_archive_disk_image_size(const char *filepath, int compression_t
     }
 
     return get_disk_size(&pt);
+}
+
+
+/**
+* Checks an image file for a valid Endless OS GPT
+* returns 1 if the GPT is valid, 0 otherwise
+* if provided, also sets *booted to indicate whether the OS has been booted
+**/
+BOOL is_eos_image_valid(const char *filepath, BOOL *booted)
+{
+    int64_t bytes_read = 0;
+    struct ptable pt;
+    const int size = sizeof(pt); // should be 2048
+    FILE *file = NULL;
+
+    if (filepath == NULL)
+        return FALSE;
+
+    errno_t err = fopen_s(&file, filepath, "rb");
+    if (err == 0) {
+        // The 'size' and 'count' arguments are "backwards" because this
+        // function returns the number of items read; by making the item
+        // size 1 we get the number of bytes
+        bytes_read = fread((void *)&pt, 1, size, file);
+        fclose(file);
+    } else {
+        uprintf("Error opening %s: %d", filepath, err);
+    }
+
+    // not enough bytes read
+    if (bytes_read < size)
+        return FALSE;
+
+    // setting isInstallerImage to TRUE bypasses the check for GUID:55 which
+    // is cleared by eos-repartition on the first boot - so this tells us
+    // whether the file is a valid Endless image regardless of whether its
+    // booted or not
+    if (!is_eos_gpt_valid(&pt, TRUE))
+        return FALSE;
+
+    // now we check a 2nd time, but we enable the GUID:55 check which
+    // essentially means we're testing for whether it's an unbooted image
+    if (booted != NULL)
+        *booted = !is_eos_gpt_valid(&pt, FALSE);
+
+    return TRUE;
 }
 
 
