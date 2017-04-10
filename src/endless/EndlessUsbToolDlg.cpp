@@ -1549,6 +1549,8 @@ void CEndlessUsbToolDlg::LoadLocalizationData()
 	if (get_loc_data_file(m_localizationFile, m_selectedLocale))
 		uprintf("Save locale to settings?");
 
+	Analytics::instance()->setLanguage(CString(m_selectedLocale->txt[0]));
+
 	return;
 
 error:
