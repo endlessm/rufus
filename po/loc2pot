@@ -44,6 +44,8 @@ with open(LOC_FILE, 'r', encoding='utf-8') as loc_file, \
     pot_file.write(PREAMBLE)
     found = False
     in_debug_block = False
+    comments = []
+
     for line in loc_file:
         if line.startswith('g'):
             # We found the last line before the start of strings
@@ -72,6 +74,13 @@ with open(LOC_FILE, 'r', encoding='utf-8') as loc_file, \
                 # Close the previously found string
                 pot_file.write('msgstr ""\n')
             pot_file.write('\n')
+
+            for comment in comments:
+                pot_file.write('#. {}\n'.format(comment))
+            comments = []
+
+            # TODO: find source locations for this string?
+
             if is_c_format_string(label):
                 pot_file.write('#, c-format\n')
             # Note the use of context rather than comments
@@ -86,6 +95,8 @@ with open(LOC_FILE, 'r', encoding='utf-8') as loc_file, \
             # This is the start of debug messages
             # Exclude until the end marker
             in_debug_block = True
+        elif line.startswith('#'):
+            comments.append(line[1:].strip())
             
     if found:
         # Close the last found string

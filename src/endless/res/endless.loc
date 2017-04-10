@@ -181,6 +181,10 @@ t MSG_024 "Tb"
 t MSG_025 "Pb"
 
 t MSG_045 "USB Storage Device (Generic)"
+# Used for USB drives that don't have a drive letter. Placeholders are:
+# 1. a name for the disk (such as "SanDisk Ultra")
+# 2. the disk number (normally a low number like 2 or 3)
+# 3. the disk's size (such as "16 Gb")
 t MSG_046 "%s (Disk %d) [%s]"
 # Used when a drive is detected that contains more than one partition
 t MSG_047 "Multiple Partitions"
@@ -213,9 +217,17 @@ t MSG_261 "Writing image: %0.1f%% completed"
 # END NO NEED TO TRANSLATE
 
 t MSG_300 "Error downloading file."
+# Download progress. Placeholders:
+# 1. size downloaded (such as 1.2Gb)
+# 2. total size (such as 11.6Gb)
+# 3. download speed (such as 100Mb/s, except the "/s" is part of this string, not the placeholder)
 t MSG_302 "%s of %s (%s/s)"
 t MSG_304 "Downloading"
+# Displayed alongside MSG_306. Placeholders:
+# 1. the step number (typically 1, 2 or 3)
 t MSG_305 "Step %d"
+# Displayed alongside MSG_305. Placeholders:
+# 1. the number of steps (typically 2 or 3)
 t MSG_306 "of %d:"
 t MSG_307 "No Label"
 t MSG_309 "Installing"
@@ -238,19 +250,27 @@ t MSG_321 "Select Your Endless OS Version"
 t MSG_373 "Select Your Endless Code Version"
 t MSG_322 "Is this the version you’d like to use? If not, select another."
 
+# The string in quotes should match MSG_326
 t MSG_323 "We couldn’t finish getting Endless OS. Check your internet connection and click \"Resume\" to carry on downloading."
 t MSG_382 "We couldn’t finish getting Endless Code. Check your internet connection and click \"Resume\" to carry on downloading."
+# The string in quotes should match MSG_327
 t MSG_324 "Something is wrong with your Endless OS file. Click \"Download Again\" to try downloading it again."
 t MSG_383 "Something is wrong with your Endless Code file. Click \"Download Again\" to try downloading it again."
+# The string in quotes should match MSG_328
 t MSG_325 "Something went wrong writing Endless OS to your USB device. Find a different device and click \"Try Again\"."
 t MSG_384 "Something went wrong writing Endless Code to your USB device. Find a different device and click \"Try Again\"."
 t MSG_358 "Something went wrong installing Endless OS to your computer."
 t MSG_385 "Something went wrong installing Endless Code to your computer."
 
+# This should match the string in quotes in MSG_323
 t MSG_326 "Resume"
+# This should match the string in quotes in MSG_324
 t MSG_327 "Download again"
+# This should match the string in quotes in MSG_325
 t MSG_328 "Try again"
 
+# If this FAQ is translated into your language, replace "en-us" with the right language code.
+# Otherwise, use exactly the same URL.
 t MSG_329 "https://support.endlessm.com/hc/en-us/articles/210527103"
 
 t MSG_330 "You have selected a slow USB device (USB 1.0). Please use a USB 3.0 device for the best experience."
@@ -262,7 +282,7 @@ t MSG_334 "There isn’t enough disk space for downloading Endless OS. Please fr
 t MSG_303 "There isn’t enough disk space for downloading Endless Code. Please free up %s and click \"Resume\" to start downloading."
 
 t MSG_335 "The selected version of Endless OS requires %s of free disk space, but only %s is available. Please free up some space on drive %s to continue."
-t MSG_374 "The selected version of Endless Code requires %s of free disk space, but only %s is available. Please free up som space on drive %s to continue."
+t MSG_374 "The selected version of Endless Code requires %s of free disk space, but only %s is available. Please free up some space on drive %s to continue."
 t MSG_336 "Delete the invalid file (%s)."
 
 t MSG_337 "For Endless OS %s, we recommend selecting at least %s of storage space."
@@ -270,6 +290,11 @@ t MSG_346 "For Endless Code %s, we recommend selecting at least %s of storage sp
 t MSG_338 "%s (Minimum)"
 t MSG_339 "%s (Recommended)"
 t MSG_340 "%s (Maximum)"
+# Placeholders are:
+# 1. free space on system drive
+# 2. total size of system drive
+# 3. drive letter of system drive (usually "C:")
+# eg: "You currently have 120GB free on your 400GB C: drive."
 t MSG_341 "You currently have %s free on your %s %s drive."
 t MSG_342 "Select how much of your %s drive to dedicate to Endless OS."
 t MSG_345 "Select how much of your %s drive to dedicate to Endless Code."
