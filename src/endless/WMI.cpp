@@ -9,6 +9,20 @@
 
 #pragma comment(lib, "wbemuuid.lib")
 
+static class COMThreading {
+public:
+    COMThreading() {
+        // Regardless of return value, you must balance each call to
+        // CoInitialize[Ex] with a call to CoUninitialize.
+        HRESULT hres = CoInitializeEx(0, COINIT_APARTMENTTHREADED);
+        IFFAILED_PRINTERROR(hres, "Error on CoInitializeEx");
+    }
+
+    ~COMThreading() {
+        CoUninitialize();
+    }
+};
+
 static BOOL RunWMIQuery(const CString &objectPath, const CString &query, std::function< BOOL( CComPtr<IEnumWbemClassObject> & )> callback)
 {
     FUNCTION_ENTER;
@@ -20,8 +34,7 @@ static BOOL RunWMIQuery(const CString &objectPath, const CString &query, std::fu
     CComPtr<IEnumWbemClassObject> pEnumerator;
     CString bitlockerQuery;
 
-    hres = CoInitializeEx(0, COINIT_APARTMENTTHREADED);
-    IFFALSE_PRINTERROR(SUCCEEDED(hres), "Error on CoInitializeEx.");
+    COMThreading t;
 
     hres = CoInitializeSecurity(
         NULL,
@@ -74,8 +87,6 @@ static BOOL RunWMIQuery(const CString &objectPath, const CString &query, std::fu
     retResult = callback(pEnumerator);
 
 error:
-    CoUninitialize();
-
     return retResult;
 }
 
