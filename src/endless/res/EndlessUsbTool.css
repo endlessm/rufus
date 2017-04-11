@@ -821,13 +821,20 @@ select:disabled {
 
 
 #VersionContainer {
+	position: absolute;
+	right: 0;
+	bottom: 0;
+
 	font-size: 9px;
 	text-align: right;
-	padding-right: 5px;
-	padding-top: 10px;
+	padding: 5px;
 }
 
 #VersionContainer, #VersionContainer a {
 	color: #d6d6d6;
 	text-decoration: none;
+}
+
+#VersionContainer a:hover {
+    color: #5f9ddd;
 }
