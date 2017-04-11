@@ -23,18 +23,12 @@ public:
     }
 };
 
-static BOOL RunWMIQuery(const CString &objectPath, const CString &query, std::function< BOOL( CComPtr<IEnumWbemClassObject> & )> callback)
+static HRESULT GetWMIProxy(const CString &objectPath, CComPtr<IWbemServices> &pSvc)
 {
     FUNCTION_ENTER;
 
     HRESULT hres;
-    BOOL retResult = FALSE;
     CComPtr<IWbemLocator> pLoc;
-    CComPtr<IWbemServices> pSvc;
-    CComPtr<IEnumWbemClassObject> pEnumerator;
-    CString bitlockerQuery;
-
-    COMThreading t;
 
     hres = CoInitializeSecurity(
         NULL,
@@ -47,14 +41,12 @@ static BOOL RunWMIQuery(const CString &objectPath, const CString &query, std::fu
         EOAC_NONE,                   // Additional capabilities
         NULL                         // Reserved
     );
-    IFFALSE_PRINTERROR(SUCCEEDED(hres), "Error on CoInitializeSecurity.");
+    IFFAILED_PRINTERROR(hres, "Error on CoInitializeSecurity.");
 
     // Obtain the initial locator to WMI
     hres = CoCreateInstance(CLSID_WbemLocator, 0, CLSCTX_INPROC_SERVER, IID_IWbemLocator, (LPVOID *)&pLoc);
-    IFFALSE_GOTOERROR(SUCCEEDED(hres), "Error on CoCreateInstance.");
+    IFFAILED_RETURN_RES(hres, "Error on CoCreateInstance.");
 
-    // Connect to WMI through the IWbemLocator::ConnectServer method
-    // Connect to the root\cimv2 namespace with the current user and obtain pointer pSvc to make IWbemServices calls.
     hres = pLoc->ConnectServer(
         _bstr_t(objectPath),     // Object path of WMI namespace
         NULL,                    // User name. NULL = current user
@@ -65,7 +57,7 @@ static BOOL RunWMIQuery(const CString &objectPath, const CString &query, std::fu
         0,                       // Context object
         &pSvc                    // pointer to IWbemServices proxy
     );
-    IFFALSE_GOTOERROR(SUCCEEDED(hres), "Error on pLoc->ConnectServer.");
+    IFFAILED_RETURN_RES(hres, "Error on pLoc->ConnectServer.");
 
     // Set security levels on the proxy
     hres = CoSetProxyBlanket(
@@ -78,16 +70,27 @@ static BOOL RunWMIQuery(const CString &objectPath, const CString &query, std::fu
         NULL,                        // client identity
         EOAC_NONE                    // proxy capabilities
     );
-    IFFALSE_GOTOERROR(SUCCEEDED(hres), "Error on CoSetProxyBlanket.");
+    IFFAILED_RETURN_RES(hres, "Error on CoSetProxyBlanket.");
+
+    return hres;
+}
+
+static BOOL RunWMIQuery(const CString &objectPath, const CString &query, std::function< BOOL( CComPtr<IEnumWbemClassObject> & )> callback)
+{
+    FUNCTION_ENTER;
+
+    COMThreading t;
+    HRESULT hres;
+    CComPtr<IWbemServices> pSvc;
+    CComPtr<IEnumWbemClassObject> pEnumerator;
+
+    IFFAILED_RETURN_VALUE(GetWMIProxy(objectPath, pSvc), "Couldn't get WMI proxy", FALSE);
 
     // Use the IWbemServices pointer to make requests of WMI
     hres = pSvc->ExecQuery(bstr_t("WQL"), bstr_t(query), WBEM_FLAG_FORWARD_ONLY | WBEM_RETURN_WHEN_COMPLETE, NULL, &pEnumerator);
-    IFFALSE_GOTOERROR(SUCCEEDED(hres), "Error on pSvc->ExecQuery.");
+    IFFAILED_RETURN_VALUE(hres, "Error on pSvc->ExecQuery.", FALSE);
 
-    retResult = callback(pEnumerator);
-
-error:
-    return retResult;
+    return callback(pEnumerator);
 }
 
 BOOL WMI::IsBitlockedDrive(const CString & drive)
