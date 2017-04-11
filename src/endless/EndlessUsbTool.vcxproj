@@ -299,6 +299,7 @@
     <ClInclude Include="ImageSigningKey.h" />
     <ClInclude Include="Version.h" />
     <ClInclude Include="WindowsUsbDefines.h" />
+    <ClInclude Include="WMI.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\badblocks.c">
@@ -525,6 +526,7 @@
       </ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="UEFIBootSetup.cpp" />
+    <ClCompile Include="WMI.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="GenerateVersion.ps1" />
