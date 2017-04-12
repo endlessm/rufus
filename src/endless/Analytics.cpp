@@ -333,6 +333,9 @@ void Analytics::loadUuid(CString &uuid)
 	uuid = strUuid;
 }
 
+// A fresh UUID
+#define CANT_CREATE_UUID "4855ed83-8051-4965-997c-54ee47357620"
+
 void Analytics::createUuid(CString &uuid)
 {
 	HRESULT hr;
@@ -342,7 +345,7 @@ void Analytics::createUuid(CString &uuid)
 		uuid.Format(_T("%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x"), guid.Data1, guid.Data2, guid.Data3, guid.Data4[0],
 			guid.Data4[1], guid.Data4[2], guid.Data4[3], guid.Data4[4], guid.Data4[5], guid.Data4[6], guid.Data4[7]);
 	else
-		uuid = _T("00000000-0000-4000-8000-000000000000");
+		uuid = _T(CANT_CREATE_UUID);
 }
 
 void Analytics::urlEncode(const CString &in, CString &out)
