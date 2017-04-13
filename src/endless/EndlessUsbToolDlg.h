@@ -9,6 +9,7 @@
 #include "localization.h"
 #include "DownloadManager.h"
 #include "EndlessISO.h"
+#include "Eosldr.h"
 
 typedef struct FileImageEntry {
     // Full, real path on disk
@@ -42,6 +43,7 @@ typedef struct FileImageEntry {
 } FileImageEntry_t, *pFileImageEntry_t;
 
 typedef enum ErrorCause {
+    ErrorCauseNone,
     ErrorCauseGeneric,
     ErrorCauseCancelled,
     ErrorCauseDownloadFailed,
@@ -57,7 +59,8 @@ typedef enum ErrorCause {
     ErrorCauseCantCheckMBR,
     ErrorCauseInstallFailedDiskFull,
     ErrorCauseSuspended,
-    ErrorCauseNone
+    ErrorCauseInstallEosldrFailed,
+    ErrorCauseUninstallEosldrFailed,
 } ErrorCause_t;
 
 typedef struct RemoteImageEntry {
@@ -296,6 +299,8 @@ private:
     long m_maximumUSBVersion;
 	unsigned long m_cancelImageUnpack;
 	InstallMethod_t m_selectedInstallMethod;
+
+	std::unique_ptr<EosldrInstaller> m_eosldrInstaller;
 
 	void TrackEvent(const CString &action, const CString &label = CString(), LONGLONG value = -1L);
 	void TrackEvent(const CString &action, LONGLONG value);

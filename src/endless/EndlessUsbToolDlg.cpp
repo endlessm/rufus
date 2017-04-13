@@ -397,6 +397,7 @@ static LPCTSTR ErrorCauseToStr(ErrorCause_t errorCause)
 {
     switch (errorCause)
     {
+        TOSTR(ErrorCauseNone);
         TOSTR(ErrorCauseGeneric);
         TOSTR(ErrorCauseCancelled);
         TOSTR(ErrorCauseDownloadFailed);
@@ -412,7 +413,8 @@ static LPCTSTR ErrorCauseToStr(ErrorCause_t errorCause)
         TOSTR(ErrorCauseCantCheckMBR);
         TOSTR(ErrorCauseInstallFailedDiskFull);
         TOSTR(ErrorCauseSuspended);
-        TOSTR(ErrorCauseNone);
+        TOSTR(ErrorCauseInstallEosldrFailed);
+        TOSTR(ErrorCauseUninstallEosldrFailed);
         default: return _T("Error Cause Unknown");
     }
 }
@@ -560,7 +562,9 @@ CEndlessUsbToolDlg::CEndlessUsbToolDlg(UINT globalMessage, CWnd* pParent /*=NULL
     m_lastErrorCause(ErrorCause_t::ErrorCauseNone),
     m_localFilesScanned(false),
     m_jsonDownloadState(JSONDownloadState::Pending),
-	m_selectedInstallMethod(InstallMethod_t::None)
+    m_selectedInstallMethod(InstallMethod_t::None),
+    m_eosldrInstaller(
+        EosldrInstaller::GetInstance(nWindowsVersion, ENDLESS_OS_NAME, REGKEY_UNINSTALLENDLESS))
 {
     FUNCTION_ENTER;
     m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);    
@@ -5149,6 +5153,7 @@ DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 	CString bootFilesPath = CEndlessUsbToolApp::TempFilePath(CString(BOOT_COMPONENTS_FOLDER)) + L"\\";
 	CStringW exeFilePath = GetExePath();
 	const bool isBIOS = IsLegacyBIOSBoot();
+	ErrorCause errorCause = ErrorCause::ErrorCauseWriteFailed;
 
 	systemDriveLetter = GetSystemDrive();
 	endlessFilesPath = systemDriveLetter + PATH_ENDLESS_SUBDIRECTORY;
@@ -5208,7 +5213,15 @@ DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 	CHECK_IF_CANCELLED;
 
 	if (isBIOS) {
-		IFFALSE_GOTOERROR(WriteMBRAndSBRToWinDrive(dlg, systemDriveLetter, bootFilesPath, endlessFilesPath), "Error on WriteMBRAndSBRToWinDrive");
+		if (dlg->m_eosldrInstaller->CanInstall(bootFilesPath)) {
+			if (!dlg->m_eosldrInstaller->Install(systemDriveLetter, bootFilesPath)) {
+				PRINT_ERROR_MSG("Error installing eosldr");
+				dlg->m_lastErrorCause = ErrorCauseInstallEosldrFailed;
+				goto error;
+			}
+		} else {
+			IFFALSE_GOTOERROR(WriteMBRAndSBRToWinDrive(dlg, systemDriveLetter, bootFilesPath, endlessFilesPath), "Error on WriteMBRAndSBRToWinDrive");
+		}
 	} else {
 		IFFALSE_GOTOERROR(SetupEndlessEFI(systemDriveLetter, bootFilesPath), "Error on SetupEndlessEFI");
 	}
@@ -5233,7 +5246,7 @@ error:
 
 	uprintf("SetupDualBoot exited with error.");
 	if (dlg->m_lastErrorCause == ErrorCause_t::ErrorCauseNone) {
-		dlg->m_lastErrorCause = ErrorCause_t::ErrorCauseWriteFailed;
+		dlg->m_lastErrorCause = errorCause;
 	}
 
 	RemoveNonEmptyDirectory(endlessFilesPath);
@@ -5973,10 +5986,20 @@ BOOL CEndlessUsbToolDlg::UninstallDualBoot(CEndlessUsbToolDlg *dlg)
 
 	IFFALSE_GOTOERROR(hPhysical != INVALID_HANDLE_VALUE, "Error on acquiring disk handle.");
 
-	if (IsLegacyBIOSBoot()) { // remove MBR entry
-		IFFALSE_GOTOERROR(
-			UninstallEndlessMBR(systemDriveLetter, endlessFilesPath, hPhysical, dlg->m_lastErrorCause),
-			"Couldn't uninstall Endless MBR");
+	if (IsLegacyBIOSBoot()) {
+		if (dlg->m_eosldrInstaller->IsInstalled(systemDriveLetter)) {
+			// remove eosldr from Windows boot menu
+			if (!dlg->m_eosldrInstaller->Uninstall(systemDriveLetter)) {
+				PRINT_ERROR_MSG("Couldn't uninstall eosldr");
+				dlg->m_lastErrorCause = ErrorCauseUninstallEosldrFailed;
+				goto error;
+			}
+		} else {
+			// remove GRUB MBR, reinstate Windows'
+			IFFALSE_GOTOERROR(
+					UninstallEndlessMBR(systemDriveLetter, endlessFilesPath, hPhysical, dlg->m_lastErrorCause),
+					"Couldn't uninstall Endless MBR");
+		}
 	} else { // remove EFI entry
 		bool found_boot_entry;
 		bool ret = UninstallEndlessEFI(systemDriveLetter, hPhysical, found_boot_entry);
