@@ -352,6 +352,22 @@ const wchar_t* mainWindowTitle = L"Endless Installer";
 
 #define FORMAT_STATUS_CANCEL (ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_CANCELLED)
 
+#pragma region Uninstall_registry_stuff
+#define REGKEY_WIN_UNINSTALL	L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\"
+#define REGKEY_ENDLESS_OS		ENDLESS_OS_NAME
+#define REGKEY_UNINSTALLENDLESS (REGKEY_WIN_UNINSTALL REGKEY_ENDLESS_OS)
+#define REGKEY_DISPLAYNAME		L"DisplayName"
+#define REGKEY_UNINSTALL_STRING	L"UninstallString"
+#define REGKEY_INSTALL_LOCATION	L"InstallLocation"
+#define REGKEY_PUBLISHER		L"Publisher"
+#define REGKEY_HELP_LINK		L"HelpLink"
+#define REGKEY_NOCHANGE			L"NoChange"
+#define REGKEY_NOMODIFY			L"NoModify"
+
+#define REGKEY_DISPLAYNAME_TEXT	ENDLESS_OS_NAME
+#define REGKEY_PUBLISHER_TEXT	L"Endless Mobile, Inc."
+#pragma endregion Uninstall_registry_stuff
+
 static LPCTSTR OperationToStr(int op)
 {
     switch (op)
@@ -5865,20 +5881,6 @@ error:
 
 	return retValue;
 }
-
-#define REGKEY_WIN_UNINSTALL	L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\"
-#define REGKEY_ENDLESS_OS		ENDLESS_OS_NAME
-#define REGKEY_UNINSTALLENDLESS (REGKEY_WIN_UNINSTALL REGKEY_ENDLESS_OS)
-#define REGKEY_DISPLAYNAME		L"DisplayName"
-#define REGKEY_UNINSTALL_STRING	L"UninstallString"
-#define REGKEY_INSTALL_LOCATION	L"InstallLocation"
-#define REGKEY_PUBLISHER		L"Publisher"
-#define REGKEY_HELP_LINK		L"HelpLink"
-#define REGKEY_NOCHANGE			L"NoChange"
-#define REGKEY_NOMODIFY			L"NoModify"
-
-#define REGKEY_DISPLAYNAME_TEXT	ENDLESS_OS_NAME
-#define REGKEY_PUBLISHER_TEXT	L"Endless Mobile, Inc."
 
 BOOL CEndlessUsbToolDlg::AddUninstallRegistryKeys(const CStringW &uninstallExePath, const CStringW &installPath)
 {
