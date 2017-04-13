@@ -5796,58 +5796,45 @@ CStringW CEndlessUsbToolDlg::GetSystemDrive()
 }
 
 #define REGKEY_BACKUP_PREFIX	L"EndlessBackup"
+// In a backup key, indicates that the key was previously unset
 #define REGKEY_DWORD_MISSING	DWORD_MAX
 
-BOOL CEndlessUsbToolDlg::SetEndlessRegistryKey(HKEY parentKey, const CString &keyPath, const CString &keyName, CComVariant keyValue, bool createBackup)
+// Backs up the current value of a key, and overwrites it.
+// UnsetEndlessRegistryKey can be used to restore the backup
+BOOL CEndlessUsbToolDlg::SetEndlessRegistryKey(HKEY parentKey, const CString &keyPath, const CString &keyName, CComVariant keyValue)
 {
-	CRegKey registryKey;
-	LSTATUS result;
-	CComVariant backupValue;
+    FUNCTION_ENTER_FMT("keyPath='%ls', keyName='%ls'", keyPath, keyName);
 
-	uprintf("SetEndlessRegistryKey called with path '%ls' and key '%ls'", keyPath, keyName);
+    CRegKey registryKey;
+    LSTATUS result;
+    const CString backupKeyName = CString(REGKEY_BACKUP_PREFIX) + keyName;
 
-	result = registryKey.Open(parentKey, keyPath, KEY_ALL_ACCESS);
-	IFFALSE_RETURN_VALUE(result == ERROR_SUCCESS, "Error opening registry key.", FALSE);
+    result = registryKey.Open(parentKey, keyPath, KEY_ALL_ACCESS);
+    IFFALSE_RETURN_VALUE(result == ERROR_SUCCESS, "Error opening registry key.", FALSE);
 
-	backupValue.ChangeType(VT_NULL);
-	switch (keyValue.vt) {
-		case VT_I4:
-		case VT_UI4:
-			if (createBackup) {
-				DWORD dwValue;
-				result = registryKey.QueryDWORDValue(CString(REGKEY_BACKUP_PREFIX) + keyName, dwValue);
-				if (result == ERROR_SUCCESS) {
-					uprintf("There already is a backup created for '%ls' in '%ls'. Aborting creating a second backup", keyName, keyPath);
-					createBackup = false;
-					break;
-				}
+    switch (keyValue.vt) {
+        case VT_I4:
+        case VT_UI4:
+            DWORD dwValue;
+            result = registryKey.QueryDWORDValue(backupKeyName, dwValue);
+            if (result == ERROR_SUCCESS) {
+                uprintf("There already is a backup created for '%ls' in '%ls'. Aborting creating a second backup", keyName, keyPath);
+                return TRUE;
+            }
 
-				result = registryKey.QueryDWORDValue(keyName, dwValue);
-				if (result == ERROR_SUCCESS) backupValue = dwValue;
-				else backupValue = REGKEY_DWORD_MISSING;
-			}
-			result = registryKey.SetDWORDValue(keyName, keyValue.intVal);
-			break;
-		case VT_BSTR:
-			if (createBackup) {
-				uprintf("Error: backup requested and not implemented for type VT_BSTR.");
-				return FALSE;
-			}
-			result = registryKey.SetStringValue(keyName, keyValue.bstrVal);
-			break;
-		default:
-			uprintf("ERROR: variant type %d not handled", keyValue.vt);
-			return FALSE;
-	}
-
-	IFFALSE_RETURN_VALUE(result == ERROR_SUCCESS, "Error on setting key value", FALSE);
-
-	if (createBackup && backupValue.vt != VT_NULL) {
-		backupValue.vt = keyValue.vt;
-		IFFALSE_PRINTERROR(SetEndlessRegistryKey(parentKey, keyPath, CString(REGKEY_BACKUP_PREFIX) + keyName, backupValue, false), "Error on creating backup key");
-	}
-
-	return TRUE;
+            result = registryKey.QueryDWORDValue(keyName, dwValue);
+            if (result != ERROR_SUCCESS) {
+                dwValue = REGKEY_DWORD_MISSING;
+            }
+            IFFALSE_RETURN_VALUE(ERROR_SUCCESS == registryKey.SetDWORDValue(backupKeyName, dwValue),
+                "Error creating backup key", FALSE);
+            IFFALSE_RETURN_VALUE(ERROR_SUCCESS == registryKey.SetDWORDValue(keyName, keyValue.intVal),
+                "Error setting key", FALSE);
+            return TRUE;
+        default:
+            uprintf("ERROR: variant type %d not handled", keyValue.vt);
+            return FALSE;
+    }
 }
 
 CStringW CEndlessUsbToolDlg::GetExePath()

@@ -432,7 +432,7 @@ private:
 	static BOOL ChangeAccessPermissions(CString path, bool restrictAccess);
 
 	static CStringW GetSystemDrive();
-	static BOOL SetEndlessRegistryKey(HKEY parentKey, const CString &keyPath, const CString &keyName, CComVariant keyValue, bool createBackup = true);
+	static BOOL SetEndlessRegistryKey(HKEY parentKey, const CString &keyPath, const CString &keyName, CComVariant keyValue);
 
 	static CStringW GetExePath();
 	static BOOL AddUninstallRegistryKeys(const CStringW &uninstallExePath, const CStringW &installPath);
