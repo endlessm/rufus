@@ -2051,10 +2051,11 @@ HRESULT CEndlessUsbToolDlg::OnInstallDualBootClicked(IHTMLElement* pElement)
 	BOOL isBitLockerEnabled = WMI::IsBitlockedDrive(systemDriveLetter.Left(2));
 	uprintf("Is BitLocker/device encryption enabled on '%ls': %s", systemDriveLetter, isBitLockerEnabled ? "YES" : "NO");
 
-	bool isBIOS = IsLegacyBIOSBoot();
+	const bool isBIOS = IsLegacyBIOSBoot();
+	const bool canInstallEosldr = true; // assume it'll be in the boot.zip; we'll check again later
 	ErrorCause cause = ErrorCauseNone;
 	// TODO: move bitlocker check in here too?
-	bool canInstall = CanInstallToDrive(systemDriveLetter, isBIOS, cause);
+	bool canInstall = CanInstallToDrive(systemDriveLetter, isBIOS, canInstallEosldr, cause);
 
 	if (ShouldUninstall()) {
 		QueryAndDoUninstall();
@@ -5131,8 +5132,8 @@ error:
 }
 
 // Below defines need to be in this order
-#define DB_PROGRESS_CHECK_PARTITION		1
-#define DB_PROGRESS_UNPACK_BOOT_ZIP		3
+#define DB_PROGRESS_UNPACK_BOOT_ZIP		2
+#define DB_PROGRESS_CHECK_PARTITION		3
 #define DB_PROGRESS_FINISHED_UNPACK		95
 #define DB_PROGRESS_COPY_GRUB_FOLDER	98
 #define DB_PROGRESS_MBR_OR_EFI_SETUP	100
@@ -5147,28 +5148,11 @@ DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 	FUNCTION_ENTER;
 
 	CEndlessUsbToolDlg *dlg = (CEndlessUsbToolDlg*)param;
-	CString systemDriveLetter;
-	CString endlessFilesPath;
-	CString endlessImgPath;
-	CString bootFilesPath = CEndlessUsbToolApp::TempFilePath(CString(BOOT_COMPONENTS_FOLDER)) + L"\\";
-	CStringW exeFilePath = GetExePath();
-	const bool isBIOS = IsLegacyBIOSBoot();
+
+	const CString bootFilesPath = CEndlessUsbToolApp::TempFilePath(CString(BOOT_COMPONENTS_FOLDER)) + L"\\";
 	ErrorCause errorCause = ErrorCause::ErrorCauseWriteFailed;
 
-	systemDriveLetter = GetSystemDrive();
-	endlessFilesPath = systemDriveLetter + PATH_ENDLESS_SUBDIRECTORY;
-	endlessImgPath = endlessFilesPath + ENDLESS_IMG_FILE_NAME;
-
-	// Double-check this is an NTFS drive and (on BIOS systems) that there's no
-	// non-Windows bootloader. Note that we deliberately jump to 'done' in this
-	// case rather than 'error' -- we have not yet written anything to
-	// endlessFilesPath so we shouldn't try to delete it, and we set
-	// m_lastErrorCause directly.
-	IFFALSE_GOTO(CanInstallToDrive(systemDriveLetter, isBIOS, dlg->m_lastErrorCause), "Can't install to this drive", done);
-
-	UpdateProgress(OP_SETUP_DUALBOOT, DB_PROGRESS_CHECK_PARTITION);
-
-	IFFALSE_PRINTERROR(ChangeAccessPermissions(endlessFilesPath, false), "Error on granting Endless files permissions.");
+	const CString systemDriveLetter = GetSystemDrive();
 
 	// Unpack boot components
 	IFFALSE_GOTOERROR(UnpackBootComponents(dlg->m_bootArchive, bootFilesPath), "Error unpacking boot components.");
@@ -5176,7 +5160,44 @@ DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 	UpdateProgress(OP_SETUP_DUALBOOT, DB_PROGRESS_UNPACK_BOOT_ZIP);
 	CHECK_IF_CANCELLED;
 
-	// Create endless folder
+	// Double-check this is an NTFS drive and that we can install a bootloader.
+	const bool isBIOS = IsLegacyBIOSBoot();
+	const bool canInstallEosldr = dlg->m_eosldrInstaller->CanInstall(bootFilesPath);
+	IFFALSE_GOTOERROR(CanInstallToDrive(systemDriveLetter, isBIOS, canInstallEosldr, errorCause), "Can't install to this drive");
+
+	UpdateProgress(OP_SETUP_DUALBOOT, DB_PROGRESS_CHECK_PARTITION);
+
+	// Unpack the OS image and set up the bootloader.
+	IFFALSE_GOTOERROR(SetupDualBootFiles(dlg, systemDriveLetter, bootFilesPath, errorCause), "InstallDualBoot failed");
+	goto done;
+
+error:
+	uprintf("SetupDualBoot exited with error.");
+
+	if (GetLastError() == ERROR_DISK_FULL) {
+		errorCause = ErrorCause_t::ErrorCauseInstallFailedDiskFull;
+	}
+
+	if (dlg->m_lastErrorCause == ErrorCause_t::ErrorCauseNone) {
+		dlg->m_lastErrorCause = errorCause;
+	}
+
+done:
+	RemoveNonEmptyDirectory(bootFilesPath);
+	dlg->PostMessage(WM_FINISHED_ALL_OPERATIONS, 0, 0);
+	return 0;
+}
+
+bool CEndlessUsbToolDlg::SetupDualBootFiles(CEndlessUsbToolDlg *dlg, const CString &systemDriveLetter, const CString &bootFilesPath, ErrorCause &errorCause)
+{
+	const CString endlessFilesPath = systemDriveLetter + PATH_ENDLESS_SUBDIRECTORY;
+	const CString endlessImgPath = endlessFilesPath + ENDLESS_IMG_FILE_NAME;
+
+	const CStringW exeFilePath = GetExePath();
+
+	IFFALSE_PRINTERROR(ChangeAccessPermissions(endlessFilesPath, false), "Error on granting Endless files permissions.");
+
+	// Create endless folder (if missing)
 	int createDirResult = SHCreateDirectoryExW(NULL, endlessFilesPath, NULL);
 	IFFALSE_GOTOERROR(createDirResult == ERROR_SUCCESS || createDirResult == ERROR_ALREADY_EXISTS, "Error creating directory on system drive.");
 
@@ -5212,11 +5233,11 @@ DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 	UpdateProgress(OP_SETUP_DUALBOOT, DB_PROGRESS_COPY_GRUB_FOLDER);
 	CHECK_IF_CANCELLED;
 
-	if (isBIOS) {
+	if (IsLegacyBIOSBoot()) {
 		if (dlg->m_eosldrInstaller->CanInstall(bootFilesPath)) {
 			if (!dlg->m_eosldrInstaller->Install(systemDriveLetter, bootFilesPath)) {
 				PRINT_ERROR_MSG("Error installing eosldr");
-				dlg->m_lastErrorCause = ErrorCauseInstallEosldrFailed;
+				errorCause = ErrorCauseInstallEosldrFailed;
 				goto error;
 			}
 		} else {
@@ -5237,24 +5258,11 @@ DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 
 	UpdateProgress(OP_SETUP_DUALBOOT, DB_PROGRESS_MBR_OR_EFI_SETUP);
 
-	goto done;
+	return true;
 
 error:
-	if (GetLastError() == ERROR_DISK_FULL) {
-		dlg->m_lastErrorCause = ErrorCause_t::ErrorCauseInstallFailedDiskFull;
-	}
-
-	uprintf("SetupDualBoot exited with error.");
-	if (dlg->m_lastErrorCause == ErrorCause_t::ErrorCauseNone) {
-		dlg->m_lastErrorCause = errorCause;
-	}
-
 	RemoveNonEmptyDirectory(endlessFilesPath);
-
-done:
-	RemoveNonEmptyDirectory(bootFilesPath);
-	dlg->PostMessage(WM_FINISHED_ALL_OPERATIONS, 0, 0);
-	return 0;
+	return false;
 }
 
 bool CEndlessUsbToolDlg::EnsureUncompressed(const CString &filePath)
@@ -5359,7 +5367,7 @@ bool CEndlessUsbToolDlg::IsLegacyBIOSBoot()
 }
 
 // Checks preconditions for installing Endless OS to a given drive. Guaranteed to only modify 'cause' on error.
-bool CEndlessUsbToolDlg::CanInstallToDrive(const CString & systemDriveLetter, const bool isBIOS, ErrorCause &cause)
+bool CEndlessUsbToolDlg::CanInstallToDrive(const CString & systemDriveLetter, const bool isBIOS, const bool canInstallEosldr, ErrorCause &cause)
 {
 	FUNCTION_ENTER;
 	
@@ -5383,7 +5391,9 @@ bool CEndlessUsbToolDlg::CanInstallToDrive(const CString & systemDriveLetter, co
 		}
 	}
 
-	if (CEndlessUsbToolApp::m_enableOverwriteMbr) {
+	if (canInstallEosldr) {
+		return true;
+	} else if (CEndlessUsbToolApp::m_enableOverwriteMbr) {
 		uprintf("Not checking for Windows MBR as /forcembr is enabled.");
 		return true;
 	} else {

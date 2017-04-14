@@ -411,6 +411,7 @@ private:
 	static bool WriteMBRAndSBRToUSB(HANDLE hPhysical, const CString &bootFilesPath, DWORD bytesPerSector);
 
 	static DWORD WINAPI SetupDualBoot(LPVOID param);
+	static bool SetupDualBootFiles(CEndlessUsbToolDlg *dlg, const CString &systemDriveLetter, const CString &bootFilesPath, ErrorCause &errorCause);
 
 	static bool EnsureUncompressed(const CString &filePath);
 	static bool ExtendImageFile(const CString &endlessImgPath, ULONGLONG selectedGigs);
@@ -418,7 +419,7 @@ private:
 	static bool CopyMultipleItems(const CString &fromPath, const CString &toPath);
 	static bool IsLegacyBIOSBoot();
 	static bool IsWindowsMBR(FILE* fpDrive, const CString &TargetName);
-	static bool CanInstallToDrive(const CString &systemDriveLetter, const bool isBIOS, ErrorCause &cause);
+	static bool CanInstallToDrive(const CString &systemDriveLetter, const bool isBIOS, const bool canInstallEosldr, ErrorCause &cause);
 	static bool WriteMBRAndSBRToWinDrive(CEndlessUsbToolDlg *dlg, const CString &systemDriveLetter, const CString &bootFilesPath, const CString &endlessFilesPath);
 	static bool SetupEndlessEFI(const CString &systemDriveLetter, const CString &bootFilesPath);
 	static HANDLE GetPhysicalFromDriveLetter(const CString &driveLetter);
