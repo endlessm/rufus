@@ -143,10 +143,13 @@ static HANDLE GetHandle(char* Path, BOOL bWriteAccess, BOOL bLockDrive)
 		}
 
 		for (i = 0; i < DRIVE_ACCESS_RETRIES; i++) {
+			uprintf("Attempting FSCTL_LOCK_VOLUME for drive %s\n", Path);
 			if (DeviceIoControl(hDrive, FSCTL_LOCK_VOLUME, NULL, 0, NULL, 0, &size, NULL))
 				goto out;
-			if (IS_ERROR(FormatStatus))	// User cancel
+			if (IS_ERROR(FormatStatus)) {	// User cancel
+				uprintf("FormatStatus = 0x%x '%s', giving up\n", FormatStatus, StrError(FormatStatus, TRUE));
 				break;
+			}
 			Sleep(DRIVE_ACCESS_TIMEOUT/DRIVE_ACCESS_RETRIES);
 		}
 		// If we reached this section, either we didn't manage to get a lock or the user cancelled
