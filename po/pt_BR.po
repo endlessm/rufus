@@ -273,6 +273,7 @@ msgctxt "USBLearnMore"
 msgid "Learn more about the Endless USB Stick"
 msgstr "Saiba mais sobre o Pendrive Endless"
 
+#. *Short* size names. These can be used as suffixes
 msgctxt "MSG_020"
 msgid "bytes"
 msgstr "bytes"
@@ -302,11 +303,16 @@ msgctxt "MSG_045"
 msgid "USB Storage Device (Generic)"
 msgstr "Dispositivo de armazenamento USB (Genérico)"
 
+#. Used for USB drives that don't have a drive letter. Placeholders are:
+#. 1. a name for the disk (such as "SanDisk Ultra")
+#. 2. the disk number (normally a low number like 2 or 3)
+#. 3. the disk's size (such as "16 Gb")
 #, c-format
 msgctxt "MSG_046"
 msgid "%s (Disk %d) [%s]"
 msgstr "%s (Disk %d) [%s]"
 
+#. Used when a drive is detected that contains more than one partition
 #, c-format
 msgctxt "MSG_047"
 msgid "Multiple Partitions"
@@ -344,6 +350,11 @@ msgctxt "MSG_300"
 msgid "Error downloading file."
 msgstr "Erro de download do arquivo."
 
+#. Download progress. Placeholders:
+#. 1. size downloaded (such as 1.2Gb)
+#. 2. total size (such as 11.6Gb)
+#. 3. download speed (such as 100Mb/s, except the "/s" is part of this string,
+#. not the placeholder)
 #, c-format
 msgctxt "MSG_302"
 msgid "%s of %s (%s/s)"
@@ -359,11 +370,15 @@ msgctxt "MSG_304"
 msgid "Downloading"
 msgstr "Baixando"
 
+#. Displayed alongside MSG_306. Placeholders:
+#. 1. the step number (typically 1, 2 or 3)
 #, c-format
 msgctxt "MSG_305"
 msgid "Step %d"
 msgstr "Passo %d"
 
+#. Displayed alongside MSG_305. Placeholders:
+#. 1. the number of steps (typically 2 or 3)
 #, c-format
 msgctxt "MSG_306"
 msgid "of %d:"
@@ -439,6 +454,7 @@ msgctxt "MSG_322"
 msgid "Is this the version you’d like to use? If not, select another."
 msgstr "Esta é a versão do Endless OS que você deseja usar? Se não for, baixe outra."
 
+#. The string in quotes should match MSG_326
 #, c-format
 msgctxt "MSG_323"
 msgid ""
@@ -446,6 +462,7 @@ msgid ""
 "click \"Resume\" to carry on downloading."
 msgstr "Não conseguimos terminar de captar o Endless OS. Verifique a sua conexão de internet e clique em \"Continuar\" para prosseguir com o download."
 
+#. The string in quotes should match MSG_327
 #, c-format
 msgctxt "MSG_324"
 msgid ""
@@ -453,6 +470,7 @@ msgid ""
 "try downloading it again."
 msgstr "Há algo errado com o seu arquivo Endless OS. Clique em \"Fazer o download novamente\" para tentar baixar novamente."
 
+#. The string in quotes should match MSG_328
 #, c-format
 msgctxt "MSG_325"
 msgid ""
@@ -465,21 +483,27 @@ msgctxt "MSG_358"
 msgid "Something went wrong installing Endless OS to your computer."
 msgstr "Ocorreu um erro durante a instalação do Endless OS no seu computador."
 
+#. This should match the string in quotes in MSG_323
 #, c-format
 msgctxt "MSG_326"
 msgid "Resume"
 msgstr "Continuar"
 
+#. This should match the string in quotes in MSG_324
 #, c-format
 msgctxt "MSG_327"
 msgid "Download again"
 msgstr "Baixe novamente"
 
+#. This should match the string in quotes in MSG_325
 #, c-format
 msgctxt "MSG_328"
 msgid "Try again"
 msgstr "Tente novamente"
 
+#. If this FAQ is translated into your language, replace "en-us" with the
+#. right language code.
+#. Otherwise, use exactly the same URL.
 #, c-format
 msgctxt "MSG_329"
 msgid "https://support.endlessm.com/hc/en-us/articles/210527103"
@@ -553,6 +577,11 @@ msgctxt "MSG_340"
 msgid "%s (Maximum)"
 msgstr "%s (Máximo)"
 
+#. Placeholders are:
+#. 1. free space on system drive
+#. 2. total size of system drive
+#. 3. drive letter of system drive (usually "C:")
+#. eg: "You currently have 120GB free on your 400GB C: drive."
 #, c-format
 msgctxt "MSG_341"
 msgid "You currently have %s free on your %s %s drive."
