@@ -207,41 +207,13 @@ public:
     {
     }
 
-    HRESULT ExecMethod_4(
+    HRESULT ExecMethod(
         LPCWSTR wszMethodName,
-        LPCWSTR wszParam1Name, const CComVariant &cvParam1,
-        LPCWSTR wszParam2Name, const CComVariant &cvParam2,
-        LPCWSTR wszParam3Name, const CComVariant &cvParam3,
-        LPCWSTR wszParam4Name, const CComVariant &cvParam4,
-        LPCWSTR wszOutParam1Name = NULL, CComVariant &vOutParam1 = CComVariant());
-
-
-    HRESULT ExecMethod_2(
-        LPCWSTR wszMethodName,
-        LPCWSTR wszParam1Name, const CComVariant &cvParam1,
-        LPCWSTR wszParam2Name, const CComVariant &cvParam2,
-        LPCWSTR wszOutParam1Name = NULL, CComVariant &vOutParam1 = CComVariant())
-    {
-        return ExecMethod_4(wszMethodName,
-            wszParam1Name, cvParam1,
-            wszParam2Name, cvParam2,
-            NULL, CComVariant(),
-            NULL, CComVariant(),
-            wszOutParam1Name, vOutParam1);
-    }
-
-    HRESULT ExecMethod_1(
-        LPCWSTR wszMethodName,
-        LPCWSTR wszParam1Name, const CComVariant &cvParam1,
-        LPCWSTR wszOutParam1Name = NULL, CComVariant &vOutParam1 = CComVariant())
-    {
-        return ExecMethod_4(wszMethodName,
-            wszParam1Name, cvParam1,
-            NULL, CComVariant(),
-            NULL, CComVariant(),
-            NULL, CComVariant(),
-            wszOutParam1Name, vOutParam1);
-    }
+        IWbemClassObject **ppOutParams = NULL,
+        LPCWSTR wszParam1Name = NULL, const CComVariant &cvParam1 = CComVariant(),
+        LPCWSTR wszParam2Name = NULL, const CComVariant &cvParam2 = CComVariant(),
+        LPCWSTR wszParam3Name = NULL, const CComVariant &cvParam3 = CComVariant(),
+        LPCWSTR wszParam4Name = NULL, const CComVariant &cvParam4 = CComVariant());
 
     /* If this were a general-purpose library these would be on separate classes. */
     static HRESULT BcdStore_OpenStore(WmiObject *bcdStore);
@@ -322,14 +294,13 @@ HRESULT WmiObject::Put(IWbemClassObject * pObject, LPCWSTR wszName, const VARIAN
     return hres;
 }
 
-HRESULT WmiObject::ExecMethod_4(
+HRESULT WmiObject::ExecMethod(
     LPCWSTR wszMethodName,
+    IWbemClassObject **ppOutParams,
     LPCWSTR wszParam1Name, const CComVariant &cvParam1,
     LPCWSTR wszParam2Name, const CComVariant &cvParam2,
     LPCWSTR wszParam3Name, const CComVariant &cvParam3,
-    LPCWSTR wszParam4Name, const CComVariant &cvParam4,
-
-    LPCWSTR wszOutParam1Name, CComVariant &vOutParam1)
+    LPCWSTR wszParam4Name, const CComVariant &cvParam4)
 {
     FUNCTION_ENTER_FMT("%ls", wszMethodName);
 
@@ -365,13 +336,9 @@ HRESULT WmiObject::ExecMethod_4(
     }
 
     // execute the method
-    CComPtr<IWbemClassObject> pOutParamsDefinition = NULL;
     hres = m_pSvc->ExecMethod(bcdStorePath.bstrVal, _bstr_t(wszMethodName), 0, NULL,
-        pInParams, &pOutParamsDefinition, NULL);
+        pInParams, ppOutParams, NULL);
     IFFAILED_RETURN_RES(hres, "Failed to execute method");
-
-    // extract a named parameter from the result
-    IFFAILED_RETURN_RES(Get(pOutParamsDefinition, wszOutParam1Name, &vOutParam1), "Getting out parameter 1 failed");
 
     return S_OK;
 }
@@ -391,13 +358,15 @@ HRESULT WmiObject::BcdStore_OpenStore(WmiObject *bcdStore)
     WmiObject bcdStoreClass(pSvc, pBcdStoreClass, pBcdStoreClass);
 
     // BCDStore.OpenStore(File=""), returning (Store=vStore)
-    CComVariant vStore;
+    CComPtr<IWbemClassObject> pOutParams;
     IFFAILED_RETURN_RES(
-        bcdStoreClass.ExecMethod_1(L"OpenStore",
-            L"File", L"",
-            // Out parameters:
-            L"Store", vStore),
+        bcdStoreClass.ExecMethod(L"OpenStore", &pOutParams,
+            L"File", L""),
         "OpenStore failed");
+
+    CComVariant vStore;
+    IFFAILED_RETURN_RES(Get(pOutParams, L"Store", &vStore), "Getting Store out param failed");
+
     CComPtr<IWbemClassObject> pBcdStore = (IWbemClassObject*)vStore.byref;
     *bcdStore = WmiObject(pSvc, pBcdStoreClass, pBcdStore);
     return S_OK;
@@ -412,17 +381,19 @@ HRESULT WmiObject::BcdStore_CreateObject(const CString & guid, int32_t type, Wmi
         m_pSvc->GetObject(_bstr_t(L"BCDObject"), 0, NULL, &pBcdObjectClass, NULL),
         "Could not get BCDObject class");
 
-    CComVariant vBcdObject;
+    CComPtr<IWbemClassObject> pOutParams;
     IFFAILED_RETURN_RES(
-        ExecMethod_2(L"CreateObject",
+        ExecMethod(L"CreateObject", &pOutParams,
             L"Id", CComVariant(guid),
             // If you enumerate this method's parameters, Type is allegedly a CIM_UINT32 == VT_UI4 == 19 == 0x13.
             // However, if you supply a variant of this type, you will receive WBEM_E_TYPE_MISMATCH.
             // Supplying a variant of type VT_I4, on the other hand, works...
-            L"Type", type,
-            // Out parameters:
-            L"Object", vBcdObject),
+            L"Type", type),
         "CreateObject failed");
+
+    CComVariant vBcdObject;
+    IFFAILED_RETURN_RES(Get(pOutParams, L"Object", &vBcdObject), "Getting Object out param failed");
+
     CComPtr<IWbemClassObject> pBcdObject = (IWbemClassObject*)vBcdObject.byref;
     *bcdObject = WmiObject(m_pSvc, pBcdObjectClass, pBcdObject);
 
@@ -437,14 +408,16 @@ HRESULT WmiObject::BcdStore_GetObject(const CString & guid, WmiObject * bcdObjec
         m_pSvc->GetObject(_bstr_t(L"BCDObject"), 0, NULL, &pBcdObjectClass, NULL),
         "Could not get BCDObject class");
 
-    CComVariant vBcdObject;
+    CComPtr<IWbemClassObject> pOutParams;
     IFFAILED_RETURN_RES(
-        ExecMethod_1(L"OpenObject",
+        ExecMethod(L"OpenObject", &pOutParams,
             // In parameters:
-            L"Id", CComVariant(guid),
-            // Out parameters:
-            L"Object", vBcdObject),
+            L"Id", CComVariant(guid)),
         "OpenObject failed");
+
+    CComVariant vBcdObject;
+    IFFAILED_RETURN_RES(Get(pOutParams, L"Object", &vBcdObject), "Getting Object out param failed");
+
     CComPtr<IWbemClassObject> pBcdObject = (IWbemClassObject*)vBcdObject.byref;
     *bcdObject = WmiObject(m_pSvc, pBcdObjectClass, pBcdObject);
 
@@ -455,7 +428,7 @@ HRESULT WmiObject::BcdStore_DeleteObject(const CString & guid)
 {
     FUNCTION_ENTER_FMT("%ls", guid);
 
-    return ExecMethod_1(L"DeleteObject",
+    return ExecMethod(L"DeleteObject", /* ppOutParams */ NULL,
         L"Id", CComVariant(guid));
 }
 
@@ -464,12 +437,15 @@ HRESULT WmiObject::Bootmgr_GetDisplayOrder(CComSafeArray<BSTR>& displayOrder)
     const int32_t type = BcdBootMgrObjectList_DisplayOrder;
 
     /* Fetch current DisplayOrder */
-    CComVariant vDisplayOrderElement;
+    CComPtr<IWbemClassObject> pOutParams;
     IFFAILED_RETURN_RES(
-        ExecMethod_1(L"GetElement",
-            L"Type", type,
-            L"Element", vDisplayOrderElement),
+        ExecMethod(L"GetElement", &pOutParams,
+            L"Type", type),
         "Can't get current DisplayOrder");
+
+    CComVariant vDisplayOrderElement;
+    IFFAILED_RETURN_RES(Get(pOutParams, L"Element", &vDisplayOrderElement), "Getting Element out param failed");
+
     CComPtr<IWbemClassObject> pDisplayOrderElement = (IWbemClassObject*)vDisplayOrderElement.byref;
     CComVariant vDisplayOrder;
     WmiObject::Get(pDisplayOrderElement, L"Ids", &vDisplayOrder);
@@ -482,7 +458,7 @@ HRESULT WmiObject::Bootmgr_SetDisplayOrder(CComSafeArray<BSTR>& displayOrder)
 {
     const int32_t type = BcdBootMgrObjectList_DisplayOrder;
 
-    return ExecMethod_2(L"SetObjectListElement",
+    return ExecMethod(L"SetObjectListElement", /* ppOutParams */ NULL,
         L"Type", type,
         L"Ids", CComVariant(displayOrder.m_psa));
 }
@@ -576,19 +552,19 @@ BOOL WMI::AddBcdEntry(const CString & name, const CString & mbrPath, CString & g
         FALSE);
 
     IFFAILED_RETURN_VALUE(
-        bcdObject.ExecMethod_2(L"SetStringElement",
+        bcdObject.ExecMethod(L"SetStringElement", /* ppOutParams */ NULL,
             L"Type", static_cast<int32_t>(BcdLibraryString_Description),
             L"String", CComVariant(name)),
         "SetStringElement failed", FALSE);
 
     IFFAILED_RETURN_VALUE(
-        bcdObject.ExecMethod_2(L"SetStringElement",
+        bcdObject.ExecMethod(L"SetStringElement", /* ppOutParams */ NULL,
             L"Type", static_cast<int32_t>(BcdLibraryString_ApplicationPath),
             L"String", CComVariant(mbrPathWithoutDrive)),
         "SetStringElement failed", FALSE);
 
     IFFAILED_RETURN_VALUE(
-        bcdObject.ExecMethod_4(L"SetPartitionDeviceElement",
+        bcdObject.ExecMethod(L"SetPartitionDeviceElement",  /* ppOutParams */ NULL,
             L"Type", static_cast<int32_t>(BcdLibraryDevice_ApplicationDevice),
             L"DeviceType", static_cast<int32_t>(2), // type partition
             L"AdditionalOptions", L"",
