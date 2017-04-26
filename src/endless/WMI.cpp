@@ -200,13 +200,6 @@ public:
     {
     }
 
-    WmiObject() :
-        m_pSvc(NULL),
-        m_pClass(NULL),
-        m_pInstance(NULL)
-    {
-    }
-
     HRESULT ExecMethod(
         LPCWSTR wszMethodName,
         IWbemClassObject **ppOutParams = NULL,
@@ -215,18 +208,7 @@ public:
         LPCWSTR wszParam3Name = NULL, const CComVariant &cvParam3 = CComVariant(),
         LPCWSTR wszParam4Name = NULL, const CComVariant &cvParam4 = CComVariant());
 
-    /* If this were a general-purpose library these would be on separate classes. */
-    static HRESULT BcdStore_OpenStore(WmiObject *bcdStore);
-    HRESULT BcdStore_CreateObject(const CString &guid, int32_t type, WmiObject *bcdObject);
-    HRESULT BcdStore_GetObject(const CString &guid, WmiObject *bcdObject);
-    HRESULT BcdStore_DeleteObject(const CString &guid);
-
-    HRESULT Bootmgr_GetDisplayOrder(CComSafeArray<BSTR> &displayOrder);
-    HRESULT Bootmgr_SetDisplayOrder(CComSafeArray<BSTR> &displayOrder);
-    HRESULT Bootmgr_ExtendDisplayOrder(const CString &guid);
-    HRESULT Bootmgr_RemoveFromDisplayOrder(const CString &guid);
-
-private:
+protected:
     static HRESULT EnumerateProperties(IWbemClassObject *pObject);
     static HRESULT Get(IWbemClassObject *pObject, LPCWSTR wszName, VARIANT *vParam);
     static HRESULT Put(IWbemClassObject *pObject, LPCWSTR wszName, const VARIANT &cvParam);
@@ -236,6 +218,70 @@ private:
     CComPtr<IWbemClassObject> m_pClass;
     // Methods are called on this -- may equal m_pClass
     CComPtr<IWbemClassObject> m_pInstance;
+};
+
+class BcdBootmgr : public WmiObject {
+public:
+    BcdBootmgr() : WmiObject(NULL, NULL, NULL) {}
+    BcdBootmgr(IWbemServices *pSvc, IWbemClassObject *pClass, IWbemClassObject *pInstance)
+        : WmiObject(pSvc, pClass, pInstance) {}
+
+    HRESULT GetDisplayOrder(CComSafeArray<BSTR> &displayOrder);
+    HRESULT SetDisplayOrder(CComSafeArray<BSTR> &displayOrder);
+    HRESULT ExtendDisplayOrder(const CString &guid);
+    HRESULT RemoveFromDisplayOrder(const CString &guid);
+};
+
+class BcdBootSectorApplication : public WmiObject {
+public:
+    BcdBootSectorApplication() : WmiObject(NULL, NULL, NULL) {}
+    BcdBootSectorApplication(IWbemServices *pSvc, IWbemClassObject *pClass, IWbemClassObject *pInstance)
+        : WmiObject(pSvc, pClass, pInstance) {}
+
+    HRESULT SetDescription(const CString &description) {
+        return ExecMethod(L"SetStringElement", /* ppOutParams */ NULL,
+            L"Type", static_cast<int32_t>(BcdLibraryString_Description),
+            L"String", CComVariant(description));
+    }
+
+    HRESULT SetPartition(const wchar_t *partitionPath) {
+        return ExecMethod(L"SetPartitionDeviceElement", /* ppOutParams */ NULL,
+            L"Type", static_cast<int32_t>(BcdLibraryDevice_ApplicationDevice),
+            L"DeviceType", static_cast<int32_t>(2), // type partition
+            L"AdditionalOptions", L"",
+            L"Path", partitionPath);
+    }
+
+    HRESULT SetApplicationPath(const CString &mbrPathWithoutDrive) {
+        return ExecMethod(L"SetStringElement", /* ppOutParams */ NULL,
+            L"Type", static_cast<int32_t>(BcdLibraryString_ApplicationPath),
+            L"String", CComVariant(mbrPathWithoutDrive));
+    }
+};
+
+class BcdStore : public WmiObject {
+public:
+    BcdStore() : WmiObject(NULL, NULL, NULL) {}
+    BcdStore(IWbemServices *pSvc, IWbemClassObject *pClass, IWbemClassObject *pInstance)
+        : WmiObject(pSvc, pClass, pInstance) {}
+
+    static HRESULT OpenStore(BcdStore *bcdStore);
+    HRESULT DeleteObject(const CString &guid);
+
+    HRESULT CreateBootSectorApplication(const CString &guid, BcdBootSectorApplication *bcdObject) {
+        return CreateObject<BcdBootSectorApplication>(guid, BCD_APPLICATION_BOOTSECTOR, bcdObject);
+    }
+
+    HRESULT GetBootmgr(BcdBootmgr *bootmgr) {
+        return GetObject<BcdBootmgr>(BCD_GUID_BOOTMGR, bootmgr);
+    }
+
+private:
+    template <typename T>
+    HRESULT CreateObject(const CString &guid, int32_t type, T *bcdObject);
+
+    template <typename T>
+    HRESULT GetObject(const CString &guid, T *bcdObject);
 };
 
 HRESULT WmiObject::EnumerateProperties(IWbemClassObject * pObject)
@@ -343,7 +389,7 @@ HRESULT WmiObject::ExecMethod(
     return S_OK;
 }
 
-HRESULT WmiObject::BcdStore_OpenStore(WmiObject *bcdStore)
+HRESULT BcdStore::OpenStore(BcdStore *bcdStore)
 {
     CComPtr<IWbemServices> pSvc;
     CComPtr<IWbemClassObject> pBcdStoreClass;
@@ -368,11 +414,12 @@ HRESULT WmiObject::BcdStore_OpenStore(WmiObject *bcdStore)
     IFFAILED_RETURN_RES(Get(pOutParams, L"Store", &vStore), "Getting Store out param failed");
 
     CComPtr<IWbemClassObject> pBcdStore = (IWbemClassObject*)vStore.byref;
-    *bcdStore = WmiObject(pSvc, pBcdStoreClass, pBcdStore);
+    *bcdStore = BcdStore(pSvc, pBcdStoreClass, pBcdStore);
     return S_OK;
 }
 
-HRESULT WmiObject::BcdStore_CreateObject(const CString & guid, int32_t type, WmiObject * bcdObject)
+template <typename T>
+HRESULT BcdStore::CreateObject(const CString & guid, int32_t type, T * bcdObject)
 {
     FUNCTION_ENTER_FMT("%ls", guid);
     CComPtr<IWbemClassObject> pBcdObjectClass;
@@ -395,12 +442,13 @@ HRESULT WmiObject::BcdStore_CreateObject(const CString & guid, int32_t type, Wmi
     IFFAILED_RETURN_RES(Get(pOutParams, L"Object", &vBcdObject), "Getting Object out param failed");
 
     CComPtr<IWbemClassObject> pBcdObject = (IWbemClassObject*)vBcdObject.byref;
-    *bcdObject = WmiObject(m_pSvc, pBcdObjectClass, pBcdObject);
+    *bcdObject = T(m_pSvc, pBcdObjectClass, pBcdObject);
 
     return S_OK;
 }
 
-HRESULT WmiObject::BcdStore_GetObject(const CString & guid, WmiObject * bcdObject)
+template <typename T>
+HRESULT BcdStore::GetObject(const CString & guid, T * bcdObject)
 {
     CComPtr<IWbemClassObject> pBcdObjectClass;
 
@@ -419,12 +467,12 @@ HRESULT WmiObject::BcdStore_GetObject(const CString & guid, WmiObject * bcdObjec
     IFFAILED_RETURN_RES(Get(pOutParams, L"Object", &vBcdObject), "Getting Object out param failed");
 
     CComPtr<IWbemClassObject> pBcdObject = (IWbemClassObject*)vBcdObject.byref;
-    *bcdObject = WmiObject(m_pSvc, pBcdObjectClass, pBcdObject);
+    *bcdObject = T(m_pSvc, pBcdObjectClass, pBcdObject);
 
     return S_OK;
 }
 
-HRESULT WmiObject::BcdStore_DeleteObject(const CString & guid)
+HRESULT BcdStore::DeleteObject(const CString & guid)
 {
     FUNCTION_ENTER_FMT("%ls", guid);
 
@@ -432,7 +480,7 @@ HRESULT WmiObject::BcdStore_DeleteObject(const CString & guid)
         L"Id", CComVariant(guid));
 }
 
-HRESULT WmiObject::Bootmgr_GetDisplayOrder(CComSafeArray<BSTR>& displayOrder)
+HRESULT BcdBootmgr::GetDisplayOrder(CComSafeArray<BSTR>& displayOrder)
 {
     const int32_t type = BcdBootMgrObjectList_DisplayOrder;
 
@@ -454,7 +502,7 @@ HRESULT WmiObject::Bootmgr_GetDisplayOrder(CComSafeArray<BSTR>& displayOrder)
     return S_OK;
 }
 
-HRESULT WmiObject::Bootmgr_SetDisplayOrder(CComSafeArray<BSTR>& displayOrder)
+HRESULT BcdBootmgr::SetDisplayOrder(CComSafeArray<BSTR>& displayOrder)
 {
     const int32_t type = BcdBootMgrObjectList_DisplayOrder;
 
@@ -463,26 +511,26 @@ HRESULT WmiObject::Bootmgr_SetDisplayOrder(CComSafeArray<BSTR>& displayOrder)
         L"Ids", CComVariant(displayOrder.m_psa));
 }
 
-HRESULT WmiObject::Bootmgr_ExtendDisplayOrder(const CString &guid)
+HRESULT BcdBootmgr::ExtendDisplayOrder(const CString &guid)
 {
     FUNCTION_ENTER_FMT("%ls", guid);
 
     CComSafeArray<BSTR> displayOrder;
 
-    IFFAILED_RETURN_RES(Bootmgr_GetDisplayOrder(displayOrder), "Can't get DisplayOrder");
+    IFFAILED_RETURN_RES(GetDisplayOrder(displayOrder), "Can't get DisplayOrder");
     IFFAILED_RETURN_RES(displayOrder.Add(_bstr_t(guid)), "Can't append GUID to DisplayOrder");
-    IFFAILED_RETURN_RES(Bootmgr_SetDisplayOrder(displayOrder), "Can't set DisplayOrder");
+    IFFAILED_RETURN_RES(SetDisplayOrder(displayOrder), "Can't set DisplayOrder");
 
     return S_OK;
 }
 
-HRESULT WmiObject::Bootmgr_RemoveFromDisplayOrder(const CString &guid)
+HRESULT BcdBootmgr::RemoveFromDisplayOrder(const CString &guid)
 {
     FUNCTION_ENTER_FMT("%ls", guid);
 
     CComSafeArray<BSTR> displayOrder;
 
-    IFFAILED_RETURN_RES(Bootmgr_GetDisplayOrder(displayOrder), "Can't get DisplayOrder");
+    IFFAILED_RETURN_RES(GetDisplayOrder(displayOrder), "Can't get DisplayOrder");
 
     CComSafeArray<BSTR> newDisplayOrder; // = filter (!= guid) displayOrder
     bool found = false;
@@ -500,7 +548,7 @@ HRESULT WmiObject::Bootmgr_RemoveFromDisplayOrder(const CString &guid)
     }
     IFFALSE_RETURN_VALUE(found, "Entry not found in DisplayOrder", E_FAIL);
 
-    IFFAILED_RETURN_RES(Bootmgr_SetDisplayOrder(newDisplayOrder), "Can't set DisplayOrder");
+    IFFAILED_RETURN_RES(SetDisplayOrder(newDisplayOrder), "Can't set DisplayOrder");
 
     return S_OK;
 }
@@ -535,44 +583,35 @@ BOOL WMI::AddBcdEntry(const CString & name, const CString & mbrPath, CString & g
     IFFAILED_RETURN_VALUE(CreateGuid(guid), "CreateGuid failed", FALSE);
     uprintf("GUID for new BcdObject: %ls", guid);
 
-    WmiObject bcdStore;
+    BcdStore bcdStore;
     IFFAILED_RETURN_VALUE(
-        WmiObject::BcdStore_OpenStore(&bcdStore),
+        BcdStore::OpenStore(&bcdStore),
         "Can't get BcdStore", FALSE);
 
-    WmiObject bootmgr;
+    BcdBootmgr bootmgr;
     IFFAILED_RETURN_VALUE(
-        bcdStore.BcdStore_GetObject(BCD_GUID_BOOTMGR, &bootmgr),
+        bcdStore.GetBootmgr(&bootmgr),
         "Can't get {bootmgr}", FALSE);
 
-    WmiObject bcdObject;
+    BcdBootSectorApplication bcdObject;
     IFFAILED_RETURN_VALUE(
-        bcdStore.BcdStore_CreateObject(guid, BCD_APPLICATION_BOOTSECTOR, &bcdObject),
-        "Can't create new boot entry",
-        FALSE);
+        bcdStore.CreateBootSectorApplication(guid, &bcdObject),
+        "Can't create new boot entry", FALSE);
 
     IFFAILED_RETURN_VALUE(
-        bcdObject.ExecMethod(L"SetStringElement", /* ppOutParams */ NULL,
-            L"Type", static_cast<int32_t>(BcdLibraryString_Description),
-            L"String", CComVariant(name)),
+        bcdObject.SetDescription(name),
+        "SetDescription failed", FALSE);
+
+    IFFAILED_RETURN_VALUE(
+        bcdObject.SetApplicationPath(mbrPathWithoutDrive),
         "SetStringElement failed", FALSE);
 
     IFFAILED_RETURN_VALUE(
-        bcdObject.ExecMethod(L"SetStringElement", /* ppOutParams */ NULL,
-            L"Type", static_cast<int32_t>(BcdLibraryString_ApplicationPath),
-            L"String", CComVariant(mbrPathWithoutDrive)),
-        "SetStringElement failed", FALSE);
-
-    IFFAILED_RETURN_VALUE(
-        bcdObject.ExecMethod(L"SetPartitionDeviceElement",  /* ppOutParams */ NULL,
-            L"Type", static_cast<int32_t>(BcdLibraryDevice_ApplicationDevice),
-            L"DeviceType", static_cast<int32_t>(2), // type partition
-            L"AdditionalOptions", L"",
-            L"Path", wszPartitionPath),
+        bcdObject.SetPartition(wszPartitionPath),
         "SetPartitionDeviceElement failed", FALSE);
 
     IFFAILED_RETURN_VALUE(
-        bootmgr.Bootmgr_ExtendDisplayOrder(guid),
+        bootmgr.ExtendDisplayOrder(guid),
         "Can't add to DisplayOrder", FALSE);
 
     return TRUE;
@@ -584,22 +623,22 @@ BOOL WMI::RemoveBcdEntry(const CString & guid)
 
     COMThreading t;
 
-    WmiObject bcdStore;
+    BcdStore bcdStore;
     IFFAILED_RETURN_VALUE(
-        WmiObject::BcdStore_OpenStore(&bcdStore),
+        BcdStore::OpenStore(&bcdStore),
         "Can't get BcdStore", FALSE);
 
-    WmiObject bootmgr;
+    BcdBootmgr bootmgr;
     IFFAILED_RETURN_VALUE(
-        bcdStore.BcdStore_GetObject(BCD_GUID_BOOTMGR, &bootmgr),
+        bcdStore.GetBootmgr(&bootmgr),
         "Can't get {bootmgr}", FALSE);
 
     IFFAILED_PRINTERROR(
-        bootmgr.Bootmgr_RemoveFromDisplayOrder(guid),
+        bootmgr.RemoveFromDisplayOrder(guid),
         "Can't remove from DisplayOrder (already removed?)");
 
     IFFAILED_PRINTERROR(
-        bcdStore.BcdStore_DeleteObject(guid),
+        bcdStore.DeleteObject(guid),
         "DeleteObject failed (already deleted?)");
 
     return TRUE;
