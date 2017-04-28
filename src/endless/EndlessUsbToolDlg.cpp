@@ -5999,7 +5999,10 @@ BOOL CEndlessUsbToolDlg::UninstallDualBoot(CEndlessUsbToolDlg *dlg)
 	if (IsLegacyBIOSBoot()) {
 		if (dlg->m_eosldrInstaller->IsInstalled(systemDriveLetter)) {
 			// remove eosldr from Windows boot menu
-			if (!dlg->m_eosldrInstaller->Uninstall(systemDriveLetter)) {
+			bool found_boot_entry;
+			bool ret = dlg->m_eosldrInstaller->Uninstall(systemDriveLetter, found_boot_entry);
+			dlg->TrackEvent(_T("FoundBootEntry"), found_boot_entry ? _T("True") : _T("False"));
+			if (!ret) {
 				PRINT_ERROR_MSG("Couldn't uninstall eosldr");
 				dlg->m_lastErrorCause = ErrorCauseUninstallEosldrFailed;
 				goto error;

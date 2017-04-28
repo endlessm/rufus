@@ -18,5 +18,5 @@ namespace WMI {
 
     // Removes an entry from the system boot menu.
     // guid (in): GUID for an existing boot menu entry
-    BOOL RemoveBcdEntry(const CString &guid);
+    BOOL RemoveBcdEntry(const CString &guid, bool &foundBootEntry);
 };

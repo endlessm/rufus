@@ -11,6 +11,9 @@
 // GRUB core.img with a special preamble, loaded by eosldr.mbr
 #define EOSLDR_IMG_FILE                 L"eosldr"
 
+// The section in Windows XP's boot.ini for boot menu entries
+#define BOOT_INI_SECTION        L"operating systems"
+
 // GUID for Endless OS's entry in the BCD boot menu, stored in the Uninstall
 // registry key
 #define REGKEY_BCD_GUID         L"EndlessBcdGuid"
@@ -76,16 +79,15 @@ static bool UnhideAndDelete(const CString &path)
     return true;
 }
 
-bool EosldrInstaller::Uninstall(const CString & systemDriveLetter)
+bool EosldrInstaller::Uninstall(const CString & systemDriveLetter, bool &foundBootEntry)
 {
     const CString eosldrImgPath = systemDriveLetter + EOSLDR_IMG_FILE;
     const CString eosldrMbrPath = systemDriveLetter + EOSLDR_MBR_FILE;
 
-    // TODO: just warn on failure?
-    IFFALSE_RETURN_VALUE(RemoveFromBootOrder(systemDriveLetter, eosldrMbrPath),
-        "Can't remove Endless OS bootloader from boot menu", false);
-    IFFALSE_RETURN_VALUE(UnhideAndDelete(eosldrMbrPath), "Deleting eosldr.mbr failed", false);
-    IFFALSE_RETURN_VALUE(UnhideAndDelete(eosldrImgPath), "Deleting eosldr failed", false);
+    IFFALSE_PRINTERROR(RemoveFromBootOrder(systemDriveLetter, eosldrMbrPath, foundBootEntry),
+        "Can't remove Endless OS bootloader from boot menu");
+    IFFALSE_PRINTERROR(UnhideAndDelete(eosldrMbrPath), "Deleting eosldr.mbr failed");
+    IFFALSE_PRINTERROR(UnhideAndDelete(eosldrImgPath), "Deleting eosldr failed");
 
     return true;
 }
@@ -109,10 +111,14 @@ bool EosldrInstaller::AddToBootOrder(const CString & systemDriveLetter, const CS
     return false;
 }
 
-bool EosldrInstaller::RemoveFromBootOrder(const CString & systemDriveLetter, const CString & eosldrMbrPath)
+bool EosldrInstaller::RemoveFromBootOrder(
+    const CString & systemDriveLetter,
+    const CString & eosldrMbrPath,
+    bool &foundBootEntry)
 {
     FUNCTION_ENTER;
 
+    foundBootEntry = false;
     return false;
 }
 
@@ -120,17 +126,24 @@ bool EosldrInstallerBootIni::AddToBootOrder(const CString & systemDriveLetter, c
 {
     FUNCTION_ENTER;
 
-    return ModifyBootOrder(systemDriveLetter, eosldrMbrPath, true);
+    bool dummyFoundBootEntry;
+
+    return ModifyBootOrder(systemDriveLetter, eosldrMbrPath, true, dummyFoundBootEntry);
 }
 
-bool EosldrInstallerBootIni::RemoveFromBootOrder(const CString & systemDriveLetter, const CString & eosldrMbrPath)
+bool EosldrInstallerBootIni::RemoveFromBootOrder(
+    const CString & systemDriveLetter,
+    const CString & eosldrMbrPath,
+    bool &foundBootEntry)
 {
     FUNCTION_ENTER;
 
-    return ModifyBootOrder(systemDriveLetter, eosldrMbrPath, false);
+    IFFALSE_PRINTERROR(ModifyBootOrder(systemDriveLetter, eosldrMbrPath, false, foundBootEntry), "ModifyBootOrder failed");
+
+    return true;
 }
 
-bool EosldrInstallerBootIni::ModifyBootOrder(const CString & systemDriveLetter, const CString & eosldrMbrPath, bool add)
+bool EosldrInstallerBootIni::ModifyBootOrder(const CString & systemDriveLetter, const CString & eosldrMbrPath, bool add, bool &foundBootEntry)
 {
     const CString bootIni = systemDriveLetter + L"boot.ini";
     FUNCTION_ENTER_FMT("bootIni=%ls", bootIni);
@@ -142,12 +155,26 @@ bool EosldrInstallerBootIni::ModifyBootOrder(const CString & systemDriveLetter, 
         "SetFileAttributes failed", false);
 
     // passing NULL for the third parameter removes the entry
-    const wchar_t *lpString = add ? m_name : NULL;
-    if (!WritePrivateProfileString(L"operating systems", eosldrMbrPath, lpString, bootIni)) {
-        PRINT_ERROR_MSG_FMT("WritePrivateProfileString(..., %ls, %ls, %ls) failed",
-            eosldrMbrPath, lpString ? lpString : L"NULL", bootIni);
-        IFFALSE_PRINTERROR(SetFileAttributes(bootIni, originalAttributes), "SetFileAttributes failed too");
-        return false;
+    if (add) {
+        if (!WritePrivateProfileString(BOOT_INI_SECTION, eosldrMbrPath, m_name, bootIni)) {
+            PRINT_ERROR_MSG_FMT("WritePrivateProfileString(..., %ls, %ls, %ls) failed",
+                eosldrMbrPath, m_name, bootIni);
+            IFFALSE_PRINTERROR(SetFileAttributes(bootIni, originalAttributes), "SetFileAttributes failed too");
+            return false;
+        }
+    } else {
+        // If there's an existing entry for eosldr with a non-empty-string label,
+        // consider the boot entry to be found.
+        wchar_t dummy[2] = { 0 };
+        DWORD len = GetPrivateProfileString(BOOT_INI_SECTION, eosldrMbrPath, L"", dummy, ARRAYSIZE(dummy), bootIni);
+        foundBootEntry = (len > 0);
+
+        if (!WritePrivateProfileString(BOOT_INI_SECTION, eosldrMbrPath, NULL, bootIni)) {
+            PRINT_ERROR_MSG_FMT("WritePrivateProfileString(..., %ls, NULL, %ls) failed",
+                eosldrMbrPath, bootIni);
+            IFFALSE_PRINTERROR(SetFileAttributes(bootIni, originalAttributes), "SetFileAttributes failed too");
+            return false;
+        }
     }
 
     IFFALSE_RETURN_VALUE(SetFileAttributes(bootIni, originalAttributes),
@@ -180,9 +207,14 @@ bool EosldrInstallerBcd::AddToBootOrder(const CString & systemDriveLetter, const
     return true;
 }
 
-bool EosldrInstallerBcd::RemoveFromBootOrder(const CString & systemDriveLetter, const CString & eosldrMbrPath)
+bool EosldrInstallerBcd::RemoveFromBootOrder(
+    const CString & systemDriveLetter,
+    const CString & eosldrMbrPath,
+    bool &foundBootEntry)
 {
     FUNCTION_ENTER;
+
+    foundBootEntry = false;
 
     CRegKey registryKey;
     LSTATUS result;
@@ -197,7 +229,7 @@ bool EosldrInstallerBcd::RemoveFromBootOrder(const CString & systemDriveLetter, 
         "Failed to get EndlessBcdGuid", false);
 
     IFFALSE_RETURN_VALUE(
-        WMI::RemoveBcdEntry(guid),
+        WMI::RemoveBcdEntry(guid, foundBootEntry),
         "RemoveBcdEntry failed", false);
 
     return true;

@@ -617,7 +617,7 @@ BOOL WMI::AddBcdEntry(const CString & name, const CString & mbrPath, CString & g
     return TRUE;
 }
 
-BOOL WMI::RemoveBcdEntry(const CString & guid)
+BOOL WMI::RemoveBcdEntry(const CString & guid, bool &foundBootEntry)
 {
     FUNCTION_ENTER_FMT("%ls", guid);
 
@@ -633,9 +633,13 @@ BOOL WMI::RemoveBcdEntry(const CString & guid)
         bcdStore.GetBootmgr(&bootmgr),
         "Can't get {bootmgr}", FALSE);
 
-    IFFAILED_PRINTERROR(
-        bootmgr.RemoveFromDisplayOrder(guid),
-        "Can't remove from DisplayOrder (already removed?)");
+    HRESULT hr = bootmgr.RemoveFromDisplayOrder(guid);
+    if (FAILED(hr)) {
+        PRINT_HRESULT(hr, "Can't remove from DisplayOrder (already removed?)");
+        foundBootEntry = false;
+    } else {
+        foundBootEntry = true;
+    }
 
     IFFAILED_PRINTERROR(
         bcdStore.DeleteObject(guid),

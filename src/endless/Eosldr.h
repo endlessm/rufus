@@ -14,7 +14,7 @@ public:
         const CString &bootFilesPath);
 
     bool IsInstalled(const CString &systemDriveLetter);
-    bool Uninstall(const CString &systemDriveLetter);
+    bool Uninstall(const CString &systemDriveLetter, bool &foundBootEntry);
 
     static EosldrInstaller *GetInstance(
         int windowsVersion,
@@ -31,7 +31,8 @@ protected:
         const CString & eosldrMbrPath);
     virtual bool RemoveFromBootOrder(
         const CString & systemDriveLetter,
-        const CString & eosldrMbrPath);
+        const CString & eosldrMbrPath,
+        bool &foundBootEntry);
 
     // Boot entry name
     const CString m_name;
@@ -49,13 +50,15 @@ protected:
         const CString & eosldrMbrPath);
     virtual bool RemoveFromBootOrder(
         const CString & systemDriveLetter,
-        const CString & eosldrMbrPath);
+        const CString & eosldrMbrPath,
+        bool &foundBootEntry);
 
 private:
     bool ModifyBootOrder(
         const CString & systemDriveLetter,
         const CString & eosldrMbrPath,
-        bool add);
+        bool add,
+        bool &foundBootEntry);
 };
 
 class EosldrInstallerBcd : public EosldrInstaller {
@@ -71,7 +74,8 @@ protected:
         const CString & eosldrMbrPath);
     virtual bool RemoveFromBootOrder(
         const CString & systemDriveLetter,
-        const CString & eosldrMbrPath);
+        const CString & eosldrMbrPath,
+        bool &foundBootEntry);
 
 private:
     // Key in registry to stash boot entry GUID
