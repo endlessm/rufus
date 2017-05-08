@@ -4825,12 +4825,20 @@ bool CEndlessUsbToolDlg::FormatFirstPartitionOnDrive(DWORD DriveIndex, int fsToU
 	Sleep(200); // Radu: check if this is needed, that's what rufus does; I hate sync using sleep
 	IFFALSE_PRINTERROR(WaitForLogical(DriveIndex), "Warning: Logical drive was not found!"); // We try to continue even if this fails, just in case
 
-	while (formatRetries-- > 0 && !(result = FormatDrive(DriveIndex, fsToUse, partLabel))) {
+	while (formatRetries-- > 0) {
+		// Clear any leftover error state
+		FormatStatus = 0;
+
+		if ((result = FormatDrive(DriveIndex, fsToUse, partLabel))) {
+			break;
+		}
+
+		uprintf("FormatDrive failed; FormatStatus = 0x%x %s\n", FormatStatus, StrError(FormatStatus, TRUE));
 		Sleep(200); // Radu: check if this is needed, that's what rufus does; I hate sync using sleep
 		// Check if user cancelled
 		IFFALSE_GOTOERROR(WaitForSingleObject(cancelEvent, 0) == WAIT_TIMEOUT, "User cancel.");
 	}
-	IFFALSE_GOTOERROR(result, "Format error.");
+	IFFALSE_GOTOERROR(result, "FormatDrive failed too many times");
 
 	Sleep(200); // Radu: check if this is needed, that's what rufus does; I hate sync using sleep
 	IFFALSE_PRINTERROR(WaitForLogical(DriveIndex), "Warning: Logical drive was not found after format!");
