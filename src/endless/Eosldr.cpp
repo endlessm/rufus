@@ -154,11 +154,11 @@ bool EosldrInstallerBootIni::ModifyBootOrder(const CString & systemDriveLetter, 
     IFFALSE_RETURN_VALUE(SetFileAttributes(bootIni, FILE_ATTRIBUTE_NORMAL),
         "SetFileAttributes failed", false);
 
-    // passing NULL for the third parameter removes the entry
     if (add) {
-        if (!WritePrivateProfileString(BOOT_INI_SECTION, eosldrMbrPath, m_name, bootIni)) {
+        const CString quotedName = L'"' + m_name + L'"';
+        if (!WritePrivateProfileString(BOOT_INI_SECTION, eosldrMbrPath, quotedName, bootIni)) {
             PRINT_ERROR_MSG_FMT("WritePrivateProfileString(..., %ls, %ls, %ls) failed",
-                eosldrMbrPath, m_name, bootIni);
+                eosldrMbrPath, quotedName, bootIni);
             IFFALSE_PRINTERROR(SetFileAttributes(bootIni, originalAttributes), "SetFileAttributes failed too");
             return false;
         }
@@ -169,6 +169,7 @@ bool EosldrInstallerBootIni::ModifyBootOrder(const CString & systemDriveLetter, 
         DWORD len = GetPrivateProfileString(BOOT_INI_SECTION, eosldrMbrPath, L"", dummy, ARRAYSIZE(dummy), bootIni);
         foundBootEntry = (len > 0);
 
+        // passing NULL for the third parameter removes the entry
         if (!WritePrivateProfileString(BOOT_INI_SECTION, eosldrMbrPath, NULL, bootIni)) {
             PRINT_ERROR_MSG_FMT("WritePrivateProfileString(..., %ls, NULL, %ls) failed",
                 eosldrMbrPath, bootIni);
