@@ -14,6 +14,13 @@
 // Windows XP's boot configuration file, stored in the root of the system drive
 #define BOOT_INI                L"boot.ini"
 
+// Our backup of boot.ini, taken before modifying it. We give it a well-known
+// name so it can be easily found despite being readonly, system and
+// hidden (like boot.ini itself); and use a UUID to remove the possibility of a
+// collision with some other backup of the file.
+// NB: not wide, so it can be used in a static debug message.
+#define BOOT_INI_BACKUP         "boot-1930e839-4cc0-4a57-a8c2-7c4dbd248e36.ini"
+
 // The section in Windows XP's boot.ini for boot menu entries
 #define BOOT_INI_SECTION        L"operating systems"
 
@@ -189,6 +196,19 @@ bool EosldrInstallerBootIni::ModifyBootOrder(const CString & systemDriveLetter, 
 
     Unveil unveilBootIni(bootIni);
     IFFALSE_RETURN_VALUE(unveilBootIni.succeeded(), "Couldn't make boot.ini visible", false);
+
+    const CString bootIniBackup = systemDriveLetter + _T(BOOT_INI_BACKUP);
+    uprintf("Backing up %ls to %ls", bootIni, bootIniBackup);
+    IFFALSE_PRINTERROR(SetFileAttributes(bootIniBackup, FILE_ATTRIBUTE_NORMAL),
+        "Couldn't make " BOOT_INI_BACKUP " visible (it probably doesn't exist)");
+    if (!CopyFile(bootIni, bootIniBackup, /* bFailIfExists */ FALSE)) {
+        PRINT_ERROR_MSG_FMT("Backing up boot.ini with CopyFile(%ls, %ls, FALSE) failed",
+            bootIni, bootIniBackup);
+        return false;
+    }
+
+    IFFALSE_PRINTERROR(SetFileAttributes(bootIniBackup, unveilBootIni.originalAttributes()),
+        "SetFileAttributes failed on backup");
 
     if (add) {
         const CString quotedName = L'"' + m_name + L'"';
