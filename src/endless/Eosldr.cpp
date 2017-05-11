@@ -11,6 +11,9 @@
 // GRUB core.img with a special preamble, loaded by eosldr.mbr
 #define EOSLDR_IMG_FILE                 L"eosldr"
 
+// Windows XP's boot configuration file, stored in the root of the system drive
+#define BOOT_INI                L"boot.ini"
+
 // The section in Windows XP's boot.ini for boot menu entries
 #define BOOT_INI_SECTION        L"operating systems"
 
@@ -143,23 +146,55 @@ bool EosldrInstallerBootIni::RemoveFromBootOrder(
     return true;
 }
 
+// Temporarily sets attributes of 'path' to NORMAL, restoring the original
+// attributes on dispose.
+static class Unveil {
+public:
+    Unveil(const CString &path)
+        : m_path(path),
+        m_originalAttributes(INVALID_FILE_ATTRIBUTES),
+        m_succeeded(false)
+    {
+        FUNCTION_ENTER_FMT("%ls", path);
+        m_originalAttributes = GetFileAttributes(path);
+        IFTRUE_RETURN(m_originalAttributes == INVALID_FILE_ATTRIBUTES, "GetFileAttributes failed");
+        IFFALSE_RETURN(SetFileAttributes(path, FILE_ATTRIBUTE_NORMAL), "SetFileAttributes failed");
+
+        m_succeeded = true;
+    }
+
+    ~Unveil() {
+        FUNCTION_ENTER_FMT("%ls", m_path);
+        if (m_originalAttributes != INVALID_FILE_ATTRIBUTES) {
+            // This cannot be fatal because at this point we have already edited boot.ini.
+            // It is not the end of the world if it is not hidden; this is also unlikely to fail.
+            IFFALSE_PRINTERROR(SetFileAttributes(m_path, m_originalAttributes),
+                "Couldn't restore attributes");
+        }
+    }
+
+    bool succeeded() { return m_succeeded; }
+    DWORD originalAttributes() { return m_originalAttributes; }
+
+private:
+    const CString &m_path;
+    DWORD m_originalAttributes;
+    bool m_succeeded;
+};
+
 bool EosldrInstallerBootIni::ModifyBootOrder(const CString & systemDriveLetter, const CString & eosldrMbrPath, bool add, bool &foundBootEntry)
 {
-    const CString bootIni = systemDriveLetter + L"boot.ini";
+    const CString bootIni = systemDriveLetter + BOOT_INI;
     FUNCTION_ENTER_FMT("bootIni=%ls", bootIni);
-    const DWORD originalAttributes = GetFileAttributes(bootIni);
 
-    IFTRUE_RETURN_VALUE(originalAttributes == INVALID_FILE_ATTRIBUTES,
-        "GetFileAttributes failed", false);
-    IFFALSE_RETURN_VALUE(SetFileAttributes(bootIni, FILE_ATTRIBUTE_NORMAL),
-        "SetFileAttributes failed", false);
+    Unveil unveilBootIni(bootIni);
+    IFFALSE_RETURN_VALUE(unveilBootIni.succeeded(), "Couldn't make boot.ini visible", false);
 
     if (add) {
         const CString quotedName = L'"' + m_name + L'"';
         if (!WritePrivateProfileString(BOOT_INI_SECTION, eosldrMbrPath, quotedName, bootIni)) {
             PRINT_ERROR_MSG_FMT("WritePrivateProfileString(..., %ls, %ls, %ls) failed",
                 eosldrMbrPath, quotedName, bootIni);
-            IFFALSE_PRINTERROR(SetFileAttributes(bootIni, originalAttributes), "SetFileAttributes failed too");
             return false;
         }
     } else {
@@ -173,13 +208,9 @@ bool EosldrInstallerBootIni::ModifyBootOrder(const CString & systemDriveLetter, 
         if (!WritePrivateProfileString(BOOT_INI_SECTION, eosldrMbrPath, NULL, bootIni)) {
             PRINT_ERROR_MSG_FMT("WritePrivateProfileString(..., %ls, NULL, %ls) failed",
                 eosldrMbrPath, bootIni);
-            IFFALSE_PRINTERROR(SetFileAttributes(bootIni, originalAttributes), "SetFileAttributes failed too");
             return false;
         }
     }
-
-    IFFALSE_RETURN_VALUE(SetFileAttributes(bootIni, originalAttributes),
-        "SetFileAttibutes failed for originalAttributes", false);
 
     return true;
 }
