@@ -35,6 +35,11 @@ bool EosldrInstaller::CanInstall(const CString & bootFilesPath)
     return !!PathFileExists(bootFilesPath + EOSLDR_SUBDIRECTORY);
 }
 
+// We mark eosldr[.mbr] readonly, hidden and system, but don't go all-out with
+// restrictive ACLs like we do for /endless/endless.img etc. There's no
+// irreplacable data in these files, and on systems booted with this method,
+// deleting them just means the user loses access to Endless OS (in a fixable
+// way), not Windows as well.
 static bool CopyAndHide(const CString &source, const CString &target)
 {
     FUNCTION_ENTER_FMT("%ls -> %ls", source, target);
