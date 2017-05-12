@@ -564,7 +564,7 @@ BOOL WMI::AddBcdEntry(const CString & name, const CString & mbrPath, const CStri
 
     wchar_t wszPartitionPath[MAX_PATH + 1] = { 0 };
     IFFALSE_RETURN_VALUE(
-        QueryDosDevice(mbrPath.Left(2), wszPartitionPath, ARRAYSIZE(wszPartitionPath)),
+        QueryDosDevice(mbrDriveLetter, wszPartitionPath, ARRAYSIZE(wszPartitionPath)),
         "Can't get device path for mbrPath drive", FALSE);
 
     BcdStore bcdStore;
