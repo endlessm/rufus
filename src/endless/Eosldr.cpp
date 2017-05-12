@@ -215,6 +215,15 @@ bool EosldrInstallerBootIni::ModifyBootOrder(const CString & systemDriveLetter, 
     IFFALSE_PRINTERROR(SetFileAttributes(bootIniBackup, unveilBootIni.originalAttributes()),
         "SetFileAttributes failed on backup");
 
+    // According to https://support.microsoft.com/en-gb/help/102873 and other
+    // resources, the key in boot.ini are supposed to use ARC-style notation
+    // for disk labels -- of the form multi(w)disk(x)rdisk(y)partition(z) --
+    // rather than DOS-style notation like C:. I have been unable to find a
+    // sensible API to convert DOS notation, or even HarddiskYPartitionZ
+    // notation, to ARC notation. On a single-disk system, at least, C: works
+    // fine!
+    //
+    // http://stackoverflow.com/q/43895953/173314
     if (add) {
         const CString quotedName = L'"' + m_name + L'"';
         if (!WritePrivateProfileString(BOOT_INI_SECTION, eosldrMbrPath, quotedName, bootIni)) {
