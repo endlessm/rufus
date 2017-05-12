@@ -553,22 +553,9 @@ HRESULT BcdBootmgr::RemoveFromDisplayOrder(const CString &guid)
     return S_OK;
 }
 
-static HRESULT CreateGuid(CString &guidOut)
+BOOL WMI::AddBcdEntry(const CString & name, const CString & mbrPath, const CString & guid)
 {
-    GUID guid;
-
-    IFFAILED_RETURN_RES(CoCreateGuid(&guid), "CoCreateGuid failed");
-
-    wchar_t wszGuid[128] = { 0 };
-    int ret = StringFromGUID2(guid, wszGuid, ARRAYSIZE(wszGuid));
-    IFFALSE_RETURN_VALUE(ret, "StringFromGUID2 failed", E_FAIL);
-    guidOut = wszGuid;
-    return S_OK;
-}
-
-BOOL WMI::AddBcdEntry(const CString & name, const CString & mbrPath, CString & guid)
-{
-    FUNCTION_ENTER_FMT("%ls %ls", name, mbrPath);
+    FUNCTION_ENTER_FMT("%ls %ls %ls", name, mbrPath, guid);
 
     const CString mbrDriveLetter = mbrPath.Left(2);
     const CString mbrPathWithoutDrive = mbrPath.Mid(2);
@@ -579,9 +566,6 @@ BOOL WMI::AddBcdEntry(const CString & name, const CString & mbrPath, CString & g
     IFFALSE_RETURN_VALUE(
         QueryDosDevice(mbrPath.Left(2), wszPartitionPath, ARRAYSIZE(wszPartitionPath)),
         "Can't get device path for mbrPath drive", FALSE);
-
-    IFFAILED_RETURN_VALUE(CreateGuid(guid), "CreateGuid failed", FALSE);
-    uprintf("GUID for new BcdObject: %ls", guid);
 
     BcdStore bcdStore;
     IFFAILED_RETURN_VALUE(

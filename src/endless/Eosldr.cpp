@@ -240,18 +240,26 @@ bool EosldrInstallerBootIni::ModifyBootOrder(const CString & systemDriveLetter, 
     return true;
 }
 
+static HRESULT CreateGuid(CString &guidOut)
+{
+    GUID guid;
+
+    IFFAILED_RETURN_RES(CoCreateGuid(&guid), "CoCreateGuid failed");
+
+    wchar_t wszGuid[128] = { 0 };
+    int ret = StringFromGUID2(guid, wszGuid, ARRAYSIZE(wszGuid));
+    IFFALSE_RETURN_VALUE(ret, "StringFromGUID2 failed", E_FAIL);
+    guidOut = wszGuid;
+    return S_OK;
+}
+
 bool EosldrInstallerBcd::AddToBootOrder(const CString & systemDriveLetter, const CString & eosldrMbrPath)
 {
     FUNCTION_ENTER_FMT("%ls, %ls", systemDriveLetter, eosldrMbrPath);
 
     CString guid;
-    IFFALSE_RETURN_VALUE(
-        WMI::AddBcdEntry(m_name, eosldrMbrPath, guid),
-        "AddBcdEntry failed", false);
+    IFFAILED_RETURN_VALUE(CreateGuid(guid), "CreateGuid failed", false);
 
-    // At this point it's too late to fail: we've already added the entry to the boot order.
-    // TODO: pass GUID into ::AddBcdEntry instead, and add it to the registry *first*
-    // Assumes that m_uninstallKey has already been created (and populated with everything else).
     CRegKey registryKey;
     LSTATUS result;
 
@@ -260,6 +268,10 @@ bool EosldrInstallerBcd::AddToBootOrder(const CString & systemDriveLetter, const
 
     IFFALSE_RETURN_VALUE(ERROR_SUCCESS == registryKey.SetStringValue(REGKEY_BCD_GUID, guid),
         "Failed to set EndlessBcdGuid", false);
+
+    IFFALSE_RETURN_VALUE(
+        WMI::AddBcdEntry(m_name, eosldrMbrPath, guid),
+        "AddBcdEntry failed", false);
 
     return true;
 }
