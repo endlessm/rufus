@@ -577,6 +577,9 @@ BOOL WMI::AddBcdEntry(const CString & name, const CString & mbrPath, const CStri
         bcdStore.GetBootmgr(&bootmgr),
         "Can't get {bootmgr}", FALSE);
 
+    // Roughly equivalent to:
+    // > bcdedit /create /d $name /application bootsector
+    // which returns a GUID
     BcdBootSectorApplication bcdObject;
     IFFAILED_RETURN_VALUE(
         bcdStore.CreateBootSectorApplication(guid, &bcdObject),
@@ -586,14 +589,20 @@ BOOL WMI::AddBcdEntry(const CString & name, const CString & mbrPath, const CStri
         bcdObject.SetDescription(name),
         "SetDescription failed", FALSE);
 
+    // Roughly equivalent to:
+    // > bcdedit /set $guid path $mbrPathWithoutDrive
     IFFAILED_RETURN_VALUE(
         bcdObject.SetApplicationPath(mbrPathWithoutDrive),
         "SetStringElement failed", FALSE);
 
+    // Roughly equivalent to:
+    // > bcdedit /set $guid device $wszPartitionPath
     IFFAILED_RETURN_VALUE(
         bcdObject.SetPartition(wszPartitionPath),
         "SetPartitionDeviceElement failed", FALSE);
 
+    // Roughly equivalent to:
+    // > bcdedit /displayorder $guid /addlast
     IFFAILED_RETURN_VALUE(
         bootmgr.ExtendDisplayOrder(guid),
         "Can't add to DisplayOrder", FALSE);
