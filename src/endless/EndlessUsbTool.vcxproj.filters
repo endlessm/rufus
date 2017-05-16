@@ -141,6 +141,12 @@
     <ClInclude Include="ImageSigningKey.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="WMI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Eosldr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EndlessUsbTool.cpp">
@@ -237,6 +243,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GeneralCode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WMI.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Eosldr.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

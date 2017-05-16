@@ -9,6 +9,7 @@
 #include "localization.h"
 #include "DownloadManager.h"
 #include "EndlessISO.h"
+#include "Eosldr.h"
 
 typedef struct FileImageEntry {
     // Full, real path on disk
@@ -42,6 +43,7 @@ typedef struct FileImageEntry {
 } FileImageEntry_t, *pFileImageEntry_t;
 
 typedef enum ErrorCause {
+    ErrorCauseNone,
     ErrorCauseGeneric,
     ErrorCauseCancelled,
     ErrorCauseDownloadFailed,
@@ -57,7 +59,8 @@ typedef enum ErrorCause {
     ErrorCauseCantCheckMBR,
     ErrorCauseInstallFailedDiskFull,
     ErrorCauseSuspended,
-    ErrorCauseNone
+    ErrorCauseInstallEosldrFailed,
+    ErrorCauseUninstallEosldrFailed,
 } ErrorCause_t;
 
 typedef struct RemoteImageEntry {
@@ -297,6 +300,8 @@ private:
 	unsigned long m_cancelImageUnpack;
 	InstallMethod_t m_selectedInstallMethod;
 
+	std::unique_ptr<EosldrInstaller> m_eosldrInstaller;
+
 	void TrackEvent(const CString &action, const CString &label = CString(), LONGLONG value = -1L);
 	void TrackEvent(const CString &action, LONGLONG value);
 	void SetSelectedInstallMethod(InstallMethod_t method);
@@ -406,6 +411,7 @@ private:
 	static bool WriteMBRAndSBRToUSB(HANDLE hPhysical, const CString &bootFilesPath, DWORD bytesPerSector);
 
 	static DWORD WINAPI SetupDualBoot(LPVOID param);
+	static bool SetupDualBootFiles(CEndlessUsbToolDlg *dlg, const CString &systemDriveLetter, const CString &bootFilesPath, ErrorCause &errorCause);
 
 	static bool EnsureUncompressed(const CString &filePath);
 	static bool ExtendImageFile(const CString &endlessImgPath, ULONGLONG selectedGigs);
@@ -413,7 +419,7 @@ private:
 	static bool CopyMultipleItems(const CString &fromPath, const CString &toPath);
 	static bool IsLegacyBIOSBoot();
 	static bool IsWindowsMBR(FILE* fpDrive, const CString &TargetName);
-	static bool CanInstallToDrive(const CString &systemDriveLetter, const bool isBIOS, ErrorCause &cause);
+	static bool CanInstallToDrive(const CString &systemDriveLetter, const bool isBIOS, const bool canInstallEosldr, ErrorCause &cause);
 	static bool WriteMBRAndSBRToWinDrive(CEndlessUsbToolDlg *dlg, const CString &systemDriveLetter, const CString &bootFilesPath, const CString &endlessFilesPath);
 	static bool SetupEndlessEFI(const CString &systemDriveLetter, const CString &bootFilesPath);
 	static HANDLE GetPhysicalFromDriveLetter(const CString &driveLetter);
@@ -432,9 +438,7 @@ private:
 	static BOOL ChangeAccessPermissions(CString path, bool restrictAccess);
 
 	static CStringW GetSystemDrive();
-	static BOOL SetEndlessRegistryKey(HKEY parentKey, const CString &keyPath, const CString &keyName, CComVariant keyValue, bool createBackup = true);
-	static BOOL IsBitlockedDrive(const CString &drive);
-	static BOOL GetMachineInfo(CString &manufacturer, CString &model);
+	static BOOL SetEndlessRegistryKey(HKEY parentKey, const CString &keyPath, const CString &keyName, CComVariant keyValue);
 
 	static CStringW GetExePath();
 	static BOOL AddUninstallRegistryKeys(const CStringW &uninstallExePath, const CStringW &installPath);
@@ -456,6 +460,8 @@ private:
 	void UpdateDualBootTexts();
 	void QueryAndDoUninstall();
 	static bool IsEndlessMBR(FILE* fp, const CString &systemDriveLetter);
+	static bool UninstallEndlessMBR(const CString &systemDriveLetter, const CString &endlessFilesPath, HANDLE hPhysical, ErrorCause &cause);
+	static bool UninstallEndlessEFI(const CString &systemDriveLetter, HANDLE hPhysical, bool &found_boot_entry);
 	static bool RestoreOriginalBoottrack(const CString &endlessPath, HANDLE hPhysical, FILE *fp);
 
 	CComBSTR GetDownloadString(const RemoteImageEntry &imageEntry);

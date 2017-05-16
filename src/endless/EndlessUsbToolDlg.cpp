@@ -7,14 +7,11 @@
 #include "Analytics.h"
 #include "afxdialogex.h"
 
-#include <functional>
-
 #include <windowsx.h>
 #include <dbt.h>
 #include <atlpath.h>
 #include <intrin.h>
 #include <Aclapi.h>
-#include <Wbemidl.h>
 
 #include "json/json.h"
 #include <algorithm>
@@ -23,6 +20,7 @@
 #include "WindowsUsbDefines.h"
 #include "StringHelperMethods.h"
 #include "Images.h"
+#include "WMI.h"
 
 // Rufus include files
 extern "C" {
@@ -354,6 +352,22 @@ const wchar_t* mainWindowTitle = L"Endless Installer";
 
 #define FORMAT_STATUS_CANCEL (ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_CANCELLED)
 
+#pragma region Uninstall_registry_stuff
+#define REGKEY_WIN_UNINSTALL	L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\"
+#define REGKEY_ENDLESS_OS		ENDLESS_OS_NAME
+#define REGKEY_UNINSTALLENDLESS (REGKEY_WIN_UNINSTALL REGKEY_ENDLESS_OS)
+#define REGKEY_DISPLAYNAME		L"DisplayName"
+#define REGKEY_UNINSTALL_STRING	L"UninstallString"
+#define REGKEY_INSTALL_LOCATION	L"InstallLocation"
+#define REGKEY_PUBLISHER		L"Publisher"
+#define REGKEY_HELP_LINK		L"HelpLink"
+#define REGKEY_NOCHANGE			L"NoChange"
+#define REGKEY_NOMODIFY			L"NoModify"
+
+#define REGKEY_DISPLAYNAME_TEXT	ENDLESS_OS_NAME
+#define REGKEY_PUBLISHER_TEXT	L"Endless Mobile, Inc."
+#pragma endregion Uninstall_registry_stuff
+
 static LPCTSTR OperationToStr(int op)
 {
     switch (op)
@@ -383,6 +397,7 @@ static LPCTSTR ErrorCauseToStr(ErrorCause_t errorCause)
 {
     switch (errorCause)
     {
+        TOSTR(ErrorCauseNone);
         TOSTR(ErrorCauseGeneric);
         TOSTR(ErrorCauseCancelled);
         TOSTR(ErrorCauseDownloadFailed);
@@ -398,7 +413,8 @@ static LPCTSTR ErrorCauseToStr(ErrorCause_t errorCause)
         TOSTR(ErrorCauseCantCheckMBR);
         TOSTR(ErrorCauseInstallFailedDiskFull);
         TOSTR(ErrorCauseSuspended);
-        TOSTR(ErrorCauseNone);
+        TOSTR(ErrorCauseInstallEosldrFailed);
+        TOSTR(ErrorCauseUninstallEosldrFailed);
         default: return _T("Error Cause Unknown");
     }
 }
@@ -546,7 +562,9 @@ CEndlessUsbToolDlg::CEndlessUsbToolDlg(UINT globalMessage, CWnd* pParent /*=NULL
     m_lastErrorCause(ErrorCause_t::ErrorCauseNone),
     m_localFilesScanned(false),
     m_jsonDownloadState(JSONDownloadState::Pending),
-	m_selectedInstallMethod(InstallMethod_t::None)
+    m_selectedInstallMethod(InstallMethod_t::None),
+    m_eosldrInstaller(
+        EosldrInstaller::GetInstance(nWindowsVersion, ENDLESS_OS_NAME, REGKEY_UNINSTALLENDLESS))
 {
     FUNCTION_ENTER;
     m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);    
@@ -851,7 +869,7 @@ BOOL CEndlessUsbToolDlg::OnInitDialog()
 
     // set up manufacturer/model and firmware dimensions before further interacting with Analytics
     CString manufacturer, model;
-    IFFALSE_PRINTERROR(GetMachineInfo(manufacturer, model), "Couldn't query manufacturer & model");
+    IFFALSE_PRINTERROR(WMI::GetMachineInfo(manufacturer, model), "Couldn't query manufacturer & model");
     uprintf("System manufacturer: %ls; Model: %ls", manufacturer, model);
     Analytics::instance()->setManufacturerModel(manufacturer, model);
 
@@ -2030,13 +2048,14 @@ HRESULT CEndlessUsbToolDlg::OnInstallDualBootClicked(IHTMLElement* pElement)
 	BOOL x64BitSupported = Has64BitSupport() ? TRUE : FALSE;
 	uprintf("HW processor has 64 bit support: %s", x64BitSupported ? "YES" : "NO");
 
-	BOOL isBitLockerEnabled = IsBitlockedDrive(systemDriveLetter.Left(2));
+	BOOL isBitLockerEnabled = WMI::IsBitlockedDrive(systemDriveLetter.Left(2));
 	uprintf("Is BitLocker/device encryption enabled on '%ls': %s", systemDriveLetter, isBitLockerEnabled ? "YES" : "NO");
 
-	bool isBIOS = IsLegacyBIOSBoot();
+	const bool isBIOS = IsLegacyBIOSBoot();
+	const bool canInstallEosldr = true; // assume it'll be in the boot.zip; we'll check again later
 	ErrorCause cause = ErrorCauseNone;
 	// TODO: move bitlocker check in here too?
-	bool canInstall = CanInstallToDrive(systemDriveLetter, isBIOS, cause);
+	bool canInstall = CanInstallToDrive(systemDriveLetter, isBIOS, canInstallEosldr, cause);
 
 	if (ShouldUninstall()) {
 		QueryAndDoUninstall();
@@ -5121,8 +5140,8 @@ error:
 }
 
 // Below defines need to be in this order
-#define DB_PROGRESS_CHECK_PARTITION		1
-#define DB_PROGRESS_UNPACK_BOOT_ZIP		3
+#define DB_PROGRESS_UNPACK_BOOT_ZIP		2
+#define DB_PROGRESS_CHECK_PARTITION		3
 #define DB_PROGRESS_FINISHED_UNPACK		95
 #define DB_PROGRESS_COPY_GRUB_FOLDER	98
 #define DB_PROGRESS_MBR_OR_EFI_SETUP	100
@@ -5137,27 +5156,11 @@ DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 	FUNCTION_ENTER;
 
 	CEndlessUsbToolDlg *dlg = (CEndlessUsbToolDlg*)param;
-	CString systemDriveLetter;
-	CString endlessFilesPath;
-	CString endlessImgPath;
-	CString bootFilesPath = CEndlessUsbToolApp::TempFilePath(CString(BOOT_COMPONENTS_FOLDER)) + L"\\";
-	CStringW exeFilePath = GetExePath();
-	const bool isBIOS = IsLegacyBIOSBoot();
 
-	systemDriveLetter = GetSystemDrive();
-	endlessFilesPath = systemDriveLetter + PATH_ENDLESS_SUBDIRECTORY;
-	endlessImgPath = endlessFilesPath + ENDLESS_IMG_FILE_NAME;
+	const CString bootFilesPath = CEndlessUsbToolApp::TempFilePath(CString(BOOT_COMPONENTS_FOLDER)) + L"\\";
+	ErrorCause errorCause = ErrorCause::ErrorCauseWriteFailed;
 
-	// Double-check this is an NTFS drive and (on BIOS systems) that there's no
-	// non-Windows bootloader. Note that we deliberately jump to 'done' in this
-	// case rather than 'error' -- we have not yet written anything to
-	// endlessFilesPath so we shouldn't try to delete it, and we set
-	// m_lastErrorCause directly.
-	IFFALSE_GOTO(CanInstallToDrive(systemDriveLetter, isBIOS, dlg->m_lastErrorCause), "Can't install to this drive", done);
-
-	UpdateProgress(OP_SETUP_DUALBOOT, DB_PROGRESS_CHECK_PARTITION);
-
-	IFFALSE_PRINTERROR(ChangeAccessPermissions(endlessFilesPath, false), "Error on granting Endless files permissions.");
+	const CString systemDriveLetter = GetSystemDrive();
 
 	// Unpack boot components
 	IFFALSE_GOTOERROR(UnpackBootComponents(dlg->m_bootArchive, bootFilesPath), "Error unpacking boot components.");
@@ -5165,7 +5168,44 @@ DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 	UpdateProgress(OP_SETUP_DUALBOOT, DB_PROGRESS_UNPACK_BOOT_ZIP);
 	CHECK_IF_CANCELLED;
 
-	// Create endless folder
+	// Double-check this is an NTFS drive and that we can install a bootloader.
+	const bool isBIOS = IsLegacyBIOSBoot();
+	const bool canInstallEosldr = dlg->m_eosldrInstaller->CanInstall(bootFilesPath);
+	IFFALSE_GOTOERROR(CanInstallToDrive(systemDriveLetter, isBIOS, canInstallEosldr, errorCause), "Can't install to this drive");
+
+	UpdateProgress(OP_SETUP_DUALBOOT, DB_PROGRESS_CHECK_PARTITION);
+
+	// Unpack the OS image and set up the bootloader.
+	IFFALSE_GOTOERROR(SetupDualBootFiles(dlg, systemDriveLetter, bootFilesPath, errorCause), "InstallDualBoot failed");
+	goto done;
+
+error:
+	uprintf("SetupDualBoot exited with error.");
+
+	if (GetLastError() == ERROR_DISK_FULL) {
+		errorCause = ErrorCause_t::ErrorCauseInstallFailedDiskFull;
+	}
+
+	if (dlg->m_lastErrorCause == ErrorCause_t::ErrorCauseNone) {
+		dlg->m_lastErrorCause = errorCause;
+	}
+
+done:
+	RemoveNonEmptyDirectory(bootFilesPath);
+	dlg->PostMessage(WM_FINISHED_ALL_OPERATIONS, 0, 0);
+	return 0;
+}
+
+bool CEndlessUsbToolDlg::SetupDualBootFiles(CEndlessUsbToolDlg *dlg, const CString &systemDriveLetter, const CString &bootFilesPath, ErrorCause &errorCause)
+{
+	const CString endlessFilesPath = systemDriveLetter + PATH_ENDLESS_SUBDIRECTORY;
+	const CString endlessImgPath = endlessFilesPath + ENDLESS_IMG_FILE_NAME;
+
+	const CStringW exeFilePath = GetExePath();
+
+	IFFALSE_PRINTERROR(ChangeAccessPermissions(endlessFilesPath, false), "Error on granting Endless files permissions.");
+
+	// Create endless folder (if missing)
 	int createDirResult = SHCreateDirectoryExW(NULL, endlessFilesPath, NULL);
 	IFFALSE_GOTOERROR(createDirResult == ERROR_SUCCESS || createDirResult == ERROR_ALREADY_EXISTS, "Error creating directory on system drive.");
 
@@ -5201,8 +5241,16 @@ DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 	UpdateProgress(OP_SETUP_DUALBOOT, DB_PROGRESS_COPY_GRUB_FOLDER);
 	CHECK_IF_CANCELLED;
 
-	if (isBIOS) {
-		IFFALSE_GOTOERROR(WriteMBRAndSBRToWinDrive(dlg, systemDriveLetter, bootFilesPath, endlessFilesPath), "Error on WriteMBRAndSBRToWinDrive");
+	if (IsLegacyBIOSBoot()) {
+		if (dlg->m_eosldrInstaller->CanInstall(bootFilesPath)) {
+			if (!dlg->m_eosldrInstaller->Install(systemDriveLetter, bootFilesPath)) {
+				PRINT_ERROR_MSG("Error installing eosldr");
+				errorCause = ErrorCauseInstallEosldrFailed;
+				goto error;
+			}
+		} else {
+			IFFALSE_GOTOERROR(WriteMBRAndSBRToWinDrive(dlg, systemDriveLetter, bootFilesPath, endlessFilesPath), "Error on WriteMBRAndSBRToWinDrive");
+		}
 	} else {
 		IFFALSE_GOTOERROR(SetupEndlessEFI(systemDriveLetter, bootFilesPath), "Error on SetupEndlessEFI");
 	}
@@ -5218,24 +5266,11 @@ DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 
 	UpdateProgress(OP_SETUP_DUALBOOT, DB_PROGRESS_MBR_OR_EFI_SETUP);
 
-	goto done;
+	return true;
 
 error:
-	if (GetLastError() == ERROR_DISK_FULL) {
-		dlg->m_lastErrorCause = ErrorCause_t::ErrorCauseInstallFailedDiskFull;
-	}
-
-	uprintf("SetupDualBoot exited with error.");
-	if (dlg->m_lastErrorCause == ErrorCause_t::ErrorCauseNone) {
-		dlg->m_lastErrorCause = ErrorCause_t::ErrorCauseWriteFailed;
-	}
-
 	RemoveNonEmptyDirectory(endlessFilesPath);
-
-done:
-	RemoveNonEmptyDirectory(bootFilesPath);
-	dlg->PostMessage(WM_FINISHED_ALL_OPERATIONS, 0, 0);
-	return 0;
+	return false;
 }
 
 bool CEndlessUsbToolDlg::EnsureUncompressed(const CString &filePath)
@@ -5340,7 +5375,7 @@ bool CEndlessUsbToolDlg::IsLegacyBIOSBoot()
 }
 
 // Checks preconditions for installing Endless OS to a given drive. Guaranteed to only modify 'cause' on error.
-bool CEndlessUsbToolDlg::CanInstallToDrive(const CString & systemDriveLetter, const bool isBIOS, ErrorCause &cause)
+bool CEndlessUsbToolDlg::CanInstallToDrive(const CString & systemDriveLetter, const bool isBIOS, const bool canInstallEosldr, ErrorCause &cause)
 {
 	FUNCTION_ENTER;
 	
@@ -5364,7 +5399,9 @@ bool CEndlessUsbToolDlg::CanInstallToDrive(const CString & systemDriveLetter, co
 		}
 	}
 
-	if (CEndlessUsbToolApp::m_enableOverwriteMbr) {
+	if (canInstallEosldr) {
+		return true;
+	} else if (CEndlessUsbToolApp::m_enableOverwriteMbr) {
 		uprintf("Not checking for Windows MBR as /forcembr is enabled.");
 		return true;
 	} else {
@@ -5807,190 +5844,46 @@ CStringW CEndlessUsbToolDlg::GetSystemDrive()
 }
 
 #define REGKEY_BACKUP_PREFIX	L"EndlessBackup"
+// In a backup key, indicates that the key was previously unset
 #define REGKEY_DWORD_MISSING	DWORD_MAX
 
-BOOL CEndlessUsbToolDlg::SetEndlessRegistryKey(HKEY parentKey, const CString &keyPath, const CString &keyName, CComVariant keyValue, bool createBackup)
+// Backs up the current value of a key, and overwrites it.
+// UnsetEndlessRegistryKey can be used to restore the backup
+BOOL CEndlessUsbToolDlg::SetEndlessRegistryKey(HKEY parentKey, const CString &keyPath, const CString &keyName, CComVariant keyValue)
 {
-	CRegKey registryKey;
-	LSTATUS result;
-	CComVariant backupValue;
+    FUNCTION_ENTER_FMT("keyPath='%ls', keyName='%ls'", keyPath, keyName);
 
-	uprintf("SetEndlessRegistryKey called with path '%ls' and key '%ls'", keyPath, keyName);
+    CRegKey registryKey;
+    LSTATUS result;
+    const CString backupKeyName = CString(REGKEY_BACKUP_PREFIX) + keyName;
 
-	result = registryKey.Open(parentKey, keyPath, KEY_ALL_ACCESS);
-	IFFALSE_RETURN_VALUE(result == ERROR_SUCCESS, "Error opening registry key.", FALSE);
+    result = registryKey.Open(parentKey, keyPath, KEY_ALL_ACCESS);
+    IFFALSE_RETURN_VALUE(result == ERROR_SUCCESS, "Error opening registry key.", FALSE);
 
-	backupValue.ChangeType(VT_NULL);
-	switch (keyValue.vt) {
-		case VT_I4:
-		case VT_UI4:
-			if (createBackup) {
-				DWORD dwValue;
-				result = registryKey.QueryDWORDValue(CString(REGKEY_BACKUP_PREFIX) + keyName, dwValue);
-				if (result == ERROR_SUCCESS) {
-					uprintf("There already is a backup created for '%ls' in '%ls'. Aborting creating a second backup", keyName, keyPath);
-					createBackup = false;
-					break;
-				}
+    switch (keyValue.vt) {
+        case VT_I4:
+        case VT_UI4:
+            DWORD dwValue;
+            result = registryKey.QueryDWORDValue(backupKeyName, dwValue);
+            if (result == ERROR_SUCCESS) {
+                uprintf("There already is a backup created for '%ls' in '%ls'. Aborting creating a second backup", keyName, keyPath);
+                return TRUE;
+            }
 
-				result = registryKey.QueryDWORDValue(keyName, dwValue);
-				if (result == ERROR_SUCCESS) backupValue = dwValue;
-				else backupValue = REGKEY_DWORD_MISSING;
-			}
-			result = registryKey.SetDWORDValue(keyName, keyValue.intVal);
-			break;
-		case VT_BSTR:
-			if (createBackup) {
-				uprintf("Error: backup requested and not implemented for type VT_BSTR.");
-				return FALSE;
-			}
-			result = registryKey.SetStringValue(keyName, keyValue.bstrVal);
-			break;
-		default:
-			uprintf("ERROR: variant type %d not handled", keyValue.vt);
-			return FALSE;
-	}
-
-	IFFALSE_RETURN_VALUE(result == ERROR_SUCCESS, "Error on setting key value", FALSE);
-
-	if (createBackup && backupValue.vt != VT_NULL) {
-		backupValue.vt = keyValue.vt;
-		IFFALSE_PRINTERROR(SetEndlessRegistryKey(parentKey, keyPath, CString(REGKEY_BACKUP_PREFIX) + keyName, backupValue, false), "Error on creating backup key");
-	}
-
-	return TRUE;
+            result = registryKey.QueryDWORDValue(keyName, dwValue);
+            if (result != ERROR_SUCCESS) {
+                dwValue = REGKEY_DWORD_MISSING;
+            }
+            IFFALSE_RETURN_VALUE(ERROR_SUCCESS == registryKey.SetDWORDValue(backupKeyName, dwValue),
+                "Error creating backup key", FALSE);
+            IFFALSE_RETURN_VALUE(ERROR_SUCCESS == registryKey.SetDWORDValue(keyName, keyValue.intVal),
+                "Error setting key", FALSE);
+            return TRUE;
+        default:
+            uprintf("ERROR: variant type %d not handled", keyValue.vt);
+            return FALSE;
+    }
 }
-
-#pragma comment(lib, "wbemuuid.lib")
-
-static BOOL RunWMIQuery(const CString &objectPath, const CString &query, std::function< BOOL( CComPtr<IEnumWbemClassObject> & )> callback)
-{
-	FUNCTION_ENTER;
-
-	HRESULT hres;
-	BOOL retResult = FALSE;
-	CComPtr<IWbemLocator> pLoc;
-	CComPtr<IWbemServices> pSvc;
-	CComPtr<IEnumWbemClassObject> pEnumerator;
-	CString bitlockerQuery;
-
-	hres = CoInitializeEx(0, COINIT_APARTMENTTHREADED);
-	IFFALSE_PRINTERROR(SUCCEEDED(hres), "Error on CoInitializeEx.");
-
-	hres = CoInitializeSecurity(
-		NULL,
-		-1,                          // COM authentication
-		NULL,                        // Authentication services
-		NULL,                        // Reserved
-		RPC_C_AUTHN_LEVEL_DEFAULT,   // Default authentication
-		RPC_C_IMP_LEVEL_IMPERSONATE, // Default Impersonation
-		NULL,                        // Authentication info
-		EOAC_NONE,                   // Additional capabilities
-		NULL                         // Reserved
-	);
-	IFFALSE_PRINTERROR(SUCCEEDED(hres), "Error on CoInitializeSecurity.");
-
-	// Obtain the initial locator to WMI
-	hres = CoCreateInstance(CLSID_WbemLocator, 0, CLSCTX_INPROC_SERVER, IID_IWbemLocator, (LPVOID *)&pLoc);
-	IFFALSE_GOTOERROR(SUCCEEDED(hres), "Error on CoCreateInstance.");
-
-	// Connect to WMI through the IWbemLocator::ConnectServer method
-	// Connect to the root\cimv2 namespace with the current user and obtain pointer pSvc to make IWbemServices calls.
-	hres = pLoc->ConnectServer(
-		_bstr_t(objectPath),     // Object path of WMI namespace
-		NULL,                    // User name. NULL = current user
-		NULL,                    // User password. NULL = current
-		0,                       // Locale. NULL indicates current
-		NULL,                    // Security flags.
-		0,                       // Authority (for example, Kerberos)
-		0,                       // Context object
-		&pSvc                    // pointer to IWbemServices proxy
-	);
-	IFFALSE_GOTOERROR(SUCCEEDED(hres), "Error on pLoc->ConnectServer.");
-
-	// Set security levels on the proxy
-	hres = CoSetProxyBlanket(
-		pSvc,                        // Indicates the proxy to set
-		RPC_C_AUTHN_WINNT,           // RPC_C_AUTHN_xxx
-		RPC_C_AUTHZ_NONE,            // RPC_C_AUTHZ_xxx
-		NULL,                        // Server principal name
-		RPC_C_AUTHN_LEVEL_CALL,      // RPC_C_AUTHN_LEVEL_xxx
-		RPC_C_IMP_LEVEL_IMPERSONATE, // RPC_C_IMP_LEVEL_xxx
-		NULL,                        // client identity
-		EOAC_NONE                    // proxy capabilities
-	);
-	IFFALSE_GOTOERROR(SUCCEEDED(hres), "Error on CoSetProxyBlanket.");
-
-	// Use the IWbemServices pointer to make requests of WMI
-	hres = pSvc->ExecQuery(bstr_t("WQL"), bstr_t(query), WBEM_FLAG_FORWARD_ONLY | WBEM_RETURN_WHEN_COMPLETE, NULL, &pEnumerator);
-	IFFALSE_GOTOERROR(SUCCEEDED(hres), "Error on pSvc->ExecQuery.");
-
-	retResult = callback(pEnumerator);
-
-error:
-	CoUninitialize();
-
-	return retResult;
-}
-
-BOOL CEndlessUsbToolDlg::IsBitlockedDrive(const CString &drive)
-{
-	FUNCTION_ENTER;
-
-	const CString objectPath(L"ROOT\\CIMV2\\Security\\MicrosoftVolumeEncryption");
-	CString bitlockerQuery;
-
-	bitlockerQuery.Format(L"Select * from Win32_EncryptableVolume where ProtectionStatus != 0 and DriveLetter = '%ls'", drive);
-
-	BOOL retResult = RunWMIQuery(objectPath, bitlockerQuery, [](CComPtr<IEnumWbemClassObject> &pEnumerator) {
-		HRESULT hres;
-		CComPtr<IWbemClassObject> pclsObj;
-		ULONG uReturned = 0;
-
-		hres = pEnumerator->Next(0, 1, &pclsObj, &uReturned);
-		uprintf("IsBitlockedDrive: hres=%x and uReturned=%d", hres, uReturned);
-		return (hres == S_OK) && (uReturned == 1);
-	});
-
-	uprintf("IsBitlockedDrive done with retResult=%d", retResult);
-	return retResult;
-}
-
-BOOL CEndlessUsbToolDlg::GetMachineInfo(CString &manufacturer, CString &model)
-{
-	FUNCTION_ENTER;
-
-	const CString objectPath(L"ROOT\\CIMV2");
-	const CString query(L"Select * from Win32_ComputerSystem");
-
-	return RunWMIQuery(objectPath, query, [&](CComPtr<IEnumWbemClassObject> &pEnumerator) {
-		while (pEnumerator)
-		{
-			CComPtr<IWbemClassObject> pclsObj;
-			ULONG uReturn = 0;
-			HRESULT hr = pEnumerator->Next(WBEM_INFINITE, 1,
-				&pclsObj, &uReturn);
-
-			if (0 == uReturn)
-			{
-				break;
-			}
-
-			VARIANT vtProp;
-
-			hr = pclsObj->Get(L"Manufacturer", 0, &vtProp, 0, 0);
-			manufacturer = vtProp.bstrVal;
-			VariantClear(&vtProp);
-
-			hr = pclsObj->Get(L"Model", 0, &vtProp, 0, 0);
-			model = vtProp.bstrVal;
-			VariantClear(&vtProp);
-		}
-
-		return TRUE;
-	});
-}
-
 
 CStringW CEndlessUsbToolDlg::GetExePath()
 {
@@ -6021,20 +5914,6 @@ error:
 	return retValue;
 }
 
-#define REGKEY_WIN_UNINSTALL	L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\"
-#define REGKEY_ENDLESS_OS		ENDLESS_OS_NAME
-#define REGKEY_UNINSTALLENDLESS (REGKEY_WIN_UNINSTALL REGKEY_ENDLESS_OS)
-#define REGKEY_DISPLAYNAME		L"DisplayName"
-#define REGKEY_UNINSTALL_STRING	L"UninstallString"
-#define REGKEY_INSTALL_LOCATION	L"InstallLocation"
-#define REGKEY_PUBLISHER		L"Publisher"
-#define REGKEY_HELP_LINK		L"HelpLink"
-#define REGKEY_NOCHANGE			L"NoChange"
-#define REGKEY_NOMODIFY			L"NoModify"
-
-#define REGKEY_DISPLAYNAME_TEXT	ENDLESS_OS_NAME
-#define REGKEY_PUBLISHER_TEXT	L"Endless Mobile, Inc."
-
 BOOL CEndlessUsbToolDlg::AddUninstallRegistryKeys(const CStringW &uninstallExePath, const CStringW &installPath)
 {
 	CRegKey registryKey;
@@ -6046,18 +5925,67 @@ BOOL CEndlessUsbToolDlg::AddUninstallRegistryKeys(const CStringW &uninstallExePa
 	uprintf("Result %d on creating key '%ls'", result, REGKEY_UNINSTALLENDLESS);
 	IFFALSE_GOTOERROR(result == ERROR_SUCCESS, "Error on CRegKey::Create.");
 
-	IFFALSE_GOTOERROR(SetEndlessRegistryKey(HKEY_LOCAL_MACHINE, REGKEY_UNINSTALLENDLESS, REGKEY_DISPLAYNAME, REGKEY_DISPLAYNAME_TEXT, false), "Error on REGKEY_DISPLAYNAME");
-	IFFALSE_GOTOERROR(SetEndlessRegistryKey(HKEY_LOCAL_MACHINE, REGKEY_UNINSTALLENDLESS, REGKEY_HELP_LINK, UTF8ToBSTR(lmprintf(MSG_314)), false), "Error on REGKEY_HELP_LINK");
-	IFFALSE_GOTOERROR(SetEndlessRegistryKey(HKEY_LOCAL_MACHINE, REGKEY_UNINSTALLENDLESS, REGKEY_UNINSTALL_STRING, CComBSTR(uninstallExePath), false), "Error on REGKEY_UNINSTALL_STRING");
-	IFFALSE_GOTOERROR(SetEndlessRegistryKey(HKEY_LOCAL_MACHINE, REGKEY_UNINSTALLENDLESS, REGKEY_INSTALL_LOCATION, CComBSTR(installPath), false), "Error on REGKEY_INSTALL_LOCATION");
-	IFFALSE_GOTOERROR(SetEndlessRegistryKey(HKEY_LOCAL_MACHINE, REGKEY_UNINSTALLENDLESS, REGKEY_PUBLISHER, REGKEY_PUBLISHER_TEXT, false), "Error on REGKEY_PUBLISHER");
-	IFFALSE_GOTOERROR(SetEndlessRegistryKey(HKEY_LOCAL_MACHINE, REGKEY_UNINSTALLENDLESS, REGKEY_NOCHANGE, 1, false), "Error on REGKEY_NOCHANGE");
-	IFFALSE_GOTOERROR(SetEndlessRegistryKey(HKEY_LOCAL_MACHINE, REGKEY_UNINSTALLENDLESS, REGKEY_NOMODIFY, 1, false), "Error on REGKEY_NOMODIFY");
+	IFFALSE_GOTOERROR(ERROR_SUCCESS == registryKey.SetStringValue(REGKEY_DISPLAYNAME, REGKEY_DISPLAYNAME_TEXT), "Error on REGKEY_DISPLAYNAME");
+	IFFALSE_GOTOERROR(ERROR_SUCCESS == registryKey.SetStringValue(REGKEY_HELP_LINK, UTF8ToBSTR(lmprintf(MSG_314))), "Error on REGKEY_HELP_LINK");
+	IFFALSE_GOTOERROR(ERROR_SUCCESS == registryKey.SetStringValue(REGKEY_UNINSTALL_STRING, CComBSTR(uninstallExePath)), "Error on REGKEY_UNINSTALL_STRING");
+	IFFALSE_GOTOERROR(ERROR_SUCCESS == registryKey.SetStringValue(REGKEY_INSTALL_LOCATION, CComBSTR(installPath)), "Error on REGKEY_INSTALL_LOCATION");
+	IFFALSE_GOTOERROR(ERROR_SUCCESS == registryKey.SetStringValue(REGKEY_PUBLISHER, REGKEY_PUBLISHER_TEXT), "Error on REGKEY_PUBLISHER");
+	IFFALSE_GOTOERROR(ERROR_SUCCESS == registryKey.SetDWORDValue(REGKEY_NOCHANGE, 1), "Error on REGKEY_NOCHANGE");
+	IFFALSE_GOTOERROR(ERROR_SUCCESS == registryKey.SetDWORDValue(REGKEY_NOMODIFY, 1), "Error on REGKEY_NOMODIFY");
 
 	retResult = TRUE;
 error:
 
 	return retResult;
+}
+
+bool CEndlessUsbToolDlg::UninstallEndlessMBR(const CString & systemDriveLetter, const CString & endlessFilesPath, HANDLE hPhysical, ErrorCause & cause)
+{
+    FAKE_FD fake_fd = { 0 };
+    FILE* fp = (FILE*)&fake_fd;
+    fake_fd._handle = (char*)hPhysical;
+
+    IFTRUE_RETURN_VALUE(IsWindowsMBR(fp, systemDriveLetter), "Windows MBR detected so skipping MBR writing", true);
+    if (!CEndlessUsbToolApp::m_enableOverwriteMbr && !IsEndlessMBR(fp, endlessFilesPath)) {
+        cause = ErrorCause_t::ErrorCauseNonEndlessMBR;
+        return false;
+    }
+
+    // restore boottrack.img if present and use embedded grub only as fallback
+    IFTRUE_RETURN_VALUE(RestoreOriginalBoottrack(endlessFilesPath, hPhysical, fp), "Success on restoring original boottrack", true);
+    uprintf("Failure on restoring original boottrack, falling back to embedded MBRs.");
+
+    if (nWindowsVersion >= WINDOWS_7) {
+        IFFALSE_RETURN_VALUE(write_win7_mbr(fp), "Error on write_win7_mbr", false);
+    } else if(nWindowsVersion == WINDOWS_VISTA) {
+        IFFALSE_RETURN_VALUE(write_vista_mbr(fp), "Error on write_vista_mbr", false);
+    } else if (nWindowsVersion == WINDOWS_2003 || nWindowsVersion == WINDOWS_XP) {
+        IFFALSE_RETURN_VALUE(write_2000_mbr(fp), "Error on write_2000_mbr", false);
+    } else {
+        uprintf("Restore MBR not supported for this windows version '%s', ver %d", WindowsVersionStr, nWindowsVersion);
+        return false;
+    }
+
+    return true;
+}
+
+bool CEndlessUsbToolDlg::UninstallEndlessEFI(const CString & systemDriveLetter, HANDLE hPhysical, bool & found_boot_entry)
+{
+    IFFALSE_PRINTERROR(EFIRequireNeededPrivileges(), "Error on EFIRequireNeededPrivileges.");
+
+    IFFALSE_PRINTERROR(EFIRemoveEntry(ENDLESS_OS_NAME, found_boot_entry), "Error on EFIRemoveEntry, continuing with uninstall anyway.");
+
+    const char *espMountLetter = NULL;
+    IFFALSE_RETURN_VALUE(MountESPFromDrive(hPhysical, &espMountLetter, systemDriveLetter), "Error on MountESPFromDrive", false);
+    CString windowsEspDriveLetter = UTF8ToCString(espMountLetter);
+
+    RemoveNonEmptyDirectory(windowsEspDriveLetter + L"\\" + ENDLESS_BOOT_SUBDIRECTORY);
+
+    if (espMountLetter != NULL) {
+        AltUnmountVolume(espMountLetter);
+    }
+
+    return true;
 }
 
 BOOL CEndlessUsbToolDlg::UninstallDualBoot(CEndlessUsbToolDlg *dlg)
@@ -6072,51 +6000,35 @@ BOOL CEndlessUsbToolDlg::UninstallDualBoot(CEndlessUsbToolDlg *dlg)
 	CString endlessFilesPath = systemDriveLetter + PATH_ENDLESS_SUBDIRECTORY;
 	CStringA endlessImgPath = ConvertUnicodeToUTF8(endlessFilesPath + ENDLESS_IMG_FILE_NAME);
 	HANDLE hPhysical = GetPhysicalFromDriveLetter(systemDriveLetter);
-	const char *espMountLetter = NULL;
 	CString exePath = GetExePath();
 	CString image_state;
 
 	IFFALSE_GOTOERROR(hPhysical != INVALID_HANDLE_VALUE, "Error on acquiring disk handle.");
 
-	if (IsLegacyBIOSBoot()) { // remove MBR entry
-		FAKE_FD fake_fd = { 0 };
-		FILE* fp = (FILE*)&fake_fd;
-		fake_fd._handle = (char*)hPhysical;
-
-		IFTRUE_GOTO(IsWindowsMBR(fp, systemDriveLetter), "Windows MBR detected so skipping MBR writing", done_with_mbr);
-		if (!CEndlessUsbToolApp::m_enableOverwriteMbr && !IsEndlessMBR(fp, endlessFilesPath)) {
-			dlg->m_lastErrorCause = ErrorCause_t::ErrorCauseNonEndlessMBR;
-			goto error;
-		}
-
-		// restore boottrack.img if present and use embedded grub only as fallback
-		IFTRUE_GOTO(RestoreOriginalBoottrack(endlessFilesPath, hPhysical, fp), "Success on restoring original boottrack", done_with_mbr);
-		uprintf("Failure on restoring original boottrack, falling back to embedded MBRs.");
-
-		if (nWindowsVersion >= WINDOWS_7) {
-			IFFALSE_GOTOERROR(write_win7_mbr(fp), "Error on write_win7_mbr");
-		} else if(nWindowsVersion == WINDOWS_VISTA) {
-			IFFALSE_GOTOERROR(write_vista_mbr(fp), "Error on write_vista_mbr");
-		} else if (nWindowsVersion == WINDOWS_2003 || nWindowsVersion == WINDOWS_XP) {
-			IFFALSE_GOTOERROR(write_2000_mbr(fp), "Error on write_2000_mbr");
+	if (IsLegacyBIOSBoot()) {
+		if (dlg->m_eosldrInstaller->IsInstalled(systemDriveLetter)) {
+			// remove eosldr from Windows boot menu
+			bool found_boot_entry;
+			bool ret = dlg->m_eosldrInstaller->Uninstall(systemDriveLetter, found_boot_entry);
+			dlg->TrackEvent(_T("FoundBootEntry"), found_boot_entry ? _T("True") : _T("False"));
+			if (!ret) {
+				PRINT_ERROR_MSG("Couldn't uninstall eosldr");
+				dlg->m_lastErrorCause = ErrorCauseUninstallEosldrFailed;
+				goto error;
+			}
 		} else {
-			uprintf("Restore MBR not supported for this windows version '%s', ver %d", WindowsVersionStr, nWindowsVersion);
-			goto error;
+			// remove GRUB MBR, reinstate Windows'
+			IFFALSE_GOTOERROR(
+					UninstallEndlessMBR(systemDriveLetter, endlessFilesPath, hPhysical, dlg->m_lastErrorCause),
+					"Couldn't uninstall Endless MBR");
 		}
 	} else { // remove EFI entry
-		CString windowsEspDriveLetter;
-		IFFALSE_PRINTERROR(EFIRequireNeededPrivileges(), "Error on EFIRequireNeededPrivileges.");
-
 		bool found_boot_entry;
-		IFFALSE_PRINTERROR(EFIRemoveEntry(ENDLESS_OS_NAME, found_boot_entry), "Error on EFIRemoveEntry, continuing with uninstall anyway.");
+		bool ret = UninstallEndlessEFI(systemDriveLetter, hPhysical, found_boot_entry);
 		dlg->TrackEvent(_T("FoundBootEntry"), found_boot_entry ? _T("True") : _T("False"));
-
-		IFFALSE_GOTOERROR(MountESPFromDrive(hPhysical, &espMountLetter, systemDriveLetter), "Error on MountESPFromDrive");
-		windowsEspDriveLetter = UTF8ToCString(espMountLetter);
-		RemoveNonEmptyDirectory(windowsEspDriveLetter + L"\\" + ENDLESS_BOOT_SUBDIRECTORY);
+		IFFALSE_GOTOERROR(ret, "UninstallEndlessEFI failed");
 	}
 
-done_with_mbr:
 	// restore the registry key for Windows clock in UTC
 	IFFALSE_PRINTERROR(ResetEndlessRegistryKey(HKEY_LOCAL_MACHINE, REGKEY_UTC_TIME_PATH, REGKEY_UTC_TIME), "Error on restoring Windows clock to UTC.");
 
@@ -6157,7 +6069,6 @@ done_with_mbr:
 
 error:
 	safe_closehandle(hPhysical);
-	if (espMountLetter != NULL) AltUnmountVolume(espMountLetter);
 
 	AfxMessageBox(UTF8ToCString(lmprintf(popupMsgId)), popupStyle);
 
@@ -6499,6 +6410,8 @@ error:
 
 bool CEndlessUsbToolDlg::RestoreOriginalBoottrack(const CString &endlessPath, HANDLE hPhysical, FILE *fp)
 {
+	FUNCTION_ENTER;
+
 	bool retResult = false;
 	DWORD size;
 	BYTE geometry[256] = { 0 };

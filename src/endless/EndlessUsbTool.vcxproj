@@ -281,6 +281,7 @@
     <ClInclude Include="EndlessISO.h" />
     <ClInclude Include="EndlessUsbTool.h" />
     <ClInclude Include="EndlessUsbToolDlg.h" />
+    <ClInclude Include="Eosldr.h" />
     <ClInclude Include="GeneralCode.h" />
     <ClInclude Include="gpt\crc32.h" />
     <ClInclude Include="gpt\gpt.h" />
@@ -299,6 +300,7 @@
     <ClInclude Include="ImageSigningKey.h" />
     <ClInclude Include="Version.h" />
     <ClInclude Include="WindowsUsbDefines.h" />
+    <ClInclude Include="WMI.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\badblocks.c">
@@ -482,6 +484,7 @@
     <ClCompile Include="EndlessISO.cpp" />
     <ClCompile Include="EndlessUsbTool.cpp" />
     <ClCompile Include="EndlessUsbToolDlg.cpp" />
+    <ClCompile Include="Eosldr.cpp" />
     <ClCompile Include="GeneralCode.cpp" />
     <ClCompile Include="gpt\crc32.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
@@ -525,6 +528,7 @@
       </ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="UEFIBootSetup.cpp" />
+    <ClCompile Include="WMI.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="GenerateVersion.ps1" />
