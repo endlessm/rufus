@@ -207,7 +207,7 @@ protected:
 
 private:
 	BOOL m_initialized;
-	int m_nrGigsSelected;
+	uint64_t m_selectedInstallSizeBytes;
 	loc_cmd* m_selectedLocale;
 	char m_localizationFile[MAX_PATH];
 	ULONG m_shellNotificationsRegister;
@@ -386,7 +386,7 @@ private:
     void SetJSONDownloadState(JSONDownloadState state);
 
 	void GoToSelectStoragePage();
-	BOOL AddStorageEntryToSelect(CComPtr<IHTMLSelectElement> &selectElement, int noOfGigs, uint8_t extraData);
+	BOOL AddStorageEntryToSelect(CComPtr<IHTMLSelectElement> &selectElement, uint64_t bytes, uint8_t extraData);
 
 	void ChangeDriveAutoRunAndMount(bool setEndlessValues);
 
@@ -407,7 +407,7 @@ private:
 	static DWORD WINAPI SetupDualBoot(LPVOID param);
 
 	static bool EnsureUncompressed(const CString &filePath);
-	static bool ExtendImageFile(const CString &endlessImgPath, ULONGLONG selectedGigs);
+	static bool ExtendImageFile(const CString &endlessImgPath, uint64_t bytes);
 	static bool UnpackBootComponents(const CString &bootFilesPathGz, const CString &bootFilesPath);
 	static bool CopyMultipleItems(const CString &fromPath, const CString &toPath);
 	static bool IsLegacyBIOSBoot();
@@ -459,7 +459,7 @@ private:
 
 	CComBSTR GetDownloadString(const RemoteImageEntry &imageEntry);
 
-	ULONGLONG GetNeededSpaceForDualBoot(int &neededGigs, bool *isBaseImage = NULL);
+	ULONGLONG GetNeededSpaceForDualBoot(bool *isBaseImage = NULL);
 
 	static const UINT m_uTaskbarBtnCreatedMsg;
 };
