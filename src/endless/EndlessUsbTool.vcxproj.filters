@@ -147,6 +147,9 @@
     <ClInclude Include="Eosldr.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Log2LL.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EndlessUsbTool.cpp">
