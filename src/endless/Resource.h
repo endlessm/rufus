@@ -243,6 +243,7 @@
 #define MSG_383							3383
 #define MSG_384							3384
 #define MSG_385							3385
+#define MSG_386							3386
 
 // For languages
 #define MSG_400                         3400

@@ -877,6 +877,12 @@ BOOL CEndlessUsbToolDlg::OnInitDialog()
     Analytics::instance()->setFirmware(isBIOS ? L"BIOS" : L"EFI");
 
     Analytics::instance()->startSession();
+
+    if (nWindowsVersion < WINDOWS_7) {
+        ShowWindowsTooOldError();
+        EndDialog(IDCANCEL);
+    }
+
     TrackEvent(_T("IEVersion"), m_ieVersion);
 
     if (m_ieVersion < MIN_SUPPORTED_IE_VERSION) {
@@ -885,6 +891,12 @@ BOOL CEndlessUsbToolDlg::OnInitDialog()
     }
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
+}
+
+void CEndlessUsbToolDlg::ShowWindowsTooOldError()
+{
+    const CString message = UTF8ToCString(lmprintf(MSG_386));
+    AfxMessageBox(message, MB_OK | MB_ICONERROR);
 }
 
 void CEndlessUsbToolDlg::ShowIETooOldError()
