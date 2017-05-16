@@ -652,6 +652,11 @@ msgid "No USB device found. If you've inserted one, try a different USB port or 
 msgstr ""
 
 #, c-format
+msgctxt "MSG_386"
+msgid "The Endless Installer requires Windows 7 or newer."
+msgstr ""
+
+#, c-format
 msgctxt "MSG_400"
 msgid "Basic"
 msgstr ""

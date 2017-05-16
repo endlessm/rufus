@@ -621,14 +621,11 @@ const IID my_CLSID_TaskbarList =
 
 LRESULT CEndlessUsbToolDlg::OnTaskbarBtnCreated(WPARAM wParam, LPARAM lParam)
 {
-	if (nWindowsVersion >= WINDOWS_7) {
-		m_taskbarProgress.Release();
-		//CoCreateInstance(my_CLSID_TaskbarList, NULL, CLSCTX_ALL, my_IID_ITaskbarList3, (void**)&m_taskbarProgress);
-		HRESULT hr = m_taskbarProgress.CoCreateInstance(my_CLSID_TaskbarList);
-		IFFALSE_GOTO(SUCCEEDED(hr), "Error creating progressbar.", done);
-	}
+	m_taskbarProgress.Release();
+	//CoCreateInstance(my_CLSID_TaskbarList, NULL, CLSCTX_ALL, my_IID_ITaskbarList3, (void**)&m_taskbarProgress);
+	HRESULT hr = m_taskbarProgress.CoCreateInstance(my_CLSID_TaskbarList);
+	IFFAILED_PRINTERROR(hr, "Error creating progressbar.");
 
-done:
 	return 0;
 }
 
@@ -655,10 +652,6 @@ void CEndlessUsbToolDlg::OnDocumentComplete(LPDISPATCH pDisp, LPCTSTR szUrl)
 
 	AddLanguagesToUI();
 	ApplyRufusLocalization(); //apply_localization(IDD_ENDLESSUSBTOOL_DIALOG, GetSafeHwnd());
-
-    if (nWindowsVersion == WINDOWS_XP) {
-        CallJavascript(_T(JS_ENABLE_BUTTON), CComVariant(HTML_BUTTON_ID(_T(ELEMENT_REFORMATTER_USB_BUTTON))), CComVariant(FALSE));
-    }
 
 	CallJavascript(_T(JS_SET_CODING_MODE), CComVariant(IsCoding()));
     SetElementText(_T(ELEMENT_VERSION_LINK), CComBSTR(RELEASE_VER_STR));
@@ -730,17 +723,15 @@ void CEndlessUsbToolDlg::ChangeDriveAutoRunAndMount(bool setEndlessValues)
 		// 0x9e disables removable and fixed drive notifications
 		m_lgpSet = SetLGP(FALSE, &m_lgpExistingKey, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", "NoDriveTypeAutorun", 0x9e);
 
-		if (nWindowsVersion > WINDOWS_XP) {
-			// Re-enable AutoMount if needed
-			if (!GetAutoMount(&m_automount)) {
-				uprintf("Could not get AutoMount status");
-				m_automount = TRUE;	// So that we don't try to change its status on exit
-			}
-			else if (!m_automount) {
-				uprintf("AutoMount was detected as disabled - temporary re-enabling it");
-				if (!SetAutoMount(TRUE)) {
-					uprintf("Failed to enable AutoMount");
-				}
+		// Re-enable AutoMount if needed
+		if (!GetAutoMount(&m_automount)) {
+			uprintf("Could not get AutoMount status");
+			m_automount = TRUE;	// So that we don't try to change its status on exit
+		}
+		else if (!m_automount) {
+			uprintf("AutoMount was detected as disabled - temporary re-enabling it");
+			if (!SetAutoMount(TRUE)) {
+				uprintf("Failed to enable AutoMount");
 			}
 		}
 	} else {
@@ -748,7 +739,7 @@ void CEndlessUsbToolDlg::ChangeDriveAutoRunAndMount(bool setEndlessValues)
 		if (m_lgpSet) {
 			SetLGP(TRUE, &m_lgpExistingKey, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", "NoDriveTypeAutorun", 0);
 		}
-		if ((nWindowsVersion > WINDOWS_XP) && (!m_automount) && (!SetAutoMount(FALSE))) {
+		if ((!m_automount) && (!SetAutoMount(FALSE))) {
 			uprintf("Failed to restore AutoMount to disabled");
 		}
 	}
@@ -801,7 +792,7 @@ BOOL CEndlessUsbToolDlg::OnInitDialog()
 	CHANGEFILTERSTRUCT cfs = { sizeof(CHANGEFILTERSTRUCT) };
 
 	PF_INIT(ChangeWindowMessageFilterEx, user32);
-	if (nWindowsVersion >= WINDOWS_7 && pfChangeWindowMessageFilterEx != NULL) {
+	if (pfChangeWindowMessageFilterEx != NULL) {
 		pfChangeWindowMessageFilterEx(m_hWnd, m_uTaskbarBtnCreatedMsg, MSGFLT_ALLOW, &cfs);
 	}
 
@@ -877,6 +868,12 @@ BOOL CEndlessUsbToolDlg::OnInitDialog()
     Analytics::instance()->setFirmware(isBIOS ? L"BIOS" : L"EFI");
 
     Analytics::instance()->startSession();
+
+    if (nWindowsVersion < WINDOWS_7) {
+        ShowWindowsTooOldError();
+        EndDialog(IDCANCEL);
+    }
+
     TrackEvent(_T("IEVersion"), m_ieVersion);
 
     if (m_ieVersion < MIN_SUPPORTED_IE_VERSION) {
@@ -887,19 +884,19 @@ BOOL CEndlessUsbToolDlg::OnInitDialog()
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
 
+void CEndlessUsbToolDlg::ShowWindowsTooOldError()
+{
+    const CString message = UTF8ToCString(lmprintf(MSG_386));
+    AfxMessageBox(message, MB_OK | MB_ICONERROR);
+}
+
 void CEndlessUsbToolDlg::ShowIETooOldError()
 {
     CString message = UTF8ToCString(lmprintf(MSG_368, m_ieVersion, MIN_SUPPORTED_IE_VERSION));
     int result = AfxMessageBox(message, MB_OKCANCEL | MB_ICONERROR);
     if (result == IDOK) {
-        const char *command;
-        if (nWindowsVersion >= WINDOWS_VISTA) {
-            // https://msdn.microsoft.com/en-us/library/cc144191(VS.85).aspx
-            command = "c:\\windows\\system32\\control.exe /name Microsoft.WindowsUpdate";
-        } else {
-            // This is what the Windows Update item in the Start menu points to
-            command = "c:\\windows\\system32\\wupdmgr.exe";
-        }
+        // https://msdn.microsoft.com/en-us/library/cc144191(VS.85).aspx
+        const char *command = "c:\\windows\\system32\\control.exe /name Microsoft.WindowsUpdate";
 
         UINT ret = WinExec(command, SW_NORMAL);
         if (ret <= 31) {
@@ -1479,12 +1476,6 @@ LRESULT CEndlessUsbToolDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lPara
             }
 
             switch (wParam) {
-            case PBT_APMQUERYSUSPEND:
-                // Windows XP only. Vista and later do not send PBT_APMQUERYSUSPEND;
-                // we attempt to inhibit suspend in EnableHibernate with the newer API.
-                uprintf("Received WM_POWERBROADCAST with PBT_APMQUERYSUSPEND and trying to cancel it.");
-                return BROADCAST_QUERY_DENY;
-
             case PBT_APMSUSPEND:
                 uprintf("Received PBT_APMSUSPEND so canceling the operation.");
                 m_lastErrorCause = ErrorCause_t::ErrorCauseSuspended;
@@ -2022,7 +2013,7 @@ HRESULT CEndlessUsbToolDlg::OnAdvancedOptionsClicked(IHTMLElement* pElement)
 	FUNCTION_ENTER;
 
 	SHORT keyState = GetKeyState(VK_CONTROL);
-	bool oldStyleUSB = ((keyState & KEY_PRESSED) != 0) || (nWindowsVersion == WINDOWS_XP);
+	bool oldStyleUSB = (keyState & KEY_PRESSED) != 0;
 
 	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_ADVOPT_SUBTITLE), CComVariant(!oldStyleUSB));
 	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(HTML_BUTTON_ID(ELEMENT_COMBINED_USB_BUTTON)), CComVariant(!oldStyleUSB));
@@ -4368,11 +4359,7 @@ void CEndlessUsbToolDlg::EnableHibernate(bool enable)
     EXECUTION_STATE flags;
 
     if (!enable) {
-        if (nWindowsVersion == WINDOWS_XP) {
-            flags = ES_CONTINUOUS | ES_SYSTEM_REQUIRED;
-        } else {
-            flags = ES_CONTINUOUS | ES_SYSTEM_REQUIRED | ES_AWAYMODE_REQUIRED;
-        }
+        flags = ES_CONTINUOUS | ES_SYSTEM_REQUIRED | ES_AWAYMODE_REQUIRED;
     } else {
         flags = ES_CONTINUOUS;
     }
@@ -4475,16 +4462,6 @@ void CEndlessUsbToolDlg::CheckUSBHub(LPCTSTR devicePath)
         USB_HUB_CAPABILITIES hubCapabilities;
         DWORD size = sizeof(hubCapabilities);
         memset(&hubCapabilities, 0, sizeof(USB_HUB_CAPABILITIES));
-
-        // Windows XP check
-        if (nWindowsVersion == WINDOWS_XP) {
-            if (!DeviceIoControl(usbHubHandle, IOCTL_USB_GET_HUB_CAPABILITIES, &hubCapabilities, size, &hubCapabilities, size, &size, NULL)) {
-                uprintf("Could not get hub capabilites for %ls: %s", devicePath, WindowsErrorString());
-            } else {
-                uprintf("%ls HubIs2xCapable=%d", devicePath, hubCapabilities.HubIs2xCapable);
-                m_maximumUSBVersion = max(m_maximumUSBVersion, hubCapabilities.HubIs2xCapable ? USB_SPEED_HIGH : USB_SPEED_LOW);
-            }
-        }
 
         // Windows Vista and 7 check
         if (nWindowsVersion >= WINDOWS_VISTA) {
@@ -5896,13 +5873,10 @@ CStringW CEndlessUsbToolDlg::GetExePath()
 		exePath = (wchar_t*)malloc((neededSize + 1) * sizeof(wchar_t));
 		memset(exePath, 0, (neededSize + 1) * sizeof(wchar_t));
 		DWORD result = GetModuleFileNameW(NULL, exePath, neededSize);
-		if (nWindowsVersion > WINDOWS_XP) {
-			IFFALSE_GOTOERROR(result != 0 && (GetLastError() == ERROR_SUCCESS || GetLastError() == ERROR_INSUFFICIENT_BUFFER), "Could not get needed size for module path");
-			neededSize = result;
-			IFFALSE_CONTINUE(GetLastError() != ERROR_INSUFFICIENT_BUFFER, "Not enough memory allocated for buffer. Trying again.");
-		} else {
-			IFFALSE_GOTOERROR(result != 0, "Windows XP: Could not get needed size for module path");
-		}
+
+		IFFALSE_GOTOERROR(result != 0 && (GetLastError() == ERROR_SUCCESS || GetLastError() == ERROR_INSUFFICIENT_BUFFER), "Could not get needed size for module path");
+		neededSize = result;
+		IFFALSE_CONTINUE(GetLastError() != ERROR_INSUFFICIENT_BUFFER, "Not enough memory allocated for buffer. Trying again.");
 
 		break;
 	} while (TRUE);
@@ -5957,10 +5931,6 @@ bool CEndlessUsbToolDlg::UninstallEndlessMBR(const CString & systemDriveLetter, 
 
     if (nWindowsVersion >= WINDOWS_7) {
         IFFALSE_RETURN_VALUE(write_win7_mbr(fp), "Error on write_win7_mbr", false);
-    } else if(nWindowsVersion == WINDOWS_VISTA) {
-        IFFALSE_RETURN_VALUE(write_vista_mbr(fp), "Error on write_vista_mbr", false);
-    } else if (nWindowsVersion == WINDOWS_2003 || nWindowsVersion == WINDOWS_XP) {
-        IFFALSE_RETURN_VALUE(write_2000_mbr(fp), "Error on write_2000_mbr", false);
     } else {
         uprintf("Restore MBR not supported for this windows version '%s', ver %d", WindowsVersionStr, nWindowsVersion);
         return false;

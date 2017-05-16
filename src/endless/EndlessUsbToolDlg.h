@@ -316,6 +316,7 @@ private:
 	void LoadLocalizationData();
 	void AddLanguagesToUI();
 	void ApplyRufusLocalization();
+	void ShowWindowsTooOldError();
 	void ShowIETooOldError();
 
 	void ChangePage(PCTSTR newPage);

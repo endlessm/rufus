@@ -38,29 +38,6 @@ protected:
     const CString m_name;
 };
 
-class EosldrInstallerBootIni : public EosldrInstaller {
-public:
-    EosldrInstallerBootIni(const CString &name)
-        : EosldrInstaller(name)
-    {}
-
-protected:
-    virtual bool AddToBootOrder(
-        const CString & systemDriveLetter,
-        const CString & eosldrMbrPath);
-    virtual bool RemoveFromBootOrder(
-        const CString & systemDriveLetter,
-        const CString & eosldrMbrPath,
-        bool &foundBootEntry);
-
-private:
-    bool ModifyBootOrder(
-        const CString & systemDriveLetter,
-        const CString & eosldrMbrPath,
-        bool add,
-        bool &foundBootEntry);
-};
-
 class EosldrInstallerBcd : public EosldrInstaller {
 public:
     EosldrInstallerBcd(const CString &name, const CString &uninstallKey)
