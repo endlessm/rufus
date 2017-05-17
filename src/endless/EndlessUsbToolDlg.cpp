@@ -1780,18 +1780,24 @@ void CEndlessUsbToolDlg::ErrorOccured(ErrorCause_t errorCause)
     if (suggestionMsgId != 0) {
         CComBSTR message;
         if (suggestionMsgId == MSG_334) {
+            // Not enough space to download
             POSITION p = m_remoteImages.FindIndex(m_selectedRemoteIndex);
             ULONGLONG size = 0;
             if (p != NULL) {
                 RemoteImageEntry_t remote = m_remoteImages.GetAt(p);
-                size = remote.compressedSize;
+                size = remote.compressedSize + remote.bootArchiveSize;
             }
             // we don't take the signature files into account but we are taking about ~2KB compared to >2GB
             ULONGLONG totalSize = size + (m_selectedInstallMethod == InstallMethod_t::ReformatterUsb ? m_installerImage.compressedSize : 0);
             message = UTF8ToBSTR(lmprintf(suggestionMsgId, SizeToHumanReadable(totalSize, FALSE, use_fake_units)));
         } else if(suggestionMsgId == MSG_351) {
-            ULONGLONG neededSize = GetNeededSpaceForDualBoot();
-            message = UTF8ToBSTR(lmprintf(suggestionMsgId, SizeToHumanReadable(neededSize, FALSE, use_fake_units), ConvertUnicodeToUTF8(GetSystemDrive())));
+            // Not enough space to install (either our size logic is buggy, or
+            // the user downloaded some other huge file between choosing a size
+            // and the download finishing?)
+            ULONGLONG downloadSize = 0;
+            ULONGLONG neededSize = GetNeededSpaceForDualBoot(&downloadSize);
+            CStringA humanSize = SizeToHumanReadable(neededSize + downloadSize + BYTES_IN_GIGABYTE, FALSE, use_fake_units);
+            message = UTF8ToBSTR(lmprintf(suggestionMsgId, humanSize, ConvertUnicodeToUTF8(GetSystemDrive())));
         } else {
             message = UTF8ToBSTR(lmprintf(suggestionMsgId));
         }
@@ -3435,8 +3441,14 @@ HRESULT CEndlessUsbToolDlg::OnSelectedStorageSizeChanged(IHTMLElement* pElement)
 #define IS_MAXIMUM_VALUE		2
 #define IS_BASE_IMAGE			3
 
-ULONGLONG CEndlessUsbToolDlg::GetNeededSpaceForDualBoot(bool *isBaseImage)
+// Returns the minimum size required to install the currently-selected image,
+// including padding to give the user free space to install updates and apps.
+// If the image needs to be downloaded, and the download destination is the
+// same as the install drive, downloadSize is set to the space required for
+// the download; otherwise, it's 0.
+ULONGLONG CEndlessUsbToolDlg::GetNeededSpaceForDualBoot(ULONGLONG *downloadSize, bool *isBaseImage)
 {
+	*downloadSize = 0;
 	if(isBaseImage != NULL)  *isBaseImage = true;
 	// figure out how much space we need
 	ULONGLONG neededSize = 0;
@@ -3456,7 +3468,7 @@ ULONGLONG CEndlessUsbToolDlg::GetNeededSpaceForDualBoot(bool *isBaseImage)
 			RemoteImageEntry_t remote = m_remoteImages.GetAt(p);
 			neededSize = remote.extractedSize;
 			if (GetExePath().Left(3) == GetSystemDrive()) {
-				neededSize += remote.compressedSize + remote.bootArchiveSize;
+				*downloadSize = remote.compressedSize + remote.bootArchiveSize;
 			}
 			if (isBaseImage != NULL)  *isBaseImage = (remote.personality == PERSONALITY_BASE);
 		}
@@ -3470,12 +3482,14 @@ void CEndlessUsbToolDlg::GoToSelectStoragePage()
 	ULARGE_INTEGER freeBytesAvailable, totalNumberOfBytes, totalNumberOfFreeBytes;
 	CComPtr<IHTMLSelectElement> selectElement;
 	HRESULT hr;
-	ULONGLONG maxAvailableSize = 0;
+	ULONGLONG maximumInstallSize = 0;
 	CStringA freeSize, totalSize;
 	bool isBaseImage = true;
 
 	ULONGLONG bytesInGig = BYTES_IN_GIGABYTE;
-	ULONGLONG neededSize = GetNeededSpaceForDualBoot(&isBaseImage);
+	ULONGLONG downloadSize = 0;
+	ULONGLONG minimumInstallSize = GetNeededSpaceForDualBoot(&downloadSize, &isBaseImage);
+	ULONGLONG totalSpaceNeeded = downloadSize + minimumInstallSize + bytesInGig;
 
 	CStringW systemDrive = GetSystemDrive();
 	CStringA systemDriveA = ConvertUnicodeToUTF8(systemDrive);
@@ -3484,8 +3498,13 @@ void CEndlessUsbToolDlg::GoToSelectStoragePage()
 	IFFALSE_RETURN(GetDiskFreeSpaceEx(systemDrive, &freeBytesAvailable, &totalNumberOfBytes, &totalNumberOfFreeBytes) != 0, "Error on GetDiskFreeSpace");
 	totalSize = SizeToHumanReadable(totalNumberOfBytes.QuadPart, FALSE, use_fake_units);
 	freeSize = SizeToHumanReadable(freeBytesAvailable.QuadPart, FALSE, use_fake_units);
-	uprintf("Available space on drive %s is %s out of %s; we need %s", systemDrive, freeSize, totalSize, SizeToHumanReadable(neededSize, FALSE, use_fake_units));
-	maxAvailableSize = (freeBytesAvailable.QuadPart - bytesInGig);
+	{
+		CStringA downloadSizeStr = SizeToHumanReadable(downloadSize, FALSE, use_fake_units);
+		CStringA minimumInstallSizeStr = SizeToHumanReadable(minimumInstallSize, FALSE, use_fake_units);
+		uprintf("Available space on drive %s is %s out of %s; we need %s to download and %s to install",
+			systemDrive, freeSize, totalSize, downloadSizeStr, minimumInstallSizeStr);
+	}
+	maximumInstallSize = (freeBytesAvailable.QuadPart - bytesInGig) - downloadSize;
 
 	// update messages with needed space based on selected version
 	CStringA osVersion = lmprintf(isBaseImage ? MSG_400 : MSG_316);
@@ -3505,7 +3524,7 @@ void CEndlessUsbToolDlg::GoToSelectStoragePage()
 	IFFALSE_RETURN(SUCCEEDED(hr) && selectElement != NULL, "Error returned from GetSelectElement.");
 	hr = selectElement->put_length(0);
 
-	bool enoughBytesAvailable = (freeBytesAvailable.QuadPart - bytesInGig) > neededSize;
+	bool enoughBytesAvailable = totalSpaceNeeded < freeBytesAvailable.QuadPart;
 
 	// Enable/disable ui elements based on space availability
 	CallJavascript(_T(JS_ENABLE_ELEMENT), CComVariant(_T(ELEMENT_STORAGE_SELECT)), CComVariant(enoughBytesAvailable));
@@ -3518,7 +3537,7 @@ void CEndlessUsbToolDlg::GoToSelectStoragePage()
 	if (!enoughBytesAvailable) {
 		uprintf("Not enough bytes available.");
 
-		message = UTF8ToCString(lmprintf(MSG_335, SizeToHumanReadable(neededSize, FALSE, use_fake_units), freeSize, systemDriveA));
+		message = UTF8ToCString(lmprintf(MSG_335, SizeToHumanReadable(totalSpaceNeeded, FALSE, use_fake_units), freeSize, systemDriveA));
 		SetElementText(_T(ELEMENT_STORAGE_SPACE_WARNING), CComBSTR(message));
 
 		ChangePage(_T(ELEMENT_STORAGE_PAGE));
@@ -3529,17 +3548,17 @@ void CEndlessUsbToolDlg::GoToSelectStoragePage()
 	}
 
 	// Add the entries
-	m_selectedInstallSizeBytes = neededSize;
-	IFFALSE_RETURN(AddStorageEntryToSelect(selectElement, neededSize, IS_MINIMUM_VALUE), "Error adding value to select.");
+	m_selectedInstallSizeBytes = minimumInstallSize;
+	IFFALSE_RETURN(AddStorageEntryToSelect(selectElement, minimumInstallSize, IS_MINIMUM_VALUE), "Error adding value to select.");
 
 	// next power of 2 greater than minimum size
-	uint64_t size = 1LL << (log2ll(neededSize) + 1);
+	uint64_t size = 1LL << (log2ll(minimumInstallSize) + 1);
 
-	for (; size < maxAvailableSize; size *= 2) {
+	for (; size < maximumInstallSize; size *= 2) {
 		IFFALSE_RETURN(AddStorageEntryToSelect(selectElement, size, isBaseImage ? IS_BASE_IMAGE : 0), "Error adding value to select.");
 	}
 
-	IFFALSE_RETURN(AddStorageEntryToSelect(selectElement, maxAvailableSize, IS_MAXIMUM_VALUE), "Error adding value to select.");
+	IFFALSE_RETURN(AddStorageEntryToSelect(selectElement, maximumInstallSize, IS_MAXIMUM_VALUE), "Error adding value to select.");
 
 	ChangePage(_T(ELEMENT_STORAGE_PAGE));
 }
