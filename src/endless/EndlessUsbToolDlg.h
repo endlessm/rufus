@@ -467,7 +467,7 @@ private:
 
 	CComBSTR GetDownloadString(const RemoteImageEntry &imageEntry);
 
-	ULONGLONG GetNeededSpaceForDualBoot(bool *isBaseImage = NULL);
+	ULONGLONG GetNeededSpaceForDualBoot(ULONGLONG *downloadSize, bool *isBaseImage = NULL);
 
 	static const UINT m_uTaskbarBtnCreatedMsg;
 
