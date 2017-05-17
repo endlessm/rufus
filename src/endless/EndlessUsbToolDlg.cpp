@@ -3452,7 +3452,6 @@ ULONGLONG CEndlessUsbToolDlg::GetNeededSpaceForDualBoot(ULONGLONG *downloadSize,
 	if(isBaseImage != NULL)  *isBaseImage = true;
 	// figure out how much space we need
 	ULONGLONG neededSize = 0;
-	ULONGLONG bytesInGig = BYTES_IN_GIGABYTE;
 	if (m_useLocalFile) {
 		pFileImageEntry_t localEntry = NULL;
 
@@ -3473,7 +3472,8 @@ ULONGLONG CEndlessUsbToolDlg::GetNeededSpaceForDualBoot(ULONGLONG *downloadSize,
 			if (isBaseImage != NULL)  *isBaseImage = (remote.personality == PERSONALITY_BASE);
 		}
 	}
-	neededSize += bytesInGig;
+	const ULONGLONG paddingBytes = 4LL * BYTES_IN_GIGABYTE;
+	neededSize += paddingBytes;
 	return neededSize;
 }
 
