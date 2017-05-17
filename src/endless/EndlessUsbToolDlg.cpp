@@ -20,6 +20,7 @@
 #include "WindowsUsbDefines.h"
 #include "StringHelperMethods.h"
 #include "Images.h"
+#include "Log2LL.h"
 #include "WMI.h"
 
 // Rufus include files
@@ -1794,19 +1795,24 @@ void CEndlessUsbToolDlg::ErrorOccured(ErrorCause_t errorCause)
     if (suggestionMsgId != 0) {
         CComBSTR message;
         if (suggestionMsgId == MSG_334 || suggestionMsgId == MSG_303) {
+            // Not enough space to download
             POSITION p = m_remoteImages.FindIndex(m_selectedRemoteIndex);
             ULONGLONG size = 0;
             if (p != NULL) {
                 RemoteImageEntry_t remote = m_remoteImages.GetAt(p);
-                size = remote.compressedSize;
+                size = remote.compressedSize + remote.bootArchiveSize;
             }
             // we don't take the signature files into account but we are taking about ~2KB compared to >2GB
             ULONGLONG totalSize = size + (m_selectedInstallMethod == InstallMethod_t::ReformatterUsb ? m_installerImage.compressedSize : 0);
             message = UTF8ToBSTR(lmprintf(suggestionMsgId, SizeToHumanReadable(totalSize, FALSE, use_fake_units)));
         } else if(suggestionMsgId == MSG_351 || suggestionMsgId == MSG_301) {
-            int nrGigsNeeded;
-            ULONGLONG neededSize = GetNeededSpaceForDualBoot(nrGigsNeeded);
-            message = UTF8ToBSTR(lmprintf(suggestionMsgId, SizeToHumanReadable(neededSize, FALSE, use_fake_units), ConvertUnicodeToUTF8(GetSystemDrive())));
+            // Not enough space to install (either our size logic is buggy, or
+            // the user downloaded some other huge file between choosing a size
+            // and the download finishing?)
+            ULONGLONG downloadSize = 0;
+            ULONGLONG neededSize = GetNeededSpaceForDualBoot(&downloadSize);
+            CStringA humanSize = SizeToHumanReadable(neededSize + downloadSize + BYTES_IN_GIGABYTE, FALSE, use_fake_units);
+            message = UTF8ToBSTR(lmprintf(suggestionMsgId, humanSize, ConvertUnicodeToUTF8(GetSystemDrive())));
         } else {
             message = UTF8ToBSTR(lmprintf(suggestionMsgId));
         }
@@ -3423,7 +3429,8 @@ HRESULT CEndlessUsbToolDlg::OnSelectStorageNextClicked(IHTMLElement *pElement)
 
 	FUNCTION_ENTER;
 
-	TrackEvent(_T("StorageSizeGB"), (LONGLONG) m_nrGigsSelected);
+	ULONGLONG approxGB = (m_selectedInstallSizeBytes + (BYTES_IN_GIGABYTE / 2)) / BYTES_IN_GIGABYTE;
+	TrackEvent(_T("StorageSizeGB"), approxGB);
 
 	StartInstallationProcess();
 
@@ -3443,22 +3450,26 @@ HRESULT CEndlessUsbToolDlg::OnSelectedStorageSizeChanged(IHTMLElement* pElement)
 	hr = selectElement->get_value(&selectedValue);
 	IFFALSE_RETURN_VALUE(SUCCEEDED(hr) && selectElement != NULL, "Error getting selected file value", S_OK);
 
-	m_nrGigsSelected = _wtoi(selectedValue);
-	uprintf("Number of Gb selected for the endless OS file: %d", m_nrGigsSelected);
+	m_selectedInstallSizeBytes = _wtoll(selectedValue);
+	uprintf("Size selected for the Endless OS file: %I64d bytes", m_selectedInstallSizeBytes);
 
 	return S_OK;
 }
 
-#define MIN_NO_OF_GIGS			8
-#define MAX_NO_OF_GIGS			256
-#define RECOMMENDED_GIGS_BASE	16
-#define RECOMMENDED_GIGS_FULL	32
+#define RECOMMENDED_SIZE_BASE	(16LL * BYTES_IN_GIGABYTE)
+#define RECOMMENDED_SIZE_FULL	(32LL * BYTES_IN_GIGABYTE)
 #define IS_MINIMUM_VALUE		1
 #define IS_MAXIMUM_VALUE		2
 #define IS_BASE_IMAGE			3
 
-ULONGLONG CEndlessUsbToolDlg::GetNeededSpaceForDualBoot(int &neededGigs, bool *isBaseImage)
+// Returns the minimum size required to install the currently-selected image,
+// including padding to give the user free space to install updates and apps.
+// If the image needs to be downloaded, and the download destination is the
+// same as the install drive, downloadSize is set to the space required for
+// the download; otherwise, it's 0.
+ULONGLONG CEndlessUsbToolDlg::GetNeededSpaceForDualBoot(ULONGLONG *downloadSize, bool *isBaseImage)
 {
+	*downloadSize = 0;
 	if(isBaseImage != NULL)  *isBaseImage = true;
 	// figure out how much space we need
 	ULONGLONG neededSize = 0;
@@ -3478,13 +3489,12 @@ ULONGLONG CEndlessUsbToolDlg::GetNeededSpaceForDualBoot(int &neededGigs, bool *i
 			RemoteImageEntry_t remote = m_remoteImages.GetAt(p);
 			neededSize = remote.extractedSize;
 			if (GetExePath().Left(3) == GetSystemDrive()) {
-				neededSize += remote.compressedSize + remote.bootArchiveSize;
+				*downloadSize = remote.compressedSize + remote.bootArchiveSize;
 			}
 			if (isBaseImage != NULL)  *isBaseImage = (remote.personality == PERSONALITY_BASE);
 		}
 	}
 	neededSize += bytesInGig;
-	neededGigs = (int)(neededSize / bytesInGig);
 	return neededSize;
 }
 
@@ -3493,13 +3503,14 @@ void CEndlessUsbToolDlg::GoToSelectStoragePage()
 	ULARGE_INTEGER freeBytesAvailable, totalNumberOfBytes, totalNumberOfFreeBytes;
 	CComPtr<IHTMLSelectElement> selectElement;
 	HRESULT hr;
-	int maxAvailableGigs = 0;
+	ULONGLONG maximumInstallSize = 0;
 	CStringA freeSize, totalSize;
 	bool isBaseImage = true;
 
 	ULONGLONG bytesInGig = BYTES_IN_GIGABYTE;
-	int neededGigs = 0;
-	ULONGLONG neededSize = GetNeededSpaceForDualBoot(neededGigs, &isBaseImage);
+	ULONGLONG downloadSize = 0;
+	ULONGLONG minimumInstallSize = GetNeededSpaceForDualBoot(&downloadSize, &isBaseImage);
+	ULONGLONG totalSpaceNeeded = downloadSize + minimumInstallSize + bytesInGig;
 
 	CStringW systemDrive = GetSystemDrive();
 	CStringA systemDriveA = ConvertUnicodeToUTF8(systemDrive);
@@ -3508,12 +3519,17 @@ void CEndlessUsbToolDlg::GoToSelectStoragePage()
 	IFFALSE_RETURN(GetDiskFreeSpaceEx(systemDrive, &freeBytesAvailable, &totalNumberOfBytes, &totalNumberOfFreeBytes) != 0, "Error on GetDiskFreeSpace");
 	totalSize = SizeToHumanReadable(totalNumberOfBytes.QuadPart, FALSE, use_fake_units);
 	freeSize = SizeToHumanReadable(freeBytesAvailable.QuadPart, FALSE, use_fake_units);
-	uprintf("Available space on drive %s is %s out of %s; we need %s", systemDrive, freeSize, totalSize, SizeToHumanReadable(neededSize, FALSE, use_fake_units));
-	maxAvailableGigs = (int) ((freeBytesAvailable.QuadPart - bytesInGig) / bytesInGig);
+	{
+		CStringA downloadSizeStr = SizeToHumanReadable(downloadSize, FALSE, use_fake_units);
+		CStringA minimumInstallSizeStr = SizeToHumanReadable(minimumInstallSize, FALSE, use_fake_units);
+		uprintf("Available space on drive %s is %s out of %s; we need %s to download and %s to install",
+			systemDrive, freeSize, totalSize, downloadSizeStr, minimumInstallSizeStr);
+	}
+	maximumInstallSize = (freeBytesAvailable.QuadPart - bytesInGig) - downloadSize;
 
 	// update messages with needed space based on selected version
 	CStringA osVersion = lmprintf(isBaseImage ? MSG_400 : MSG_316);
-	CStringA osSizeText = SizeToHumanReadable((isBaseImage ? RECOMMENDED_GIGS_BASE : RECOMMENDED_GIGS_FULL) * bytesInGig, FALSE, use_fake_units);
+	CStringA osSizeText = SizeToHumanReadable((isBaseImage ? RECOMMENDED_SIZE_BASE : RECOMMENDED_SIZE_FULL), FALSE, use_fake_units);
 
 	CString message = UTF8ToCString(lmprintf(IsCoding() ? MSG_346 : MSG_337, osVersion, osSizeText));
 	SetElementText(_T(ELEMENT_STORAGE_DESCRIPTION), CComBSTR(message));
@@ -3529,7 +3545,7 @@ void CEndlessUsbToolDlg::GoToSelectStoragePage()
 	IFFALSE_RETURN(SUCCEEDED(hr) && selectElement != NULL, "Error returned from GetSelectElement.");
 	hr = selectElement->put_length(0);
 
-	bool enoughBytesAvailable = (freeBytesAvailable.QuadPart - bytesInGig) > neededSize;
+	bool enoughBytesAvailable = totalSpaceNeeded < freeBytesAvailable.QuadPart;
 
 	// Enable/disable ui elements based on space availability
 	CallJavascript(_T(JS_ENABLE_ELEMENT), CComVariant(_T(ELEMENT_STORAGE_SELECT)), CComVariant(enoughBytesAvailable));
@@ -3542,7 +3558,7 @@ void CEndlessUsbToolDlg::GoToSelectStoragePage()
 	if (!enoughBytesAvailable) {
 		uprintf("Not enough bytes available.");
 
-		message = UTF8ToCString(lmprintf(IsCoding() ? MSG_374 : MSG_335, SizeToHumanReadable(neededSize, FALSE, use_fake_units), freeSize, systemDriveA));
+		message = UTF8ToCString(lmprintf(IsCoding() ? MSG_374 : MSG_335, SizeToHumanReadable(totalSpaceNeeded, FALSE, use_fake_units), freeSize, systemDriveA));
 		SetElementText(_T(ELEMENT_STORAGE_SPACE_WARNING), CComBSTR(message));
 
 		ChangePage(_T(ELEMENT_STORAGE_PAGE));
@@ -3553,32 +3569,32 @@ void CEndlessUsbToolDlg::GoToSelectStoragePage()
 	}
 
 	// Add the entries
-	m_nrGigsSelected = neededGigs;
-	IFFALSE_RETURN(AddStorageEntryToSelect(selectElement, neededGigs, IS_MINIMUM_VALUE), "Error adding value to select.");
+	m_selectedInstallSizeBytes = minimumInstallSize;
+	IFFALSE_RETURN(AddStorageEntryToSelect(selectElement, minimumInstallSize, IS_MINIMUM_VALUE), "Error adding value to select.");
 
-	for (int nrGigs = MIN_NO_OF_GIGS; nrGigs < min(maxAvailableGigs, MAX_NO_OF_GIGS); nrGigs = nrGigs * 2) {
-		IFFALSE_CONTINUE(nrGigs > neededGigs, "");
-		IFFALSE_RETURN(AddStorageEntryToSelect(selectElement, nrGigs, isBaseImage ? IS_BASE_IMAGE : 0), "Error adding value to select.");
+	// next power of 2 greater than minimum size
+	uint64_t size = 1LL << (log2ll(minimumInstallSize) + 1);
+
+	for (; size < maximumInstallSize; size *= 2) {
+		IFFALSE_RETURN(AddStorageEntryToSelect(selectElement, size, isBaseImage ? IS_BASE_IMAGE : 0), "Error adding value to select.");
 	}
 
-	IFFALSE_RETURN(AddStorageEntryToSelect(selectElement, maxAvailableGigs, IS_MAXIMUM_VALUE), "Error adding value to select.");
+	IFFALSE_RETURN(AddStorageEntryToSelect(selectElement, maximumInstallSize, IS_MAXIMUM_VALUE), "Error adding value to select.");
 
 	ChangePage(_T(ELEMENT_STORAGE_PAGE));
 }
 
-BOOL CEndlessUsbToolDlg::AddStorageEntryToSelect(CComPtr<IHTMLSelectElement> &selectElement, int noOfGigs, uint8_t extraData)
+BOOL CEndlessUsbToolDlg::AddStorageEntryToSelect(CComPtr<IHTMLSelectElement> &selectElement, const ULONGLONG size, uint8_t extraData)
 {
-	ULONGLONG size = noOfGigs;
-	size = size * BYTES_IN_GIGABYTE;
 	CStringA sizeText = SizeToHumanReadable(size, FALSE, use_fake_units);
 	CString value, text;
 	int locMsg = 0;
-	value.Format(L"%d", noOfGigs);
+	value.Format(L"%I64d", size);
 
 	if (extraData == IS_MINIMUM_VALUE) locMsg = MSG_338;
 	else if (extraData == IS_MAXIMUM_VALUE) locMsg = MSG_340;
-	else if (extraData == IS_BASE_IMAGE && noOfGigs == RECOMMENDED_GIGS_BASE) locMsg = MSG_339;
-	else if (extraData == 0 && noOfGigs == RECOMMENDED_GIGS_FULL) locMsg = MSG_339;
+	else if (extraData == IS_BASE_IMAGE && size == RECOMMENDED_SIZE_BASE) locMsg = MSG_339;
+	else if (extraData == 0 && size == RECOMMENDED_SIZE_FULL) locMsg = MSG_339;
 
 	if (locMsg != 0) {
 		text = UTF8ToCString(lmprintf(locMsg, sizeText));
@@ -3587,7 +3603,7 @@ BOOL CEndlessUsbToolDlg::AddStorageEntryToSelect(CComPtr<IHTMLSelectElement> &se
 	}
 
 	if (locMsg == MSG_339) {
-		m_nrGigsSelected = noOfGigs;
+		m_selectedInstallSizeBytes = size;
 	}
 
 	return SUCCEEDED(AddEntryToSelect(selectElement, CComBSTR(value), CComBSTR(text), NULL, locMsg == MSG_339));
@@ -5208,7 +5224,7 @@ bool CEndlessUsbToolDlg::SetupDualBootFiles(CEndlessUsbToolDlg *dlg, const CStri
 	IFFALSE_PRINTERROR(SetFileAttributes(endlessImgPath, FILE_ATTRIBUTE_SYSTEM | FILE_ATTRIBUTE_HIDDEN),
 		"Failed to clear FILE_ATTRIBUTE_READONLY; ExtendImageFile will probably now fail");
 	// extend this file so it reaches the required size
-	IFFALSE_GOTOERROR(ExtendImageFile(endlessImgPath, dlg->m_nrGigsSelected), "Error extending Endless image file");
+	IFFALSE_GOTOERROR(ExtendImageFile(endlessImgPath, dlg->m_selectedInstallSizeBytes), "Error extending Endless image file");
 
 	UpdateProgress(OP_SETUP_DUALBOOT, DB_PROGRESS_FINISHED_UNPACK);
 	CHECK_IF_CANCELLED;
@@ -5284,7 +5300,7 @@ error:
 	return success;
 }
 
-bool CEndlessUsbToolDlg::ExtendImageFile(const CString &endlessImgPath, ULONGLONG selectedGigs)
+bool CEndlessUsbToolDlg::ExtendImageFile(const CString &endlessImgPath, uint64_t bytes)
 {
 	FUNCTION_ENTER;
 	HANDLE endlessImage = INVALID_HANDLE_VALUE;
@@ -5302,7 +5318,7 @@ bool CEndlessUsbToolDlg::ExtendImageFile(const CString &endlessImgPath, ULONGLON
 	LARGE_INTEGER lCurrentSize;
 	IFFALSE_GOTOERROR(GetFileSizeEx(endlessImage, &lCurrentSize), "Error getting Endless image file size");
 	LARGE_INTEGER lsize;
-	lsize.QuadPart = selectedGigs * BYTES_IN_GIGABYTE;
+	lsize.QuadPart = bytes;
 	
     if (lCurrentSize.QuadPart < lsize.QuadPart) {
         uprintf("Trying to extend Endless image from %I64i bytes to %I64i bytes which is about %s", lCurrentSize.QuadPart, lsize.QuadPart, SizeToHumanReadable(lsize.QuadPart, FALSE, use_fake_units));
