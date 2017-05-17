@@ -256,23 +256,23 @@ msgid "bytes"
 msgstr ""
 
 msgctxt "MSG_021"
-msgid "Kb"
+msgid "KB"
 msgstr ""
 
 msgctxt "MSG_022"
-msgid "Mb"
+msgid "MB"
 msgstr ""
 
 msgctxt "MSG_023"
-msgid "Gb"
+msgid "GB"
 msgstr ""
 
 msgctxt "MSG_024"
-msgid "Tb"
+msgid "TB"
 msgstr ""
 
 msgctxt "MSG_025"
-msgid "Pb"
+msgid "PB"
 msgstr ""
 
 #, c-format
