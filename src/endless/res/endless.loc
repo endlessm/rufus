@@ -174,11 +174,11 @@ t USBLearnMore "Learn more about the Endless USB Stick"
 
 # *Short* size names. These can be used as suffixes
 t MSG_020 "bytes"
-t MSG_021 "Kb"
-t MSG_022 "Mb"
-t MSG_023 "Gb"
-t MSG_024 "Tb"
-t MSG_025 "Pb"
+t MSG_021 "KB"
+t MSG_022 "MB"
+t MSG_023 "GB"
+t MSG_024 "TB"
+t MSG_025 "PB"
 
 t MSG_045 "USB Storage Device (Generic)"
 # Used for USB drives that don't have a drive letter. Placeholders are:
