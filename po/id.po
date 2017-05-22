@@ -12,7 +12,7 @@ msgstr ""
 "Project-Id-Version: rufus\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-03-08 02:28+0000\n"
-"PO-Revision-Date: 2017-04-10 14:25+0000\n"
+"PO-Revision-Date: 2017-05-22 05:24+0000\n"
 "Last-Translator: Septira Taruna <septira@endlessm.com>\n"
 "Language-Team: Indonesian (http://www.transifex.com/endless-mobile-inc/rufus/language/id/)\n"
 "MIME-Version: 1.0\n"
@@ -148,7 +148,7 @@ msgstr "Endless OS"
 
 msgctxt "InstallCancelButton"
 msgid "Cancel"
-msgstr "Batalkan"
+msgstr "Batal"
 
 msgctxt "ThankYouPageTitle"
 msgid "Thank you"
@@ -455,7 +455,7 @@ msgctxt "MSG_323"
 msgid ""
 "We couldn’t finish getting Endless OS. Check your internet connection and "
 "click \"Resume\" to carry on downloading."
-msgstr "Kami tidak bisa menyelesaikan mengunduh Endless OS. Periksa koneksi internet Anda dan klik \"Lanjutkan\" untuk melanjutkan pengunduhan."
+msgstr "Kami tidak bisa menyelesaikan mengunduh Endless OS. Periksa koneksi internet Anda dan klik \"Lanjut\" untuk melanjutkan pengunduhan."
 
 #. The string in quotes should match MSG_327
 #, c-format
@@ -482,7 +482,7 @@ msgstr "Terjadi sesuatu pada komputer Anda saat menginstal Endless OS."
 #, c-format
 msgctxt "MSG_326"
 msgid "Resume"
-msgstr "Ringkasan"
+msgstr "Lanjut"
 
 #. This should match the string in quotes in MSG_324
 #, c-format
@@ -537,7 +537,7 @@ msgctxt "MSG_334"
 msgid ""
 "There isn’t enough disk space for downloading Endless OS. Please free up %s "
 "and click \"Resume\" to start downloading."
-msgstr "Ruang penyimpanan yang tersedia tidak cukup untuk mengunduh Endless OS. Silakan bebaskan %s dan klik \"Lanjutkan\" untuk mulai mengunduh."
+msgstr "Ruang penyimpanan yang tersedia tidak cukup untuk mengunduh Endless OS. Silakan bebaskan kapasitas %s dan klik \"Lanjut\" untuk mulai mengunduh."
 
 #, c-format
 msgctxt "MSG_335"
@@ -651,7 +651,7 @@ msgstr "Anda yakin ingin menghapus pemasangan Endless OS? Tindakan ini akan meng
 #, c-format
 msgctxt "MSG_362"
 msgid "Endless OS has been uninstalled successfully"
-msgstr "Endless OS telah berhasil dihapus pemasangannya."
+msgstr "Endless OS telah berhasil dihapus."
 
 #, c-format
 msgctxt "MSG_363"
