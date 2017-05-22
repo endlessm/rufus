@@ -496,7 +496,9 @@ HRESULT BcdBootmgr::GetDisplayOrder(CComSafeArray<BSTR>& displayOrder)
 
     CComPtr<IWbemClassObject> pDisplayOrderElement = (IWbemClassObject*)vDisplayOrderElement.byref;
     CComVariant vDisplayOrder;
-    WmiObject::Get(pDisplayOrderElement, L"Ids", &vDisplayOrder);
+    IFFAILED_RETURN_RES(
+        WmiObject::Get(pDisplayOrderElement, L"Ids", &vDisplayOrder),
+        "Failed to get Ids property from Element");
 
     displayOrder = vDisplayOrder.parray;
     return S_OK;
