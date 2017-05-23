@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: rufus\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-03-08 02:28+0000\n"
-"PO-Revision-Date: 2017-03-28 03:54+0000\n"
+"PO-Revision-Date: 2017-05-22 16:21+0000\n"
 "Last-Translator: endlessmobile_build <philip@endlessm.com>\n"
 "Language-Team: Arabic (http://www.transifex.com/endless-mobile-inc/rufus/language/ar/)\n"
 "MIME-Version: 1.0\n"
@@ -276,24 +276,24 @@ msgid "bytes"
 msgstr "بايت"
 
 msgctxt "MSG_021"
-msgid "Kb"
-msgstr "كيلو بايت"
+msgid "KB"
+msgstr ""
 
 msgctxt "MSG_022"
-msgid "Mb"
-msgstr "ميجا بايت"
+msgid "MB"
+msgstr ""
 
 msgctxt "MSG_023"
-msgid "Gb"
-msgstr "جيجا بايت"
+msgid "GB"
+msgstr ""
 
 msgctxt "MSG_024"
-msgid "Tb"
-msgstr "تيرا بايت"
+msgid "TB"
+msgstr ""
 
 msgctxt "MSG_025"
-msgid "Pb"
-msgstr "بيتا بايت"
+msgid "PB"
+msgstr ""
 
 #, c-format
 msgctxt "MSG_045"
@@ -709,6 +709,11 @@ msgid ""
 "No USB device found. If you've inserted one, try a different USB port or a "
 "different USB device."
 msgstr "لم يتم العثور على أي أجهزة USB. إذا كنت قد قمت بتركيب أحدها، جرب توصيلها على منفذ USB آخرأو على جهاز مختلف به USB."
+
+#, c-format
+msgctxt "MSG_386"
+msgid "The Endless Installer requires Windows 7 or newer."
+msgstr ""
 
 #, c-format
 msgctxt "MSG_400"

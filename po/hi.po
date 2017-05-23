@@ -11,7 +11,7 @@ msgstr ""
 "Project-Id-Version: rufus\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-03-08 02:28+0000\n"
-"PO-Revision-Date: 2017-03-28 03:54+0000\n"
+"PO-Revision-Date: 2017-05-22 16:21+0000\n"
 "Last-Translator: endlessmobile_build <philip@endlessm.com>\n"
 "Language-Team: Hindi (http://www.transifex.com/endless-mobile-inc/rufus/language/hi/)\n"
 "MIME-Version: 1.0\n"
@@ -278,24 +278,24 @@ msgid "bytes"
 msgstr "बाइट्स"
 
 msgctxt "MSG_021"
-msgid "Kb"
-msgstr "Kb"
+msgid "KB"
+msgstr ""
 
 msgctxt "MSG_022"
-msgid "Mb"
-msgstr "Mb"
+msgid "MB"
+msgstr ""
 
 msgctxt "MSG_023"
-msgid "Gb"
-msgstr "Gb"
+msgid "GB"
+msgstr ""
 
 msgctxt "MSG_024"
-msgid "Tb"
-msgstr "Tb"
+msgid "TB"
+msgstr ""
 
 msgctxt "MSG_025"
-msgid "Pb"
-msgstr "Pb"
+msgid "PB"
+msgstr ""
 
 #, c-format
 msgctxt "MSG_045"
@@ -711,6 +711,11 @@ msgid ""
 "No USB device found. If you've inserted one, try a different USB port or a "
 "different USB device."
 msgstr "कोई USB डिवाइस नहीं मिला. यदि आपने कुछ इंसर्ट किया है, तो भिन्न USB पोर्ट या भिन्न USB डिवाइस आजमाएं."
+
+#, c-format
+msgctxt "MSG_386"
+msgid "The Endless Installer requires Windows 7 or newer."
+msgstr ""
 
 #, c-format
 msgctxt "MSG_400"
