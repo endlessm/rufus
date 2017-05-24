@@ -230,6 +230,10 @@ public:
     HRESULT SetDisplayOrder(CComSafeArray<BSTR> &displayOrder);
     HRESULT ExtendDisplayOrder(const CString &guid);
     HRESULT RemoveFromDisplayOrder(const CString &guid);
+
+    HRESULT GetTimeout(ULONGLONG &timeout);
+    HRESULT SetTimeout(const int32_t timeout);
+    HRESULT EnsureTimeout(const int32_t timeout);
 };
 
 class BcdBootSectorApplication : public WmiObject {
@@ -496,7 +500,9 @@ HRESULT BcdBootmgr::GetDisplayOrder(CComSafeArray<BSTR>& displayOrder)
 
     CComPtr<IWbemClassObject> pDisplayOrderElement = (IWbemClassObject*)vDisplayOrderElement.byref;
     CComVariant vDisplayOrder;
-    WmiObject::Get(pDisplayOrderElement, L"Ids", &vDisplayOrder);
+    IFFAILED_RETURN_RES(
+        WmiObject::Get(pDisplayOrderElement, L"Ids", &vDisplayOrder),
+        "Failed to get Ids property from Element");
 
     displayOrder = vDisplayOrder.parray;
     return S_OK;
@@ -553,6 +559,66 @@ HRESULT BcdBootmgr::RemoveFromDisplayOrder(const CString &guid)
     return S_OK;
 }
 
+HRESULT BcdBootmgr::GetTimeout(ULONGLONG & timeout)
+{
+    FUNCTION_ENTER;
+    const int32_t type = BcdBootMgrInteger_Timeout;
+
+    CComPtr<IWbemClassObject> pOutParams;
+    IFFAILED_RETURN_RES(
+        ExecMethod(L"GetElement", &pOutParams,
+            L"Type", type),
+        "Can't get current Timeout");
+
+    CComVariant vTimeoutElement;
+    IFFAILED_RETURN_RES(Get(pOutParams, L"Element", &vTimeoutElement), "Getting Element out param failed");
+
+    CComPtr<IWbemClassObject> pElement = (IWbemClassObject*)vTimeoutElement.byref;
+    CComVariant vTimeout;
+    IFFAILED_RETURN_RES(
+        WmiObject::Get(pElement, L"Integer", &vTimeout),
+        "Getting Integer from Element failed");
+
+    // Although this value is conceptually an uint64, it's passed as a string.
+    // https://msdn.microsoft.com/en-us/library/windows/desktop/aa362650(v=vs.85).aspx
+    wchar_t *wszTimeout = vTimeout.bstrVal;
+    wchar_t *end = NULL;
+    timeout = wcstoull(wszTimeout, &end, 10);
+
+    if (*end != 0) {
+        PRINT_ERROR_MSG_FMT("Failed to parse Timeout value \"%ls\"", wszTimeout);
+        return E_FAIL;
+    }
+
+    return S_OK;
+}
+
+// https://msdn.microsoft.com/en-us/library/windows/desktop/aa362696(v=vs.85).aspx
+// documents the Integer parameter to be of type UI8 but only I4 works in practice.
+HRESULT BcdBootmgr::SetTimeout(const int32_t timeout)
+{
+    FUNCTION_ENTER_FMT("%d", timeout);
+    const int32_t type = BcdBootMgrInteger_Timeout;
+
+    return ExecMethod(L"SetIntegerElement", NULL,
+        L"Type", type,
+        L"Integer", timeout);
+}
+
+HRESULT BcdBootmgr::EnsureTimeout(const int32_t timeout)
+{
+    FUNCTION_ENTER_FMT("%d", timeout);
+
+    ULONGLONG currentTimeout;
+    IFFAILED_RETURN_RES(GetTimeout(currentTimeout), "Failed to get timeout");
+
+    if (currentTimeout < timeout) {
+        IFFAILED_RETURN_RES(SetTimeout(timeout), "Failed to set timeout");
+    }
+
+    return S_OK;
+}
+
 BOOL WMI::AddBcdEntry(const CString & name, const CString & mbrPath, const CString & guid)
 {
     FUNCTION_ENTER_FMT("%ls %ls %ls", name, mbrPath, guid);
@@ -576,6 +642,14 @@ BOOL WMI::AddBcdEntry(const CString & name, const CString & mbrPath, const CStri
     IFFAILED_RETURN_VALUE(
         bcdStore.GetBootmgr(&bootmgr),
         "Can't get {bootmgr}", FALSE);
+
+    // Ensure a non-zero timeout. The "upstream" default is 30 but 0 has been
+    // observed in the wild. Equivalent to running bcdedit, checking the
+    // timeout, and if it's less than 30:
+    // > bcdedit /timeout 30
+    IFFAILED_RETURN_VALUE(
+        bootmgr.EnsureTimeout(30),
+        "Can't set boot menu timeout to at least 30 seconds", FALSE);
 
     // Roughly equivalent to:
     // > bcdedit /create /d $name /application bootsector
