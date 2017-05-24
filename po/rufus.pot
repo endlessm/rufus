@@ -410,7 +410,7 @@ msgstr ""
 
 #, c-format
 msgctxt "MSG_344"
-msgid "Great! Your Endless OS Reflasher USB has been created."
+msgid "Great! Your Endless OS Reformatter USB has been created."
 msgstr ""
 
 #, c-format
