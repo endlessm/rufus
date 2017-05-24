@@ -10,6 +10,8 @@
 
 #include "../Common/RegisterArc.h"
 
+#include "../../../C/7zCrc.h"
+
 static const unsigned kNumArcsMax = 64;
 static unsigned g_NumArcs = 0;
 static unsigned g_DefaultArcIndex = 0;
@@ -175,6 +177,12 @@ class ForceLink {
 public:
 	ForceLink() {
 		NArchive::NSquashfs::linkMe = true;
+
+		// Same problem for CRC.cpp, whose single global member calls
+		// CrcGenerateTable() but is discarded at link time, so attempts to
+		// calculate CRCs (needed for 7z-compressed Squashfs images) crash.
+		// Just initialize the CRC table here.
+		CrcGenerateTable();
 	}
 };
 static const ForceLink forceLink;
