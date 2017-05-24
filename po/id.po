@@ -12,8 +12,8 @@ msgstr ""
 "Project-Id-Version: rufus\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-03-08 02:28+0000\n"
-"PO-Revision-Date: 2017-05-22 16:21+0000\n"
-"Last-Translator: endlessmobile_build <philip@endlessm.com>\n"
+"PO-Revision-Date: 2017-05-24 08:05+0000\n"
+"Last-Translator: Septira Taruna <septira@endlessm.com>\n"
 "Language-Team: Indonesian (http://www.transifex.com/endless-mobile-inc/rufus/language/id/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -131,7 +131,7 @@ msgstr "USB drive yang ditemukan:"
 
 msgctxt "NewDiskNameLabel"
 msgid "New USB device contents:"
-msgstr "Isi peranti USB baru:"
+msgstr "Isi perangkat USB baru:"
 
 msgctxt "NewDiskSizeLabel"
 msgid "Size:"
@@ -180,11 +180,11 @@ msgstr "Untuk mencoba Endless OS sekarang, nyalakan ulang komputer Anda."
 
 msgctxt "ThankYouReflasherReminder"
 msgid "Now you're ready to install Endless OS on more computers."
-msgstr "Kini Anda siap menginstal Endless OS di komputer lainnya."
+msgstr "Kini Anda bisa menginstal Endless OS di komputer lainnya."
 
 msgctxt "UsbBootHowToLink"
 msgid "How to start your computer from a USB stick."
-msgstr "Cara memulai komputer Anda dari USB stick."
+msgstr "Bagaimana cara memulai komputer Anda dari stik USB."
 
 msgctxt "ErrorPageTitle"
 msgid "Error"
@@ -196,13 +196,13 @@ msgstr "Selesai"
 
 msgctxt "ErrorMessage"
 msgid "Oops, something went wrong setting up Endless OS."
-msgstr "Maaf, ada yang tidak beres dalam pengaturan Endless OS."
+msgstr "Maaf, ada masalah saat mempersiapkan Endless OS."
 
 msgctxt "EndlessSupportContainer"
 msgid ""
 "If you keep having trouble, you can get help on the <a "
 "id='EndlessSupport'>Endless community forum</a>."
-msgstr "Jika Anda terus mengalami kesulitan, Anda bisa mendapatkan bantuan dari <a id='EndlessSupport'> forum komunitas Endless </a>"
+msgstr "Jika Anda terus mengalami kesulitan, Anda bisa mendapatkan bantuan dari <a id='EndlessSupport'> forum komunitas Endless </a>."
 
 msgctxt "DualBootPageTitle"
 msgid "Endless OS"
@@ -210,7 +210,7 @@ msgstr "Endless OS"
 
 msgctxt "DualBootContentTitle"
 msgid "Download and Install Endless on this Computer"
-msgstr "Unduh dan Pasang Endless di Komputer ini"
+msgstr "Unduh dan Instal Endless di Komputer ini"
 
 msgctxt "DualBootContentDescription"
 msgid ""
@@ -249,7 +249,7 @@ msgid ""
 "Note: We recommend backing up any important files before continuing. Should "
 "you experience any problems with your computer after installation, you can "
 "find help at <a id='StorageSupportLink'>Endless Support</a>."
-msgstr "Catatan: Kami menyarankan untuk mencadangkan file-file penting sebelum melanjutkan. Jika Anda mengalami masalah dengan komputer setelah instalasi, Anda dapat mencari bantuan di <a id='StorageSupportLink'>Dukungan Endless</a>."
+msgstr "Catatan: Kami menyarankan untuk membuat salinan file-file penting sebelum melanjutkan. Jika Anda mengalami masalah dengan komputer setelah instalasi, Anda dapat mencari bantuan di <a id='StorageSupportLink'>Dukungan Endless</a>."
 
 msgctxt "DualBootLanguageLabel"
 msgid "Select Language"
@@ -280,23 +280,23 @@ msgstr "byte"
 
 msgctxt "MSG_021"
 msgid "KB"
-msgstr ""
+msgstr "KB"
 
 msgctxt "MSG_022"
 msgid "MB"
-msgstr ""
+msgstr "MB"
 
 msgctxt "MSG_023"
 msgid "GB"
-msgstr ""
+msgstr "GB"
 
 msgctxt "MSG_024"
 msgid "TB"
-msgstr ""
+msgstr "TB"
 
 msgctxt "MSG_025"
 msgid "PB"
-msgstr ""
+msgstr "PB"
 
 #, c-format
 msgctxt "MSG_045"
@@ -363,7 +363,7 @@ msgstr "%s dari %s (%s/d)"
 #, c-format
 msgctxt "MSG_304"
 msgid "Downloading"
-msgstr "Mengunduh"
+msgstr "Sedang Mengunduh"
 
 #. Displayed alongside MSG_306. Placeholders:
 #. 1. the step number (typically 1, 2 or 3)
@@ -476,7 +476,7 @@ msgstr "Terjadi kesalahan dalam penulisan Endless OS ke perangkat USB Anda. Cari
 #, c-format
 msgctxt "MSG_358"
 msgid "Something went wrong installing Endless OS to your computer."
-msgstr "Terjadi sesuatu pada komputer Anda saat menginstal Endless OS."
+msgstr "Terjadi kesalahan pada saat menginstal Endless OS di komputer Anda."
 
 #. This should match the string in quotes in MSG_323
 #, c-format
@@ -488,7 +488,7 @@ msgstr "Lanjut"
 #, c-format
 msgctxt "MSG_327"
 msgid "Download again"
-msgstr "Unduh Ulang"
+msgstr "Unduh ulang"
 
 #. This should match the string in quotes in MSG_325
 #, c-format
@@ -516,7 +516,7 @@ msgctxt "MSG_331"
 msgid ""
 "You have selected a slow USB device (USB 1.0). Please use a USB 2.0 device "
 "for a better experience."
-msgstr "Anda telah memilih perangkat USB yang lamban (USB 1.0). Harap gunakan perangkat USB 2.0 untuk pengalaman yang lebih baik."
+msgstr "Anda telah memilih perangkat USB yang lambat (USB 1.0). Silakan gunakan USB 2.0 untuk pengalaman terbaik."
 
 #, c-format
 msgctxt "MSG_332"
@@ -549,7 +549,7 @@ msgstr "Versi Endless OS yang dipilih memerlukan %s ruang penyimpanan yang koson
 #, c-format
 msgctxt "MSG_336"
 msgid "Delete the invalid file (%s)."
-msgstr "Hapus berkas yang tak valid (%s)."
+msgstr "Hapus file yang tidak valid (%s)."
 
 #, c-format
 msgctxt "MSG_337"
@@ -646,7 +646,7 @@ msgctxt "MSG_361"
 msgid ""
 "Are you sure you want to uninstall Endless OS? This will erase all apps and "
 "documents stored within your Endless OS installation."
-msgstr "Anda yakin ingin menghapus pemasangan Endless OS? Tindakan ini akan menghapus semua aplikasi dan dokumen yang disimpan di dalam instalasi Endless OS Anda."
+msgstr "Anda yakin ingin menghapus Endless OS? Tindakan ini akan menghapus semua aplikasi dan dokumen yang disimpan di dalam instalasi Endless OS Anda."
 
 #, c-format
 msgctxt "MSG_362"
@@ -658,38 +658,38 @@ msgctxt "MSG_363"
 msgid ""
 "There was a problem uninstalling Endless OS. Please contact us for "
 "assistance."
-msgstr "Ada masalah menghapus pemasangan Endless OS. Hubungi kami untuk mendapatkan bantuan."
+msgstr "Ada masalah menghapus Endless OS. Mohon hubungi kami untuk bantuan selanjutnya."
 
 #, c-format
 msgctxt "MSG_364"
 msgid "Uninstall Endless from this Computer"
-msgstr "Hapus pemasangan Endless dari Komputer ini"
+msgstr "Hapus pemasangan Endless OS dari komputer ini"
 
 #, c-format
 msgctxt "MSG_365"
 msgid ""
 "If you uninstall Endless, Windows will run automatically when you start your"
 " computer. Any apps and files stored in Endless will be erased."
-msgstr "Jika Anda menghapus pemasangan Endless, Windows akan berjalan secara otomatis ketika Anda mulai menjalankan komputer. Semua aplikasi dan file yang disimpan di Endless akan dihapus."
+msgstr "Jika Anda menghapus Endless OS, Windows akan berjalan secara otomatis ketika Anda mulai menjalankan komputer. Semua aplikasi dan file yang disimpan di Endless OS akan dihapus."
 
 #, c-format
 msgctxt "MSG_366"
 msgid "Uninstall Endless"
-msgstr "Hapus Pemasangan Endless"
+msgstr "Hapus Endless"
 
 #, c-format
 msgctxt "MSG_367"
 msgid ""
 "Make sure you back up any important documents from Endless before you "
 "uninstall."
-msgstr "Pastikan Anda mencadangkan setiap dokumen penting dari Endless sebelum menghapus pemasangan."
+msgstr "Pastikan Anda membuat salinan setiap dokumen penting di Endless OS sebelum menghapus pemasangan."
 
 #, c-format
 msgctxt "MSG_368"
 msgid ""
 "Internet Explorer %d is not supported. Please click OK to download Internet "
 "Explorer %d, install it, then run the Endless Installer again."
-msgstr "Internet Explorer %d tidak didukung. Klik OK untuk mengunduh Internet Explorer %d, pasang Internet Explorer, lalu jalankan Installer Endless lagi."
+msgstr "Internet Explorer %d tidak didukung. Klik OK untuk mengunduh dan menginstal Internet Explorer %d, lalu jalankan Installer Endless lagi."
 
 #, c-format
 msgctxt "MSG_369"
@@ -716,7 +716,7 @@ msgstr "Perangkat USB tidak ditemukan. Jika Anda telah memasukkan perangkat USB,
 #, c-format
 msgctxt "MSG_386"
 msgid "The Endless Installer requires Windows 7 or newer."
-msgstr ""
+msgstr "Endless Installer memerlukan Windows 7 atau setelahnya."
 
 #, c-format
 msgctxt "MSG_400"
