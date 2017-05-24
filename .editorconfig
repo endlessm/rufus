@@ -3,6 +3,7 @@ root = true
 # most Rufus code uses tabs
 [*]
 indent_style = tab
+insert_final_newline = false
 
 # Endless code is an unholy mixture. Err on the side of spaces, but set
 # unambiguously-tabby files to keep with tabs for now.
