@@ -218,6 +218,7 @@ select:disabled {
     border-bottom: 1px solid #a1a1a1;
 	border-radius: 8px 8px 0 0;
 	height: 34px;
+	cursor: default;
 	padding: 6px;
 	
 	font-size: medium;
