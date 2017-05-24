@@ -873,6 +873,7 @@ BOOL CEndlessUsbToolDlg::OnInitDialog()
     if (nWindowsVersion < WINDOWS_7) {
         ShowWindowsTooOldError();
         EndDialog(IDCANCEL);
+        return TRUE;
     }
 
     TrackEvent(_T("IEVersion"), m_ieVersion);
