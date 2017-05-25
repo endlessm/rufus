@@ -332,6 +332,12 @@ enum endless_action_type {
 #define	BOOT_ARCHIVE_SUFFIX		   L".boot.zip"
 #define	IMAGE_FILE_EXT			   L".img"
 
+#define EOSLDR_BOOT_ZIP_FILENAME     L"eos-eos3.2-amd64-amd64.170525-202333.base.boot.zip"
+#define EOSLDR_BOOT_ZIP_ASC_FILENAME EOSLDR_BOOT_ZIP_FILENAME SIGNATURE_FILE_EXT
+#define EOSLDR_BOOT_ZIP_URLPATH      L"nightly/eos-amd64-amd64/eos3.2/base/170525-202333/" EOSLDR_BOOT_ZIP_FILENAME
+#define EOSLDR_BOOT_ZIP_ASC_URLPATH  EOSLDR_BOOT_ZIP_URLPATH SIGNATURE_FILE_EXT
+#define EOSLDR_BOOT_ZIP_SIZE         11893609
+
 #define ENDLESS_OS "Endless OS"
 const wchar_t* mainWindowTitle = L"Endless Installer";
 
@@ -2375,8 +2381,16 @@ void CEndlessUsbToolDlg::UpdateFileEntries(bool shouldInit)
                     ? CSTRING_GET_PATH(trueNamePath, '.')
                     : CSTRING_GET_PATH(CSTRING_GET_PATH(trueNamePath, '.'), '.');
 
-                currentEntry->bootArchivePath = basePath + BOOT_ARCHIVE_SUFFIX;
-                currentEntry->bootArchiveSigPath = basePath + BOOT_ARCHIVE_SUFFIX + SIGNATURE_FILE_EXT;
+                if (HasEosldr(version)) {
+                    // If the local image is new enough that its own boot.zip will contain eosldr, look for that.
+                    currentEntry->bootArchivePath = basePath + BOOT_ARCHIVE_SUFFIX;
+                    currentEntry->bootArchiveSigPath = basePath + BOOT_ARCHIVE_SUFFIX + SIGNATURE_FILE_EXT;
+                } else {
+                    // Otherwise, look for the hardcoded new-enough one that we download.
+                    currentEntry->bootArchivePath = GET_IMAGE_PATH(EOSLDR_BOOT_ZIP_FILENAME);
+                    currentEntry->bootArchiveSigPath = GET_IMAGE_PATH(EOSLDR_BOOT_ZIP_ASC_FILENAME);
+                }
+
                 try {
                     CFile bootArchive(currentEntry->bootArchivePath, CFile::modeRead | CFile::shareDenyNone);
                     currentEntry->bootArchiveSize = bootArchive.GetLength();
@@ -2744,9 +2758,16 @@ bool CEndlessUsbToolDlg::ParseJsonFile(LPCTSTR filename, bool isInstallerJson)
                 CHECK_ENTRY(bootImage, JSON_IMG_URL_FILE);
                 CHECK_ENTRY(bootImage, JSON_IMG_URL_SIG);
 
-                remoteImage.urlBootArchive = bootImage[JSON_IMG_URL_FILE].asCString();
-                remoteImage.urlBootArchiveSignature = bootImage[JSON_IMG_URL_SIG].asCString();
-                remoteImage.bootArchiveSize = bootImage[JSON_IMG_COMPRESSED_SIZE].asUInt64();
+                if (HasEosldr(latestVersion)) {
+                    remoteImage.urlBootArchive = bootImage[JSON_IMG_URL_FILE].asCString();
+                    remoteImage.urlBootArchiveSignature = bootImage[JSON_IMG_URL_SIG].asCString();
+                    remoteImage.bootArchiveSize = bootImage[JSON_IMG_COMPRESSED_SIZE].asUInt64();
+                } else {
+                    // If this image is too old to have eosldr in its boot.zip, grab a hardcoded newer one instead.
+                    remoteImage.urlBootArchive = EOSLDR_BOOT_ZIP_URLPATH;
+                    remoteImage.urlBootArchiveSignature = EOSLDR_BOOT_ZIP_ASC_URLPATH;
+                    remoteImage.bootArchiveSize = EOSLDR_BOOT_ZIP_SIZE;
+                }
 
                 // Create dowloadJobName
                 remoteImage.downloadJobName = latestVersion;
@@ -6260,6 +6281,25 @@ bool CEndlessUsbToolDlg::ShouldUninstall()
 bool CEndlessUsbToolDlg::HasImageBootSupport(const CString &version, const CString &date)
 {
 	return version[0] >= '3' && date >= MIN_DATE_IMAGE_BOOT;
+}
+
+// Is the boot.zip for this image expected to contain eosldr? If not, we'll fetch a newer one.
+bool CEndlessUsbToolDlg::HasEosldr(const CString & version)
+{
+    // We assume all master images are okay. Actually, it needs to be a pretty
+    // recent master image, but if you have a master image you should know what
+    // you're doing.
+    if (version == L"master") {
+        return true;
+    }
+
+    // Otherwise, is it Endless OS 3.2 or newer?
+    static const ImageVersion minVersion{ 3, 2 };
+    const CStringA narrowVersion = ConvertUnicodeToUTF8(version);
+    ImageVersion parsedVersion;
+    IFFALSE_RETURN_VALUE(ParseImageVersion(narrowVersion, parsedVersion), "Couldn't parse image version", false);
+
+    return (parsedVersion >= minVersion);
 }
 
 bool CEndlessUsbToolDlg::PackedImageAlreadyExists(const CString &filePath, ULONGLONG expectedSize, ULONGLONG expectedUnpackedSize, bool isInstaller)
