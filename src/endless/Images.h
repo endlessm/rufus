@@ -13,9 +13,7 @@
 #define EXFAT_ENDLESS_LIVE_FILE_NAME    L"live"
 
 // vectors have lexicographic ordering! Hooray
-class ImageVersion : public std::vector<uint32_t> {
-public:
-    static bool Parse(const char *str, ImageVersion &ret);
-};
+typedef std::vector<uint32_t> ImageVersion;
+bool ParseImageVersion(const char *str, ImageVersion &ret);
 
 bool ParseImgFileName(const CString& filename, CString &personality, CString &version, CString &date, bool &isInstallerImage);

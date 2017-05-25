@@ -2645,7 +2645,7 @@ static bool FindLatestVersion(const Json::Value &rootValue, Json::Value &latestE
 
         const char *versionString = (*it)[JSON_IMG_VERSION].asCString();
         ImageVersion currentParsedVersion;
-        if (!ImageVersion::Parse(versionString, currentParsedVersion)) {
+        if (!ParseImageVersion(versionString, currentParsedVersion)) {
             uprintf("Can't parse version '%s'", versionString);
             continue;
         }
