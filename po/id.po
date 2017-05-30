@@ -12,7 +12,7 @@ msgstr ""
 "Project-Id-Version: rufus\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-03-08 02:28+0000\n"
-"PO-Revision-Date: 2017-05-24 08:05+0000\n"
+"PO-Revision-Date: 2017-05-24 13:07+0000\n"
 "Last-Translator: Septira Taruna <septira@endlessm.com>\n"
 "Language-Team: Indonesian (http://www.transifex.com/endless-mobile-inc/rufus/language/id/)\n"
 "MIME-Version: 1.0\n"
@@ -103,7 +103,7 @@ msgid ""
 "Includes full Endless OS, preloaded with more than 100 apps and content. "
 "This version is ideal for computers without reliable internet access. Choose"
 " language for content and apps:"
-msgstr "Termasuk Endless OS yang telah dilengkapi dengan lebih dari 100 aplikasi dan konten. Versi ini cocok untuk komputer tanpa akses internet yang stabil. Pilih bahasa untuk konten dan aplikasi:"
+msgstr "Termasuk Endless OS yang telah dilengkapi dengan lebih dari 100 aplikasi dan konten. Cocok untuk komputer tanpa akses internet yang stabil. Pilih bahasa untuk konten dan aplikasi:"
 
 msgctxt "DownloadFullButton"
 msgid "Download EOS Full"
@@ -358,12 +358,12 @@ msgstr "Kesalahan saat mengunduh file."
 #, c-format
 msgctxt "MSG_302"
 msgid "%s of %s (%s/s)"
-msgstr "%s dari %s (%s/d)"
+msgstr "%s dari %s (%s/s)"
 
 #, c-format
 msgctxt "MSG_304"
 msgid "Downloading"
-msgstr "Sedang Mengunduh"
+msgstr "Mengunduh"
 
 #. Displayed alongside MSG_306. Placeholders:
 #. 1. the step number (typically 1, 2 or 3)
@@ -387,12 +387,12 @@ msgstr "Tanpa Label"
 #, c-format
 msgctxt "MSG_309"
 msgid "Installing"
-msgstr "Sedang Menginstal"
+msgstr "Menginstal"
 
 #, c-format
 msgctxt "MSG_310"
 msgid "Verifying"
-msgstr "Sedang Memverifikasi"
+msgstr "Memverifikasi"
 
 #, c-format
 msgctxt "MSG_311"
@@ -436,8 +436,8 @@ msgstr "Bagus! Endless OS Live USB telah dibuat."
 
 #, c-format
 msgctxt "MSG_344"
-msgid "Great! Your Endless OS Reflasher USB has been created."
-msgstr "Bagus! Endless OS Reflasher USB Anda telah dibuat."
+msgid "Great! Your Endless OS Reformatter USB has been created."
+msgstr "Bagus! USB Reformatter Endless OS Anda telah dibuat."
 
 #, c-format
 msgctxt "MSG_321"
@@ -494,7 +494,7 @@ msgstr "Unduh ulang"
 #, c-format
 msgctxt "MSG_328"
 msgid "Try again"
-msgstr "Coba lagi"
+msgstr "Coba Lagi"
 
 #. If this FAQ is translated into your language, replace "en-us" with the
 #. right language code.
@@ -699,7 +699,7 @@ msgstr "%s Unduhan"
 #, c-format
 msgctxt "MSG_370"
 msgid "Oops, something went wrong setting up Endless OS."
-msgstr "Ups, ada yang salah ketika menyiapkan Endless OS."
+msgstr "Maaf, ada masalah saat mempersiapkan Endless OS."
 
 #, c-format
 msgctxt "MSG_371"

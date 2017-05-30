@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: rufus\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-03-08 02:28+0000\n"
-"PO-Revision-Date: 2017-05-22 16:21+0000\n"
+"PO-Revision-Date: 2017-05-24 08:12+0000\n"
 "Last-Translator: endlessmobile_build <philip@endlessm.com>\n"
 "Language-Team: Chinese (Taiwan) (http://www.transifex.com/endless-mobile-inc/rufus/language/zh_TW/)\n"
 "MIME-Version: 1.0\n"
@@ -432,8 +432,8 @@ msgstr "太棒了！您的 Endless OS Live USB 已建立完成。"
 
 #, c-format
 msgctxt "MSG_344"
-msgid "Great! Your Endless OS Reflasher USB has been created."
-msgstr "很好！你的 Endless 作業系統檔案存放 USB 已經建立完畢。"
+msgid "Great! Your Endless OS Reformatter USB has been created."
+msgstr ""
 
 #, c-format
 msgctxt "MSG_321"

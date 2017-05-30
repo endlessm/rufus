@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: rufus\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-03-08 02:28+0000\n"
-"PO-Revision-Date: 2017-05-22 16:21+0000\n"
+"PO-Revision-Date: 2017-05-24 08:12+0000\n"
 "Last-Translator: endlessmobile_build <philip@endlessm.com>\n"
 "Language-Team: German (http://www.transifex.com/endless-mobile-inc/rufus/language/de/)\n"
 "MIME-Version: 1.0\n"
@@ -433,8 +433,8 @@ msgstr "Prima! Dein Endless-OS-Live-USB-Stick wurde erzeugt."
 
 #, c-format
 msgctxt "MSG_344"
-msgid "Great! Your Endless OS Reflasher USB has been created."
-msgstr "Prima! Dein Formatier-Stick für Endless-OS wurde erzeugt."
+msgid "Great! Your Endless OS Reformatter USB has been created."
+msgstr ""
 
 #, c-format
 msgctxt "MSG_321"

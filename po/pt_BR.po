@@ -12,7 +12,7 @@ msgstr ""
 "Project-Id-Version: rufus\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-03-08 02:28+0000\n"
-"PO-Revision-Date: 2017-05-22 16:21+0000\n"
+"PO-Revision-Date: 2017-05-24 08:12+0000\n"
 "Last-Translator: endlessmobile_build <philip@endlessm.com>\n"
 "Language-Team: Portuguese (Brazil) (http://www.transifex.com/endless-mobile-inc/rufus/language/pt_BR/)\n"
 "MIME-Version: 1.0\n"
@@ -436,8 +436,8 @@ msgstr "Legal! O seu Live USB do Endless OS foi criado."
 
 #, c-format
 msgctxt "MSG_344"
-msgid "Great! Your Endless OS Reflasher USB has been created."
-msgstr "Legal! O seu USB Bootável para Endless OS foi criado."
+msgid "Great! Your Endless OS Reformatter USB has been created."
+msgstr ""
 
 #, c-format
 msgctxt "MSG_321"
