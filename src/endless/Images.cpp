@@ -11,7 +11,7 @@
 #define EOS_OEM_PRODUCT_TEXT        "eosoem"
 #define EOS_RETAIL_PRODUCT_TEXT     "eosretail"
 
-bool ImageVersion::Parse(const char *str, ImageVersion &ret)
+bool ParseImageVersion(const char *str, ImageVersion &ret)
 {
     char *s = (char *)str;
     char *end = NULL;

@@ -452,6 +452,7 @@ private:
 	static void DelayDeleteFolder(const CString &folder);
 
 	static bool HasImageBootSupport(const CString &version, const CString &date);
+	static bool HasEosldr(const CString &version);
 
 	bool PackedImageAlreadyExists(const CString &filePath, ULONGLONG expectedSize, ULONGLONG expectedUnpackedSize, bool isInstaller);
 
