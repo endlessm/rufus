@@ -459,6 +459,7 @@ private:
 
 	CComBSTR GetDownloadString(const RemoteImageEntry &imageEntry);
 
+	static ULONGLONG RoundToSector(ULONGLONG size);
 	ULONGLONG GetNeededSpaceForDualBoot(ULONGLONG *downloadSize, bool *isBaseImage = NULL);
 
 	static const UINT m_uTaskbarBtnCreatedMsg;
