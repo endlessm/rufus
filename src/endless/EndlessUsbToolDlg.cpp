@@ -3484,6 +3484,21 @@ HRESULT CEndlessUsbToolDlg::OnSelectedStorageSizeChanged(IHTMLElement* pElement)
 #define IS_MAXIMUM_VALUE		2
 #define IS_BASE_IMAGE			3
 
+// All extents of the image must be a multiple of 512 bytes long to be fed to
+// device-mapper. NTFS's sector size is (typically) 4096 bytes so that's
+// generally okay, but if the total size is not a multiple of 512 the last
+// chunk may not be a suitable length. Just round up if needed.
+ULONGLONG CEndlessUsbToolDlg::RoundToSector(ULONGLONG size)
+{
+    static const ULONGLONG sectorSize = 512;
+    const ULONGLONG rem = size % sectorSize;
+    if (rem) {
+        return size + (sectorSize - rem);
+    } else {
+        return size;
+    }
+}
+
 // Returns the minimum size required to install the currently-selected image,
 // including padding to give the user free space to install updates and apps.
 // If the image needs to be downloaded, and the download destination is the
@@ -3517,7 +3532,7 @@ ULONGLONG CEndlessUsbToolDlg::GetNeededSpaceForDualBoot(ULONGLONG *downloadSize,
 	}
 	const ULONGLONG paddingBytes = 4LL * BYTES_IN_GIGABYTE;
 	neededSize += paddingBytes;
-	return neededSize;
+	return RoundToSector(neededSize);
 }
 
 void CEndlessUsbToolDlg::GoToSelectStoragePage()
@@ -3547,7 +3562,7 @@ void CEndlessUsbToolDlg::GoToSelectStoragePage()
 		uprintf("Available space on drive %s is %s out of %s; we need %s to download and %s to install",
 			systemDrive, freeSize, totalSize, downloadSizeStr, minimumInstallSizeStr);
 	}
-	maximumInstallSize = (freeBytesAvailable.QuadPart - bytesInGig) - downloadSize;
+	maximumInstallSize = RoundToSector((freeBytesAvailable.QuadPart - bytesInGig) - downloadSize);
 
 	// update messages with needed space based on selected version
 	CStringA osVersion = lmprintf(isBaseImage ? MSG_400 : MSG_316);
