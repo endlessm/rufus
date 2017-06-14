@@ -24,3 +24,10 @@ indent_style = tab
 
 [src/endless/UEFIBootSetup.*]
 indent_style = tab
+
+# 7zpp uses tabs
+[src/7zip-cpp/7zpp/*]
+indent_style = tab
+
+[src/7zip-cpp/7zpp/PropVariant.{cpp,h}]
+indent_style = space
