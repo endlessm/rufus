@@ -12,6 +12,7 @@ namespace SevenZip
 	class SevenZipExtractStream
 	{
 	public:
+		virtual ~SevenZipExtractStream() {}
 		virtual UINT32 Read(void *buf, UINT32 size) = 0;
 	};
 
