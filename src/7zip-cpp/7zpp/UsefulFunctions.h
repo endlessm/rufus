@@ -20,8 +20,6 @@ namespace SevenZip
 		static CComPtr< IInArchive > GetArchiveReader(const SevenZipLibrary& library, const CompressionFormatEnum& format);
 		static CComPtr< IOutArchive > GetArchiveWriter(const SevenZipLibrary& library, const CompressionFormatEnum& format);
 
-		static CComPtr< IInStream > GetFileStream(const TString &archivePath);
-
 		static bool DetectCompressionFormat(const SevenZipLibrary& library, const TString& archivePath,
 			CompressionFormatEnum & archiveCompressionFormat);
 		
