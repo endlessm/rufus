@@ -7,6 +7,7 @@
 #include "CompressionLevel.h"
 
 struct IInArchive;
+struct IInStream;
 
 namespace SevenZip
 {
@@ -14,6 +15,7 @@ namespace SevenZip
 	{
 	public:
 		SevenZipArchive(const SevenZipLibrary& library, const TString& archivePath);
+		SevenZipArchive(const SevenZipLibrary& library, IInStream *stream, CompressionFormatEnum format);
 		virtual ~SevenZipArchive();
 
 		virtual void SetCompressionFormat(const CompressionFormatEnum& format);
@@ -36,6 +38,7 @@ namespace SevenZip
 		bool m_OverrideCompressionFormat = false;
 		const SevenZipLibrary& m_library;
 		TString m_archivePath;
+		CComPtr<IInStream> m_inStream = NULL;
 		CComPtr<IInArchive> m_inArchive = NULL;
 		CompressionFormatEnum m_compressionFormat;
 		CompressionLevelEnum m_compressionLevel;

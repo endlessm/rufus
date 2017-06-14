@@ -46,6 +46,11 @@ namespace SevenZip
 	{
 	}
 
+	SevenZipExtractor::SevenZipExtractor(const SevenZipLibrary & library, IInStream * stream, CompressionFormatEnum format)
+		: SevenZipArchive(library, stream, format)
+	{
+	}
+
 	SevenZipExtractor::~SevenZipExtractor()
 	{
 	}
@@ -85,6 +90,34 @@ namespace SevenZip
 
 	SevenZipExtractStream * SevenZipExtractor::ExtractStream(const UINT32 index)
 	{
+		CComPtr< ISequentialInStream > seqInStream = GetStream(index);
+		if (!seqInStream)
+		{
+			return nullptr;
+		}
+
+		return new intl::ExtractStream(seqInStream);
+	}
+
+	SevenZipExtractor * SevenZipExtractor::GetSubArchive(const UINT32 index, const CompressionFormatEnum format)
+	{
+		CComPtr< ISequentialInStream > seqInStream = GetStream(index);
+		if (!seqInStream)
+		{
+			return nullptr;
+		}
+
+		CComPtr< IInStream > inStream;
+		if (seqInStream->QueryInterface(IID_IInStream, (void**)&inStream) != S_OK || !inStream) {
+			return nullptr;
+		}
+
+		// TODO: do we need to pass ourselves here to keep ourselves alive?
+		return new SevenZipExtractor(m_library, inStream, format);
+	}
+
+	ISequentialInStream * SevenZipExtractor::GetStream(const UINT32 index)
+	{
 		if (!EnsureInArchive()) {
 			return nullptr;
 		}
@@ -95,13 +128,13 @@ namespace SevenZip
 			return nullptr;
 		}
 
-		CComPtr< ISequentialInStream > seqInStream;
-		if (getStream->GetStream(index, &seqInStream) != S_OK || !seqInStream)
+		ISequentialInStream * seqInStream = nullptr;
+		if (getStream->GetStream(index, &seqInStream) != S_OK)
 		{
 			return nullptr;
 		}
 
-		return new intl::ExtractStream(seqInStream);
+		return seqInStream;
 	}
 
 }

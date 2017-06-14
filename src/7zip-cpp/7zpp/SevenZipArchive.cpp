@@ -11,7 +11,18 @@ namespace SevenZip
 		// The default compression type will be unknown
 		m_compressionFormat(CompressionFormat::Unknown),
 		m_compressionLevel(CompressionLevel::None),
+		m_inStream(NULL),
 		m_inArchive(NULL)
+	{
+	}
+
+	SevenZipArchive::SevenZipArchive(const SevenZipLibrary & library, IInStream * stream, CompressionFormatEnum format)
+		: m_library(library),
+		m_archivePath(),
+		m_compressionFormat(format),
+		m_OverrideCompressionFormat(true),
+		m_compressionLevel(CompressionLevel::None),
+		m_inStream(stream)
 	{
 	}
 
@@ -92,9 +103,11 @@ namespace SevenZip
 			}
 		}
 
-		CComPtr< IInStream > inFile = FileSys::OpenFileToRead(m_archivePath);
+		if (m_inStream == NULL && !m_archivePath.empty()) {
+			m_inStream = FileSys::OpenFileToRead(m_archivePath);
+		}
 
-		if (inFile == NULL)
+		if (m_inStream == NULL)
 		{
 			return false;
 			//throw SevenZipException( StrFmt( _T( "Could not open archive \"%s\"" ), m_archivePath.c_str() ) );
@@ -103,7 +116,7 @@ namespace SevenZip
 		m_inArchive = UsefulFunctions::GetArchiveReader(m_library, m_compressionFormat);
 		CComPtr< ArchiveOpenCallback > openCallback = new ArchiveOpenCallback();
 
-		HRESULT hr = m_inArchive->Open(inFile, 0, openCallback);
+		HRESULT hr = m_inArchive->Open(m_inStream, 0, openCallback);
 		if (hr != S_OK)
 		{
 			m_inArchive = NULL;
