@@ -332,11 +332,11 @@ enum endless_action_type {
 #define	BOOT_ARCHIVE_SUFFIX		   L".boot.zip"
 #define	IMAGE_FILE_EXT			   L".img"
 
-#define EOSLDR_BOOT_ZIP_FILENAME     L"eos-eos3.2-amd64-amd64.170601-093802.base.boot.zip"
+#define EOSLDR_BOOT_ZIP_FILENAME     L"eos-eos3.2-amd64-amd64.170614-083330.base.boot.zip"
 #define EOSLDR_BOOT_ZIP_ASC_FILENAME EOSLDR_BOOT_ZIP_FILENAME SIGNATURE_FILE_EXT
-#define EOSLDR_BOOT_ZIP_URLPATH      L"nightly/eos-amd64-amd64/eos3.2/base/170601-093802/" EOSLDR_BOOT_ZIP_FILENAME
+#define EOSLDR_BOOT_ZIP_URLPATH      L"nightly/eos-amd64-amd64/eos3.2/base/170614-083330/" EOSLDR_BOOT_ZIP_FILENAME
 #define EOSLDR_BOOT_ZIP_ASC_URLPATH  EOSLDR_BOOT_ZIP_URLPATH SIGNATURE_FILE_EXT
-#define EOSLDR_BOOT_ZIP_SIZE         11887809
+#define EOSLDR_BOOT_ZIP_SIZE         11893775
 
 #define ENDLESS_OS "Endless OS"
 const wchar_t* mainWindowTitle = L"Endless Installer";
