@@ -23,8 +23,8 @@ namespace SevenZip
 		static bool DetectCompressionFormat(const SevenZipLibrary& library, const TString& archivePath,
 			CompressionFormatEnum & archiveCompressionFormat);
 
-		static bool UsefulFunctions::GetItemsNames(const SevenZipLibrary & library, const TString & archivePath,
-			CompressionFormatEnum & format, size_t & numberofitems, 
+		static bool UsefulFunctions::GetItemsNames(IInArchive *archive,
+			size_t & numberofitems,
 			std::vector<TString> & itemnames, std::vector<UINT64> & origsizes);
 
 		static const TString EndingFromCompressionFormat(const CompressionFormatEnum& format);

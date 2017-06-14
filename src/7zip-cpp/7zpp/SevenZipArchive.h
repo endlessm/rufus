@@ -6,6 +6,8 @@
 #include "CompressionFormat.h"
 #include "CompressionLevel.h"
 
+struct IInArchive;
+
 namespace SevenZip
 {
 	class SevenZipArchive
@@ -13,8 +15,6 @@ namespace SevenZip
 	public:
 		SevenZipArchive(const SevenZipLibrary& library, const TString& archivePath);
 		virtual ~SevenZipArchive();
-
-		virtual bool ReadInArchiveMetadata();
 
 		virtual void SetCompressionFormat(const CompressionFormatEnum& format);
 		virtual CompressionFormatEnum GetCompressionFormat();
@@ -29,10 +29,14 @@ namespace SevenZip
 		virtual std::vector<UINT64>  GetOrigSizes();
 
 	protected:
+		bool EnsureInArchive();
+		virtual bool ReadInArchiveMetadata();
+
 		bool m_ReadMetadata = false;
 		bool m_OverrideCompressionFormat = false;
 		const SevenZipLibrary& m_library;
 		TString m_archivePath;
+		CComPtr<IInArchive> m_inArchive = NULL;
 		CompressionFormatEnum m_compressionFormat;
 		CompressionLevelEnum m_compressionLevel;
 		size_t m_numberofitems = 0;

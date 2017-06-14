@@ -14,15 +14,13 @@ namespace SevenZip
 	namespace intl {
 		class ExtractStream : public SevenZip::SevenZipExtractStream {
 		public:
-			ExtractStream(CComPtr< IInArchive > &archive, CComPtr< ISequentialInStream > &seqInStream) :
-				m_archive(archive),
+			ExtractStream(CComPtr< ISequentialInStream > &seqInStream) :
 				m_seqInStream(seqInStream)
 			{
 			}
 
 			~ExtractStream()
 			{
-				m_archive->Close();
 			}
 
 			virtual UINT32 Read(void *buf, UINT32 size) {
@@ -37,7 +35,6 @@ namespace SevenZip
 			}
 
 		private:
-			CComPtr< IInArchive > m_archive;
 			CComPtr< ISequentialInStream > m_seqInStream;
 		};
 	}
@@ -55,25 +52,13 @@ namespace SevenZip
 
 	bool SevenZipExtractor::ExtractArchive( const TString& destDirectory, ProgressCallback* callback )
 	{
-		CComPtr< IInStream > inFile = FileSys::OpenFileToRead( m_archivePath );
-
-		if ( inFile == NULL )
-		{
-			return false;	//Could not open archive
+		if (!EnsureInArchive()) {
+			return false;
 		}
 
-		CComPtr< IInArchive > archive = UsefulFunctions::GetArchiveReader( m_library, m_compressionFormat );
-		CComPtr< ArchiveOpenCallback > openCallback = new ArchiveOpenCallback();
+		CComPtr< ArchiveExtractCallback > extractCallback = new ArchiveExtractCallback( m_inArchive, destDirectory, callback );
 
-		HRESULT hr = archive->Open( inFile, 0, openCallback );
-		if ( hr != S_OK )
-		{
-			return false;	//Open archive error
-		}
-
-		CComPtr< ArchiveExtractCallback > extractCallback = new ArchiveExtractCallback( archive, destDirectory, callback );
-
-		hr = archive->Extract( NULL, -1, false, extractCallback );
+		HRESULT hr = m_inArchive->Extract( NULL, -1, false, extractCallback );
 		if ( hr != S_OK ) // returning S_FALSE also indicates error
 		{
 			return false;	//Extract archive error
@@ -83,7 +68,6 @@ namespace SevenZip
 		{
 			callback->OnDone(m_archivePath);
 		}
-		archive->Close();		
 		return true;
 	}
 
@@ -101,37 +85,23 @@ namespace SevenZip
 
 	SevenZipExtractStream * SevenZipExtractor::ExtractStream(const UINT32 index)
 	{
-		CComPtr< IInStream > inFile = FileSys::OpenFileToRead(m_archivePath);
-
-		if (inFile == NULL)
-		{
-			return nullptr;	//Could not open archive
-		}
-
-		CComPtr< IInArchive > archive = UsefulFunctions::GetArchiveReader(m_library, m_compressionFormat);
-		CComPtr< ArchiveOpenCallback > openCallback = new ArchiveOpenCallback();
-
-		HRESULT hr = archive->Open(inFile, 0, openCallback);
-		if (hr != S_OK)
-		{
+		if (!EnsureInArchive()) {
 			return nullptr;
 		}
 
 		CComPtr< IInArchiveGetStream > getStream;
-		if (archive->QueryInterface(IID_IInArchiveGetStream, (void**)&getStream) != S_OK || !getStream)
+		if (m_inArchive->QueryInterface(IID_IInArchiveGetStream, (void**)&getStream) != S_OK || !getStream)
 		{
-			archive->Close();
 			return nullptr;
 		}
 
 		CComPtr< ISequentialInStream > seqInStream;
 		if (getStream->GetStream(index, &seqInStream) != S_OK || !seqInStream)
 		{
-			archive->Close();
 			return nullptr;
 		}
 
-		return new intl::ExtractStream(archive, seqInStream);
+		return new intl::ExtractStream(seqInStream);
 	}
 
 }
