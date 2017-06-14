@@ -104,12 +104,6 @@ namespace SevenZip
 		return UsefulFunctions::DetectCompressionFormat(m_library, m_archivePath, format);
 	}
 
-	bool SevenZipArchive::pri_GetNumberOfItems()
-	{
-		return UsefulFunctions::GetNumberOfItems(m_library, m_archivePath, 
-			m_compressionFormat, m_numberofitems);
-	}
-
 	bool SevenZipArchive::pri_GetItemsNames()
 	{
 		return UsefulFunctions::GetItemsNames(m_library, m_archivePath, m_compressionFormat, 

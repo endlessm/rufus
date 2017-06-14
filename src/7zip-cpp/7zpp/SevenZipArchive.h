@@ -40,7 +40,6 @@ namespace SevenZip
 		std::vector<UINT64> m_origsizes;
 
 	private:
-		bool pri_GetNumberOfItems();
 		bool pri_GetItemsNames();
 		bool pri_DetectCompressionFormat(CompressionFormatEnum & format);
 		bool pri_DetectCompressionFormat();

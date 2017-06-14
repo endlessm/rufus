@@ -79,40 +79,6 @@ namespace SevenZip
 		return archive;
 	}
 
-	bool UsefulFunctions::GetNumberOfItems(const SevenZipLibrary & library, const TString & archivePath,
-		CompressionFormatEnum &format, size_t & numberofitems)
-	{
-		CComPtr< IInStream > inFile = FileSys::OpenFileToRead(archivePath);
-
-		if (inFile == NULL)
-		{
-			return false;
-			//throw SevenZipException( StrFmt( _T( "Could not open archive \"%s\"" ), m_archivePath.c_str() ) );
-		}
-
-		CComPtr< IInArchive > archive = UsefulFunctions::GetArchiveReader(library, format);
-		CComPtr< ArchiveOpenCallback > openCallback = new ArchiveOpenCallback();
-
-		HRESULT hr = archive->Open(inFile, 0, openCallback);
-		if (hr != S_OK)
-		{
-			return false;
-			//throw SevenZipException( GetCOMErrMsg( _T( "Open archive" ), hr ) );
-		}
-
-		UInt32 mynumofitems;
-		hr = archive->GetNumberOfItems(&mynumofitems);
-		if (hr != S_OK)
-		{
-			return false;
-			//throw SevenZipException( GetCOMErrMsg( _T( "Open archive" ), hr ) );
-		}
-		numberofitems = size_t(mynumofitems);
-
-		archive->Close();
-		return true;
-	}
-
 	bool UsefulFunctions::GetItemsNames(const SevenZipLibrary & library, const TString & archivePath,
 		CompressionFormatEnum &format, size_t & numberofitems, 
 		std::vector<TString> & itemnames, std::vector<UINT64> & origsizes)
