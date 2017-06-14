@@ -18,4 +18,7 @@ REGISTER_ARC_I(
   0,
   NULL)
 
+// Linker hack: see ArchiveExports.cpp
+bool linkMe = false;
+
 }}

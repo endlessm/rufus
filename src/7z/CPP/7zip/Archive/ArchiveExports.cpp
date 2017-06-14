@@ -172,11 +172,18 @@ namespace NArchive {
 		extern bool linkMe;
 	}
 }
+namespace NArchive {
+	namespace NIso {
+		extern bool linkMe;
+	}
+}
+
 
 class ForceLink {
 public:
 	ForceLink() {
 		NArchive::NSquashfs::linkMe = true;
+		NArchive::NIso::linkMe = true;
 
 		// Same problem for CRC.cpp, whose single global member calls
 		// CrcGenerateTable() but is discarded at link time, so attempts to
