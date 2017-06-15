@@ -6,7 +6,7 @@
 #include "EndlessUsbTool.h"
 #include "EndlessUsbToolDlg.h"
 #include "Analytics.h"
-
+#include "Images.h"
 #include "StringHelperMethods.h"
 #include "version.h"
 

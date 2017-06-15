@@ -11,7 +11,6 @@
 #include "resource.h"		// main symbols
 
 #define ENDLESS_INSTALLER_TEXT 		L"Endless Installer"
-#define PATH_ENDLESS_SUBDIRECTORY	L"endless\\"
 
 // CEndlessUsbToolApp:
 // See EndlessUsbTool.cpp for the implementation of this class

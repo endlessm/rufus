@@ -5,6 +5,8 @@
 
 /* Well-known file names */
 
+// Combined USBs, ISOs, and dual-boot systems keep all the image files in this directory
+#define PATH_ENDLESS_SUBDIRECTORY       L"endless\\"
 // Combined USBs and dual-boot systems use an uncompressed OS image with this name
 #define ENDLESS_IMG_FILE_NAME           L"endless.img"
 // ISOs use a squashfs image containing one file named ENDLESS_IMG_FILE_NAME
