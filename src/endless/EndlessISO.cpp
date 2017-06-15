@@ -78,7 +78,7 @@ ULONGLONG EndlessISO::GetExtractedSize(const CString & image, const BOOL isInsta
     UINT32 i = 0;
 
     auto name = extractor.GetItemsNames()[i];
-    IFFALSE_RETURN_VALUE(name == ENDLESS_IMG_FILE_NAME, "squashfs item has wrong name", 0);
+    IFFALSE_RETURN_VALUE(name == _T(ENDLESS_IMG_FILE_NAME), "squashfs item has wrong name", 0);
 
     struct ptable pt;
     auto gotPt = extractor.ExtractBytes(i, &pt, sizeof(pt));

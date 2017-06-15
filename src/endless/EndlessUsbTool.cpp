@@ -110,7 +110,7 @@ BOOL CEndlessUsbToolApp::InitInstance()
 	m_appDir.ReleaseBuffer();
 
 	// set image dir to endless if it exists, otherwise use app dir
-	CString endlessDir = GET_LOCAL_PATH(PATH_ENDLESS_SUBDIRECTORY);
+	CString endlessDir = GET_LOCAL_PATH(_T(PATH_ENDLESS_SUBDIRECTORY));
 	if (PathIsDirectory(endlessDir))
 		m_imageDir = CSTRING_GET_PATH(endlessDir, _T('\\'));
 	else

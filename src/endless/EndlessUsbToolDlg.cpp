@@ -2262,7 +2262,7 @@ void CEndlessUsbToolDlg::UpdateFileEntries(bool shouldInit)
     BOOL fileAccessException = false;
     CString currentInstallerVersion;
 	CString searchPath = GET_IMAGE_PATH(ALL_FILES);
-    const CString liveFilePath = GET_IMAGE_PATH(EXFAT_ENDLESS_LIVE_FILE_NAME);
+    const CString liveFilePath = GET_IMAGE_PATH(_T(EXFAT_ENDLESS_LIVE_FILE_NAME));
     HANDLE findFilesHandle = FindFirstFile(searchPath, &findFileData);
 
     m_localFilesScanned = true;
@@ -2296,8 +2296,8 @@ void CEndlessUsbToolDlg::UpdateFileEntries(bool shouldInit)
         // trueName is the filename it *should* have had (eos-...base.img, for example)
         CString trueName = currentFile;
         if ((
-                currentFile == ENDLESS_IMG_FILE_NAME ||
-                currentFile == ENDLESS_SQUASH_FILE_NAME
+                currentFile == _T(ENDLESS_IMG_FILE_NAME) ||
+                currentFile == _T(ENDLESS_SQUASH_FILE_NAME)
             ) && PathFileExists(liveFilePath)) {
 			uprintf("Found %ls; checking %ls to find image name", currentFile, liveFilePath);
 			bool foundTrueName = false;
@@ -3250,7 +3250,7 @@ void CEndlessUsbToolDlg::StartInstallationProcess()
 		// live image signature file
 		CString urlAsc = CString(RELEASE_JSON_URLPATH) + remote.urlSignature;
 		if(RemoteMatchesUnpackedImg(m_localFile, &m_localFileSig)) {
-			m_localFile = GET_IMAGE_PATH(ENDLESS_IMG_FILE_NAME);
+			m_localFile = GET_IMAGE_PATH(_T(ENDLESS_IMG_FILE_NAME));
 			urlAsc = CString(RELEASE_JSON_URLPATH) + remote.urlUnpackedSignature;
 		} else {
 			m_localFileSig = GET_IMAGE_PATH(CSTRING_GET_LAST(remote.urlSignature, '/'));
@@ -4099,7 +4099,7 @@ DWORD WINAPI CEndlessUsbToolDlg::FileCopyThread(void* param)
 
     // Copy Files
 	liveFileName = CSTRING_GET_LAST(dlg->m_localFile, L'\\');
-	if (liveFileName == ENDLESS_IMG_FILE_NAME) {
+	if (liveFileName == _T(ENDLESS_IMG_FILE_NAME)) {
 		fileDestination = driveDestination + CSTRING_GET_PATH(CSTRING_GET_LAST(dlg->m_localFileSig, L'\\'), L'.');
 	} else {
 		fileDestination = driveDestination + liveFileName;
@@ -5061,7 +5061,7 @@ bool CEndlessUsbToolDlg::CopyFilesToexFAT(CEndlessUsbToolDlg *dlg, const CString
 
 	bool retResult = false;
 
-	CString usbFilesPath = driveLetter + PATH_ENDLESS_SUBDIRECTORY;
+	CString usbFilesPath = driveLetter + _T(PATH_ENDLESS_SUBDIRECTORY);
 	CString exePath = GetExePath();
 	CStringA originalImgFilename = ConvertUnicodeToUTF8(CSTRING_GET_PATH(CSTRING_GET_LAST(dlg->m_unpackedImageSig, '\\'), '.'));
 
@@ -5073,11 +5073,11 @@ bool CEndlessUsbToolDlg::CopyFilesToexFAT(CEndlessUsbToolDlg *dlg, const CString
 	CEndlessUsbToolDlg::ImageUnpackPercentEnd = USB_PROGRESS_IMG_COPY_DONE;
 	CEndlessUsbToolDlg::ImageUnpackFileSize = dlg->m_selectedFileSize;
 
-	IFFALSE_GOTOERROR(dlg->UnpackImage(dlg->m_localFile, usbFilesPath + ENDLESS_IMG_FILE_NAME), "Error unpacking image to USB drive");
+	IFFALSE_GOTOERROR(dlg->UnpackImage(dlg->m_localFile, usbFilesPath + _T(ENDLESS_IMG_FILE_NAME)), "Error unpacking image to USB drive");
 	IFFALSE_GOTOERROR(0 != CopyFile(dlg->m_unpackedImageSig, usbFilesPath + CSTRING_GET_LAST(dlg->m_unpackedImageSig, '\\'), FALSE), "Error copying image signature file to drive.");
 
 	FILE *liveFile;
-	IFFALSE_GOTOERROR(0 == _wfopen_s(&liveFile, usbFilesPath + EXFAT_ENDLESS_LIVE_FILE_NAME, L"w"), "Error creating empty live file.");
+	IFFALSE_GOTOERROR(0 == _wfopen_s(&liveFile, usbFilesPath + _T(EXFAT_ENDLESS_LIVE_FILE_NAME), L"w"), "Error creating empty live file.");
 	fwrite((const char*)originalImgFilename, 1, originalImgFilename.GetLength(), liveFile);
 	fclose(liveFile);
 
@@ -5242,8 +5242,8 @@ done:
 
 bool CEndlessUsbToolDlg::SetupDualBootFiles(CEndlessUsbToolDlg *dlg, const CString &systemDriveLetter, const CString &bootFilesPath, ErrorCause &errorCause)
 {
-	const CString endlessFilesPath = systemDriveLetter + PATH_ENDLESS_SUBDIRECTORY;
-	const CString endlessImgPath = endlessFilesPath + ENDLESS_IMG_FILE_NAME;
+	const CString endlessFilesPath = systemDriveLetter + _T(PATH_ENDLESS_SUBDIRECTORY);
+	const CString endlessImgPath = endlessFilesPath + _T(ENDLESS_IMG_FILE_NAME);
 
 	const CStringW exeFilePath = GetExePath();
 
@@ -6034,8 +6034,8 @@ BOOL CEndlessUsbToolDlg::UninstallDualBoot(CEndlessUsbToolDlg *dlg)
 	UINT popupStyle = MB_OK | MB_ICONERROR;
 
 	CString systemDriveLetter = GetSystemDrive();
-	CString endlessFilesPath = systemDriveLetter + PATH_ENDLESS_SUBDIRECTORY;
-	CStringA endlessImgPath = ConvertUnicodeToUTF8(endlessFilesPath + ENDLESS_IMG_FILE_NAME);
+	CString endlessFilesPath = systemDriveLetter + _T(PATH_ENDLESS_SUBDIRECTORY);
+	CStringA endlessImgPath = ConvertUnicodeToUTF8(endlessFilesPath + _T(ENDLESS_IMG_FILE_NAME));
 	HANDLE hPhysical = GetPhysicalFromDriveLetter(systemDriveLetter);
 	CString exePath = GetExePath();
 	CString image_state;
@@ -6299,7 +6299,7 @@ const wchar_t* CEndlessUsbToolDlg::JsonInstallerFileURL()
 
 bool CEndlessUsbToolDlg::ShouldUninstall()
 {
-	return (PathFileExists(GetSystemDrive() + PATH_ENDLESS_SUBDIRECTORY + ENDLESS_IMG_FILE_NAME)
+	return (PathFileExists(GetSystemDrive() + _T(PATH_ENDLESS_SUBDIRECTORY) + _T(ENDLESS_IMG_FILE_NAME))
 		|| IsUninstaller());
 }
 
@@ -6341,7 +6341,7 @@ bool CEndlessUsbToolDlg::PackedImageAlreadyExists(const CString &filePath, ULONG
 	if(!isInstaller) {
 		isUnpackedImage = RemoteMatchesUnpackedImg(filePath);
 	}
-	CString actualFile = isUnpackedImage ? GET_IMAGE_PATH(ENDLESS_IMG_FILE_NAME) : filePath;
+	CString actualFile = isUnpackedImage ? GET_IMAGE_PATH(_T(ENDLESS_IMG_FILE_NAME)) : filePath;
 	IFFALSE_GOTOERROR(PathFileExists(actualFile), "File doesn't exists");
 
 	CompressionType unused;
@@ -6383,7 +6383,7 @@ ULONGLONG CEndlessUsbToolDlg::GetActualDownloadSize(const RemoteImageEntry &r, b
 bool CEndlessUsbToolDlg::RemoteMatchesUnpackedImg(const CString &remoteFilePath, CString *unpackedImgSig)
 {
 	pFileImageEntry_t localEntry = NULL;
-	if (m_imageFiles.Lookup(GET_IMAGE_PATH(ENDLESS_IMG_FILE_NAME), localEntry)) {
+	if (m_imageFiles.Lookup(GET_IMAGE_PATH(_T(ENDLESS_IMG_FILE_NAME)), localEntry)) {
 		if (CSTRING_GET_PATH(localEntry->unpackedImgSigPath, '.') == CSTRING_GET_PATH(remoteFilePath, '.')) {
 			if (unpackedImgSig != NULL) *unpackedImgSig = localEntry->unpackedImgSigPath;
 			return true;
