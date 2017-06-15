@@ -2327,7 +2327,7 @@ void CEndlessUsbToolDlg::UpdateFileEntries(bool shouldInit)
         if (!PathFileExists(currentFilePath)) continue; // file is present
 
         const CString imgSigPath = trueNamePath + SIGNATURE_FILE_EXT;
-        if (!PathFileExists(imgSigPath)) continue; // signature file is present
+        // if (!PathFileExists(imgSigPath)) continue; // signature file is present
 
         try {
             CString displayName, personality, version, date;
@@ -4256,6 +4256,7 @@ CompressionType CEndlessUsbToolDlg::GetCompressionType(const CString& filename)
     if (ext == "xz")  return CompressionTypeXz;
     if (ext == "img") return CompressionTypeNone;
     if (ext == "squash") return CompressionTypeSquash;
+    if (ext == "iso") return CompressionTypeIsoSquash;
 
     uprintf("%ls has unknown compression type %ls", filename, ext);
     return CompressionTypeUnknown;
@@ -4285,6 +4286,7 @@ ULONGLONG CEndlessUsbToolDlg::GetExtractedSize(const CString& filename, BOOL isI
     case CompressionTypeUnknown:
         return 0;
     case CompressionTypeSquash:
+    case CompressionTypeIsoSquash:
         return m_iso.GetExtractedSize(filename, isInstallerImage);
     default:
         int bled_type = GetBledCompressionType(compressionType);

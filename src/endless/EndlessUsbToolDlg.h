@@ -99,6 +99,7 @@ enum CompressionType {
     CompressionTypeGz,
     CompressionTypeXz,
     CompressionTypeSquash,
+    CompressionTypeIsoSquash,
 };
 
 struct SignedFile_t {

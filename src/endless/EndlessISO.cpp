@@ -70,8 +70,18 @@ void EndlessISO::Uninit()
 
 ULONGLONG EndlessISO::GetExtractedSize(const CString & image, const BOOL isInstallerImage)
 {
-    auto extractor = SevenZip::SevenZipExtractor(pImpl->sevenZip, image.GetString());
-    extractor.SetCompressionFormat(SevenZip::CompressionFormat::SquashFS);
+    auto extractor1 = SevenZip::SevenZipExtractor(pImpl->sevenZip, image.GetString());
+    extractor1.SetCompressionFormat(SevenZip::CompressionFormat::Iso);
+    auto names = extractor1.GetItemsNames();
+
+    // In practice this list is sorted, but 7z doesn't clearly guarantee this, so we use a linear search.
+    // n is small, and the in-practice order puts this near the start anyway!
+    auto iter = std::find(names.begin(), names.end(), _T(ENDLESS_SQUASH_FILE_PATH));
+    IFFALSE_RETURN_VALUE(iter != names.end(), ENDLESS_SQUASH_FILE_PATH " not found in ISO", 0);
+    auto j = std::distance(names.begin(), iter);
+
+    std::unique_ptr<SevenZip::SevenZipExtractor> extractor2(extractor1.GetSubArchive(j, SevenZip::CompressionFormat::SquashFS));
+    auto & extractor = *extractor2;
 
     auto n = extractor.GetNumberOfItems();
     IFFALSE_RETURN_VALUE(n == 1, "not exactly 1 item in squashfs image", 0);

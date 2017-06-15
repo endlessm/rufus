@@ -11,6 +11,8 @@
 #define ENDLESS_IMG_FILE_NAME           "endless.img"
 // ISOs use a squashfs image containing one file named ENDLESS_IMG_FILE_NAME
 #define ENDLESS_SQUASH_FILE_NAME        "endless.squash"
+// Full path, relative to ISO root, to squashfs image
+#define ENDLESS_SQUASH_FILE_PATH        PATH_ENDLESS_SUBDIRECTORY ENDLESS_SQUASH_FILE_NAME
 // Combined USBs and ISOs store the "true" name of the image in a text file
 #define EXFAT_ENDLESS_LIVE_FILE_NAME    "live"
 
