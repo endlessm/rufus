@@ -170,7 +170,8 @@ out:
 	return 0;
 }
 
-int print_entries(void) {wchar_t varname[9];
+int print_entries(void) {
+	wchar_t varname[9];
 	BYTE vardata[10000];
 	DWORD size;
 	WORD *bootorder;
