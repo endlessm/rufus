@@ -45,13 +45,3 @@ void _print_hresult(const char *file, int line, const char *msg, HRESULT hr);
 
 #define FUNCTION_ENTER uprintf("%s:%d %s", __FILE__, __LINE__, __FUNCTION__)
 #define FUNCTION_ENTER_FMT(fmt, ...) uprintf("%s:%d %s " fmt, __FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)
-
-
-
-#ifdef __cplusplus
-// methods for adding our entry in BIOS EFI
-bool EFIRequireNeededPrivileges();
-bool EFICreateNewEntry(const wchar_t *drive, wchar_t *path, wchar_t *desc);
-bool EFIRemoveEntry(wchar_t *desc, bool &found_entry);
-#endif
-

@@ -22,6 +22,7 @@
 #include <Windows.h>
 #include <WinIoCtl.h>
 
+#include "UEFIBootSetup.h"
 #include "GeneralCode.h"
 
 #pragma pack(1)
