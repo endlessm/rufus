@@ -3830,6 +3830,19 @@ void CEndlessUsbToolDlg::UpdateCurrentStep(int currentStep)
 
     FUNCTION_ENTER;
 
+    switch (m_currentStep)
+    {
+    case OP_DOWNLOADING_FILES:
+        TrackEvent(_T("DownloadFinished"));
+        break;
+    case OP_VERIFYING_SIGNATURE:
+        TrackEvent(_T("VerifyFinished"));
+        break;
+    default:
+        // Otherwise, nothing to report.
+        break;
+    }
+
     int nrSteps = m_useLocalFile ? 2 : 3;
     CString action;
     int nrCurrentStep;
