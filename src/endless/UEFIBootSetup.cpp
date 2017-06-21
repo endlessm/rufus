@@ -22,6 +22,7 @@
 #include <Windows.h>
 #include <WinIoCtl.h>
 
+#include "UEFIBootSetup.h"
 #include "GeneralCode.h"
 
 #pragma pack(1)
@@ -68,6 +69,10 @@ struct ExtraEntries : DRIVE_LAYOUT_INFORMATION_EX
 };
 
 #define UEFI_BOOT_NAMESPACE			L"{8BE4DF61-93CA-11d2-AA0D-00E098032B8C}"
+
+#define UEFI_VAR_BOOTORDER			L"BootOrder"
+#define UEFI_BOOT_ENTRY_NUM_FORMAT	"%04x"
+#define UEFI_VAR_BOOT_ENTRY_FORMAT	L"Boot" _T(UEFI_BOOT_ENTRY_NUM_FORMAT)
 
 int print_drive_letter(WCHAR *VolumeName) {
 	DWORD CharCount = MAX_PATH + 1;
@@ -169,7 +174,8 @@ out:
 	return 0;
 }
 
-int print_entries(void) {wchar_t varname[9];
+int print_entries(void) {
+	wchar_t varname[9];
 	BYTE vardata[10000];
 	DWORD size;
 	WORD *bootorder;
@@ -181,7 +187,7 @@ int print_entries(void) {wchar_t varname[9];
 		bootorder = (WORD *)vardata;
 		uprintf("Bootorder: ");
 		for (i = 0; i < (int)(size / 2); i++) {
-			uprintf("%d ", bootorder[i]);
+			uprintf(UEFI_BOOT_ENTRY_NUM_FORMAT " ", bootorder[i]);
 		}
 		uprintf("\n");
 	}
@@ -189,11 +195,11 @@ int print_entries(void) {wchar_t varname[9];
 	size = GetFirmwareEnvironmentVariableW(L"BootNext", UEFI_BOOT_NAMESPACE, vardata, sizeof(vardata));
 	if (size > 0) {
 		WORD *bootnext = (WORD *)vardata;
-		uprintf("BootNext: %d\n", *bootnext);
+		uprintf("BootNext: " UEFI_BOOT_ENTRY_NUM_FORMAT "\n", *bootnext);
 	}
 	for (i = 0; i <= 0xffff && countEmpty < 5; i++) {
 		EFI_HARD_DRIVE_PATH *hdpath;
-		swprintf(varname, sizeof(varname), L"Boot%04x", i);
+		swprintf(varname, sizeof(varname), UEFI_VAR_BOOT_ENTRY_FORMAT, i);
 		size = GetFirmwareEnvironmentVariableW(varname, UEFI_BOOT_NAMESPACE, vardata, sizeof(vardata));
 		if (size > 0) {
 			GUID guid;
@@ -202,7 +208,7 @@ int print_entries(void) {wchar_t varname[9];
 			int signature_type = -1;
 			wchar_t *description = (wchar_t *)&vardata[6];
 			EFI_DEVICE_PATH *devpath = (EFI_DEVICE_PATH *)&vardata[6 + wcslen(description) * 2 + 2];
-			uprintf("%d: %ls - ", i, description);
+			uprintf(UEFI_BOOT_ENTRY_NUM_FORMAT ": %ls - ", i, description);
 			while (devpath) {
 				switch (devpath->type) {
 				case 0x4: // Media device type
@@ -279,9 +285,6 @@ error:
 
 	return retResult;
 }
-
-#define UEFI_VAR_BOOTORDER			L"BootOrder"
-#define UEFI_VAR_BOOT_ENTRY_FORMAT	L"Boot%04x"
 
 static BYTE vardata[10000];
 static BYTE vardata1[1000];
@@ -444,7 +447,7 @@ bool EFICreateNewEntry(const wchar_t *drive, wchar_t *path, wchar_t *desc) {
 
 	/* And write it to firmware */
 	IFFALSE_GOTOERROR(SetFirmwareEnvironmentVariable(varname, UEFI_BOOT_NAMESPACE, load_option, varsize), "Error on SetFirmwareEnvironmentVariable");
-	uprintf("Created entry for %ls (%ls) at %d\n", path, description, target);
+	uprintf("Created entry for %ls (%ls) at " UEFI_BOOT_ENTRY_NUM_FORMAT "\n", path, description, target);
 
 	/* Add our entry to the boot order */
 	size = GetFirmwareEnvironmentVariable(UEFI_VAR_BOOTORDER, UEFI_BOOT_NAMESPACE, vardata, sizeof(vardata));

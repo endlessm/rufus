@@ -21,6 +21,7 @@
 #include "StringHelperMethods.h"
 #include "Images.h"
 #include "Log2LL.h"
+#include "UEFIBootSetup.h"
 #include "WMI.h"
 
 // Rufus include files
