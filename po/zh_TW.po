@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: rufus\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-03-08 02:28+0000\n"
-"PO-Revision-Date: 2017-05-24 08:12+0000\n"
+"PO-Revision-Date: 2017-06-24 13:30+0000\n"
 "Last-Translator: endlessmobile_build <philip@endlessm.com>\n"
 "Language-Team: Chinese (Taiwan) (http://www.transifex.com/endless-mobile-inc/rufus/language/zh_TW/)\n"
 "MIME-Version: 1.0\n"
@@ -276,23 +276,23 @@ msgstr "位元組"
 
 msgctxt "MSG_021"
 msgid "KB"
-msgstr ""
+msgstr "KB"
 
 msgctxt "MSG_022"
 msgid "MB"
-msgstr ""
+msgstr "MB"
 
 msgctxt "MSG_023"
 msgid "GB"
-msgstr ""
+msgstr "GB"
 
 msgctxt "MSG_024"
 msgid "TB"
-msgstr ""
+msgstr "TB"
 
 msgctxt "MSG_025"
 msgid "PB"
-msgstr ""
+msgstr "PB"
 
 #, c-format
 msgctxt "MSG_045"
@@ -433,7 +433,7 @@ msgstr "太棒了！您的 Endless OS Live USB 已建立完成。"
 #, c-format
 msgctxt "MSG_344"
 msgid "Great! Your Endless OS Reformatter USB has been created."
-msgstr ""
+msgstr "太好了！你的無盡 OS 重訂格式化器已被創建。"
 
 #, c-format
 msgctxt "MSG_321"
@@ -712,7 +712,7 @@ msgstr "未找到任何 USB 裝置。如果你已有插入 USB 裝置，請嘗�
 #, c-format
 msgctxt "MSG_386"
 msgid "The Endless Installer requires Windows 7 or newer."
-msgstr ""
+msgstr "Endless 安裝程式需要 Windows 7 或更高版本。"
 
 #, c-format
 msgctxt "MSG_400"

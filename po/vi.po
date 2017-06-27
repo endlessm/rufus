@@ -10,7 +10,7 @@ msgstr ""
 "Project-Id-Version: rufus\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-03-08 02:28+0000\n"
-"PO-Revision-Date: 2017-05-24 08:12+0000\n"
+"PO-Revision-Date: 2017-06-24 15:59+0000\n"
 "Last-Translator: endlessmobile_build <philip@endlessm.com>\n"
 "Language-Team: Vietnamese (http://www.transifex.com/endless-mobile-inc/rufus/language/vi/)\n"
 "MIME-Version: 1.0\n"
@@ -278,23 +278,23 @@ msgstr "byte"
 
 msgctxt "MSG_021"
 msgid "KB"
-msgstr ""
+msgstr "KB"
 
 msgctxt "MSG_022"
 msgid "MB"
-msgstr ""
+msgstr "MB"
 
 msgctxt "MSG_023"
 msgid "GB"
-msgstr ""
+msgstr "GB"
 
 msgctxt "MSG_024"
 msgid "TB"
-msgstr ""
+msgstr "TB"
 
 msgctxt "MSG_025"
 msgid "PB"
-msgstr ""
+msgstr "PB"
 
 #, c-format
 msgctxt "MSG_045"
@@ -435,7 +435,7 @@ msgstr "Thật tuyệt! USB Trực tiếp Hệ điều hành Endless của bạn
 #, c-format
 msgctxt "MSG_344"
 msgid "Great! Your Endless OS Reformatter USB has been created."
-msgstr ""
+msgstr "Rất tuyệt! USB Trình cải tiến Hệ điều hành Endless của bạn đã được tạo."
 
 #, c-format
 msgctxt "MSG_321"
@@ -714,7 +714,7 @@ msgstr "Không tìm thấy thiết bị USB nào. Nếu bạn đã chèn một U
 #, c-format
 msgctxt "MSG_386"
 msgid "The Endless Installer requires Windows 7 or newer."
-msgstr ""
+msgstr "Trình cài đặt Endless đòi hỏi phải có Windows 7 hoặc bản mới hơn."
 
 #, c-format
 msgctxt "MSG_400"

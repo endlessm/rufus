@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: rufus\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-03-08 02:28+0000\n"
-"PO-Revision-Date: 2017-05-24 08:12+0000\n"
+"PO-Revision-Date: 2017-06-24 15:22+0000\n"
 "Last-Translator: endlessmobile_build <philip@endlessm.com>\n"
 "Language-Team: Arabic (http://www.transifex.com/endless-mobile-inc/rufus/language/ar/)\n"
 "MIME-Version: 1.0\n"
@@ -277,23 +277,23 @@ msgstr "بايت"
 
 msgctxt "MSG_021"
 msgid "KB"
-msgstr ""
+msgstr "كيلو بايت"
 
 msgctxt "MSG_022"
 msgid "MB"
-msgstr ""
+msgstr "ميجاباييت"
 
 msgctxt "MSG_023"
 msgid "GB"
-msgstr ""
+msgstr "جيجا بايت"
 
 msgctxt "MSG_024"
 msgid "TB"
-msgstr ""
+msgstr "تيرا بايت"
 
 msgctxt "MSG_025"
 msgid "PB"
-msgstr ""
+msgstr "PB"
 
 #, c-format
 msgctxt "MSG_045"
@@ -434,7 +434,7 @@ msgstr "رائع! لقد تم إنشاء Endless OS Live USB الخاص بك."
 #, c-format
 msgctxt "MSG_344"
 msgid "Great! Your Endless OS Reformatter USB has been created."
-msgstr ""
+msgstr "رائع! لقد تم إنشاء USB المسئول عن إعادة تنسيق نظام تشغيل Endless OS الخاص بك."
 
 #, c-format
 msgctxt "MSG_321"
@@ -713,7 +713,7 @@ msgstr "لم يتم العثور على أي أجهزة USB. إذا كنت قد 
 #, c-format
 msgctxt "MSG_386"
 msgid "The Endless Installer requires Windows 7 or newer."
-msgstr ""
+msgstr "يتطلب برنامج تثبيت Endless ويندوز 7 أو أحدث."
 
 #, c-format
 msgctxt "MSG_400"

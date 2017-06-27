@@ -11,8 +11,8 @@ msgstr ""
 "Project-Id-Version: rufus\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-03-08 02:28+0000\n"
-"PO-Revision-Date: 2017-05-24 08:12+0000\n"
-"Last-Translator: endlessmobile_build <philip@endlessm.com>\n"
+"PO-Revision-Date: 2017-06-26 12:59+0000\n"
+"Last-Translator: e2f_in c7 <e2f_in_c7@outlook.com>\n"
 "Language-Team: Hindi (http://www.transifex.com/endless-mobile-inc/rufus/language/hi/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -279,23 +279,23 @@ msgstr "बाइट्स"
 
 msgctxt "MSG_021"
 msgid "KB"
-msgstr ""
+msgstr "केबी"
 
 msgctxt "MSG_022"
 msgid "MB"
-msgstr ""
+msgstr "एमबी"
 
 msgctxt "MSG_023"
 msgid "GB"
-msgstr ""
+msgstr "जीबी"
 
 msgctxt "MSG_024"
 msgid "TB"
-msgstr ""
+msgstr "टीबी"
 
 msgctxt "MSG_025"
 msgid "PB"
-msgstr ""
+msgstr "पीबी"
 
 #, c-format
 msgctxt "MSG_045"
@@ -436,7 +436,7 @@ msgstr "बहुत बढ़िया! Endless OS Live USB क्रिएट क
 #, c-format
 msgctxt "MSG_344"
 msgid "Great! Your Endless OS Reformatter USB has been created."
-msgstr ""
+msgstr "शानदार! आपका एंड्लेस ओ एस रीफॉर्मेटर यूएसबी बन चुका है."
 
 #, c-format
 msgctxt "MSG_321"
@@ -715,7 +715,7 @@ msgstr "कोई USB डिवाइस नहीं मिला. यदि �
 #, c-format
 msgctxt "MSG_386"
 msgid "The Endless Installer requires Windows 7 or newer."
-msgstr ""
+msgstr "एंड्लेस इंस्टॉलर के लिए विंडोज़ 7 या उससे नया आवश्यक है."
 
 #, c-format
 msgctxt "MSG_400"

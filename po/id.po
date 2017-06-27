@@ -12,7 +12,7 @@ msgstr ""
 "Project-Id-Version: rufus\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-03-08 02:28+0000\n"
-"PO-Revision-Date: 2017-05-24 13:07+0000\n"
+"PO-Revision-Date: 2017-06-18 09:13+0000\n"
 "Last-Translator: Septira Taruna <septira@endlessm.com>\n"
 "Language-Team: Indonesian (http://www.transifex.com/endless-mobile-inc/rufus/language/id/)\n"
 "MIME-Version: 1.0\n"
@@ -43,7 +43,7 @@ msgstr "Memformat ulang komputer apa saja dengan Endless OS menggunakan stik USB
 
 msgctxt "CompareOptionsLink"
 msgid "Compare the two options"
-msgstr "Membandingkan dua pilihan"
+msgstr "Bandingkan kedua pilihan"
 
 msgctxt "SelectFilePreviousButton"
 msgid "Previous"
