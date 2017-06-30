@@ -187,7 +187,7 @@ BEGIN
         BLOCK "040904b0"
         BEGIN
             VALUE "CompanyName", "Endless Mobile"
-            VALUE "FileDescription", "Download, install and uninstall Endless OS or create bootable USB sticks"
+            VALUE "FileDescription", "Endless Installer"
             VALUE "FileVersion", RELEASE_VER_STR "\0"
             VALUE "InternalName", "endless-installer.exe"
             VALUE "LegalCopyright", "Endless Mobile, Inc."
