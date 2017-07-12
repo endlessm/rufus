@@ -806,7 +806,7 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 /*
  * Flush file data
  */
-static BOOL FlushDrive(char drive_letter)
+BOOL FlushDrive(char drive_letter)
 {
 	HANDLE hDrive = INVALID_HANDLE_VALUE;
 	BOOL r = FALSE;

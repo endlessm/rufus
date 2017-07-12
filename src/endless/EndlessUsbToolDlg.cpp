@@ -5285,6 +5285,8 @@ bool CEndlessUsbToolDlg::SetupDualBootFiles(CEndlessUsbToolDlg *dlg, const CStri
 	UpdateProgress(OP_SETUP_DUALBOOT, DB_PROGRESS_COPY_GRUB_FOLDER);
 	CHECK_IF_CANCELLED;
 
+	IFFALSE_GOTOERROR(FlushDrive(ConvertUnicodeToUTF8(systemDriveLetter)[0]), "Failed to flush system drive");
+
 	if (IsLegacyBIOSBoot()) {
 		if (dlg->m_eosldrInstaller->CanInstall(bootFilesPath)) {
 			if (!dlg->m_eosldrInstaller->Install(systemDriveLetter, bootFilesPath)) {

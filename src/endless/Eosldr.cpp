@@ -1,7 +1,9 @@
 #include "stdafx.h"
 #include "Eosldr.h"
 #include "GeneralCode.h"
+#include "StringHelperMethods.h"
 #include "WMI.h"
+#include "drive.h"
 
 // Paths for g2ldr binaries, used to chainload GRUB from the Windows Boot
 // Manager on BIOS systems, rather than the other way round.
@@ -59,6 +61,9 @@ bool EosldrInstaller::Install(const CString & systemDriveLetter, const CString &
         )) {
         return false;
     }
+
+    IFFALSE_RETURN_VALUE(FlushDrive(ConvertUnicodeToUTF8(systemDriveLetter)[0]),
+        "FlushDrive failed", false);
 
     return AddToBootOrder(systemDriveLetter, eosldrMbrPath);
 }

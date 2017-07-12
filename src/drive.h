@@ -91,6 +91,7 @@ BOOL IsMediaPresent(DWORD DriveIndex);
 BOOL AnalyzeMBR(HANDLE hPhysicalDrive, const char* TargetName);
 BOOL AnalyzePBR(HANDLE hLogicalVolume);
 BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSystemNameSize, BOOL bSilent);
+BOOL FlushDrive(char drive_letter);
 BOOL UnmountVolume(HANDLE hDrive);
 BOOL MountVolume(char* drive_name, char *drive_guid);
 BOOL AltUnmountVolume(const char* drive_name);
