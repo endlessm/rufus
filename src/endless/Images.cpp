@@ -10,6 +10,7 @@
 #define EOS_NONFREE_PRODUCT_TEXT    "eosnonfree"
 #define EOS_OEM_PRODUCT_TEXT        "eosoem"
 #define EOS_RETAIL_PRODUCT_TEXT     "eosretail"
+#define EOS_DVD_PRODUCT_TEXT        "eosdvd"
 
 bool ParseImageVersion(const char *str, ImageVersion &ret)
 {
@@ -72,6 +73,7 @@ bool ParseImgFileName(const CString& filename, CString &personality, CString &ve
         product != _T(EOS_NONFREE_PRODUCT_TEXT) &&
         product != _T(EOS_OEM_PRODUCT_TEXT) &&
         product != _T(EOS_RETAIL_PRODUCT_TEXT) &&
+        product != _T(EOS_DVD_PRODUCT_TEXT) &&
         !isInstallerImage) {
         uprintf("Unrecognised product name '%ls'; assuming it's some new product", product);
     }
