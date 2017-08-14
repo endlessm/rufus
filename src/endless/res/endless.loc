@@ -280,8 +280,11 @@ t MSG_331 "You have selected a slow USB device (USB 1.0). Please use a USB 2.0 d
 t MSG_332 "You have selected a slower USB device (USB 2.0). Please use a USB 3.0 device for the best experience."
 t MSG_333 "Your USB 3.0 device is inserted into a USB 2.0 port. Please insert it into a USB 3.0 port (usually blue) for the best experience."
 
-t MSG_334 "There isn’t enough disk space for downloading Endless OS. Please free up %s and click \"Resume\" to start downloading."
-t MSG_303 "There isn’t enough disk space for downloading Endless Code. Please free up %s and click \"Resume\" to start downloading."
+# Placeholders are:
+# 1. drive (such as "C:\")
+# 2. amount of space needed (eg "4.7GB")
+t MSG_334 "There isn’t enough disk space on %s for downloading Endless OS. Please free up %s and click “Resume” to start downloading."
+t MSG_303 "There isn’t enough disk space on %s for downloading Endless Code. Please free up %s and click “Resume” to start downloading."
 
 t MSG_335 "The selected version of Endless OS requires %s of free disk space, but only %s is available. Please free up some space on drive %s to continue."
 t MSG_374 "The selected version of Endless Code requires %s of free disk space, but only %s is available. Please free up some space on drive %s to continue."

@@ -1798,6 +1798,8 @@ void CEndlessUsbToolDlg::ErrorOccured(ErrorCause_t errorCause)
         CComBSTR message;
         if (suggestionMsgId == MSG_334 || suggestionMsgId == MSG_303) {
             // Not enough space to download
+            const CStringA downloadDriveA = ConvertUnicodeToUTF8(CEndlessUsbToolApp::m_imageDir.Left(3));
+
             POSITION p = m_remoteImages.FindIndex(m_selectedRemoteIndex);
             ULONGLONG size = 0;
             if (p != NULL) {
@@ -1806,7 +1808,7 @@ void CEndlessUsbToolDlg::ErrorOccured(ErrorCause_t errorCause)
             }
             // we don't take the signature files into account but we are taking about ~2KB compared to >2GB
             ULONGLONG totalSize = size + (m_selectedInstallMethod == InstallMethod_t::ReformatterUsb ? m_installerImage.compressedSize : 0);
-            message = UTF8ToBSTR(lmprintf(suggestionMsgId, SizeToHumanReadable(totalSize, FALSE, use_fake_units)));
+            message = UTF8ToBSTR(lmprintf(suggestionMsgId, downloadDriveA, SizeToHumanReadable(totalSize, FALSE, use_fake_units)));
         } else if(suggestionMsgId == MSG_351 || suggestionMsgId == MSG_301) {
             // Not enough space to install (either our size logic is buggy, or
             // the user downloaded some other huge file between choosing a size
