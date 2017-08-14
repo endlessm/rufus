@@ -81,6 +81,8 @@ public:
 
 private:
     void ReportStatus(const DownloadStatus_t &downloadStatus);
+    static void PopulateErrorDetails(DownloadStatus_t &downloadStatus, IBackgroundCopyError *pError);
+    static void PopulateErrorDetails(DownloadStatus_t &downloadStatus, IBackgroundCopyJob *pJob);
 
     LONG m_PendingJobModificationCount;
     static volatile ULONG m_refCount;
