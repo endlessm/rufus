@@ -15,7 +15,7 @@ configuration:
 
 install:
   - if not exist upx.exe (
-        appveyor DownloadFile https://github.com/upx/upx/releases/download/v3.91/upx391w.zip -FileName upx.zip &&
+        appveyor DownloadFile https://github.com/upx/upx/releases/download/v3.94/upx394w.zip -FileName upx.zip &&
         7z e upx.zip *.exe -r
     )
 
