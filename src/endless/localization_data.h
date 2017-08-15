@@ -31,6 +31,7 @@ const loc_control_id control_id[] = {
 	LOC_CTRL(IDD_DIALOG),
 	LOC_CTRL(IDD_ENDLESSUSBTOOL_DIALOG),
 	LOC_CTRL_HTML(AdvancedPageTitle),
+	LOC_CTRL_HTML(AdvancedPagePreviousButton),
 	LOC_CTRL_HTML(LiveUsbButton),
 	LOC_CTRL_HTML(LiveUsbText),
 	LOC_CTRL_HTML(LiveUsbTextCoding),

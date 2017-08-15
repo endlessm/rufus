@@ -22,6 +22,10 @@ msgctxt "AdvancedPageTitle"
 msgid "Advanced Install Options"
 msgstr ""
 
+msgctxt "AdvancedPagePreviousButton"
+msgid "Previous"
+msgstr ""
+
 msgctxt "LiveUsbButton"
 msgid "Create Live USB"
 msgstr ""
