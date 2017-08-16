@@ -99,6 +99,7 @@ v 1.0.19
 # Main dialog
 g IDD_ENDLESSUSBTOOL_DIALOG
 t AdvancedPageTitle "Advanced Install Options"
+t AdvancedPagePreviousButton "Previous"
 t LiveUsbButton "Create Live USB"
 t LiveUsbText "Try Endless OS by running it from a USB stick."
 t LiveUsbTextCoding "Try Endless Code by running it from a USB stick."

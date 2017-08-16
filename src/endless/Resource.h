@@ -40,6 +40,7 @@
 #define IDC_BOOT                        1010
 
 #define HTML_ELEM_AdvancedPageTitle     2000
+#define HTML_ELEM_AdvancedPagePreviousButton 2021
 #define HTML_ELEM_LiveUsbButton         2001
 #define HTML_ELEM_LiveUsbText           2002
 #define HTML_ELEM_ReformatterUsbButton  2003
