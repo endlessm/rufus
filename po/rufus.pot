@@ -495,9 +495,12 @@ msgctxt "MSG_333"
 msgid "Your USB 3.0 device is inserted into a USB 2.0 port. Please insert it into a USB 3.0 port (usually blue) for the best experience."
 msgstr ""
 
+#. Placeholders are:
+#. 1. drive (such as "C:\")
+#. 2. amount of space needed (eg "4.7GB")
 #, c-format
 msgctxt "MSG_334"
-msgid "There isn’t enough disk space for downloading Endless OS. Please free up %s and click \"Resume\" to start downloading."
+msgid "There isn’t enough disk space on %s for downloading Endless OS. Please free up %s and click “Resume” to start downloading."
 msgstr ""
 
 #, c-format

@@ -213,6 +213,48 @@ void DownloadManager::ReportStatus(const DownloadStatus_t & downloadStatus)
         ::PostMessage(m_dispatchWindow, m_statusMsgId, (WPARAM)new DownloadStatus_t(downloadStatus), 0);
 }
 
+void DownloadManager::PopulateErrorDetails(DownloadStatus_t & downloadStatus, IBackgroundCopyError * pError)
+{
+    FUNCTION_ENTER;
+
+    HRESULT hr;
+    CComHeapPtr<WCHAR> errorDescription;
+
+    hr = pError->GetError(&downloadStatus.errorContext, &downloadStatus.errorCode);
+    IFFAILED_PRINTERROR(hr, "GetError failed");
+
+    // This fails, apparently because the message catalogue isn't loaded
+    hr = pError->GetErrorDescription(LANGIDFROMLCID(GetThreadLocale()), &errorDescription);
+    IFFAILED_PRINTERROR(hr, "GetErrorDescription failed");
+
+    uprintf("Job %ls %s error 0x%x in context %d: %ls", downloadStatus.jobName,
+        downloadStatus.error ? "fatal" : downloadStatus.transientError ? "transient" : "???",
+        downloadStatus.errorCode, downloadStatus.errorContext,
+        errorDescription ? errorDescription : L"");
+
+    // Special-case one transient error that we want to treat as permanent
+    if (downloadStatus.transientError &&
+        downloadStatus.errorContext == BG_ERROR_CONTEXT_LOCAL_FILE &&
+        downloadStatus.errorCode == HRESULT_FROM_WIN32(ERROR_DISK_FULL)) {
+        uprintf("Escalating DISK_FULL error to fatal");
+        downloadStatus.error = true;
+        downloadStatus.transientError = false;
+    }
+}
+
+void DownloadManager::PopulateErrorDetails(DownloadStatus_t & downloadStatus, IBackgroundCopyJob * pJob)
+{
+    FUNCTION_ENTER;
+
+    CComPtr<IBackgroundCopyError> pError;
+    HRESULT hr = pJob->GetError(&pError);
+    if (SUCCEEDED(hr)) {
+        PopulateErrorDetails(downloadStatus, pError);
+    } else {
+        PRINT_HRESULT(hr, "IBackgroundCopyJob::GetError failed");
+    }
+}
+
 STDMETHODIMP DownloadManager::JobError(IBackgroundCopyJob *pJob, IBackgroundCopyError *pError)
 {
     FUNCTION_ENTER;
@@ -224,9 +266,6 @@ STDMETHODIMP DownloadManager::JobError(IBackgroundCopyJob *pJob, IBackgroundCopy
 
     downloadStatus.error = true;
 
-    hr = pError->GetError(&downloadStatus.errorContext, &downloadStatus.errorCode);
-    IFFAILED_PRINTERROR(hr, "GetError failed");
-
     hr = pJob->GetProgress(&downloadStatus.progress);
     IFFAILED_PRINTERROR(hr, "GetProgress failed");
 
@@ -234,14 +273,7 @@ STDMETHODIMP DownloadManager::JobError(IBackgroundCopyJob *pJob, IBackgroundCopy
     IFFAILED_PRINTERROR(hr, "GetDisplayName failed");
     downloadStatus.jobName = jobName;
 
-    // This fails, apparently because the message catalogue isn't loaded
-    hr = pError->GetErrorDescription(LANGIDFROMLCID(GetThreadLocale()), &errorDescription);
-    IFFAILED_PRINTERROR(hr, "GetErrorDescription failed");
-
-    uprintf("Job %ls error 0x%x in context %d: %ls", jobName,
-        downloadStatus.errorCode, downloadStatus.errorContext,
-        errorDescription ? errorDescription : L"");
-
+    PopulateErrorDetails(downloadStatus, pError);
     ReportStatus(downloadStatus);
 
     return S_OK;
@@ -281,8 +313,18 @@ STDMETHODIMP DownloadManager::JobModification(IBackgroundCopyJob *JobModificatio
         downloadStatus.done = true;
         break;
     case BG_JOB_STATE_TRANSIENT_ERROR:
+    {
         downloadStatus.transientError = true;
+
+        CComPtr<IBackgroundCopyError> pError;
+        hr = JobModification->GetError(&pError);
+        if (SUCCEEDED(hr)) {
+            PopulateErrorDetails(downloadStatus, pError);
+        } else {
+            PRINT_HRESULT(hr, "IBackgroundCopyJob::GetError failed");
+        }
         break;
+    }
     case BG_JOB_STATE_CANCELLED:
         downloadStatus.error = true;
         break;
@@ -436,6 +478,7 @@ bool DownloadManager::GetDownloadProgress(CComPtr<IBackgroundCopyJob> &currentJo
     bool result = false;
 
     downloadStatus = DownloadStatusNull;
+    downloadStatus.jobName = jobName;
 
     hr = currentJob->GetState(&State);
     IFFAILED_GOTOERROR(hr, "Error querying for job state");
@@ -448,14 +491,14 @@ bool DownloadManager::GetDownloadProgress(CComPtr<IBackgroundCopyJob> &currentJo
         break;
     case BG_JOB_STATE_TRANSIENT_ERROR:
         downloadStatus.transientError = true;
+        PopulateErrorDetails(downloadStatus, currentJob);
         break;
     case BG_JOB_STATE_ERROR:
     case BG_JOB_STATE_CANCELLED:
         downloadStatus.error = true;
-        downloadStatus.errorContext = BG_ERROR_CONTEXT_NONE;
+        PopulateErrorDetails(downloadStatus, currentJob);
         break;
     }
-    downloadStatus.jobName = jobName;
 
     hr = currentJob->GetProgress(&downloadStatus.progress);
     IFFAILED_GOTOERROR(hr, "Error querying for job progress");
