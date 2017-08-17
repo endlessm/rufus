@@ -5088,12 +5088,10 @@ error:
 
 bool CEndlessUsbToolDlg::CopyMultipleItems(const CString &from, const CString &to)
 {
-	FUNCTION_ENTER;
+	FUNCTION_ENTER_FMT("%ls -> %ls", from, to);
 
 	SHFILEOPSTRUCT fileOperation;
 	wchar_t fromPath[MAX_PATH + 1], toPath[MAX_PATH + 1];
-
-	uprintf("Copying '%ls' to '%ls'", from, to);
 
 	memset(fromPath, 0, sizeof(fromPath));
 	wsprintf(fromPath, L"%ls", from);
@@ -5107,6 +5105,7 @@ bool CEndlessUsbToolDlg::CopyMultipleItems(const CString &from, const CString &t
 	fileOperation.wFunc = FO_COPY;
 
 	int result = SHFileOperation(&fileOperation);
+	uprintf("result: %d", result);
 
 	return result == 0;
 }
