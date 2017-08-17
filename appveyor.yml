@@ -14,8 +14,13 @@ configuration:
   - Release
 
 install:
-  - appveyor DownloadFile https://github.com/upx/upx/releases/download/v3.91/upx391w.zip -FileName upx.zip
-  - 7z e upx.zip *.exe -r
+  - if not exist upx.exe (
+        appveyor DownloadFile https://github.com/upx/upx/releases/download/v3.94/upx394w.zip -FileName upx.zip &&
+        7z e upx.zip *.exe -r
+    )
+
+cache:
+  - C:\projects\rufus\upx.exe -> appveyor.yml
 
 # We assume tags are of the form VERSION_foo, and we assume that foo matches
 # the version number embedded in the executable.
