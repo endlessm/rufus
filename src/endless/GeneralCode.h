@@ -36,8 +36,10 @@ void _print_hresult(const char *file, int line, const char *msg, HRESULT hr);
 
 #define IFFAILED_PRINTERROR(hr, msg)  { HRESULT __hr__ = (hr); if (FAILED(__hr__)) { PRINT_HRESULT(__hr__, msg); } }
 #define IFFAILED_GOTO(hr, msg, label) { HRESULT __hr__ = (hr); if (FAILED(__hr__)) { PRINT_HRESULT(__hr__, msg); goto label; } }
+#define IFFAILED_BREAK(hr, msg)       { HRESULT __hr__ = (hr); if (FAILED(__hr__)) { PRINT_HRESULT(__hr__, msg); break; } }
 #define IFFAILED_CONTINUE(hr, msg)    { HRESULT __hr__ = (hr); if (FAILED(__hr__)) { PRINT_HRESULT(__hr__, msg); continue; } }
 #define IFFAILED_GOTOERROR(hr, msg)   IFFAILED_GOTO(hr, msg, error)
+#define IFFAILED_RETURN(hr, msg)            { HRESULT __hr__ = (hr); if (FAILED(__hr__)) { PRINT_HRESULT(__hr__, msg); return; } }
 #define IFFAILED_RETURN_VALUE(hr, msg, ret) { HRESULT __hr__ = (hr); if (FAILED(__hr__)) { PRINT_HRESULT(__hr__, msg); return ret; } }
 #define IFFAILED_RETURN_RES(hr, msg)        { HRESULT __hr__ = (hr); if (FAILED(__hr__)) { PRINT_HRESULT(__hr__, msg); return __hr__; } }
 
