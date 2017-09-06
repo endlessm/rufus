@@ -4920,7 +4920,7 @@ error:
 
 bool CEndlessUsbToolDlg::UnpackZip(const CComBSTR source, const CComBSTR dest)
 {
-	FUNCTION_ENTER;
+	FUNCTION_ENTER_FMT("%ls -> %ls", source, dest);
 
 	HRESULT					hResult;
 	CComPtr<IShellDispatch>	pISD;
