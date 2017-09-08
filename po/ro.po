@@ -11,7 +11,7 @@ msgstr ""
 "Project-Id-Version: rufus\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-03-08 02:28+0000\n"
-"PO-Revision-Date: 2017-05-28 15:00+0000\n"
+"PO-Revision-Date: 2017-08-26 11:57+0000\n"
 "Last-Translator: georgian balan <braila222@gmail.com>\n"
 "Language-Team: Romanian (http://www.transifex.com/endless-mobile-inc/rufus/language/ro/)\n"
 "MIME-Version: 1.0\n"
@@ -23,6 +23,10 @@ msgstr ""
 msgctxt "AdvancedPageTitle"
 msgid "Advanced Install Options"
 msgstr "Opțiuni de instalare avansate"
+
+msgctxt "AdvancedPagePreviousButton"
+msgid "Previous"
+msgstr "Anterior"
 
 msgctxt "LiveUsbButton"
 msgid "Create Live USB"
@@ -531,12 +535,15 @@ msgid ""
 " USB 3.0 port (usually blue) for the best experience."
 msgstr "Dispozitivul USB 3.0 a fost introdus intr-un port USB 2.0.Introdu dispozitivul intr-un port USB 3.0 (de obicei albastru)pentru o experienta mai buna."
 
+#. Placeholders are:
+#. 1. drive (such as "C:\")
+#. 2. amount of space needed (eg "4.7GB")
 #, c-format
 msgctxt "MSG_334"
 msgid ""
-"There isn’t enough disk space for downloading Endless OS. Please free up %s "
-"and click \"Resume\" to start downloading."
-msgstr "Nu exista destul spatiu pe disc pentru a descarca Endless OS.Elibereaza %s spatiu si click pe \"Reia\" pentru a incepe descarcarea."
+"There isn’t enough disk space on %s for downloading Endless OS. Please free "
+"up %s and click “Resume” to start downloading."
+msgstr "Nu exista suficient spatiu pe %s pentru a descarca Endless OS. Elibereaza %s si apasa \"Reia\" pentru a incepe descarcarea."
 
 #, c-format
 msgctxt "MSG_335"

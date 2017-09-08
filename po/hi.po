@@ -11,7 +11,7 @@ msgstr ""
 "Project-Id-Version: rufus\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-03-08 02:28+0000\n"
-"PO-Revision-Date: 2017-06-26 12:59+0000\n"
+"PO-Revision-Date: 2017-09-04 07:31+0000\n"
 "Last-Translator: e2f_in c7 <e2f_in_c7@outlook.com>\n"
 "Language-Team: Hindi (http://www.transifex.com/endless-mobile-inc/rufus/language/hi/)\n"
 "MIME-Version: 1.0\n"
@@ -23,6 +23,10 @@ msgstr ""
 msgctxt "AdvancedPageTitle"
 msgid "Advanced Install Options"
 msgstr "ऐडवांस्ड इंस्टॉल विकल्प"
+
+msgctxt "AdvancedPagePreviousButton"
+msgid "Previous"
+msgstr "पिछला"
 
 msgctxt "LiveUsbButton"
 msgid "Create Live USB"
@@ -531,12 +535,15 @@ msgid ""
 " USB 3.0 port (usually blue) for the best experience."
 msgstr "आपका USB 3.0 डिवाइस USB 2.0 पोर्ट में डाला जा चुका है। कृपया सर्वोत्तम अनुभव के लिए इसे किसी USB 3.0 पोर्ट में (प्रायः नीला) में डालें।"
 
+#. Placeholders are:
+#. 1. drive (such as "C:\")
+#. 2. amount of space needed (eg "4.7GB")
 #, c-format
 msgctxt "MSG_334"
 msgid ""
-"There isn’t enough disk space for downloading Endless OS. Please free up %s "
-"and click \"Resume\" to start downloading."
-msgstr "Endless OS डाउनलोड करने के लिए पर्याप्त डिस्क स्थान नहीं है. डाउनलोड करने के लिए कृपया %s रिक्त करें और \"पुनरारंभ करें\" क्लिक करें."
+"There isn’t enough disk space on %s for downloading Endless OS. Please free "
+"up %s and click “Resume” to start downloading."
+msgstr "Endless OS को डाउनलोड करने के लिए %s में पर्याप्त डिस्क स्थान नहीं है. कृपया %s में कुछ स्थान रिक्त करें और डाउनलोड करना प्रारंभ करने के लिए \"पुनर्रारंभ करें\" क्लिक करें."
 
 #, c-format
 msgctxt "MSG_335"

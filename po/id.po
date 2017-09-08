@@ -12,7 +12,7 @@ msgstr ""
 "Project-Id-Version: rufus\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-03-08 02:28+0000\n"
-"PO-Revision-Date: 2017-06-18 09:13+0000\n"
+"PO-Revision-Date: 2017-09-08 13:00+0000\n"
 "Last-Translator: Septira Taruna <septira@endlessm.com>\n"
 "Language-Team: Indonesian (http://www.transifex.com/endless-mobile-inc/rufus/language/id/)\n"
 "MIME-Version: 1.0\n"
@@ -24,6 +24,10 @@ msgstr ""
 msgctxt "AdvancedPageTitle"
 msgid "Advanced Install Options"
 msgstr "Opsi Instal Lanjutan"
+
+msgctxt "AdvancedPagePreviousButton"
+msgid "Previous"
+msgstr "Sebelumnya"
 
 msgctxt "LiveUsbButton"
 msgid "Create Live USB"
@@ -532,12 +536,15 @@ msgid ""
 " USB 3.0 port (usually blue) for the best experience."
 msgstr "Perangkat USB 3.0 Anda dimasukkan ke dalam port USB 2.0. Harap memasukkannya ke port USB 3.0 (umumnya berwarna biru) untuk pengalaman terbaik."
 
+#. Placeholders are:
+#. 1. drive (such as "C:\")
+#. 2. amount of space needed (eg "4.7GB")
 #, c-format
 msgctxt "MSG_334"
 msgid ""
-"There isn’t enough disk space for downloading Endless OS. Please free up %s "
-"and click \"Resume\" to start downloading."
-msgstr "Ruang penyimpanan yang tersedia tidak cukup untuk mengunduh Endless OS. Silakan bebaskan kapasitas %s dan klik \"Lanjut\" untuk mulai mengunduh."
+"There isn’t enough disk space on %s for downloading Endless OS. Please free "
+"up %s and click “Resume” to start downloading."
+msgstr "Ruang penyimpanan di %s tidak cukup untuk mengunduh Endless OS. Mohon besarkan kapasitas %s dan klik \"Lanjut\" untuk mulai mengunduh."
 
 #, c-format
 msgctxt "MSG_335"

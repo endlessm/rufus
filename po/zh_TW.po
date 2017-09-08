@@ -3,13 +3,14 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
+# Roddy Shuler <roddy@endlessm.com>, 2017
 msgid ""
 msgstr ""
 "Project-Id-Version: rufus\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-03-08 02:28+0000\n"
-"PO-Revision-Date: 2017-06-24 13:30+0000\n"
-"Last-Translator: endlessmobile_build <philip@endlessm.com>\n"
+"PO-Revision-Date: 2017-09-08 21:10+0000\n"
+"Last-Translator: Roddy Shuler <roddy@endlessm.com>\n"
 "Language-Team: Chinese (Taiwan) (http://www.transifex.com/endless-mobile-inc/rufus/language/zh_TW/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -20,6 +21,10 @@ msgstr ""
 msgctxt "AdvancedPageTitle"
 msgid "Advanced Install Options"
 msgstr "進階安裝選項"
+
+msgctxt "AdvancedPagePreviousButton"
+msgid "Previous"
+msgstr "上一個"
 
 msgctxt "LiveUsbButton"
 msgid "Create Live USB"
@@ -107,7 +112,7 @@ msgstr "下載 EOS 完整版"
 
 msgctxt "SelectUSBPreviousButton"
 msgid "Previous"
-msgstr "往前"
+msgstr "上一個"
 
 msgctxt "SelectUSBNextButton"
 msgid "Next"
@@ -234,7 +239,7 @@ msgstr "下一個"
 
 msgctxt "SelectStoragePreviousButton"
 msgid "Previous"
-msgstr "往前"
+msgstr "上一個"
 
 msgctxt "SelectStoragePageTitle"
 msgid "Storage Space for Endless OS"
@@ -528,12 +533,15 @@ msgid ""
 " USB 3.0 port (usually blue) for the best experience."
 msgstr "您的 USB 3.0 裝置目前是連接到 USB 2.0 連接埠。為獲得最佳使用體驗，請將裝置插入 USB 3.0 連接埠（通常是藍色的）。"
 
+#. Placeholders are:
+#. 1. drive (such as "C:\")
+#. 2. amount of space needed (eg "4.7GB")
 #, c-format
 msgctxt "MSG_334"
 msgid ""
-"There isn’t enough disk space for downloading Endless OS. Please free up %s "
-"and click \"Resume\" to start downloading."
-msgstr "磁碟空間不足，無法下載 Endless 作業系統。請釋出 %s，然後按一下「繼續」開始下載。"
+"There isn’t enough disk space on %s for downloading Endless OS. Please free "
+"up %s and click “Resume” to start downloading."
+msgstr "%s 上沒有足夠的空間可以下載 Endless OS。請清出 %s 並按下「繼續」以開始下載。"
 
 #, c-format
 msgctxt "MSG_335"

@@ -10,7 +10,7 @@ msgstr ""
 "Project-Id-Version: rufus\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-03-08 02:28+0000\n"
-"PO-Revision-Date: 2017-06-25 06:13+0000\n"
+"PO-Revision-Date: 2017-09-03 01:33+0000\n"
 "Last-Translator: endlessmobile_build <philip@endlessm.com>\n"
 "Language-Team: Thai (http://www.transifex.com/endless-mobile-inc/rufus/language/th/)\n"
 "MIME-Version: 1.0\n"
@@ -22,6 +22,10 @@ msgstr ""
 msgctxt "AdvancedPageTitle"
 msgid "Advanced Install Options"
 msgstr "ตัวเลือกการติดตั้งขั้นสูง"
+
+msgctxt "AdvancedPagePreviousButton"
+msgid "Previous"
+msgstr "ก่อนหน้า"
 
 msgctxt "LiveUsbButton"
 msgid "Create Live USB"
@@ -530,12 +534,15 @@ msgid ""
 " USB 3.0 port (usually blue) for the best experience."
 msgstr "อุปกรณ์ยูเอสบี 3.0 ของคุณเสียบเข้ากับพอร์ตยูเอสบี 2.0  กรุณาเสียบอุปกรณ์กับพอร์ตยูเอสบี 3.0 (โดยทั่วไปเป็นสีน้ำเงิน) เพื่อสัมผัสประสบการณ์ที่ดีที่สุด"
 
+#. Placeholders are:
+#. 1. drive (such as "C:\")
+#. 2. amount of space needed (eg "4.7GB")
 #, c-format
 msgctxt "MSG_334"
 msgid ""
-"There isn’t enough disk space for downloading Endless OS. Please free up %s "
-"and click \"Resume\" to start downloading."
-msgstr "มีพื้นที่ว่างในดิสก์ไม่เพียงพอสำหรับการดาวน์โหลด Endless OS กรุณาเพิ่มพื้นที่ว่าง %s และคลิก \"ทำต่อ\" เพื่อเริ่มต้นดาวน์โหลด"
+"There isn’t enough disk space on %s for downloading Endless OS. Please free "
+"up %s and click “Resume” to start downloading."
+msgstr "มีที่ว่างบนดิสก์ไม่เพียงพอในไดรฟ์ %s สำหรับการดาวน์โหลด Endless OS โปรดเพิ่มพื้นที่ว่าง %s และคลิก \"ทำต่อ\" เพื่อเริ่มต้นการดาวน์โหลด"
 
 #, c-format
 msgctxt "MSG_335"

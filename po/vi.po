@@ -3,15 +3,15 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
-# Roddy Shuler <roddy@endlessm.com>, 2016
+# Roddy Shuler <roddy@endlessm.com>, 2016-2017
 # Will Thompson <wjt@endlessm.com>, 2016-2017
 msgid ""
 msgstr ""
 "Project-Id-Version: rufus\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-03-08 02:28+0000\n"
-"PO-Revision-Date: 2017-06-24 15:59+0000\n"
-"Last-Translator: endlessmobile_build <philip@endlessm.com>\n"
+"PO-Revision-Date: 2017-09-08 21:12+0000\n"
+"Last-Translator: Roddy Shuler <roddy@endlessm.com>\n"
 "Language-Team: Vietnamese (http://www.transifex.com/endless-mobile-inc/rufus/language/vi/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -22,6 +22,10 @@ msgstr ""
 msgctxt "AdvancedPageTitle"
 msgid "Advanced Install Options"
 msgstr "Tùy chọn cài đặt nâng cao"
+
+msgctxt "AdvancedPagePreviousButton"
+msgid "Previous"
+msgstr "Trước"
 
 msgctxt "LiveUsbButton"
 msgid "Create Live USB"
@@ -109,7 +113,7 @@ msgstr "Tải về EOS Full"
 
 msgctxt "SelectUSBPreviousButton"
 msgid "Previous"
-msgstr "Trước đó"
+msgstr "Trước"
 
 msgctxt "SelectUSBNextButton"
 msgid "Next"
@@ -530,12 +534,15 @@ msgid ""
 " USB 3.0 port (usually blue) for the best experience."
 msgstr "Thiết bị USB 3.0 của bạn được cắm cổng USB 2.0. Vui lòng cắm nó vào cổng USB 3.0 (thường là màu xanh) để có trải nghiệm nghiệm tốt nhất."
 
+#. Placeholders are:
+#. 1. drive (such as "C:\")
+#. 2. amount of space needed (eg "4.7GB")
 #, c-format
 msgctxt "MSG_334"
 msgid ""
-"There isn’t enough disk space for downloading Endless OS. Please free up %s "
-"and click \"Resume\" to start downloading."
-msgstr "Không có đủ dung lượng đĩa để tải về Endless OS. Vui lòng tạo thêm %s và nhấp vào \"Khôi phục\" để bắt đầu tải về."
+"There isn’t enough disk space on %s for downloading Endless OS. Please free "
+"up %s and click “Resume” to start downloading."
+msgstr "Ổ đĩa %s không còn đủ dung lượng để có thể tải về HĐH Endless. Vui lòng giải phóng ổ đĩa %s và nhấp \"Bắt đầu lại\" để bắt đầu tải xuống. "
 
 #, c-format
 msgctxt "MSG_335"
