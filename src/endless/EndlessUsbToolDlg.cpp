@@ -1647,7 +1647,7 @@ void CEndlessUsbToolDlg::AddLanguagesToUI()
 	HRESULT hr;
 
 	hr = GetSelectElement(_T(ELEMENT_LANGUAGE_DUALBOOT), selectElementDualBoot);
-	IFFAILED_RETURN(hr && selectElementDualBoot != NULL, "Error returned from GetSelectElement.");
+	IFFAILED_RETURN(hr, "Error returned from GetSelectElement.");
 
 	hr = selectElementDualBoot->put_length(0);
 
@@ -1894,16 +1894,20 @@ error:
 	return hr;
 }
 
+// Guaranteed to either return an error, or set selectElem to non-NULL
 HRESULT CEndlessUsbToolDlg::GetSelectElement(PCTSTR selectId, CComPtr<IHTMLSelectElement> &selectElem)
 {
     CComPtr<IHTMLElement> pElement;
     HRESULT hr;
 
     hr = m_spHtmlDoc3->getElementById(CComBSTR(selectId), &pElement);
-    IFFAILED_GOTOERROR(hr && pElement != NULL, "Error when querying for select element.");
+    IFFAILED_GOTOERROR(hr, "Error when querying for select element.");
+    IFFALSE_RETURN_VALUE(pElement != NULL, "Select element not found", E_FAIL);
 
     hr = pElement.QueryInterface<IHTMLSelectElement>(&selectElem);
     IFFAILED_GOTOERROR(hr, "Error querying for IHTMLSelectElement interface");
+    // In theory this is impossible, but: https://blogs.msdn.microsoft.com/oldnewthing/20040326-00/?p=40033
+    IFFALSE_RETURN_VALUE(selectElem != NULL, "QueryInterface returned NULL", E_FAIL);
 
 error:
     return hr;
@@ -1917,7 +1921,7 @@ HRESULT CEndlessUsbToolDlg::ClearSelectElement(PCTSTR selectId)
     HRESULT hr;
 
     hr = GetSelectElement(selectId, selectElement);
-    IFFAILED_GOTOERROR(hr && selectElement != NULL, "Error returned from GetSelectElement");
+    IFFAILED_GOTOERROR(hr, "Error returned from GetSelectElement");
 
     hr = selectElement->put_length(0);
     IFFAILED_GOTOERROR(hr, "Error removing all elements from HTML element");
@@ -1932,7 +1936,7 @@ HRESULT CEndlessUsbToolDlg::AddEntryToSelect(PCTSTR selectId, const CComBSTR &va
     HRESULT hr;
     
     hr = GetSelectElement(selectId, selectElement);
-    IFFAILED_GOTOERROR(hr && selectElement != NULL, "Error returned from GetSelectElement");
+    IFFAILED_GOTOERROR(hr, "Error returned from GetSelectElement");
 
     return AddEntryToSelect(selectElement, value, text, outIndex, selected);
 
@@ -3561,7 +3565,7 @@ void CEndlessUsbToolDlg::GoToSelectStoragePage()
 
 	// Clear existing elements from the drop down
 	hr = GetSelectElement(_T(ELEMENT_STORAGE_SELECT), selectElement);
-	IFFAILED_RETURN(hr && selectElement != NULL, "Error returned from GetSelectElement.");
+	IFFAILED_RETURN(hr, "Error returned from GetSelectElement.");
 	hr = selectElement->put_length(0);
 
 	bool enoughBytesAvailable = totalSpaceNeeded < freeBytesAvailable.QuadPart;
