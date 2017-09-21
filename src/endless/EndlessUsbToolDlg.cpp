@@ -1894,6 +1894,27 @@ error:
 	return hr;
 }
 
+// pElement: a <select> element
+// selectedValue: location to store selected value
+// Guaranteed to either return failure, or set selectedValue to non-NULL
+HRESULT CEndlessUsbToolDlg::GetSelectedValue(IHTMLElement * pElement, CComBSTR & selectedValue)
+{
+    FUNCTION_ENTER;
+
+    CComPtr<IHTMLSelectElement> selectElement;
+    HRESULT hr;
+
+    hr = pElement->QueryInterface(IID_IHTMLSelectElement, (void**)&selectElement);
+    IFFAILED_RETURN_RES(hr, "Error querying for IHTMLSelectElement interface");
+    IFFALSE_RETURN_VALUE(selectElement != NULL, "NULL IHTMLSelectElement interface", E_FAIL);
+
+    hr = selectElement->get_value(&selectedValue);
+    IFFAILED_RETURN_RES(hr, "Error getting selected value");
+    IFFALSE_RETURN_VALUE(selectedValue != NULL, "NULL selected value", E_FAIL);
+
+    return S_OK;
+}
+
 // Guaranteed to either return an error, or set selectElem to non-NULL
 HRESULT CEndlessUsbToolDlg::GetSelectElement(PCTSTR selectId, CComPtr<IHTMLSelectElement> &selectElem)
 {
@@ -2213,14 +2234,9 @@ HRESULT CEndlessUsbToolDlg::OnLanguageChanged(IHTMLElement* pElement)
 {
     FUNCTION_ENTER;
 
-	CComPtr<IHTMLSelectElement> selectElement;
 	CComBSTR selectedValue;
 
-	HRESULT hr = pElement->QueryInterface(IID_IHTMLSelectElement, (void**)&selectElement);
-	IFFAILED_GOTOERROR(hr && selectElement != NULL, "Error querying for IHTMLSelectElement interface");
-
-	hr = selectElement->get_value(&selectedValue);
-	IFFAILED_GOTOERROR(hr && selectElement != NULL, "Error getting selected language value");
+	IFFAILED_GOTOERROR(GetSelectedValue(pElement, selectedValue), "Error getting selected language value");
 
 	char* p = _com_util::ConvertBSTRToString(selectedValue);
 	Analytics::instance()->setLanguage(CString(p));
@@ -3057,14 +3073,9 @@ HRESULT CEndlessUsbToolDlg::OnSelectedImageFileChanged(IHTMLElement* pElement)
 {
     FUNCTION_ENTER;
 
-    CComPtr<IHTMLSelectElement> selectElement;
     CComBSTR selectedValue;
 
-    HRESULT hr = pElement->QueryInterface(IID_IHTMLSelectElement, (void**)&selectElement);
-    IFFAILED_RETURN_VALUE(hr && selectElement != NULL, "Error querying for IHTMLSelectElement interface", S_OK);
-
-    hr = selectElement->get_value(&selectedValue);
-    IFFAILED_RETURN_VALUE(hr && selectedValue != NULL, "Error getting selected file value", S_OK);
+    IFFAILED_RETURN_VALUE(GetSelectedValue(pElement, selectedValue), "Error getting selected file value", S_OK);
 
     m_localFile = selectedValue;
     uprintf("OnSelectedImageFileChanged to LOCAL [%ls]", m_localFile);
@@ -3449,14 +3460,9 @@ HRESULT CEndlessUsbToolDlg::OnSelectedStorageSizeChanged(IHTMLElement* pElement)
 {
 	FUNCTION_ENTER;
 
-	CComPtr<IHTMLSelectElement> selectElement;
 	CComBSTR selectedValue;
 
-	HRESULT hr = pElement->QueryInterface(IID_IHTMLSelectElement, (void**)&selectElement);
-	IFFAILED_RETURN_VALUE(hr && selectElement != NULL, "Error querying for IHTMLSelectElement interface", S_OK);
-
-	hr = selectElement->get_value(&selectedValue);
-	IFFAILED_RETURN_VALUE(hr && selectElement != NULL, "Error getting selected file value", S_OK);
+	IFFAILED_RETURN_VALUE(GetSelectedValue(pElement, selectedValue), "Error getting selected file value", S_OK);
 
 	m_selectedInstallSizeBytes = _wtoll(selectedValue);
 	uprintf("Size selected for the Endless OS file: %I64d bytes", m_selectedInstallSizeBytes);

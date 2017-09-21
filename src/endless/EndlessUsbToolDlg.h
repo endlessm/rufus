@@ -322,6 +322,7 @@ private:
 	void ChangePage(PCTSTR newPage);
 
 	HRESULT UpdateSelectOptionText(CComPtr<IHTMLSelectElement> selectElement, const CString &text, LONG index);
+	HRESULT GetSelectedValue(IHTMLElement* pElement, CComBSTR &selectedValue);
 	HRESULT GetSelectedOptionElementText(CComPtr<IHTMLSelectElement>, CString &text);
     HRESULT GetSelectElement(PCTSTR selectId, CComPtr<IHTMLSelectElement> &selectElem);
     HRESULT ClearSelectElement(PCTSTR selectId);
