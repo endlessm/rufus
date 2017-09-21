@@ -649,7 +649,8 @@ void CEndlessUsbToolDlg::OnDocumentComplete(LPDISPATCH pDisp, LPCTSTR szUrl)
 
 	if (m_spHtmlDoc3 == NULL) {
 		HRESULT hr = m_spHtmlDoc->QueryInterface(IID_IHTMLDocument3, (void**)&m_spHtmlDoc3);
-		IFFAILED_GOTOERROR(hr && m_spHtmlDoc3 != NULL, "Error when querying IID_IHTMLDocument3 interface.");
+		IFFAILED_GOTOERROR(hr, "Error when querying IID_IHTMLDocument3 interface.");
+		IFFALSE_GOTOERROR(m_spHtmlDoc3 != NULL, "NULL IID_IHTMLDocument3 interface.");
 	}
 
 	AddLanguagesToUI();
@@ -1089,7 +1090,8 @@ LRESULT CEndlessUsbToolDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lPara
             long value = (long)lParam;
 
             hr = selectElement->item(CComVariant(index), CComVariant(0), &pDispatch);
-            IFFAILED_GOTOERROR(hr && pDispatch != NULL, "Error when querying for element at requested index.");
+            IFFAILED_GOTOERROR(hr, "Error when querying for element at requested index.");
+            IFFALSE_GOTOERROR(pDispatch != NULL, "NULL element at requested index.");
 
             hr = pDispatch.QueryInterface<IHTMLOptionElement>(&optionElement);
             IFFAILED_GOTOERROR(hr, "Error when querying for IHTMLOptionElement interface");
@@ -1882,7 +1884,8 @@ HRESULT CEndlessUsbToolDlg::UpdateSelectOptionText(CComPtr<IHTMLSelectElement> s
 	CComBSTR valueBSTR;
 
 	HRESULT hr = selectElement->item(CComVariant(index), CComVariant(index), &pDispatch);
-	IFFAILED_GOTOERROR(hr && pDispatch != NULL, "Error when querying for element at requested index.");
+	IFFAILED_GOTOERROR(hr, "Error when querying for element at requested index.");
+	IFFALSE_RETURN_VALUE(pDispatch != NULL, "NULL element at requested index.", E_FAIL);
 
 	hr = pDispatch.QueryInterface<IHTMLOptionElement>(&pOption);
 	IFFAILED_GOTOERROR(hr, "Error when querying for IHTMLOptionElement interface");
@@ -2470,7 +2473,8 @@ checkEntries:
 
     CComBSTR selectedValue;
     hr = selectElement->get_value(&selectedValue);
-    IFFAILED_RETURN(hr && selectedValue != NULL, "Error getting selected file value");
+    IFFAILED_RETURN(hr, "Error getting selected file value");
+    IFFALSE_RETURN(selectedValue != NULL, "NULL selected file value");
 
     if (m_useLocalFile) {
         m_localFile = selectedValue;
@@ -3093,7 +3097,8 @@ HRESULT CEndlessUsbToolDlg::OnSelectedRemoteFileChanged(IHTMLElement* pElement)
     long selectedIndex;
 
     HRESULT hr = pElement->QueryInterface(IID_IHTMLSelectElement, (void**)&selectElement);
-    IFFAILED_RETURN_VALUE(hr && selectElement != NULL, "Error querying for IHTMLSelectElement interface", S_OK);
+    IFFAILED_RETURN_VALUE(hr, "Error querying for IHTMLSelectElement interface", S_OK);
+    IFFALSE_RETURN_VALUE(selectElement != NULL, "NULL IHTMLSelectElement interface", S_OK);
 
     hr = selectElement->get_selectedIndex(&selectedIndex);
     IFFAILED_RETURN_VALUE(hr, "Error getting selected index value", S_OK);
@@ -3727,7 +3732,8 @@ HRESULT CEndlessUsbToolDlg::OnDeleteCheckboxChanged(IHTMLElement *pElement)
     VARIANT_BOOL checked = VARIANT_FALSE;
 
     HRESULT hr = pElement->QueryInterface(&checkboxElem);
-    IFFAILED_RETURN_VALUE(hr && checkboxElem != NULL, "Error querying for IHTMLOptionButtonElement.", S_OK);
+    IFFAILED_RETURN_VALUE(hr, "Error querying for IHTMLOptionButtonElement.", S_OK);
+    IFFALSE_RETURN_VALUE(checkboxElem != NULL, "NULL IHTMLOptionButtonElement.", S_OK);
 
     hr = checkboxElem->get_checked(&checked);
     IFFAILED_RETURN_VALUE(hr, "Error querying for IHTMLOptionButtonElement.", S_OK);
@@ -3788,15 +3794,18 @@ HRESULT CEndlessUsbToolDlg::CallJavascript(LPCTSTR method, CComVariant parameter
     //uprintf("CallJavascript called with method %ls", method);
     if (m_spWindowElem == NULL) {
         hr = m_spHtmlDoc->get_parentWindow(&m_spWindowElem);
-        IFFAILED_RETURN_VALUE(hr && m_spWindowElem != NULL, "Error querying for parent window.", E_FAIL);
+        IFFAILED_RETURN_RES(hr, "Error querying for parent window.");
+        IFFALSE_RETURN_VALUE(m_spWindowElem != NULL, "NULL parent window.", E_FAIL);
     }
     if (m_dispWindow == NULL) {
         hr = m_spWindowElem->QueryInterface(&m_dispWindow);
-        IFFAILED_RETURN_VALUE(hr && m_dispWindow != NULL, "Error querying for CComDispatchDriver.", E_FAIL);
+        IFFAILED_RETURN_RES(hr, "Error querying for CComDispatchDriver.");
+        IFFALSE_RETURN_VALUE(m_dispWindow != NULL, "NULL CComDispatchDriver.", E_FAIL);
     }
     if (m_dispexWindow == NULL) {
         hr = m_spWindowElem->QueryInterface(&m_dispexWindow);
-        IFFAILED_RETURN_VALUE(hr && m_dispexWindow != NULL, "Error querying for IDispatchEx.", E_FAIL);
+        IFFAILED_RETURN_RES(hr, "Error querying for IDispatchEx.");
+        IFFALSE_RETURN_VALUE(m_dispexWindow != NULL, "NULL IDispatchEx.", E_FAIL);
     }
 
     DISPID dispidMethod = -1;
