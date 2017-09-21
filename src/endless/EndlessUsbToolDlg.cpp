@@ -3607,7 +3607,7 @@ void CEndlessUsbToolDlg::GoToSelectStoragePage()
 	ChangePage(_T(ELEMENT_STORAGE_PAGE));
 }
 
-BOOL CEndlessUsbToolDlg::AddStorageEntryToSelect(CComPtr<IHTMLSelectElement> &selectElement, const ULONGLONG size, uint8_t extraData)
+BOOL CEndlessUsbToolDlg::AddStorageEntryToSelect(CComPtr<IHTMLSelectElement> &selectElement, const uint64_t size, uint8_t extraData)
 {
 	CStringA sizeText = SizeToHumanReadable(size, FALSE, use_fake_units);
 	CString value, text;

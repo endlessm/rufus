@@ -393,7 +393,7 @@ private:
     void SetJSONDownloadState(JSONDownloadState state);
 
 	void GoToSelectStoragePage();
-	BOOL AddStorageEntryToSelect(CComPtr<IHTMLSelectElement> &selectElement, uint64_t bytes, uint8_t extraData);
+	BOOL AddStorageEntryToSelect(CComPtr<IHTMLSelectElement> &selectElement, const uint64_t bytes, uint8_t extraData);
 
 	void ChangeDriveAutoRunAndMount(bool setEndlessValues);
 
