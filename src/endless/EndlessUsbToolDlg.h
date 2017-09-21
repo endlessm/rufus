@@ -322,6 +322,7 @@ private:
 	void ChangePage(PCTSTR newPage);
 
 	HRESULT UpdateSelectOptionText(CComPtr<IHTMLSelectElement> selectElement, const CString &text, LONG index);
+	HRESULT GetSelectedValue(IHTMLElement* pElement, CComBSTR &selectedValue);
 	HRESULT GetSelectedOptionElementText(CComPtr<IHTMLSelectElement>, CString &text);
     HRESULT GetSelectElement(PCTSTR selectId, CComPtr<IHTMLSelectElement> &selectElem);
     HRESULT ClearSelectElement(PCTSTR selectId);
@@ -381,7 +382,6 @@ private:
     static DWORD WINAPI CheckInternetConnectionThread(void* param);
 
     void GoToSelectFilePage(bool forwards);
-    void InitLogging();
     void EnableHibernate(bool enable = true);
     void CancelRunningOperation(bool userCancel = false);
     void StartCheckInternetConnectionThread();
@@ -393,7 +393,7 @@ private:
     void SetJSONDownloadState(JSONDownloadState state);
 
 	void GoToSelectStoragePage();
-	BOOL AddStorageEntryToSelect(CComPtr<IHTMLSelectElement> &selectElement, uint64_t bytes, uint8_t extraData);
+	BOOL AddStorageEntryToSelect(CComPtr<IHTMLSelectElement> &selectElement, const uint64_t bytes, uint8_t extraData);
 
 	void ChangeDriveAutoRunAndMount(bool setEndlessValues);
 

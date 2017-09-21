@@ -649,7 +649,8 @@ void CEndlessUsbToolDlg::OnDocumentComplete(LPDISPATCH pDisp, LPCTSTR szUrl)
 
 	if (m_spHtmlDoc3 == NULL) {
 		HRESULT hr = m_spHtmlDoc->QueryInterface(IID_IHTMLDocument3, (void**)&m_spHtmlDoc3);
-		IFFAILED_GOTOERROR(hr && m_spHtmlDoc3 != NULL, "Error when querying IID_IHTMLDocument3 interface.");
+		IFFAILED_GOTOERROR(hr, "Error when querying IID_IHTMLDocument3 interface.");
+		IFFALSE_GOTOERROR(m_spHtmlDoc3 != NULL, "NULL IID_IHTMLDocument3 interface.");
 	}
 
 	AddLanguagesToUI();
@@ -1089,7 +1090,8 @@ LRESULT CEndlessUsbToolDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lPara
             long value = (long)lParam;
 
             hr = selectElement->item(CComVariant(index), CComVariant(0), &pDispatch);
-            IFFAILED_GOTOERROR(hr && pDispatch != NULL, "Error when querying for element at requested index.");
+            IFFAILED_GOTOERROR(hr, "Error when querying for element at requested index.");
+            IFFALSE_GOTOERROR(pDispatch != NULL, "NULL element at requested index.");
 
             hr = pDispatch.QueryInterface<IHTMLOptionElement>(&optionElement);
             IFFAILED_GOTOERROR(hr, "Error when querying for IHTMLOptionElement interface");
@@ -1647,7 +1649,7 @@ void CEndlessUsbToolDlg::AddLanguagesToUI()
 	HRESULT hr;
 
 	hr = GetSelectElement(_T(ELEMENT_LANGUAGE_DUALBOOT), selectElementDualBoot);
-	IFFAILED_RETURN(hr && selectElementDualBoot != NULL, "Error returned from GetSelectElement.");
+	IFFAILED_RETURN(hr, "Error returned from GetSelectElement.");
 
 	hr = selectElementDualBoot->put_length(0);
 
@@ -1882,7 +1884,8 @@ HRESULT CEndlessUsbToolDlg::UpdateSelectOptionText(CComPtr<IHTMLSelectElement> s
 	CComBSTR valueBSTR;
 
 	HRESULT hr = selectElement->item(CComVariant(index), CComVariant(index), &pDispatch);
-	IFFAILED_GOTOERROR(hr && pDispatch != NULL, "Error when querying for element at requested index.");
+	IFFAILED_GOTOERROR(hr, "Error when querying for element at requested index.");
+	IFFALSE_RETURN_VALUE(pDispatch != NULL, "NULL element at requested index.", E_FAIL);
 
 	hr = pDispatch.QueryInterface<IHTMLOptionElement>(&pOption);
 	IFFAILED_GOTOERROR(hr, "Error when querying for IHTMLOptionElement interface");
@@ -1894,16 +1897,41 @@ error:
 	return hr;
 }
 
+// pElement: a <select> element
+// selectedValue: location to store selected value
+// Guaranteed to either return failure, or set selectedValue to non-NULL
+HRESULT CEndlessUsbToolDlg::GetSelectedValue(IHTMLElement * pElement, CComBSTR & selectedValue)
+{
+    FUNCTION_ENTER;
+
+    CComPtr<IHTMLSelectElement> selectElement;
+    HRESULT hr;
+
+    hr = pElement->QueryInterface(IID_IHTMLSelectElement, (void**)&selectElement);
+    IFFAILED_RETURN_RES(hr, "Error querying for IHTMLSelectElement interface");
+    IFFALSE_RETURN_VALUE(selectElement != NULL, "NULL IHTMLSelectElement interface", E_FAIL);
+
+    hr = selectElement->get_value(&selectedValue);
+    IFFAILED_RETURN_RES(hr, "Error getting selected value");
+    IFFALSE_RETURN_VALUE(selectedValue != NULL, "NULL selected value", E_FAIL);
+
+    return S_OK;
+}
+
+// Guaranteed to either return an error, or set selectElem to non-NULL
 HRESULT CEndlessUsbToolDlg::GetSelectElement(PCTSTR selectId, CComPtr<IHTMLSelectElement> &selectElem)
 {
     CComPtr<IHTMLElement> pElement;
     HRESULT hr;
 
     hr = m_spHtmlDoc3->getElementById(CComBSTR(selectId), &pElement);
-    IFFAILED_GOTOERROR(hr && pElement != NULL, "Error when querying for select element.");
+    IFFAILED_GOTOERROR(hr, "Error when querying for select element.");
+    IFFALSE_RETURN_VALUE(pElement != NULL, "Select element not found", E_FAIL);
 
     hr = pElement.QueryInterface<IHTMLSelectElement>(&selectElem);
     IFFAILED_GOTOERROR(hr, "Error querying for IHTMLSelectElement interface");
+    // In theory this is impossible, but: https://blogs.msdn.microsoft.com/oldnewthing/20040326-00/?p=40033
+    IFFALSE_RETURN_VALUE(selectElem != NULL, "QueryInterface returned NULL", E_FAIL);
 
 error:
     return hr;
@@ -1917,7 +1945,7 @@ HRESULT CEndlessUsbToolDlg::ClearSelectElement(PCTSTR selectId)
     HRESULT hr;
 
     hr = GetSelectElement(selectId, selectElement);
-    IFFAILED_GOTOERROR(hr && selectElement != NULL, "Error returned from GetSelectElement");
+    IFFAILED_GOTOERROR(hr, "Error returned from GetSelectElement");
 
     hr = selectElement->put_length(0);
     IFFAILED_GOTOERROR(hr, "Error removing all elements from HTML element");
@@ -1932,7 +1960,7 @@ HRESULT CEndlessUsbToolDlg::AddEntryToSelect(PCTSTR selectId, const CComBSTR &va
     HRESULT hr;
     
     hr = GetSelectElement(selectId, selectElement);
-    IFFAILED_GOTOERROR(hr && selectElement != NULL, "Error returned from GetSelectElement");
+    IFFAILED_GOTOERROR(hr, "Error returned from GetSelectElement");
 
     return AddEntryToSelect(selectElement, value, text, outIndex, selected);
 
@@ -2209,14 +2237,9 @@ HRESULT CEndlessUsbToolDlg::OnLanguageChanged(IHTMLElement* pElement)
 {
     FUNCTION_ENTER;
 
-	CComPtr<IHTMLSelectElement> selectElement;
 	CComBSTR selectedValue;
 
-	HRESULT hr = pElement->QueryInterface(IID_IHTMLSelectElement, (void**)&selectElement);
-	IFFAILED_GOTOERROR(hr && selectElement != NULL, "Error querying for IHTMLSelectElement interface");
-
-	hr = selectElement->get_value(&selectedValue);
-	IFFAILED_GOTOERROR(hr && selectElement != NULL, "Error getting selected language value");
+	IFFAILED_GOTOERROR(GetSelectedValue(pElement, selectedValue), "Error getting selected language value");
 
 	char* p = _com_util::ConvertBSTRToString(selectedValue);
 	Analytics::instance()->setLanguage(CString(p));
@@ -2450,7 +2473,8 @@ checkEntries:
 
     CComBSTR selectedValue;
     hr = selectElement->get_value(&selectedValue);
-    IFFAILED_RETURN(hr && selectedValue != NULL, "Error getting selected file value");
+    IFFAILED_RETURN(hr, "Error getting selected file value");
+    IFFALSE_RETURN(selectedValue != NULL, "NULL selected file value");
 
     if (m_useLocalFile) {
         m_localFile = selectedValue;
@@ -3053,14 +3077,9 @@ HRESULT CEndlessUsbToolDlg::OnSelectedImageFileChanged(IHTMLElement* pElement)
 {
     FUNCTION_ENTER;
 
-    CComPtr<IHTMLSelectElement> selectElement;
     CComBSTR selectedValue;
 
-    HRESULT hr = pElement->QueryInterface(IID_IHTMLSelectElement, (void**)&selectElement);
-    IFFAILED_RETURN_VALUE(hr && selectElement != NULL, "Error querying for IHTMLSelectElement interface", S_OK);
-
-    hr = selectElement->get_value(&selectedValue);
-    IFFAILED_RETURN_VALUE(hr && selectedValue != NULL, "Error getting selected file value", S_OK);
+    IFFAILED_RETURN_VALUE(GetSelectedValue(pElement, selectedValue), "Error getting selected file value", S_OK);
 
     m_localFile = selectedValue;
     uprintf("OnSelectedImageFileChanged to LOCAL [%ls]", m_localFile);
@@ -3078,7 +3097,8 @@ HRESULT CEndlessUsbToolDlg::OnSelectedRemoteFileChanged(IHTMLElement* pElement)
     long selectedIndex;
 
     HRESULT hr = pElement->QueryInterface(IID_IHTMLSelectElement, (void**)&selectElement);
-    IFFAILED_RETURN_VALUE(hr && selectElement != NULL, "Error querying for IHTMLSelectElement interface", S_OK);
+    IFFAILED_RETURN_VALUE(hr, "Error querying for IHTMLSelectElement interface", S_OK);
+    IFFALSE_RETURN_VALUE(selectElement != NULL, "NULL IHTMLSelectElement interface", S_OK);
 
     hr = selectElement->get_selectedIndex(&selectedIndex);
     IFFAILED_RETURN_VALUE(hr, "Error getting selected index value", S_OK);
@@ -3445,14 +3465,9 @@ HRESULT CEndlessUsbToolDlg::OnSelectedStorageSizeChanged(IHTMLElement* pElement)
 {
 	FUNCTION_ENTER;
 
-	CComPtr<IHTMLSelectElement> selectElement;
 	CComBSTR selectedValue;
 
-	HRESULT hr = pElement->QueryInterface(IID_IHTMLSelectElement, (void**)&selectElement);
-	IFFAILED_RETURN_VALUE(hr && selectElement != NULL, "Error querying for IHTMLSelectElement interface", S_OK);
-
-	hr = selectElement->get_value(&selectedValue);
-	IFFAILED_RETURN_VALUE(hr && selectElement != NULL, "Error getting selected file value", S_OK);
+	IFFAILED_RETURN_VALUE(GetSelectedValue(pElement, selectedValue), "Error getting selected file value", S_OK);
 
 	m_selectedInstallSizeBytes = _wtoll(selectedValue);
 	uprintf("Size selected for the Endless OS file: %I64d bytes", m_selectedInstallSizeBytes);
@@ -3561,7 +3576,7 @@ void CEndlessUsbToolDlg::GoToSelectStoragePage()
 
 	// Clear existing elements from the drop down
 	hr = GetSelectElement(_T(ELEMENT_STORAGE_SELECT), selectElement);
-	IFFAILED_RETURN(hr && selectElement != NULL, "Error returned from GetSelectElement.");
+	IFFAILED_RETURN(hr, "Error returned from GetSelectElement.");
 	hr = selectElement->put_length(0);
 
 	bool enoughBytesAvailable = totalSpaceNeeded < freeBytesAvailable.QuadPart;
@@ -3603,7 +3618,7 @@ void CEndlessUsbToolDlg::GoToSelectStoragePage()
 	ChangePage(_T(ELEMENT_STORAGE_PAGE));
 }
 
-BOOL CEndlessUsbToolDlg::AddStorageEntryToSelect(CComPtr<IHTMLSelectElement> &selectElement, const ULONGLONG size, uint8_t extraData)
+BOOL CEndlessUsbToolDlg::AddStorageEntryToSelect(CComPtr<IHTMLSelectElement> &selectElement, const uint64_t size, uint8_t extraData)
 {
 	CStringA sizeText = SizeToHumanReadable(size, FALSE, use_fake_units);
 	CString value, text;
@@ -3717,7 +3732,8 @@ HRESULT CEndlessUsbToolDlg::OnDeleteCheckboxChanged(IHTMLElement *pElement)
     VARIANT_BOOL checked = VARIANT_FALSE;
 
     HRESULT hr = pElement->QueryInterface(&checkboxElem);
-    IFFAILED_RETURN_VALUE(hr && checkboxElem != NULL, "Error querying for IHTMLOptionButtonElement.", S_OK);
+    IFFAILED_RETURN_VALUE(hr, "Error querying for IHTMLOptionButtonElement.", S_OK);
+    IFFALSE_RETURN_VALUE(checkboxElem != NULL, "NULL IHTMLOptionButtonElement.", S_OK);
 
     hr = checkboxElem->get_checked(&checked);
     IFFAILED_RETURN_VALUE(hr, "Error querying for IHTMLOptionButtonElement.", S_OK);
@@ -3774,19 +3790,23 @@ void CEndlessUsbToolDlg::OnClose()
 
 HRESULT CEndlessUsbToolDlg::CallJavascript(LPCTSTR method, CComVariant parameter1, CComVariant parameter2)
 {
+    //FUNCTION_ENTER_FMT("%ls", method);
     HRESULT hr;
-    //uprintf("CallJavascript called with method %ls", method);
+
     if (m_spWindowElem == NULL) {
         hr = m_spHtmlDoc->get_parentWindow(&m_spWindowElem);
-        IFFAILED_RETURN_VALUE(hr && m_spWindowElem != NULL, "Error querying for parent window.", E_FAIL);
+        IFFAILED_RETURN_RES(hr, "Error querying for parent window.");
+        IFFALSE_RETURN_VALUE(m_spWindowElem != NULL, "NULL parent window.", E_FAIL);
     }
     if (m_dispWindow == NULL) {
         hr = m_spWindowElem->QueryInterface(&m_dispWindow);
-        IFFAILED_RETURN_VALUE(hr && m_dispWindow != NULL, "Error querying for CComDispatchDriver.", E_FAIL);
+        IFFAILED_RETURN_RES(hr, "Error querying for CComDispatchDriver.");
+        IFFALSE_RETURN_VALUE(m_dispWindow != NULL, "NULL CComDispatchDriver.", E_FAIL);
     }
     if (m_dispexWindow == NULL) {
         hr = m_spWindowElem->QueryInterface(&m_dispexWindow);
-        IFFAILED_RETURN_VALUE(hr && m_dispexWindow != NULL, "Error querying for IDispatchEx.", E_FAIL);
+        IFFAILED_RETURN_RES(hr, "Error querying for IDispatchEx.");
+        IFFALSE_RETURN_VALUE(m_dispexWindow != NULL, "NULL IDispatchEx.", E_FAIL);
     }
 
     DISPID dispidMethod = -1;
