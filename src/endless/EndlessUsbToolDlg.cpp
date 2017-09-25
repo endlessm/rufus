@@ -4993,27 +4993,14 @@ bool CEndlessUsbToolDlg::CopyFilesToESP(const CString &fromFolder, const CString
 	FUNCTION_ENTER;
 
 	CString espFolder = driveLetter + EFI_BOOT_SUBDIRECTORY;
-	SHFILEOPSTRUCT fileOperation;
-	wchar_t fromPath[MAX_PATH + 1], toPath[MAX_PATH + 1];
+	CString fromPath;
 	bool retResult = false;
 
 	int createDirResult = SHCreateDirectoryExW(NULL, espFolder, NULL);
 	IFFALSE_GOTOERROR(createDirResult == ERROR_SUCCESS || createDirResult == ERROR_FILE_EXISTS, "Error creating EFI directory in ESP partition.");
 
-	memset(fromPath, 0, sizeof(fromPath));
-	wsprintf(fromPath, L"%ls%ls\\%ls", fromFolder, EFI_BOOT_SUBDIRECTORY, ALL_FILES);
-	memset(toPath, 0, sizeof(fromPath));
-	wsprintf(toPath, L"%ls", espFolder);
-
-	fileOperation.fFlags = FOF_SILENT | FOF_NOCONFIRMATION | FOF_NOERRORUI | FOF_NOCONFIRMMKDIR;
-	fileOperation.pFrom = fromPath;
-	fileOperation.pTo = toPath;
-	fileOperation.hwnd = NULL;
-	fileOperation.wFunc = FO_COPY;
-
-	int result = SHFileOperation(&fileOperation);
-
-	retResult = result == ERROR_SUCCESS;
+	fromPath.Format(L"%ls%ls\\%ls", fromFolder, EFI_BOOT_SUBDIRECTORY, ALL_FILES);
+	retResult = CopyMultipleItems(fromPath, espFolder);
 
 error:
 	return retResult;
@@ -5101,12 +5088,10 @@ error:
 
 bool CEndlessUsbToolDlg::CopyMultipleItems(const CString &from, const CString &to)
 {
-	FUNCTION_ENTER;
+	FUNCTION_ENTER_FMT("%ls -> %ls", from, to);
 
 	SHFILEOPSTRUCT fileOperation;
 	wchar_t fromPath[MAX_PATH + 1], toPath[MAX_PATH + 1];
-
-	uprintf("Copying '%ls' to '%ls'", from, to);
 
 	memset(fromPath, 0, sizeof(fromPath));
 	wsprintf(fromPath, L"%ls", from);
@@ -5120,6 +5105,7 @@ bool CEndlessUsbToolDlg::CopyMultipleItems(const CString &from, const CString &t
 	fileOperation.wFunc = FO_COPY;
 
 	int result = SHFileOperation(&fileOperation);
+	uprintf("result: %d", result);
 
 	return result == 0;
 }
