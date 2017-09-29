@@ -359,8 +359,8 @@ select:disabled {
     font-size: 22px;
     font-family: LatoBold;
     color: #000000;
-    width: 70%;
-	margin: 0 15%;
+    width: 100%;
+	margin: 0;
 	padding-top: 20px;
 	text-align: center;
 }
