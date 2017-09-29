@@ -573,15 +573,15 @@ select:disabled {
 #SelectFilePage .Fieldset .FieldsetDescription {
 	margin-top: 19px;
 	font-size: 13px;
-	max-width: 225px;
+	max-width: 240px;
 	height: 145px;
+	text-align: inherit;
 }
 
 /* Selects the .Fieldset adjacent to the first .Fieldset in the page, which is
  * to say the right column.
  */
 #SelectFilePage .Fieldset:first-child  + .Fieldset .FieldsetDescription {
-	max-width: 240px;
 	/*  145   description height (above)
 	 * - 33   select { height }
 	 * - 10   select { margin-top }
