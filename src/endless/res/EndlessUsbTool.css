@@ -466,7 +466,8 @@ select:disabled {
     padding-top: 20px;
 }
 
-#AdvancedInstallLink {
+#AdvancedInstallLink,
+#CompareOptionsLink {
     font-size: 13px;
 }
 
@@ -571,6 +572,7 @@ select:disabled {
 #SelectFilePage .Fieldset .FieldsetSubtitle {
 	margin-top: 9px;
 	font-family: LatoMedium;
+	font-size: 16px;
 }
 
 #SelectFilePage .Fieldset .FieldsetDescription {
