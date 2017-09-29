@@ -593,11 +593,12 @@ select:disabled {
 #SelectFilePage .Fieldset select {
 	margin-top: 10px;
 	margin-bottom: 5px;
+	width: 191px;
 }
 
-#SelectFilePage .Fieldset select,
 #SelectFilePage .Fieldset .Button {
-	width: 191px;
+	/* 2px narrower than <select> because it has a 1px border each side */
+	width: 189px;
 }
 
 #NoInternetConnection {
