@@ -86,8 +86,9 @@ msgctxt "LightDownloadDescription"
 msgid "Includes basic features of Endless OS and the option to download more apps and content later. This version is best for computers with reliable internet access."
 msgstr ""
 
+#. This means "Download [the] Basic [edition of Endless OS]". Use the same translation as for the "BASIC" string.
 msgctxt "DownloadLightButton"
-msgid "Download EOS Basic"
+msgid "Download Basic"
 msgstr ""
 
 msgctxt "FullVersionText"
@@ -98,8 +99,9 @@ msgctxt "FullDownloadDescription"
 msgid "Includes full Endless OS, preloaded with more than 100 apps and content. This version is ideal for computers without reliable internet access. Choose language for content and apps:"
 msgstr ""
 
+#. This means "Download [the] Full [edition of Endless OS]". Use the same translation as for the "FULL" string.
 msgctxt "DownloadFullButton"
-msgid "Download EOS Full"
+msgid "Download Full"
 msgstr ""
 
 msgctxt "SelectUSBPreviousButton"
