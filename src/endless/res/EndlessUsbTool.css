@@ -470,9 +470,12 @@ select:disabled {
     font-size: 13px;
 }
 
+#AdvancedPage .PageContent .Button {
+    width: 260px;
+}
+
 #CombinedUsbButtonC {
     margin: 5px auto;
-    width: 200px;
 }
 
 /* Select file Page */
