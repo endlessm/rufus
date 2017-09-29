@@ -394,7 +394,7 @@ select:disabled {
 /* Advanced page */
 
 #AdvancedPage .ContentContainer {
-	width: 600px;
+	width: 670px;
 	border: 0;
 }
 
@@ -409,7 +409,7 @@ select:disabled {
 
 .ContentPanel {
 	float: left;
-	width: 45%;
+	width: 320px;
     margin-top: 30px;
     padding-bottom: 25px;
 }
@@ -487,7 +487,7 @@ select:disabled {
 }
 
 #SelectFilePage #SelectFileLocalNotPresent {
-	width: 662px;
+	width: 670px;
 }
 
 #SelectFilePage #SelectFileLocalPresent,
