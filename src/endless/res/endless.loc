@@ -291,6 +291,9 @@ t MSG_335 "The selected version of Endless OS requires %s of free disk space, bu
 t MSG_374 "The selected version of Endless Code requires %s of free disk space, but only %s is available. Please free up some space on drive %s to continue."
 t MSG_336 "Delete the invalid file (%s)."
 
+# Placeholders are:
+# 1. Basic/English/Spanish/..., as translated elsewhere
+# 2. an amount of space, such as "32 GB"
 t MSG_337 "For Endless OS %s, we recommend selecting at least %s of storage space."
 t MSG_346 "For Endless Code %s, we recommend selecting at least %s of storage space."
 t MSG_338 "%s (Minimum)"

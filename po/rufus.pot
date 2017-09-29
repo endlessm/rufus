@@ -515,6 +515,9 @@ msgctxt "MSG_336"
 msgid "Delete the invalid file (%s)."
 msgstr ""
 
+#. Placeholders are:
+#. 1. Basic/English/Spanish/..., as translated elsewhere
+#. 2. an amount of space, such as "32 GB"
 #, c-format
 msgctxt "MSG_337"
 msgid "For Endless OS %s, we recommend selecting at least %s of storage space."
