@@ -417,6 +417,7 @@ static LPCTSTR ErrorCauseToStr(ErrorCause_t errorCause)
         TOSTR(ErrorCauseSuspended);
         TOSTR(ErrorCauseInstallEosldrFailed);
         TOSTR(ErrorCauseUninstallEosldrFailed);
+        TOSTR(ErrorCauseCantUnpackBootZip);
         default: return _T("Error Cause Unknown");
     }
 }
@@ -4675,14 +4676,18 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	BYTE geometry[256] = { 0 }, layout[4096] = { 0 };
 	CREATE_DISK createDiskData;
 	CString driveLetter;
-	CString bootFilesPathGz = dlg->m_bootArchive;
 	CString bootFilesPath = CEndlessUsbToolApp::TempFilePath(CString(BOOT_COMPONENTS_FOLDER)) + L"\\";
 	CString usbFilesPath;
 	PDISK_GEOMETRY_EX DiskGeometry = (PDISK_GEOMETRY_EX)(void*)geometry;
 
 	UpdateProgress(OP_NEW_LIVE_CREATION, 0);
+
 	// Unpack boot components
-	IFFALSE_GOTOERROR(UnpackBootComponents(bootFilesPathGz, bootFilesPath), "Error unpacking boot components.");
+	if (!UnpackBootComponents(dlg->m_bootArchive, bootFilesPath)) {
+		PRINT_ERROR_MSG("Error unpacking boot components.");
+		dlg->m_lastErrorCause = ErrorCauseCantUnpackBootZip;
+		goto error;
+	}
 
 	UpdateProgress(OP_NEW_LIVE_CREATION, USB_PROGRESS_UNPACK_BOOT_ZIP);
 	CHECK_IF_CANCELLED;
@@ -5194,7 +5199,11 @@ DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 	const CString systemDriveLetter = GetSystemDrive();
 
 	// Unpack boot components
-	IFFALSE_GOTOERROR(UnpackBootComponents(dlg->m_bootArchive, bootFilesPath), "Error unpacking boot components.");
+	if (!UnpackBootComponents(dlg->m_bootArchive, bootFilesPath)) {
+		PRINT_ERROR_MSG("Error unpacking boot components.");
+		errorCause = ErrorCauseCantUnpackBootZip;
+		goto error;
+	}
 
 	UpdateProgress(OP_SETUP_DUALBOOT, DB_PROGRESS_UNPACK_BOOT_ZIP);
 	CHECK_IF_CANCELLED;

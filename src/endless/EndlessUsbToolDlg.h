@@ -61,6 +61,7 @@ typedef enum ErrorCause {
     ErrorCauseSuspended,
     ErrorCauseInstallEosldrFailed,
     ErrorCauseUninstallEosldrFailed,
+    ErrorCauseCantUnpackBootZip,
 } ErrorCause_t;
 
 typedef struct RemoteImageEntry {
