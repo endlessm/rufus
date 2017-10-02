@@ -2335,7 +2335,7 @@ void CEndlessUsbToolDlg::UpdateFileEntries(bool shouldInit)
         // The real filename on disk
         const CString currentFile = findFileData.cFileName;
         // If running from a live USB, the image file is named endless.img or endless.squash,
-        // trueName is the filename it *should* have had (eos-...base.img, for example).
+        // trueName is the filename it *should* have had (eos-...base.img or eos-...base.squash, for example).
         CString trueName = currentFile;
         if ((
                 currentFile == ENDLESS_IMG_FILE_NAME ||
@@ -3945,16 +3945,7 @@ bool CEndlessUsbToolDlg::FileHashingCallback(__int64 currentSize, __int64 totalS
         uprintf("FileHashingCallback: Cancel requested.");
         return false;
     }
-    
-    // When verifying a SquashFS image, we actually decompress on the fly and
-    // verify the uncompressed image within. In this case, currentSize and
-    // totalSize are measured in *uncompressed* bytes. We allocate proportions
-    // of the progress bar based on the compressed size of the files, and
-    // assume that the proportion of decompressed bytes processed increases at
-    // approximately the same rate as the proportion of compressed bytes.
-    // (In the common case, the two files to be verified are a tiny boot.zip
-    // bundle and an enormous OS image, so the files will get none and all of
-    // the progress bar, respectively!)
+
     float current = ctx->currentScale * currentSize / totalSize;
     UpdateProgress(OP_VERIFYING_SIGNATURE, 100 * (ctx->previousFiles + current));
 
@@ -3985,17 +3976,10 @@ DWORD WINAPI CEndlessUsbToolDlg::FileVerificationThread(void* param)
         const CString &filePath = p.filePath;
         const CString &sigPath = p.sigPath;
         uprintf("Verifying %ls against %ls", filePath, sigPath);
-        bool v;
 
         ctx.currentScale = (float) p.fileSize / totalSize;
 
-        switch (GetCompressionType(filePath)) {
-        case CompressionTypeSquash:
-            v = dlg->m_iso.VerifySquashFS(filePath, sigPath, FileHashingCallback, &ctx);
-            break;
-        default:
-            v = VerifyFile(filePath, sigPath, FileHashingCallback, &ctx);
-        }
+        bool v = VerifyFile(filePath, sigPath, FileHashingCallback, &ctx);
 
         if (!v) {
             uprintf("Verification failed for %ls against %ls", filePath, sigPath);

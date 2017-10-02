@@ -12,7 +12,6 @@ public:
     void Uninit();
 
     ULONGLONG GetExtractedSize(const CString &image, const BOOL isInstallerImage);
-    bool VerifySquashFS(const CString &image, const CString &signatureFilename, HashingCallback_t hashingCallback = NULL, LPVOID hashingContext = NULL);
     bool UnpackSquashFS(const CString &image, const CString &destination, UnpackProgressCallback callback, HANDLE cancelEvent);
 
 private:
