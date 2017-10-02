@@ -2267,6 +2267,29 @@ error:
 	return S_OK;
 }
 
+static bool ReadLiveFile(const CString &imageName, const CString &liveFilePath, CString &trueName)
+{
+    FUNCTION_ENTER_FMT("Found %ls; checking %ls to find image name", imageName, liveFilePath);
+
+    bool ret = false;
+    FILE *liveFile = NULL;
+    char originalFileName[MAX_PATH];
+    memset(originalFileName, 0, MAX_PATH);
+    errno_t result = _wfopen_s(&liveFile, liveFilePath, L"r");
+    if (result == 0) {
+        fread(originalFileName, 1, MAX_PATH - 1, liveFile);
+        if (feof(liveFile)) {
+            trueName = UTF8ToCString(originalFileName);
+            trueName.TrimRight();
+            uprintf("image name is %ls", trueName);
+            ret = true;
+        }
+        fclose(liveFile);
+    }
+
+    return true;
+}
+
 void CEndlessUsbToolDlg::UpdateFileEntries(bool shouldInit)
 {
     FUNCTION_ENTER;
@@ -2311,34 +2334,16 @@ void CEndlessUsbToolDlg::UpdateFileEntries(bool shouldInit)
         if ((findFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0) continue;
         // The real filename on disk
         const CString currentFile = findFileData.cFileName;
-        // If running from a live USB, the image file is named endless.img;
-        // trueName is the filename it *should* have had (eos-...base.img, for example)
+        // If running from a live USB, the image file is named endless.img or endless.squash,
+        // trueName is the filename it *should* have had (eos-...base.img, for example).
         CString trueName = currentFile;
         if ((
                 currentFile == ENDLESS_IMG_FILE_NAME ||
                 currentFile == ENDLESS_SQUASH_FILE_NAME
             ) && PathFileExists(liveFilePath)) {
-			uprintf("Found %ls; checking %ls to find image name", currentFile, liveFilePath);
-			bool foundTrueName = false;
-			FILE *liveFile = NULL;
-			char originalFileName[MAX_PATH];
-			memset(originalFileName, 0, MAX_PATH);
-			errno_t result = _wfopen_s(&liveFile, liveFilePath, L"r");
-			if (result == 0) {
-				fread(originalFileName, 1, MAX_PATH - 1, liveFile);
-				if (feof(liveFile)) {
-					trueName = UTF8ToCString(originalFileName);
-					trueName.TrimRight();
-					uprintf("image name is %ls", trueName);
-					foundTrueName = true;
-				}
-				fclose(liveFile);
-			}
-
-			if (!foundTrueName) {
-				uprintf("couldn't determine the unpacked image's true name");
-			}
-		}
+            IFFALSE_PRINTERROR(ReadLiveFile(currentFile, liveFilePath, trueName),
+                "couldn't determine the unpacked image's true name");
+        }
 
         const CString currentFilePath =  GET_IMAGE_PATH(currentFile);
         const CString trueNamePath = GET_IMAGE_PATH(trueName);
