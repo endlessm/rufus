@@ -2588,10 +2588,10 @@ void CEndlessUsbToolDlg::StartJSONDownload()
 #define JSON_IMG_UNPACKED_URL_SIG   "extracted_signature"
 
 #define CHECK_ENTRY(parentValue, tag) \
-do { \
-    IFFALSE_CONTINUE(!parentValue[tag].isNull(), CString("\t\t Elem is NULL - ") + tag); \
-    uprintf("\t\t %s=%s", tag, parentValue[tag].toStyledString().c_str()); \
-} while(false);
+    if (parentValue[tag].isNull()) { \
+        uprintf("\t\t Elem is NULL - %s", tag); \
+        continue; \
+    }
 
 bool CEndlessUsbToolDlg::UnpackFile(const CString &archive, const CString &destination, int compressionType, void* progress_function, unsigned long* cancel_request)
 {
