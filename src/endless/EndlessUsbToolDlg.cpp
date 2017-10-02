@@ -2280,7 +2280,7 @@ void CEndlessUsbToolDlg::UpdateFileEntries(bool shouldInit)
     CString currentPath;
     BOOL fileAccessException = false;
     CString currentInstallerVersion;
-	CString searchPath = GET_IMAGE_PATH(ALL_FILES);
+    CString searchPath = GET_IMAGE_PATH(ALL_FILES);
     const CString liveFilePath = GET_IMAGE_PATH(EXFAT_ENDLESS_LIVE_FILE_NAME);
     HANDLE findFilesHandle = FindFirstFile(searchPath, &findFileData);
 
@@ -2416,7 +2416,7 @@ void CEndlessUsbToolDlg::UpdateFileEntries(bool shouldInit)
                 currentEntry->hasUnpackedImgSig = PathFileExists(currentEntry->unpackedImgSigPath);
             }
 
-			uprintf("Found local image '%ls'", file.GetFilePath());
+            uprintf("Found local image '%ls'", file.GetFilePath());
         } catch (CFileException *ex) {
             uprintf("CFileException on file [%ls] with cause [%d] and OS error [%d]", findFileData.cFileName, ex->m_cause, ex->m_lOsError);
             ex->Delete();
