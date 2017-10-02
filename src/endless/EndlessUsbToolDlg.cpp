@@ -2360,7 +2360,7 @@ void CEndlessUsbToolDlg::UpdateFileEntries(bool shouldInit)
             GetImgDisplayName(displayName, version, personality, file.GetLength());
 
             if (isInstallerImage) {
-                // TODO: version comparison again!
+                // TODO: version comparison again. NB version may be "master" so naive application of ParseVersionString will not work.
                 if (version > currentInstallerVersion) {
                     currentInstallerVersion = version;
                     m_localInstallerImage.stillPresent = TRUE;
