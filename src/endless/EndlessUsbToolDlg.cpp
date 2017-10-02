@@ -5379,19 +5379,19 @@ error:
 	return retResult;
 }
 
-bool CEndlessUsbToolDlg::UnpackBootComponents(const CString &bootFilesPathGz, const CString &bootFilesPath)
+bool CEndlessUsbToolDlg::UnpackBootComponents(const CString &bootFilesZipPath, const CString &bootFilesPath)
 {
-	FUNCTION_ENTER;
-	bool retResult = false;
+    FUNCTION_ENTER;
 
-	RemoveNonEmptyDirectory(bootFilesPath);
-	int createDirResult = SHCreateDirectoryExW(NULL, bootFilesPath, NULL);
-	IFFALSE_GOTOERROR(createDirResult == ERROR_SUCCESS || createDirResult == ERROR_ALREADY_EXISTS, "Error creating local directory to unpack boot components.");
-	IFFALSE_GOTOERROR(UnpackZip(CComBSTR(bootFilesPathGz), CComBSTR(bootFilesPath)), "Error unpacking archive to local folder.");
+    RemoveNonEmptyDirectory(bootFilesPath);
+    int createDirResult = SHCreateDirectoryExW(NULL, bootFilesPath, NULL);
+    if (createDirResult != ERROR_SUCCESS && createDirResult != ERROR_ALREADY_EXISTS) {
+        uprintf("Error creating local directory to unpack boot components: %d", createDirResult);
+        return false;
+    }
 
-	retResult = true;
-error:
-	return retResult;
+    IFFALSE_RETURN_VALUE(UnpackZip(CComBSTR(bootFilesZipPath), CComBSTR(bootFilesPath)), "Error unpacking archive to local folder.", false);
+    return true;
 }
 
 bool CEndlessUsbToolDlg::IsLegacyBIOSBoot()

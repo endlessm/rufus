@@ -416,7 +416,7 @@ private:
 
 	static bool EnsureUncompressed(const CString &filePath);
 	static bool ExtendImageFile(const CString &endlessImgPath, uint64_t bytes);
-	static bool UnpackBootComponents(const CString &bootFilesPathGz, const CString &bootFilesPath);
+	static bool UnpackBootComponents(const CString &bootFilesZipPath, const CString &bootFilesPath);
 	static bool CopyMultipleItems(const CString &fromPath, const CString &toPath);
 	static bool IsLegacyBIOSBoot();
 	static bool IsWindowsMBR(FILE* fpDrive, const CString &TargetName);
