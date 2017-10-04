@@ -42,10 +42,6 @@ msgctxt "ReformatterUsbText"
 msgid "Reformat any computer with Endless OS using a USB stick."
 msgstr ""
 
-msgctxt "CompareOptionsLink"
-msgid "Compare the two options"
-msgstr ""
-
 msgctxt "SelectFilePreviousButton"
 msgid "Previous"
 msgstr ""

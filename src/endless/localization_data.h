@@ -38,7 +38,6 @@ const loc_control_id control_id[] = {
 	LOC_CTRL_HTML(ReformatterUsbButton),
 	LOC_CTRL_HTML(ReformatterUsbText),
 	LOC_CTRL_HTML(ReformatterUsbTextCoding),
-	LOC_CTRL_HTML(CompareOptionsLink),
 	LOC_CTRL_HTML(SelectFilePreviousButton),
 	LOC_CTRL_HTML(SelectFileNextButton),
 	LOC_CTRL_HTML(SelectFilePageTitle),
