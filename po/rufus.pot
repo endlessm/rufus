@@ -375,9 +375,11 @@ msgctxt "MSG_311"
 msgid "Writing"
 msgstr ""
 
+#. If this FAQ is translated into your language, replace "en-us" with the right language code.
+#. Otherwise, use exactly the same URL.
 #, c-format
 msgctxt "MSG_312"
-msgid "https://support.endlessm.com/hc/en-us/articles/208895726"
+msgid "https://support.endlessm.com/hc/en-us/articles/115003662326"
 msgstr ""
 
 #, c-format

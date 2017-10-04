@@ -2224,7 +2224,9 @@ HRESULT CEndlessUsbToolDlg::OnLinkClicked(IHTMLElement* pElement)
     hr = pElement->get_id(&id);
     IFFAILED_RETURN_VALUE(hr, "OnLinkClicked: Error getting element id", S_OK);
 
-    if (id == _T(ELEMENT_ENDLESS_SUPPORT) || id == _T(ELEMENT_CONNECTED_SUPPORT_LINK) || id == _T(ELEMENT_STORAGE_SUPPORT_LINK)) {
+    if (id == _T(ELEMENT_CONNECTED_SUPPORT_LINK)) {
+        msg_id = MSG_312;
+    } else if (id == _T(ELEMENT_ENDLESS_SUPPORT) || id == _T(ELEMENT_STORAGE_SUPPORT_LINK)) {
         msg_id = MSG_314;
     } else if (id == _T(ELEMENT_CONNECTED_LINK)) {
         WinExec("c:\\windows\\system32\\control.exe ncpa.cpl", SW_NORMAL);
