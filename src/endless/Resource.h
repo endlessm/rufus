@@ -45,7 +45,6 @@
 #define HTML_ELEM_LiveUsbText           2002
 #define HTML_ELEM_ReformatterUsbButton  2003
 #define HTML_ELEM_ReformatterUsbText    2004
-#define HTML_ELEM_CompareOptionsLink    2005
 #define HTML_ELEM_SelectFilePreviousButton 2006
 #define HTML_ELEM_SelectFileNextButton  2007
 #define HTML_ELEM_SelectFilePageTitle   2008

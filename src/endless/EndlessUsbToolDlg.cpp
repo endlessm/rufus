@@ -129,7 +129,6 @@ DWORD usbDevicesCount;
 //Advanced page elements
 #define ELEMENT_LIVE_USB_BUTTON         "LiveUsbButton"
 #define ELEMENT_REFORMATTER_USB_BUTTON  "ReformatterUsbButton"
-#define ELEMENT_COMPARE_OPTIONS         "CompareOptionsLink"
 #define ELEMENT_ADVANCED_CLOSE_BUTTON   "AdvancedPageCloseButton"
 #define ELEMENT_ADVANCED_PREV_BUTTON    "AdvancedPagePreviousButton"
 
@@ -471,7 +470,6 @@ BEGIN_DHTML_EVENT_MAP(CEndlessUsbToolDlg)
 	// Advanced Page Handlers
     DHTML_EVENT_ONCLICK(_T(ELEMENT_LIVE_USB_BUTTON), OnLiveUsbClicked)
     DHTML_EVENT_ONCLICK(_T(ELEMENT_REFORMATTER_USB_BUTTON), OnReformatterUsbClicked)
-	DHTML_EVENT_ONCLICK(_T(ELEMENT_COMPARE_OPTIONS), OnLinkClicked)
     DHTML_EVENT_ONCLICK(_T(ELEMENT_ADVANCED_CLOSE_BUTTON), OnCloseAppClicked)
 	DHTML_EVENT_ONCLICK(_T(ELEMENT_ADVANCED_PREV_BUTTON), OnAdvancedPagePreviousClicked)
 	DHTML_EVENT_ONCLICK(_T(ELEMENT_COMBINED_USB_BUTTON), OnCombinedUsbButtonClicked)
@@ -2081,7 +2079,6 @@ HRESULT CEndlessUsbToolDlg::OnAdvancedOptionsClicked(IHTMLElement* pElement)
 
 	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(HTML_BUTTON_ID(ELEMENT_REFORMATTER_USB_BUTTON)), CComVariant(oldStyleUSB));
 	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(HTML_BUTTON_ID(ELEMENT_LIVE_USB_BUTTON)), CComVariant(oldStyleUSB));
-	CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(ELEMENT_COMPARE_OPTIONS), CComVariant(oldStyleUSB));
 
 	ChangePage(_T(ELEMENT_ADVANCED_PAGE));
 
@@ -2227,9 +2224,9 @@ HRESULT CEndlessUsbToolDlg::OnLinkClicked(IHTMLElement* pElement)
     hr = pElement->get_id(&id);
     IFFAILED_RETURN_VALUE(hr, "OnLinkClicked: Error getting element id", S_OK);
 
-    if (id == _T(ELEMENT_COMPARE_OPTIONS)) {
+    if (id == _T(ELEMENT_CONNECTED_SUPPORT_LINK)) {
         msg_id = MSG_312;
-    } else if (id == _T(ELEMENT_ENDLESS_SUPPORT) || id == _T(ELEMENT_CONNECTED_SUPPORT_LINK) || id == _T(ELEMENT_STORAGE_SUPPORT_LINK)) {
+    } else if (id == _T(ELEMENT_ENDLESS_SUPPORT) || id == _T(ELEMENT_STORAGE_SUPPORT_LINK)) {
         msg_id = MSG_314;
     } else if (id == _T(ELEMENT_CONNECTED_LINK)) {
         WinExec("c:\\windows\\system32\\control.exe ncpa.cpl", SW_NORMAL);
