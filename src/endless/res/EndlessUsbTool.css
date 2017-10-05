@@ -359,8 +359,8 @@ select:disabled {
     font-size: 22px;
     font-family: LatoBold;
     color: #000000;
-    width: 70%;
-	margin: 0 15%;
+    width: 100%;
+	margin: 0;
 	padding-top: 20px;
 	text-align: center;
 }
@@ -394,7 +394,7 @@ select:disabled {
 /* Advanced page */
 
 #AdvancedPage .ContentContainer {
-	width: 600px;
+	width: 670px;
 	border: 0;
 }
 
@@ -409,7 +409,7 @@ select:disabled {
 
 .ContentPanel {
 	float: left;
-	width: 45%;
+	width: 320px;
     margin-top: 30px;
     padding-bottom: 25px;
 }
@@ -466,13 +466,17 @@ select:disabled {
     padding-top: 20px;
 }
 
-#AdvancedInstallLink {
+#AdvancedInstallLink,
+#CompareOptionsLink {
     font-size: 13px;
+}
+
+#AdvancedPage .PageContent .Button {
+    width: 260px;
 }
 
 #CombinedUsbButtonC {
     margin: 5px auto;
-    width: 200px;
 }
 
 /* Select file Page */
@@ -487,7 +491,7 @@ select:disabled {
 }
 
 #SelectFilePage #SelectFileLocalNotPresent {
-	width: 662px;
+	width: 670px;
 }
 
 #SelectFilePage #SelectFileLocalPresent,
@@ -568,28 +572,38 @@ select:disabled {
 #SelectFilePage .Fieldset .FieldsetSubtitle {
 	margin-top: 9px;
 	font-family: LatoMedium;
+	font-size: 16px;
 }
 
 #SelectFilePage .Fieldset .FieldsetDescription {
 	margin-top: 19px;
 	font-size: 13px;
-	max-width: 225px;
-	height: 123px;
+	max-width: 240px;
+	height: 145px;
+	text-align: inherit;
 }
 
-#SelectFilePage .Fieldset:first-child  + .Fieldset .FieldsetDescription{
-	max-width: 240px;
-	height: 65px;
+/* Selects the .Fieldset adjacent to the first .Fieldset in the page, which is
+ * to say the right column.
+ */
+#SelectFilePage .Fieldset:first-child  + .Fieldset .FieldsetDescription {
+	/*  145   description height (above)
+	 * - 33   select { height }
+	 * - 10   select { margin-top }
+	 * -  5   select { margin-bottom }
+	 */
+	height: 97px;
 }
 
 #SelectFilePage .Fieldset select {
-	margin-top: 20px;
+	margin-top: 10px;
 	margin-bottom: 5px;
+	width: 191px;
 }
 
-#SelectFilePage .Fieldset select,
 #SelectFilePage .Fieldset .Button {
-	width: 191px;
+	/* 2px narrower than <select> because it has a 1px border each side */
+	width: 189px;
 }
 
 #NoInternetConnection {

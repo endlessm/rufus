@@ -1656,9 +1656,29 @@ void CEndlessUsbToolDlg::AddLanguagesToUI()
 	int index = 0;
 	// Add languages to dropdown and apply localization
 	list_for_each_entry(lcmd, &locale_list, loc_cmd, list) {
-		luprintf("Language available : %s", lcmd->txt[1]);
+		luprintf("Language available : %s", lcmd->txt[0]);
 
-		hr = AddEntryToSelect(selectElementDualBoot, UTF8ToBSTR(lcmd->txt[0]), UTF8ToBSTR(lcmd->txt[1]), NULL, m_selectedLocale == lcmd ? TRUE : FALSE);
+		CComBSTR value = UTF8ToBSTR(lcmd->txt[0]);
+		CString name = UTF8ToCString(lcmd->txt[1]);
+		CString englishName;
+		int i = name.FindOneOf(L"(");
+		if (i > 2) {
+			// Use the endonym (eg Deutsch) as the text in the list,
+			// and the English name (eg German) as the title (ie tooltip)
+			// German (Deutsch)
+			//        i        n
+			int n = name.GetLength();
+			englishName = name.Left(i - 1);
+			name = name.Mid(i + 1, n - i - 2);
+			if (name == englishName) {
+				englishName = L"";
+			}
+		}
+		CComBSTR bstrText = name;
+		CComBSTR bstrTitle = englishName;
+		BOOL selected = m_selectedLocale == lcmd ? TRUE : FALSE;
+
+		hr = AddEntryToSelect(selectElementDualBoot, value, bstrText, NULL, selected, bstrTitle);
 		IFFAILED_RETURN(hr, "Error adding the new option element to the select element on the dual boot page");
 	}
 }
@@ -1969,7 +1989,7 @@ error:
     return hr;
 }
 
-HRESULT CEndlessUsbToolDlg::AddEntryToSelect(CComPtr<IHTMLSelectElement> &selectElem, const CComBSTR &value, const CComBSTR &text, long *outIndex, BOOL selected)
+HRESULT CEndlessUsbToolDlg::AddEntryToSelect(CComPtr<IHTMLSelectElement> &selectElem, const CComBSTR &value, const CComBSTR &text, long *outIndex, BOOL selected, const CComBSTR &title)
 {
     CComPtr<IHTMLElement> pElement;
     CComPtr<IHTMLOptionElement> optionElement;
@@ -1981,9 +2001,10 @@ HRESULT CEndlessUsbToolDlg::AddEntryToSelect(CComPtr<IHTMLSelectElement> &select
     hr = pElement.QueryInterface<IHTMLOptionElement>(&optionElement);
     IFFAILED_GOTOERROR(hr, "Error when querying for IHTMLOptionElement interface");
 
-    optionElement->put_selected(selected);
-    optionElement->put_value(value);
-    optionElement->put_text(text);
+    IFFAILED_PRINTERROR(optionElement->put_selected(selected), "couldn't set selected attribute");
+    IFFAILED_PRINTERROR(optionElement->put_value(value), "couldn't set value attribute");
+    IFFAILED_PRINTERROR(optionElement->put_text(text), "couldn't set text attribute");
+    IFFAILED_PRINTERROR(pElement->put_title(title), "couldn't set title attribute");
 
     long length;
     hr = selectElem->get_length(&length);
