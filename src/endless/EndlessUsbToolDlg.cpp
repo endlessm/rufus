@@ -417,6 +417,7 @@ static LPCTSTR ErrorCauseToStr(ErrorCause_t errorCause)
         TOSTR(ErrorCauseSuspended);
         TOSTR(ErrorCauseInstallEosldrFailed);
         TOSTR(ErrorCauseUninstallEosldrFailed);
+        TOSTR(ErrorCauseCantUnpackBootZip);
         default: return _T("Error Cause Unknown");
     }
 }
@@ -2380,7 +2381,7 @@ void CEndlessUsbToolDlg::UpdateFileEntries(bool shouldInit)
             GetImgDisplayName(displayName, version, personality, file.GetLength());
 
             if (isInstallerImage) {
-                // TODO: version comparison again!
+                // TODO: version comparison again. NB version may be "master" so naive application of ParseVersionString will not work.
                 if (version > currentInstallerVersion) {
                     currentInstallerVersion = version;
                     m_localInstallerImage.stillPresent = TRUE;
@@ -2608,10 +2609,10 @@ void CEndlessUsbToolDlg::StartJSONDownload()
 #define JSON_IMG_UNPACKED_URL_SIG   "extracted_signature"
 
 #define CHECK_ENTRY(parentValue, tag) \
-do { \
-    IFFALSE_CONTINUE(!parentValue[tag].isNull(), CString("\t\t Elem is NULL - ") + tag); \
-    uprintf("\t\t %s=%s", tag, parentValue[tag].toStyledString().c_str()); \
-} while(false);
+    if (parentValue[tag].isNull()) { \
+        uprintf("\t\t Elem is NULL - %s", tag); \
+        continue; \
+    }
 
 bool CEndlessUsbToolDlg::UnpackFile(const CString &archive, const CString &destination, int compressionType, void* progress_function, unsigned long* cancel_request)
 {
@@ -4696,14 +4697,18 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	BYTE geometry[256] = { 0 }, layout[4096] = { 0 };
 	CREATE_DISK createDiskData;
 	CString driveLetter;
-	CString bootFilesPathGz = dlg->m_bootArchive;
 	CString bootFilesPath = CEndlessUsbToolApp::TempFilePath(CString(BOOT_COMPONENTS_FOLDER)) + L"\\";
 	CString usbFilesPath;
 	PDISK_GEOMETRY_EX DiskGeometry = (PDISK_GEOMETRY_EX)(void*)geometry;
 
 	UpdateProgress(OP_NEW_LIVE_CREATION, 0);
+
 	// Unpack boot components
-	IFFALSE_GOTOERROR(UnpackBootComponents(bootFilesPathGz, bootFilesPath), "Error unpacking boot components.");
+	if (!UnpackBootComponents(dlg->m_bootArchive, bootFilesPath)) {
+		PRINT_ERROR_MSG("Error unpacking boot components.");
+		dlg->m_lastErrorCause = ErrorCauseCantUnpackBootZip;
+		goto error;
+	}
 
 	UpdateProgress(OP_NEW_LIVE_CREATION, USB_PROGRESS_UNPACK_BOOT_ZIP);
 	CHECK_IF_CANCELLED;
@@ -5215,7 +5220,11 @@ DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 	const CString systemDriveLetter = GetSystemDrive();
 
 	// Unpack boot components
-	IFFALSE_GOTOERROR(UnpackBootComponents(dlg->m_bootArchive, bootFilesPath), "Error unpacking boot components.");
+	if (!UnpackBootComponents(dlg->m_bootArchive, bootFilesPath)) {
+		PRINT_ERROR_MSG("Error unpacking boot components.");
+		errorCause = ErrorCauseCantUnpackBootZip;
+		goto error;
+	}
 
 	UpdateProgress(OP_SETUP_DUALBOOT, DB_PROGRESS_UNPACK_BOOT_ZIP);
 	CHECK_IF_CANCELLED;
@@ -5400,19 +5409,19 @@ error:
 	return retResult;
 }
 
-bool CEndlessUsbToolDlg::UnpackBootComponents(const CString &bootFilesPathGz, const CString &bootFilesPath)
+bool CEndlessUsbToolDlg::UnpackBootComponents(const CString &bootFilesZipPath, const CString &bootFilesPath)
 {
-	FUNCTION_ENTER;
-	bool retResult = false;
+    FUNCTION_ENTER;
 
-	RemoveNonEmptyDirectory(bootFilesPath);
-	int createDirResult = SHCreateDirectoryExW(NULL, bootFilesPath, NULL);
-	IFFALSE_GOTOERROR(createDirResult == ERROR_SUCCESS || createDirResult == ERROR_ALREADY_EXISTS, "Error creating local directory to unpack boot components.");
-	IFFALSE_GOTOERROR(UnpackZip(CComBSTR(bootFilesPathGz), CComBSTR(bootFilesPath)), "Error unpacking archive to local folder.");
+    RemoveNonEmptyDirectory(bootFilesPath);
+    int createDirResult = SHCreateDirectoryExW(NULL, bootFilesPath, NULL);
+    if (createDirResult != ERROR_SUCCESS && createDirResult != ERROR_ALREADY_EXISTS) {
+        uprintf("Error creating local directory to unpack boot components: %d", createDirResult);
+        return false;
+    }
 
-	retResult = true;
-error:
-	return retResult;
+    IFFALSE_RETURN_VALUE(UnpackZip(CComBSTR(bootFilesZipPath), CComBSTR(bootFilesPath)), "Error unpacking archive to local folder.", false);
+    return true;
 }
 
 bool CEndlessUsbToolDlg::IsLegacyBIOSBoot()
