@@ -345,6 +345,8 @@ const wchar_t* mainWindowTitle = L"Endless Installer";
 
 #define BYTES_IN_MEGABYTE		(1024 *  1024)
 #define BYTES_IN_GIGABYTE		(1024 *  1024 * 1024)
+#define ROUND_TO_NEAREST_GIGABYTE(bytes) \
+    (((bytes) + (BYTES_IN_GIGABYTE / 2)) / BYTES_IN_GIGABYTE)
 
 #define UPDATE_DOWNLOAD_PROGRESS_TIME       2000
 #define CHECK_INTERNET_CONNECTION_TIME      2000
@@ -3472,7 +3474,7 @@ HRESULT CEndlessUsbToolDlg::OnSelectStorageNextClicked(IHTMLElement *pElement)
 
 	FUNCTION_ENTER;
 
-	ULONGLONG approxGB = (m_selectedInstallSizeBytes + (BYTES_IN_GIGABYTE / 2)) / BYTES_IN_GIGABYTE;
+	ULONGLONG approxGB = ROUND_TO_NEAREST_GIGABYTE(m_selectedInstallSizeBytes);
 	TrackEvent(_T("StorageSizeGB"), approxGB);
 
 	StartInstallationProcess();
@@ -3579,6 +3581,8 @@ void CEndlessUsbToolDlg::GoToSelectStoragePage()
 			systemDrive, freeSize, totalSize, downloadSizeStr, minimumInstallSizeStr);
 	}
 	maximumInstallSize = RoundToSector((freeBytesAvailable.QuadPart - bytesInGig) - downloadSize);
+	// Measured in GB for consistency with StorageSizeGB
+	TrackEvent(_T("MaximumInstallSizeGB"), ROUND_TO_NEAREST_GIGABYTE(maximumInstallSize));
 
 	// update messages with needed space based on selected version
 	CStringA osVersion = lmprintf(isBaseImage ? MSG_400 : MSG_316);
