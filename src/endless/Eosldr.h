@@ -8,7 +8,6 @@ class EosldrInstaller {
 public:
     virtual ~EosldrInstaller() {}
 
-    bool CanInstall(const CString &bootFilesPath);
     bool Install(
         const CString &systemDriveLetter,
         const CString &bootFilesPath);

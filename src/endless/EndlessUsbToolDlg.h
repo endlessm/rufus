@@ -410,7 +410,6 @@ private:
 	static void ImageUnpackCallback(const uint64_t read_bytes);
 	static void UpdateUnpackProgress(const uint64_t current_bytes, const uint64_t total_bytes);
 	static bool CopyFilesToexFAT(CEndlessUsbToolDlg *dlg, const CString &fromFolder, const CString &driveLetter);
-	static bool WriteMBRAndSBRToUSB(HANDLE hPhysical, const CString &bootFilesPath, DWORD bytesPerSector);
 
 	static DWORD WINAPI SetupDualBoot(LPVOID param);
 	static bool SetupDualBootFiles(CEndlessUsbToolDlg *dlg, const CString &systemDriveLetter, const CString &bootFilesPath, ErrorCause &errorCause);

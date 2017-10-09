@@ -40,12 +40,6 @@
     <Filter Include="Resource Files\Fonts">
       <UniqueIdentifier>{eb816419-08c4-478e-975e-0f629f716a0a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\grub">
-      <UniqueIdentifier>{2661dade-dece-4d61-965e-8a5ff26af860}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\grub">
-      <UniqueIdentifier>{8107eb39-747d-4661-9bc4-84ce68db88be}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -122,12 +116,6 @@
     </ClInclude>
     <ClInclude Include="Analytics.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="grub\grub.h">
-      <Filter>Header Files\grub</Filter>
-    </ClInclude>
-    <ClInclude Include="grub\reed_solomon.h">
-      <Filter>Header Files\grub</Filter>
     </ClInclude>
     <ClInclude Include="StringHelperMethods.h">
       <Filter>Header Files</Filter>
@@ -232,12 +220,6 @@
     </ClCompile>
     <ClCompile Include="UEFIBootSetup.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="grub\reed_solomon.c">
-      <Filter>Source Files\grub</Filter>
-    </ClCompile>
-    <ClCompile Include="grub\grub.c">
-      <Filter>Source Files\grub</Filter>
     </ClCompile>
     <ClCompile Include="StringHelperMethods.cpp">
       <Filter>Source Files</Filter>
