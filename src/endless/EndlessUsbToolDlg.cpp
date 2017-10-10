@@ -4743,7 +4743,8 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	IFFALSE_PRINTERROR(WaitForLogical(DriveIndex), "Warning: Logical drive was not found!"); // We try to continue even if this fails, just in case
 
 	// Write MBR and SBR to disk
-	IFFALSE_GOTOERROR(WriteMBRAndSBRToUSB(hPhysical, bootFilesPath, BytesPerSector), "Error on WriteMBRAndSBRToUSB");
+	IFFALSE_GOTOERROR(WriteMBRToUSB(hPhysical, bootFilesPath), "Error on WriteMBRToUSB");
+	IFFALSE_GOTOERROR(WriteBIOSBootPartitionToUSB(hPhysical, bootFilesPath, BytesPerSector), "Error on WriteBIOSBootPartitionToUSB");
 
 	safe_closehandle(hPhysical);
 
@@ -5144,23 +5145,16 @@ bool CEndlessUsbToolDlg::CopyMultipleItems(const CString &from, const CString &t
 	return result == 0;
 }
 
-bool CEndlessUsbToolDlg::WriteMBRAndSBRToUSB(HANDLE hPhysical, const CString &bootFilesPath, DWORD bytesPerSector)
+bool CEndlessUsbToolDlg::WriteMBRToUSB(HANDLE hPhysical, const CString &bootFilesPath)
 {
 	FUNCTION_ENTER;
 
 	FAKE_FD fake_fd = { 0 };
 	FILE* fp = (FILE*)&fake_fd;
 	CString bootImgFilePath = bootFilesPath + LIVE_BOOT_IMG_FILE;
-	CString coreImgFilePath = bootFilesPath + LIVE_CORE_IMG_FILE;
 	unsigned char endlessMBRData[MAX_BOOT_IMG_FILE_SIZE];
-	unsigned char *endlessSBRData = (unsigned char *) malloc(MBR_PART_LENGTH_BYTES);
 	bool retResult = false;
-	size_t countRead, coreImgSize;
-	DWORD coreImgBytesWritten = 0;
-	size_t mbrPartitionStart = bytesPerSector * MBR_PART_STARTING_SECTOR;
-	LARGE_INTEGER lMbrPartitionStart;
-
-	lMbrPartitionStart.QuadPart = mbrPartitionStart;
+	size_t countRead;
 
 	// Read boot.img and write it to USB drive
 	countRead = ReadEntireFile(bootImgFilePath, endlessMBRData, sizeof(endlessMBRData));
@@ -5168,6 +5162,30 @@ bool CEndlessUsbToolDlg::WriteMBRAndSBRToUSB(HANDLE hPhysical, const CString &bo
 	fake_fd._handle = (char*)hPhysical;
 	set_bytes_per_sector(SelectedDrive.Geometry.BytesPerSector);
 	IFFALSE_GOTOERROR(write_data(fp, 0x0, endlessMBRData, MAX_BOOT_IMG_FILE_SIZE) != 0, "Error on write_data with boot.img contents.");
+
+	retResult = true;
+
+	DWORD size;
+	// Tell the system we've updated the disk properties
+	if (!DeviceIoControl(hPhysical, IOCTL_DISK_UPDATE_PROPERTIES, NULL, 0, NULL, 0, &size, NULL))
+		uprintf("Failed to notify system about disk properties update: %s\n", WindowsErrorString());
+
+error:
+	return retResult;
+}
+
+bool CEndlessUsbToolDlg::WriteBIOSBootPartitionToUSB(HANDLE hPhysical, const CString &bootFilesPath, DWORD bytesPerSector)
+{
+	FUNCTION_ENTER;
+
+	CString coreImgFilePath = bootFilesPath + LIVE_CORE_IMG_FILE;
+	unsigned char *endlessSBRData = (unsigned char *) malloc(MBR_PART_LENGTH_BYTES);
+	bool retResult = false;
+	size_t coreImgSize;
+	DWORD coreImgBytesWritten = 0;
+	LARGE_INTEGER lMbrPartitionStart;
+
+	lMbrPartitionStart.QuadPart = bytesPerSector * MBR_PART_STARTING_SECTOR;
 
 	// Read core.img data and write it to USB drive
 	coreImgSize = ReadEntireFile(coreImgFilePath, endlessSBRData, MBR_PART_LENGTH_BYTES);
@@ -5177,11 +5195,6 @@ bool CEndlessUsbToolDlg::WriteMBRAndSBRToUSB(HANDLE hPhysical, const CString &bo
 		"Error writing BIOS boot partition");
 
 	retResult = true;
-
-	DWORD size;
-	// Tell the system we've updated the disk properties
-	if (!DeviceIoControl(hPhysical, IOCTL_DISK_UPDATE_PROPERTIES, NULL, 0, NULL, 0, &size, NULL))
-		uprintf("Failed to notify system about disk properties update: %s\n", WindowsErrorString());
 
 error:
 	safe_free(endlessSBRData);
