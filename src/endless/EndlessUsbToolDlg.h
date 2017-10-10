@@ -62,6 +62,18 @@ typedef enum ErrorCause {
     ErrorCauseInstallEosldrFailed,
     ErrorCauseUninstallEosldrFailed,
     ErrorCauseCantUnpackBootZip,
+    ErrorCauseGetPhysicalHandleFailed,
+    ErrorCauseDisappearingExistingVolumesFailed,
+    ErrorCauseErasePartitionsFailed,
+    ErrorCauseWriteBiosBootFailed,
+    ErrorCauseCreatePartitionsFailed,
+    ErrorCauseWriteMBRFailed,
+    ErrorCauseFormatExfatFailed,
+    ErrorCauseMountExfatFailed,
+    ErrorCauseMountESPFailed,
+    ErrorCauseFormatESPFailed,
+    ErrorCausePopulateESPFailed,
+    ErrorCausePopulateExfatFailed,
 } ErrorCause_t;
 
 typedef struct RemoteImageEntry {

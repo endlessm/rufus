@@ -418,6 +418,18 @@ static LPCTSTR ErrorCauseToStr(ErrorCause_t errorCause)
         TOSTR(ErrorCauseInstallEosldrFailed);
         TOSTR(ErrorCauseUninstallEosldrFailed);
         TOSTR(ErrorCauseCantUnpackBootZip);
+        TOSTR(ErrorCauseGetPhysicalHandleFailed);
+        TOSTR(ErrorCauseDisappearingExistingVolumesFailed);
+        TOSTR(ErrorCauseErasePartitionsFailed);
+        TOSTR(ErrorCauseWriteBiosBootFailed);
+        TOSTR(ErrorCauseCreatePartitionsFailed);
+        TOSTR(ErrorCauseWriteMBRFailed);
+        TOSTR(ErrorCauseFormatExfatFailed);
+        TOSTR(ErrorCauseMountExfatFailed);
+        TOSTR(ErrorCauseMountESPFailed);
+        TOSTR(ErrorCauseFormatESPFailed);
+        TOSTR(ErrorCausePopulateESPFailed);
+        TOSTR(ErrorCausePopulateExfatFailed);
         default: return _T("Error Cause Unknown");
     }
 }
@@ -1744,7 +1756,21 @@ void CEndlessUsbToolDlg::ErrorOccured(ErrorCause_t errorCause)
     case ErrorCause_t::ErrorCauseWriteFailed:
     case ErrorCause_t::ErrorCauseSuspended: // TODO: new string here
     case ErrorCause_t::ErrorCauseCantUnpackBootZip:
+    // Dual-boot errors
     case ErrorCause_t::ErrorCauseInstallEosldrFailed:
+    // Combined USB errors
+    case ErrorCause_t::ErrorCauseGetPhysicalHandleFailed:
+    case ErrorCause_t::ErrorCauseDisappearingExistingVolumesFailed:
+    case ErrorCause_t::ErrorCauseErasePartitionsFailed:
+    case ErrorCause_t::ErrorCauseWriteBiosBootFailed:
+    case ErrorCause_t::ErrorCauseCreatePartitionsFailed:
+    case ErrorCause_t::ErrorCauseWriteMBRFailed:
+    case ErrorCause_t::ErrorCauseFormatExfatFailed:
+    case ErrorCause_t::ErrorCauseMountExfatFailed:
+    case ErrorCause_t::ErrorCauseMountESPFailed:
+    case ErrorCause_t::ErrorCauseFormatESPFailed:
+    case ErrorCause_t::ErrorCausePopulateESPFailed:
+    case ErrorCause_t::ErrorCausePopulateExfatFailed:
         recoverButtonMsgId = MSG_RECOVER_TRY_AGAIN;
         suggestionMsgId = m_selectedInstallMethod == InstallMethod_t::InstallDualBoot
 	    ? (IsCoding() ? MSG_385 : MSG_358)
@@ -3727,6 +3753,19 @@ HRESULT CEndlessUsbToolDlg::OnRecoverErrorButtonClicked(IHTMLElement* pElement)
         StartInstallationProcess();
         break;
     case ErrorCause_t::ErrorCauseWriteFailed:
+    case ErrorCause_t::ErrorCauseCantUnpackBootZip:
+    case ErrorCause_t::ErrorCauseGetPhysicalHandleFailed:
+    case ErrorCause_t::ErrorCauseDisappearingExistingVolumesFailed:
+    case ErrorCause_t::ErrorCauseErasePartitionsFailed:
+    case ErrorCause_t::ErrorCauseWriteBiosBootFailed:
+    case ErrorCause_t::ErrorCauseCreatePartitionsFailed:
+    case ErrorCause_t::ErrorCauseWriteMBRFailed:
+    case ErrorCause_t::ErrorCauseFormatExfatFailed:
+    case ErrorCause_t::ErrorCauseMountExfatFailed:
+    case ErrorCause_t::ErrorCauseMountESPFailed:
+    case ErrorCause_t::ErrorCauseFormatESPFailed:
+    case ErrorCause_t::ErrorCausePopulateESPFailed:
+    case ErrorCause_t::ErrorCausePopulateExfatFailed:
         OnSelectFileNextClicked(NULL);
         break;
     case ErrorCause_t::ErrorCauseVerificationFailed:
@@ -4718,24 +4757,24 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	DWORD BytesPerSector = SelectedDrive.Geometry.BytesPerSector;
 	CStringA eosliveDriveLetter, espDriveLetter;
 	const char *cszEspDriveLetter;
+	ErrorCause errorCause = ErrorCause::ErrorCauseWriteFailed;
 
 	UpdateProgress(OP_NEW_LIVE_CREATION, 0);
 
 	// Unpack boot components
-	if (!UnpackBootComponents(dlg->m_bootArchive, bootFilesPath)) {
-		PRINT_ERROR_MSG("Error unpacking boot components.");
-		dlg->m_lastErrorCause = ErrorCauseCantUnpackBootZip;
-		goto error;
-	}
+	errorCause = ErrorCauseCantUnpackBootZip;
+	IFFALSE_GOTOERROR(UnpackBootComponents(dlg->m_bootArchive, bootFilesPath), "Error unpacking boot components.");
 
 	UpdateProgress(OP_NEW_LIVE_CREATION, USB_PROGRESS_UNPACK_BOOT_ZIP);
 	CHECK_IF_CANCELLED;
 
 	// get disk handle
+	errorCause = ErrorCauseGetPhysicalHandleFailed;
 	hPhysical = GetPhysicalHandle(DriveIndex, TRUE, TRUE);
 	IFFALSE_GOTOERROR(hPhysical != INVALID_HANDLE_VALUE, "Error on acquiring disk handle.");
 
 	// Remove drive letters for existing volumes
+	errorCause = ErrorCauseDisappearingExistingVolumesFailed;
 	IFFALSE_GOTOERROR(DeleteMountpointsForDrive(DriveIndex), "Couldn't delete mountpoints");
 	CHECK_IF_CANCELLED;
 
@@ -4752,6 +4791,7 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	CHECK_IF_CANCELLED;
 
 	// erase any existing partition
+	errorCause = ErrorCauseErasePartitionsFailed;
 	IFFALSE_GOTOERROR(ClearMBRGPT(hPhysical, SelectedDrive.DiskSize, BytesPerSector, FALSE), "ClearMBRGPT failed");
 	IFFALSE_GOTOERROR(DeletePartitions(hPhysical), "ErasePartitions failed");
 
@@ -4761,9 +4801,11 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	// * The sectors to be written to do not fall within a volume's extents.
 	// * [some other conditions]
 	// Having zeroed the partition table, this first condition is surely true.
+	errorCause = ErrorCauseWriteBiosBootFailed;
 	IFFALSE_GOTOERROR(WriteBIOSBootPartitionToUSB(hPhysical, bootFilesPath, BytesPerSector), "Error on WriteBIOSBootPartitionToUSB");
 
 	// create partitions.
+	errorCause = ErrorCauseCreatePartitionsFailed;
 	IFFALSE_GOTOERROR(CreateUSBPartitionLayout(hPhysical, BytesPerSector), "Error on CreateUSBPartitionLayout");
 
 	if (hLogicalVolume != NULL && hLogicalVolume != INVALID_HANDLE_VALUE) {
@@ -4780,6 +4822,7 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	CHECK_IF_CANCELLED;
 
 	// Write MBR to disk
+	errorCause = ErrorCauseWriteMBRFailed;
 	IFFALSE_GOTOERROR(WriteMBRToUSB(hPhysical, bootFilesPath), "Error on WriteMBRToUSB");
 
 	safe_closehandle(hPhysical);
@@ -4788,16 +4831,18 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	CHECK_IF_CANCELLED;
 
 	// Format and mount exFAT
+	errorCause = ErrorCauseFormatExfatFailed;
 	IFFALSE_GOTOERROR(FormatFirstPartitionOnDrive(DriveIndex, L"exFAT", EXFAT_CLUSTER_SIZE, dlg->m_cancelOperationEvent, EXFAT_PARTITION_NAME_LIVE), "Error formatting eoslive");
 
 	CHECK_IF_CANCELLED;
-
+	errorCause = ErrorCauseMountExfatFailed;
 	IFFALSE_GOTOERROR(MountFirstPartitionOnDrive(DriveIndex, eosliveDriveLetter), "Error mounting eoslive");
 
 	UpdateProgress(OP_NEW_LIVE_CREATION, USB_PROGRESS_EXFAT_PREPARED);
 	CHECK_IF_CANCELLED;
 
 	// Mount and format ESP. (Yes, you can assign a drive letter to an unformatted volume!)
+	errorCause = ErrorCauseMountESPFailed;
 	cszEspDriveLetter = AltMountVolume(eosliveDriveLetter.Left(2), 2);
 	IFFALSE_GOTOERROR(cszEspDriveLetter != NULL, "Error mounting ESP");
 	// The pointer returned by AltMountVolume() is to a static buffer...
@@ -4805,12 +4850,14 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 
 	CHECK_IF_CANCELLED;
 
+	errorCause = ErrorCauseFormatESPFailed;
 	IFFALSE_GOTOERROR(FormatPartitionWithRetry(espDriveLetter, L"FAT32", ESP_CLUSTER_SIZE, dlg->m_cancelOperationEvent, L""), "Error formatting ESP");
 
 	UpdateProgress(OP_NEW_LIVE_CREATION, USB_PROGRESS_ESP_PREPARED);
 	CHECK_IF_CANCELLED;
 
 	// Copy files to the ESP partition
+	errorCause = ErrorCausePopulateESPFailed;
 	IFFALSE_GOTOERROR(CopyFilesToESP(bootFilesPath, CString(espDriveLetter) + L"\\"), "Error when trying to copy files to ESP partition.");
 
 	// Unmount ESP (but continue if this fails)
@@ -4821,6 +4868,7 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	CHECK_IF_CANCELLED;
 
 	// Copy files to the exFAT partition
+	errorCause = ErrorCausePopulateExfatFailed;
 	IFFALSE_GOTOERROR(CopyFilesToexFAT(dlg, bootFilesPath, UTF8ToCString(eosliveDriveLetter)), "Error on CopyFilesToexFAT");
 
 	UpdateProgress(OP_NEW_LIVE_CREATION, USB_PROGRESS_ALL_DONE);
@@ -4831,7 +4879,7 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 error:
 	uprintf("CreateUSBStick exited with error.");
 	if (dlg->m_lastErrorCause == ErrorCause_t::ErrorCauseNone) {
-		dlg->m_lastErrorCause = ErrorCause_t::ErrorCauseWriteFailed;
+		dlg->m_lastErrorCause = errorCause;
 	}
 
 done:
