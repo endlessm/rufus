@@ -20,6 +20,7 @@
 #include "WindowsUsbDefines.h"
 #include "StringHelperMethods.h"
 #include "Images.h"
+#include "IOUtil.h"
 #include "Log2LL.h"
 #include "UEFIBootSetup.h"
 #include "WMI.h"
@@ -5149,41 +5150,31 @@ bool CEndlessUsbToolDlg::WriteMBRAndSBRToUSB(HANDLE hPhysical, const CString &bo
 
 	FAKE_FD fake_fd = { 0 };
 	FILE* fp = (FILE*)&fake_fd;
-	FILE *bootImgFile = NULL, *coreImgFile = NULL;
 	CString bootImgFilePath = bootFilesPath + LIVE_BOOT_IMG_FILE;
 	CString coreImgFilePath = bootFilesPath + LIVE_CORE_IMG_FILE;
-	unsigned char endlessMBRData[MAX_BOOT_IMG_FILE_SIZE + 1];
-	unsigned char *endlessSBRData = NULL;
+	unsigned char endlessMBRData[MAX_BOOT_IMG_FILE_SIZE];
+	unsigned char *endlessSBRData = (unsigned char *) malloc(MBR_PART_LENGTH_BYTES);
 	bool retResult = false;
 	size_t countRead, coreImgSize;
+	DWORD coreImgBytesWritten = 0;
 	size_t mbrPartitionStart = bytesPerSector * MBR_PART_STARTING_SECTOR;
+	LARGE_INTEGER lMbrPartitionStart;
 
-	// Load boot.img from file
-	IFFALSE_GOTOERROR(0 == _wfopen_s(&bootImgFile, bootImgFilePath, L"rb"), "Error opening boot.img file");
-	countRead = fread(endlessMBRData, 1, sizeof(endlessMBRData), bootImgFile);
+	lMbrPartitionStart.QuadPart = mbrPartitionStart;
+
+	// Read boot.img and write it to USB drive
+	countRead = ReadEntireFile(bootImgFilePath, endlessMBRData, sizeof(endlessMBRData));
 	IFFALSE_GOTOERROR(countRead == MAX_BOOT_IMG_FILE_SIZE, "Size of boot.img is not what is expected.");
-
-	// write boot.img to USB drive
 	fake_fd._handle = (char*)hPhysical;
 	set_bytes_per_sector(SelectedDrive.Geometry.BytesPerSector);
 	IFFALSE_GOTOERROR(write_data(fp, 0x0, endlessMBRData, MAX_BOOT_IMG_FILE_SIZE) != 0, "Error on write_data with boot.img contents.");
 
 	// Read core.img data and write it to USB drive
-	IFFALSE_GOTOERROR(0 == _wfopen_s(&coreImgFile, coreImgFilePath, L"rb"), "Error opening core.img file");
-	fseek(coreImgFile, 0L, SEEK_END);
-	coreImgSize = ftell(coreImgFile);
-	rewind(coreImgFile);
-	uprintf("Size of SBR is %d bytes from %ls", coreImgSize, coreImgFilePath);
-	IFFALSE_GOTOERROR(coreImgSize <= MBR_PART_LENGTH_BYTES, "Error: SBR found in core.img is too big.");
-
-	endlessSBRData = (unsigned char*)malloc(bytesPerSector);
-	coreImgSize = 0;
-	while (!feof(coreImgFile) && coreImgSize < MBR_PART_LENGTH_BYTES) {
-		countRead = fread(endlessSBRData, 1, bytesPerSector, coreImgFile);
-		IFFALSE_GOTOERROR(write_data(fp, mbrPartitionStart + coreImgSize, endlessSBRData, countRead) != 0, "Error on write data with core.img contents.");
-		coreImgSize += countRead;
-		uprintf("Wrote %d bytes", coreImgSize);
-	}
+	coreImgSize = ReadEntireFile(coreImgFilePath, endlessSBRData, MBR_PART_LENGTH_BYTES);
+	IFFALSE_GOTOERROR(coreImgSize, "Couldn't read core.img");
+	IFFALSE_GOTOERROR(SetFilePointerEx(hPhysical, lMbrPartitionStart, NULL, FILE_BEGIN), "Error setting handle position");
+	IFFALSE_GOTOERROR(WriteFileWithRetry(hPhysical, endlessSBRData, coreImgSize, &coreImgBytesWritten, WRITE_RETRIES),
+		"Error writing BIOS boot partition");
 
 	retResult = true;
 
@@ -5193,12 +5184,7 @@ bool CEndlessUsbToolDlg::WriteMBRAndSBRToUSB(HANDLE hPhysical, const CString &bo
 		uprintf("Failed to notify system about disk properties update: %s\n", WindowsErrorString());
 
 error:
-	safe_closefile(bootImgFile);
-	safe_closefile(coreImgFile);
-
-	if (endlessSBRData != NULL) {
-		safe_free(endlessSBRData);
-	}
+	safe_free(endlessSBRData);
 
 	return retResult;
 }
