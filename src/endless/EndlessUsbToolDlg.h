@@ -399,10 +399,10 @@ private:
 	void ChangeDriveAutoRunAndMount(bool setEndlessValues);
 
 	static DWORD WINAPI CreateUSBStick(LPVOID param);
-	static bool CreateFakePartitionLayout(HANDLE hPhysical, PBYTE layout, PBYTE geometry);
+	static bool CreateUSBPartitionLayout(HANDLE hPhysical, DWORD &BytesPerSector);
 	static bool FormatFirstPartitionOnDrive(DWORD DriveIndex, const wchar_t *kFSType, ULONG ulClusterSize, HANDLE cancelEvent, const wchar_t *kPartLabel);
-	static bool MountFirstPartitionOnDrive(DWORD DriveIndex, CString &driveLetter);
-	static bool CreateCorrectPartitionLayout(HANDLE hPhysical, PBYTE layout, PBYTE geometry);
+	static bool FormatPartitionWithRetry(const char *partition, const wchar_t *kFSType, ULONG ulClusterSize, HANDLE cancelEvent, const wchar_t *kPartLabel);
+	static bool MountFirstPartitionOnDrive(DWORD DriveIndex, CStringA &driveLetter);
 
 	static bool UnpackZip(const CComBSTR source, const CComBSTR dest);
 	static void RemoveNonEmptyDirectory(const CString directoryPath);

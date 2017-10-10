@@ -889,8 +889,10 @@ BOOL MountVolume(char* drive_name, char *drive_guid)
 }
 
 /*
- * Mount partition #part_nr, residing on the same disk as drive_name to an available
- * drive letter. Returns the newly allocated drive string.
+ * Mount partition #part_nr, residing on the same disk as drive_name (which must be
+ * of the form "X:" with no trailing slash) to an available
+ * drive letter. Returns a borrowed pointer to the newly-allocated drive letter of
+ * the form "Y:", which must not be freed, or NULL on error.
  * We need to do this because, for instance, EFI System partitions are not assigned
  * Volume GUIDs by the OS, and we need to have a letter assigned, for when we invoke
  * bcdtool for Windows To Go. All in all, the process looks like this:

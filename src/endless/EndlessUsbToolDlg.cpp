@@ -4067,7 +4067,7 @@ DWORD WINAPI CEndlessUsbToolDlg::FileCopyThread(void* param)
     PDISK_GEOMETRY_EX DiskGeometry = (PDISK_GEOMETRY_EX)(void*)geometry;
     PDRIVE_LAYOUT_INFORMATION_EX DriveLayout = (PDRIVE_LAYOUT_INFORMATION_EX)(void*)layout;
     CString driveDestination, fileDestination, liveFileName;
-    CStringA iniLanguage = INI_LOCALE_EN;
+    CStringA driveDestinationA, iniLanguage = INI_LOCALE_EN;
 
 	// Radu: why do we do this?
     memset(&SelectedDrive, 0, sizeof(SelectedDrive));
@@ -4120,7 +4120,8 @@ DWORD WINAPI CEndlessUsbToolDlg::FileCopyThread(void* param)
 	// Format the partition
 	IFFALSE_GOTOERROR(FormatFirstPartitionOnDrive(DriveIndex, L"exFAT", EXFAT_CLUSTER_SIZE, dlg->m_cancelOperationEvent, EXFAT_PARTITION_NAME_IMAGES), "Error on FormatFirstPartitionOnDrive");
     // Mount it
-	IFFALSE_GOTOERROR(MountFirstPartitionOnDrive(DriveIndex, driveDestination), "Error on MountFirstPartitionOnDrive");
+	IFFALSE_GOTOERROR(MountFirstPartitionOnDrive(DriveIndex, driveDestinationA), "Error on MountFirstPartitionOnDrive");
+    driveDestination = driveDestinationA;
 
     // Copy Files
 	liveFileName = CSTRING_GET_LAST(dlg->m_localFile, L'\\');
@@ -4680,8 +4681,10 @@ void CEndlessUsbToolDlg::SetJSONDownloadState(JSONDownloadState state)
 // Below defines need to be in this order
 #define USB_PROGRESS_UNPACK_BOOT_ZIP		2
 #define USB_PROGRESS_MBR_SBR_DONE			4
-#define USB_PROGRESS_ESP_CREATION_DONE		6
-#define USB_PROGRESS_EXFAT_PREPARED			10
+#define USB_PROGRESS_EXFAT_PREPARED			6
+#define USB_PROGRESS_ESP_PREPARED			8
+#define USB_PROGRESS_ESP_CREATION_DONE		10
+#define USB_PROGRESS_IMG_COPY_STARTED		10
 #define USB_PROGRESS_IMG_COPY_DONE			98
 #define USB_PROGRESS_ALL_DONE				100
 
@@ -4696,12 +4699,12 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	BOOL result;
 	DWORD size;
 	HANDLE hPhysical = INVALID_HANDLE_VALUE;
-	BYTE geometry[256] = { 0 }, layout[4096] = { 0 };
 	CREATE_DISK createDiskData;
-	CString driveLetter;
 	CString bootFilesPath = CEndlessUsbToolApp::TempFilePath(CString(BOOT_COMPONENTS_FOLDER)) + L"\\";
 	CString usbFilesPath;
-	PDISK_GEOMETRY_EX DiskGeometry = (PDISK_GEOMETRY_EX)(void*)geometry;
+	DWORD BytesPerSector = 0;
+	CStringA eosliveDriveLetter, espDriveLetter;
+	const char *cszEspDriveLetter;
 
 	UpdateProgress(OP_NEW_LIVE_CREATION, 0);
 
@@ -4728,63 +4731,59 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	result = DeviceIoControl(hPhysical, IOCTL_DISK_CREATE_DISK, &createDiskData, sizeof(createDiskData), NULL, 0, &size, NULL);
 	IFFALSE_GOTOERROR(result != 0, "Error when calling IOCTL_DISK_CREATE_DISK");
 
-	// get disk geometry information
-	result = DeviceIoControl(hPhysical, IOCTL_DISK_GET_DRIVE_GEOMETRY_EX, NULL, 0, geometry, sizeof(geometry), &size, NULL);
-	IFFALSE_GOTOERROR(result != 0 && size > 0, "Error on querying disk geometry.");
-
-	// set initial drive layout data
-	memset(layout, 0, sizeof(layout));
-	IFFALSE_GOTOERROR(CreateFakePartitionLayout(hPhysical, layout, geometry), "Error on CreateFakePartitionLayout");
+	// create partitions.
+	IFFALSE_GOTOERROR(CreateUSBPartitionLayout(hPhysical, BytesPerSector), "Error on CreateUSBPartitionLayout");
 
 	CHECK_IF_CANCELLED;
 
+	// Wait for the logical drive we just created to appear
+	uprintf("Waiting for logical drive to reappear...\n");
+	Sleep(200); // Radu: check if this is needed, that's what rufus does; I hate sync using sleep
+	IFFALSE_PRINTERROR(WaitForLogical(DriveIndex), "Warning: Logical drive was not found!"); // We try to continue even if this fails, just in case
+
 	// Write MBR and SBR to disk
-	IFFALSE_GOTOERROR(WriteMBRAndSBRToUSB(hPhysical, bootFilesPath, DiskGeometry->Geometry.BytesPerSector), "Error on WriteMBRAndSBRToUSB");
+	IFFALSE_GOTOERROR(WriteMBRAndSBRToUSB(hPhysical, bootFilesPath, BytesPerSector), "Error on WriteMBRAndSBRToUSB");
 
 	safe_closehandle(hPhysical);
 
 	UpdateProgress(OP_NEW_LIVE_CREATION, USB_PROGRESS_MBR_SBR_DONE);
 	CHECK_IF_CANCELLED;
 
-	// Format and mount ESP
-	IFFALSE_GOTOERROR(FormatFirstPartitionOnDrive(DriveIndex, L"FAT32", ESP_CLUSTER_SIZE, dlg->m_cancelOperationEvent, L""), "Error on FormatFirstPartitionOnDrive");
+	// Format and mount exFAT
+	IFFALSE_GOTOERROR(FormatFirstPartitionOnDrive(DriveIndex, L"exFAT", EXFAT_CLUSTER_SIZE, dlg->m_cancelOperationEvent, EXFAT_PARTITION_NAME_LIVE), "Error formatting eoslive");
 
 	CHECK_IF_CANCELLED;
 
-	IFFALSE_GOTOERROR(MountFirstPartitionOnDrive(DriveIndex, driveLetter), "Error on MountFirstPartitionOnDrive");
+	IFFALSE_GOTOERROR(MountFirstPartitionOnDrive(DriveIndex, eosliveDriveLetter), "Error mounting eoslive");
+
+	UpdateProgress(OP_NEW_LIVE_CREATION, USB_PROGRESS_EXFAT_PREPARED);
+	CHECK_IF_CANCELLED;
+
+	// Mount and format ESP. (Yes, you can assign a drive letter to an unformatted volume!)
+	cszEspDriveLetter = AltMountVolume(eosliveDriveLetter.Left(2), 2);
+	IFFALSE_GOTOERROR(cszEspDriveLetter != NULL, "Error mounting ESP");
+	// The pointer returned by AltMountVolume() is to a static buffer...
+	espDriveLetter = cszEspDriveLetter;
+
+	CHECK_IF_CANCELLED;
+
+	IFFALSE_GOTOERROR(FormatPartitionWithRetry(espDriveLetter, L"FAT32", ESP_CLUSTER_SIZE, dlg->m_cancelOperationEvent, L""), "Error formatting ESP");
+
+	UpdateProgress(OP_NEW_LIVE_CREATION, USB_PROGRESS_ESP_PREPARED);
+	CHECK_IF_CANCELLED;
 
 	// Copy files to the ESP partition
-	IFFALSE_GOTOERROR(CopyFilesToESP(bootFilesPath, driveLetter), "Error when trying to copy files to ESP partition.");
+	IFFALSE_GOTOERROR(CopyFilesToESP(bootFilesPath, CString(espDriveLetter) + L"\\"), "Error when trying to copy files to ESP partition.");
 
-	// Unmount ESP
-	if (!DeleteVolumeMountPoint(driveLetter)) uprintf("Failed to unmount volume: %s", WindowsErrorString());
+	// Unmount ESP (but continue if this fails)
+	IFFALSE_PRINTERROR(AltUnmountVolume(espDriveLetter), "Failed to unmount ESP");
+	espDriveLetter = "";
 
 	UpdateProgress(OP_NEW_LIVE_CREATION, USB_PROGRESS_ESP_CREATION_DONE);
 	CHECK_IF_CANCELLED;
 
-	// get disk handle again
-	hPhysical = GetPhysicalHandle(DriveIndex, TRUE, TRUE);
-	IFFALSE_GOTOERROR(hPhysical != INVALID_HANDLE_VALUE, "Error on acquiring disk handle.");
-
-	// fix partition types and layout
-	IFFALSE_GOTOERROR(CreateCorrectPartitionLayout(hPhysical, layout, geometry), "Error on CreateCorrectPartitionLayout");
-	safe_closehandle(hPhysical);
-
-	CHECK_IF_CANCELLED;
-
-	// Format and mount exFAT
-	IFFALSE_GOTOERROR(FormatFirstPartitionOnDrive(DriveIndex, L"exFAT", EXFAT_CLUSTER_SIZE, dlg->m_cancelOperationEvent, EXFAT_PARTITION_NAME_LIVE), "Error on FormatFirstPartitionOnDrive");
-
-	CHECK_IF_CANCELLED;
-
-	IFFALSE_GOTOERROR(MountFirstPartitionOnDrive(DriveIndex, driveLetter), "Error on MountFirstPartitionOnDrive");
-
-	UpdateProgress(OP_NEW_LIVE_CREATION, USB_PROGRESS_EXFAT_PREPARED);
 	// Copy files to the exFAT partition
-	IFFALSE_GOTOERROR(CopyFilesToexFAT(dlg, bootFilesPath, driveLetter), "Error on CopyFilesToexFAT");
-
-	// Unmount exFAT
-	if (!DeleteVolumeMountPoint(driveLetter)) uprintf("Failed to unmount volume: %s", WindowsErrorString());
+	IFFALSE_GOTOERROR(CopyFilesToexFAT(dlg, bootFilesPath, UTF8ToCString(eosliveDriveLetter)), "Error on CopyFilesToexFAT");
 
 	UpdateProgress(OP_NEW_LIVE_CREATION, USB_PROGRESS_ALL_DONE);
 	CHECK_IF_CANCELLED;
@@ -4797,10 +4796,12 @@ error:
 		dlg->m_lastErrorCause = ErrorCause_t::ErrorCauseWriteFailed;
 	}
 
-	// Unmount exFAT
-	if (!DeleteVolumeMountPoint(driveLetter)) uprintf("Failed to unmount volume: %s", WindowsErrorString());
-
 done:
+	// Unmount ESP
+	if (espDriveLetter.GetLength() > 0) {
+		IFFALSE_PRINTERROR(AltUnmountVolume(espDriveLetter), "Failed to unmount ESP");
+	}
+
 	RemoveNonEmptyDirectory(bootFilesPath);
 	safe_closehandle(hPhysical);
 	dlg->PostMessage(WM_FINISHED_ALL_OPERATIONS, 0, 0);
@@ -4808,13 +4809,21 @@ done:
 }
 
 
-bool CEndlessUsbToolDlg::CreateFakePartitionLayout(HANDLE hPhysical, PBYTE layout, PBYTE geometry)
+bool CEndlessUsbToolDlg::CreateUSBPartitionLayout(HANDLE hPhysical, DWORD &BytesPerSector)
 {
 	FUNCTION_ENTER;
 
+	BYTE layout[4096] = { 0 }, geometry[256] = { 0 };
 	PDRIVE_LAYOUT_INFORMATION_EX DriveLayout = (PDRIVE_LAYOUT_INFORMATION_EX)(void*)layout;
 	PDISK_GEOMETRY_EX DiskGeometry = (PDISK_GEOMETRY_EX)(void*)geometry;
 	PARTITION_INFORMATION_EX *currentPartition;
+	DWORD result, size;
+
+	// get disk geometry information
+	result = DeviceIoControl(hPhysical, IOCTL_DISK_GET_DRIVE_GEOMETRY_EX, NULL, 0, geometry, sizeof(geometry), &size, NULL);
+	IFFALSE_GOTOERROR(result != 0 && size > 0, "Error on querying disk geometry.");
+	BytesPerSector = DiskGeometry->Geometry.BytesPerSector;
+
 	// the EFI spec says the GPT will take the first and last two sectors of
 	// the disk, plus however much is allocated for partition entries. there
 	// must be at least 128 entries of at least 128 in size - in practice this
@@ -4822,8 +4831,7 @@ bool CEndlessUsbToolDlg::CreateFakePartitionLayout(HANDLE hPhysical, PBYTE layou
 	// sector size which is at least 512, but a hypothetical GIANT SECTOR disk
 	// would need three sectors reserved for the whole partition table, so we
 	// use max()
-	LONGLONG gptLength = (2 * DiskGeometry->Geometry.BytesPerSector) +
-		max((128 * 128), DiskGeometry->Geometry.BytesPerSector);
+	LONGLONG gptLength = (2 * BytesPerSector) + max((128 * 128), BytesPerSector);
 	bool returnValue = false;
 
 	DriveLayout->PartitionStyle = PARTITION_STYLE_GPT;
@@ -4831,21 +4839,26 @@ bool CEndlessUsbToolDlg::CreateFakePartitionLayout(HANDLE hPhysical, PBYTE layou
 	IGNORE_RETVAL(CoCreateGuid(&DriveLayout->Gpt.DiskId));
 
 	LONGLONG partitionStart[EXPECTED_NUMBER_OF_PARTITIONS] = {
-		ESP_PART_STARTING_SECTOR * DiskGeometry->Geometry.BytesPerSector,
-		MBR_PART_STARTING_SECTOR * DiskGeometry->Geometry.BytesPerSector,
-		EXFAT_PART_STARTING_SECTOR * DiskGeometry->Geometry.BytesPerSector
+		EXFAT_PART_STARTING_SECTOR * BytesPerSector,
+		ESP_PART_STARTING_SECTOR * BytesPerSector,
+		MBR_PART_STARTING_SECTOR * BytesPerSector
 	};
 	LONGLONG partitionSize[EXPECTED_NUMBER_OF_PARTITIONS] = {
-		ESP_PART_LENGTH_BYTES,
-		MBR_PART_LENGTH_BYTES,
 		// there is a 2nd copy of the GPT at the end of the disk so we
 		// subtract the length here to avoid the operation failing
-		DiskGeometry->DiskSize.QuadPart - gptLength - partitionStart[2]
+		DiskGeometry->DiskSize.QuadPart - gptLength - partitionStart[0],
+		ESP_PART_LENGTH_BYTES,
+		MBR_PART_LENGTH_BYTES
 	};
 	GUID partitionType[EXPECTED_NUMBER_OF_PARTITIONS] = {
-		PARTITION_BASIC_DATA_GUID, // will become PARTITION_SYSTEM_GUID later
-		PARTITION_BIOS_BOOT_GUID,
-		PARTITION_BASIC_DATA_GUID
+		PARTITION_BASIC_DATA_GUID,
+		PARTITION_SYSTEM_GUID,
+		PARTITION_BIOS_BOOT_GUID
+	};
+	wchar_t *partitionName[EXPECTED_NUMBER_OF_PARTITIONS] = {
+		EXFAT_PARTITION_NAME_LIVE,
+		L"",
+		L""
 	};
 
 	for (int partIndex = 0; partIndex < EXPECTED_NUMBER_OF_PARTITIONS; partIndex++) {
@@ -4857,46 +4870,13 @@ bool CEndlessUsbToolDlg::CreateFakePartitionLayout(HANDLE hPhysical, PBYTE layou
 		currentPartition->RewritePartition = TRUE;
 		currentPartition->Gpt.PartitionType = partitionType[partIndex];
 		IGNORE_RETVAL(CoCreateGuid(&currentPartition->Gpt.PartitionId));
-
-		if (partIndex == EXPECTED_NUMBER_OF_PARTITIONS - 1) wcscpy(currentPartition->Gpt.Name, EXFAT_PARTITION_NAME_LIVE);
+		wcscpy(currentPartition->Gpt.Name, partitionName[partIndex]);
 	}
 
 	// push partition information to drive
-	DWORD size = sizeof(DRIVE_LAYOUT_INFORMATION_EX) + DriveLayout->PartitionCount * sizeof(PARTITION_INFORMATION_EX);
+	size = sizeof(DRIVE_LAYOUT_INFORMATION_EX) + DriveLayout->PartitionCount * sizeof(PARTITION_INFORMATION_EX);
 	IFFALSE_GOTOERROR(DeviceIoControl(hPhysical, IOCTL_DISK_SET_DRIVE_LAYOUT_EX, layout, size, NULL, 0, &size, NULL), "Could not set drive layout.");
-	DWORD result = RefreshDriveLayout(hPhysical);
-	IFFALSE_PRINTERROR(result != 0, "Warning: failure on IOCTL_DISK_UPDATE_PROPERTIES"); // not returning here, maybe formatting will still work although IOCTL_DISK_UPDATE_PROPERTIES failed
-
-	returnValue = true;
-error:
-	return returnValue;
-}
-
-bool CEndlessUsbToolDlg::CreateCorrectPartitionLayout(HANDLE hPhysical, PBYTE layout, PBYTE geometry)
-{
-	FUNCTION_ENTER;
-
-	PARTITION_INFORMATION_EX exfatPartition;
-	PDRIVE_LAYOUT_INFORMATION_EX DriveLayout = (PDRIVE_LAYOUT_INFORMATION_EX)(void*)layout;
-	PDISK_GEOMETRY_EX DiskGeometry = (PDISK_GEOMETRY_EX)(void*)geometry;
-	bool returnValue = false;
-
-	// save the exFAT partition data
-	memcpy(&exfatPartition, &(DriveLayout->PartitionEntry[2]), sizeof(PARTITION_INFORMATION_EX));
-	exfatPartition.PartitionNumber = 1;
-	// move ESP and MBR
-	memcpy(&(DriveLayout->PartitionEntry[2]), &(DriveLayout->PartitionEntry[1]), sizeof(PARTITION_INFORMATION_EX));
-	DriveLayout->PartitionEntry[2].PartitionNumber = 3;
-	memcpy(&(DriveLayout->PartitionEntry[1]), &(DriveLayout->PartitionEntry[0]), sizeof(PARTITION_INFORMATION_EX));
-	DriveLayout->PartitionEntry[1].PartitionNumber = 2;
-	DriveLayout->PartitionEntry[1].Gpt.PartitionType = PARTITION_SYSTEM_GUID;
-	// copy exFAT to first position
-	memcpy(&(DriveLayout->PartitionEntry[0]), &exfatPartition, sizeof(PARTITION_INFORMATION_EX));
-
-	// push partition information to drive
-	DWORD size = sizeof(DRIVE_LAYOUT_INFORMATION_EX) + DriveLayout->PartitionCount * sizeof(PARTITION_INFORMATION_EX);
-	IFFALSE_GOTOERROR(DeviceIoControl(hPhysical, IOCTL_DISK_SET_DRIVE_LAYOUT_EX, layout, size, NULL, 0, &size, NULL), "Could not set drive layout.");
-	DWORD result = RefreshDriveLayout(hPhysical);
+	result = RefreshDriveLayout(hPhysical);
 	IFFALSE_PRINTERROR(result != 0, "Warning: failure on IOCTL_DISK_UPDATE_PROPERTIES"); // not returning here, maybe formatting will still work although IOCTL_DISK_UPDATE_PROPERTIES failed
 
 	returnValue = true;
@@ -4908,12 +4888,6 @@ bool CEndlessUsbToolDlg::FormatFirstPartitionOnDrive(DWORD DriveIndex, const wch
 {
 	FUNCTION_ENTER;
 
-	// FormatPartition() requires these to be non-const
-	wchar_t *wFSType    = _wcsdup(kFSType);
-	wchar_t *wPartLabel = _wcsdup(kPartLabel);
-
-	BOOL result;
-	int formatRetries = 5;
 	bool returnValue = false;
 	char *name = NULL;
 
@@ -4925,11 +4899,35 @@ bool CEndlessUsbToolDlg::FormatFirstPartitionOnDrive(DWORD DriveIndex, const wch
 	name = GetLogicalName(DriveIndex, FALSE, TRUE);
 	IFFALSE_GOTOERROR(name != NULL, "GetLogicalName failed");
 
+	IFFALSE_GOTOERROR(FormatPartitionWithRetry(name, kFSType, ulClusterSize, cancelEvent, kPartLabel), "Couldn't format partition");
+
+	Sleep(200); // Radu: check if this is needed, that's what rufus does; I hate sync using sleep
+	IFFALSE_PRINTERROR(WaitForLogical(DriveIndex), "Warning: Logical drive was not found after format!");
+
+	returnValue = true;
+
+error:
+	safe_free(name);
+	return returnValue;
+}
+
+bool CEndlessUsbToolDlg::FormatPartitionWithRetry(const char *partition, const wchar_t *kFSType, ULONG ulClusterSize, HANDLE cancelEvent, const wchar_t *kPartLabel)
+{
+	FUNCTION_ENTER_FMT("%s (label '%ls')", partition, kPartLabel);
+
+	// FormatPartition() requires these to be non-const
+	wchar_t *wFSType    = _wcsdup(kFSType);
+	wchar_t *wPartLabel = _wcsdup(kPartLabel);
+
+	BOOL result;
+	int formatRetries = 5;
+	bool returnValue = false;
+
 	while (formatRetries-- > 0) {
 		// Clear any leftover error state
 		FormatStatus = 0;
 
-		if ((result = FormatPartition(name, wFSType, wPartLabel, ulClusterSize))) {
+		if ((result = FormatPartition(partition, wFSType, wPartLabel, ulClusterSize))) {
 			break;
 		}
 
@@ -4940,19 +4938,15 @@ bool CEndlessUsbToolDlg::FormatFirstPartitionOnDrive(DWORD DriveIndex, const wch
 	}
 	IFFALSE_GOTOERROR(result, "FormatPartition failed too many times");
 
-	Sleep(200); // Radu: check if this is needed, that's what rufus does; I hate sync using sleep
-	IFFALSE_PRINTERROR(WaitForLogical(DriveIndex), "Warning: Logical drive was not found after format!");
-
 	returnValue = true;
 
 error:
 	safe_free(wFSType);
 	safe_free(wPartLabel);
-	safe_free(name);
 	return returnValue;
 }
 
-bool CEndlessUsbToolDlg::MountFirstPartitionOnDrive(DWORD DriveIndex, CString &driveLetter)
+bool CEndlessUsbToolDlg::MountFirstPartitionOnDrive(DWORD DriveIndex, CStringA &driveLetter)
 {
 	FUNCTION_ENTER;
 
@@ -5096,7 +5090,7 @@ bool CEndlessUsbToolDlg::CopyFilesToexFAT(CEndlessUsbToolDlg *dlg, const CString
 	IFFALSE_GOTOERROR(createDirResult == ERROR_SUCCESS || createDirResult == ERROR_FILE_EXISTS, "Error creating directory on USB drive.");
 
 	CEndlessUsbToolDlg::ImageUnpackOperation = OP_NEW_LIVE_CREATION;
-	CEndlessUsbToolDlg::ImageUnpackPercentStart = USB_PROGRESS_EXFAT_PREPARED;
+	CEndlessUsbToolDlg::ImageUnpackPercentStart = USB_PROGRESS_IMG_COPY_STARTED;
 	CEndlessUsbToolDlg::ImageUnpackPercentEnd = USB_PROGRESS_IMG_COPY_DONE;
 	CEndlessUsbToolDlg::ImageUnpackFileSize = dlg->m_selectedFileSize;
 
