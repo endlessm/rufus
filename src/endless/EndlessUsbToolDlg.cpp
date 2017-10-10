@@ -80,8 +80,6 @@ PF_TYPE_DECL(WINAPI, BOOL, SHChangeNotifyDeregister, (ULONG));
 PF_TYPE_DECL(WINAPI, ULONG, SHChangeNotifyRegister, (HWND, int, LONG, UINT, int, const SHChangeNotifyEntry *));
 PF_TYPE_DECL(WINAPI, BOOL, ChangeWindowMessageFilterEx, (HWND, UINT, DWORD, PCHANGEFILTERSTRUCT));
 
-BOOL FormatDrive(DWORD DriveIndex, int fsToUse, const wchar_t *partLabel);
-
 // Added by us so we don't go through the hastle of getting device speed again
 // Rufus code already does it
 DWORD usbDeviceSpeed[128];
@@ -4048,6 +4046,9 @@ const GUID PARTITION_BIOS_BOOT_GUID =
 #define EXFAT_PARTITION_NAME_IMAGES		L"eosimages"
 #define EXFAT_PARTITION_NAME_LIVE		L"eoslive"
 
+#define EXFAT_CLUSTER_SIZE              0x8000
+#define ESP_CLUSTER_SIZE                0x200
+
 // Used in ReformatterUsb mode, after the eosinstaller image has been written
 // to the target device. Appends an exFAT partition (renumbered to be logically
 // first) and copies the OS image, signature, and language preset across.
@@ -4117,7 +4118,7 @@ DWORD WINAPI CEndlessUsbToolDlg::FileCopyThread(void* param)
     // Check if user cancelled
     IFFALSE_GOTOERROR(WaitForSingleObject(dlg->m_cancelOperationEvent, 0) == WAIT_TIMEOUT, "User cancel.");
 	// Format the partition
-	IFFALSE_GOTOERROR(FormatFirstPartitionOnDrive(DriveIndex, FS_EXFAT, dlg->m_cancelOperationEvent, EXFAT_PARTITION_NAME_IMAGES), "Error on FormatFirstPartitionOnDrive");
+	IFFALSE_GOTOERROR(FormatFirstPartitionOnDrive(DriveIndex, L"exFAT", EXFAT_CLUSTER_SIZE, dlg->m_cancelOperationEvent, EXFAT_PARTITION_NAME_IMAGES), "Error on FormatFirstPartitionOnDrive");
     // Mount it
 	IFFALSE_GOTOERROR(MountFirstPartitionOnDrive(DriveIndex, driveDestination), "Error on MountFirstPartitionOnDrive");
 
@@ -4746,7 +4747,7 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	CHECK_IF_CANCELLED;
 
 	// Format and mount ESP
-	IFFALSE_GOTOERROR(FormatFirstPartitionOnDrive(DriveIndex, FS_FAT32, dlg->m_cancelOperationEvent, L""), "Error on FormatFirstPartitionOnDrive");
+	IFFALSE_GOTOERROR(FormatFirstPartitionOnDrive(DriveIndex, L"FAT32", ESP_CLUSTER_SIZE, dlg->m_cancelOperationEvent, L""), "Error on FormatFirstPartitionOnDrive");
 
 	CHECK_IF_CANCELLED;
 
@@ -4772,7 +4773,7 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	CHECK_IF_CANCELLED;
 
 	// Format and mount exFAT
-	IFFALSE_GOTOERROR(FormatFirstPartitionOnDrive(DriveIndex, FS_EXFAT, dlg->m_cancelOperationEvent, EXFAT_PARTITION_NAME_LIVE), "Error on FormatFirstPartitionOnDrive");
+	IFFALSE_GOTOERROR(FormatFirstPartitionOnDrive(DriveIndex, L"exFAT", EXFAT_CLUSTER_SIZE, dlg->m_cancelOperationEvent, EXFAT_PARTITION_NAME_LIVE), "Error on FormatFirstPartitionOnDrive");
 
 	CHECK_IF_CANCELLED;
 
@@ -4903,9 +4904,13 @@ error:
 	return returnValue;
 }
 
-bool CEndlessUsbToolDlg::FormatFirstPartitionOnDrive(DWORD DriveIndex, int fsToUse, HANDLE cancelEvent, const wchar_t *partLabel)
+bool CEndlessUsbToolDlg::FormatFirstPartitionOnDrive(DWORD DriveIndex, const wchar_t *kFSType, ULONG ulClusterSize, HANDLE cancelEvent, const wchar_t *kPartLabel)
 {
 	FUNCTION_ENTER;
+
+	// FormatPartition() requires these to be non-const
+	wchar_t *wFSType    = _wcsdup(kFSType);
+	wchar_t *wPartLabel = _wcsdup(kPartLabel);
 
 	BOOL result;
 	int formatRetries = 5;
@@ -4920,16 +4925,16 @@ bool CEndlessUsbToolDlg::FormatFirstPartitionOnDrive(DWORD DriveIndex, int fsToU
 		// Clear any leftover error state
 		FormatStatus = 0;
 
-		if ((result = FormatDrive(DriveIndex, fsToUse, partLabel))) {
+		if ((result = FormatPartition(DriveIndex, wFSType, wPartLabel, ulClusterSize))) {
 			break;
 		}
 
-		uprintf("FormatDrive failed; FormatStatus = 0x%x %s\n", FormatStatus, StrError(FormatStatus, TRUE));
+		uprintf("FormatPartition failed; FormatStatus = 0x%x %s\n", FormatStatus, StrError(FormatStatus, TRUE));
 		Sleep(200); // Radu: check if this is needed, that's what rufus does; I hate sync using sleep
 		// Check if user cancelled
 		IFFALSE_GOTOERROR(WaitForSingleObject(cancelEvent, 0) == WAIT_TIMEOUT, "User cancel.");
 	}
-	IFFALSE_GOTOERROR(result, "FormatDrive failed too many times");
+	IFFALSE_GOTOERROR(result, "FormatPartition failed too many times");
 
 	Sleep(200); // Radu: check if this is needed, that's what rufus does; I hate sync using sleep
 	IFFALSE_PRINTERROR(WaitForLogical(DriveIndex), "Warning: Logical drive was not found after format!");
@@ -4937,6 +4942,8 @@ bool CEndlessUsbToolDlg::FormatFirstPartitionOnDrive(DWORD DriveIndex, int fsToU
 	returnValue = true;
 
 error:
+	safe_free(wFSType);
+	safe_free(wPartLabel);
 	return returnValue;
 }
 

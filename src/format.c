@@ -674,13 +674,48 @@ out:
 }
 
 /*
+ * Call on fmifs.dll's FormatEx() to format a partition. Returns FALSE with FormatStatus set on error.
+ */
+BOOL FormatPartition(DWORD DriveIndex, wchar_t *wFSType, wchar_t *partLabel, ULONG ulClusterSize)
+{
+	BOOL r = FALSE;
+	PF_DECL(FormatEx);
+	char *locale, *VolumeName = NULL;
+	WCHAR* wVolumeName = NULL;
+
+	VolumeName = GetLogicalName(DriveIndex, FALSE, TRUE);
+	wVolumeName = utf8_to_wchar(VolumeName);
+	if (wVolumeName == NULL) {
+		uprintf("Could not read volume name\n");
+		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_GEN_FAILURE;
+		goto out;
+	}
+
+	// LoadLibrary("fmifs.dll") appears to changes the locale, which can lead to
+	// problems with tolower(). Make sure we restore the locale. For more details,
+	// see http://comments.gmane.org/gmane.comp.gnu.mingw.user/39300
+	locale = setlocale(LC_ALL, NULL);
+	PF_INIT_OR_OUT(FormatEx, Fmifs);
+	setlocale(LC_ALL, locale);
+
+	pfFormatEx(wVolumeName, SelectedDrive.Geometry.MediaType, wFSType, partLabel,
+		/* quick format */ TRUE, ulClusterSize, FormatExCallback);
+
+	if (!IS_ERROR(FormatStatus)) {
+		uprintf("Format completed.\n");
+		r = TRUE;
+	}
+
+out:
+	safe_free(VolumeName);
+	safe_free(wVolumeName);
+	return r;
+}
+
+/*
  * Call on fmifs.dll's FormatEx() to format the drive
  */
-#ifdef ENDLESSUSB_TOOL
-BOOL FormatDrive(DWORD DriveIndex, int fsToUse, const wchar_t *partLabel)
-#else
 static BOOL FormatDrive(DWORD DriveIndex)
-#endif // ENDLESSUSB_TOOL
 {
 	BOOL r = FALSE;
 	PF_DECL(FormatEx);
@@ -694,11 +729,6 @@ static BOOL FormatDrive(DWORD DriveIndex)
 	size_t i;
 	int fs;
 
-#ifdef ENDLESSUSB_TOOL
-    fs = fsToUse;
-    strcpy_s(FSType, sizeof(FSType), fs == FS_EXFAT ? "exFAT" : "FAT32");
-    UNREFERENCED_PARAMETER(i);
-#else
 	GetWindowTextU(hFileSystem, FSType, ARRAYSIZE(FSType));
 	// Might have a (Default) suffix => remove it
 	for (i=strlen(FSType); i>2; i--) {
@@ -713,7 +743,6 @@ static BOOL FormatDrive(DWORD DriveIndex)
 	} else {
 		PrintInfoDebug(0, MSG_222, FSType);
 	}
-#endif // ENDLESSUSB_TOOL
 	VolumeName = GetLogicalName(DriveIndex, TRUE, TRUE);
 	wVolumeName = utf8_to_wchar(VolumeName);
 	if (wVolumeName == NULL) {
@@ -733,11 +762,6 @@ static BOOL FormatDrive(DWORD DriveIndex)
 	PF_INIT(EnableVolumeCompression, Fmifs);
 	setlocale(LC_ALL, locale);
 
-#ifdef ENDLESSUSB_TOOL
-    wcscpy_s(wFSType, 64, fs == FS_EXFAT ? L"exFAT" : L"FAT32");
-    wcscpy_s(wLabel, 64, partLabel);
-    ulClusterSize = fs == FS_EXFAT ? 0x8000 : 0x200;
-#else
 	GetWindowTextW(hFileSystem, wFSType, ARRAYSIZE(wFSType));
 	// We may have a " (Default)" trail
 	for (i=0; i<wcslen(wFSType); i++) {
@@ -747,8 +771,6 @@ static BOOL FormatDrive(DWORD DriveIndex)
 		}
 	}
 	GetWindowTextW(hLabel, wLabel, ARRAYSIZE(wLabel));
-
-
 	// Make sure the label is valid
 	ToValidLabel(wLabel, (wFSType[0] == 'F') && (wFSType[1] == 'A') && (wFSType[2] == 'T'));
 	ulClusterSize = (ULONG)ComboBox_GetItemData(hClusterSize, ComboBox_GetCurSel(hClusterSize));
@@ -762,7 +784,7 @@ static BOOL FormatDrive(DWORD DriveIndex)
 	format_percent = 0.0f;
 	task_number = 0;
 	fs_index = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
-#endif // ENDLESSUSB_TOOL
+
 	uprintf("%s format was selected\n", IsChecked(IDC_QUICKFORMAT)?"Quick":"Slow");
 	pfFormatEx(wVolumeName, SelectedDrive.Geometry.MediaType, wFSType, wLabel,
 		IsChecked(IDC_QUICKFORMAT), ulClusterSize, FormatExCallback);
@@ -1607,8 +1629,6 @@ DWORD WINAPI FormatThread(void* param)
 	char kolibri_dst[] = "?:\\MTLD_F32";
 	char grub4dos_dst[] = "?:\\grldr";
 
-	//goto out;
-
 	PF_TYPE_DECL(WINAPI, LANGID, GetThreadUILanguage, (void));
 	PF_TYPE_DECL(WINAPI, LANGID, SetThreadUILanguage, (LANGID));
 	PF_INIT(GetThreadUILanguage, Kernel32);
@@ -1838,11 +1858,7 @@ DWORD WINAPI FormatThread(void* param)
 
 	// If FAT32 is requested and we have a large drive (>32 GB) use
 	// large FAT32 format, else use MS's FormatEx.
-#ifdef ENDLESSUSB_TOOL
-	ret = use_large_fat32?FormatFAT32(DriveIndex):FormatDrive(DriveIndex, fs, L"");
-#else
 	ret = use_large_fat32 ? FormatFAT32(DriveIndex) : FormatDrive(DriveIndex);
-#endif // ENDLESSUSB_TOOL
 	if (!ret) {
 		// Error will be set by FormatDrive() in FormatStatus
 		uprintf("Format error: %s\n", StrError(FormatStatus, TRUE));

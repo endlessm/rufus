@@ -453,6 +453,8 @@ extern BOOL SetThreadAffinity(DWORD_PTR* thread_affinity, size_t num_threads);
 #define printbitslz(x) _printbits(sizeof(x), &x, 1)
 extern char* _printbits(size_t const size, void const * const ptr, int leading_zeroes);
 
+BOOL FormatPartition(DWORD DriveIndex, wchar_t *wFSType, wchar_t *partLabel, ULONG ulClusterSize);
+
 DWORD WINAPI FormatThread(void* param);
 DWORD WINAPI SaveImageThread(void* param);
 DWORD WINAPI SumThread(void* param);
