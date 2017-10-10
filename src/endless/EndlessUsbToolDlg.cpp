@@ -4651,8 +4651,8 @@ void CEndlessUsbToolDlg::SetJSONDownloadState(JSONDownloadState state)
 #define GPT_MAX_PARTITION_COUNT		128
 #define ESP_PART_STARTING_SECTOR	2048
 #define ESP_PART_LENGTH_BYTES		65011712
-#define MBR_PART_STARTING_SECTOR	129024
-#define MBR_PART_LENGTH_BYTES		1048576
+#define BIOS_BOOT_PART_STARTING_SECTOR 129024
+#define BIOS_BOOT_PART_LENGTH_BYTES    1048576
 #define EXFAT_PART_STARTING_SECTOR	131072
 
 #define EFI_BOOT_SUBDIRECTORY			L"EFI\\BOOT"
@@ -4742,7 +4742,7 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	Sleep(200); // Radu: check if this is needed, that's what rufus does; I hate sync using sleep
 	IFFALSE_PRINTERROR(WaitForLogical(DriveIndex), "Warning: Logical drive was not found!"); // We try to continue even if this fails, just in case
 
-	// Write MBR and SBR to disk
+	// Write MBR and BIOS boot partition to disk
 	IFFALSE_GOTOERROR(WriteMBRToUSB(hPhysical, bootFilesPath), "Error on WriteMBRToUSB");
 	IFFALSE_GOTOERROR(WriteBIOSBootPartitionToUSB(hPhysical, bootFilesPath, BytesPerSector), "Error on WriteBIOSBootPartitionToUSB");
 
@@ -4843,14 +4843,14 @@ bool CEndlessUsbToolDlg::CreateUSBPartitionLayout(HANDLE hPhysical, DWORD &Bytes
 	LONGLONG partitionStart[EXPECTED_NUMBER_OF_PARTITIONS] = {
 		EXFAT_PART_STARTING_SECTOR * BytesPerSector,
 		ESP_PART_STARTING_SECTOR * BytesPerSector,
-		MBR_PART_STARTING_SECTOR * BytesPerSector
+		BIOS_BOOT_PART_STARTING_SECTOR * BytesPerSector
 	};
 	LONGLONG partitionSize[EXPECTED_NUMBER_OF_PARTITIONS] = {
 		// there is a 2nd copy of the GPT at the end of the disk so we
 		// subtract the length here to avoid the operation failing
 		DiskGeometry->DiskSize.QuadPart - gptLength - partitionStart[0],
 		ESP_PART_LENGTH_BYTES,
-		MBR_PART_LENGTH_BYTES
+		BIOS_BOOT_PART_LENGTH_BYTES
 	};
 	GUID partitionType[EXPECTED_NUMBER_OF_PARTITIONS] = {
 		PARTITION_BASIC_DATA_GUID,
@@ -5179,25 +5179,25 @@ bool CEndlessUsbToolDlg::WriteBIOSBootPartitionToUSB(HANDLE hPhysical, const CSt
 	FUNCTION_ENTER;
 
 	CString coreImgFilePath = bootFilesPath + LIVE_CORE_IMG_FILE;
-	unsigned char *endlessSBRData = (unsigned char *) malloc(MBR_PART_LENGTH_BYTES);
+	unsigned char *coreImg = (unsigned char *) malloc(BIOS_BOOT_PART_LENGTH_BYTES);
 	bool retResult = false;
 	size_t coreImgSize;
 	DWORD coreImgBytesWritten = 0;
 	LARGE_INTEGER lMbrPartitionStart;
 
-	lMbrPartitionStart.QuadPart = bytesPerSector * MBR_PART_STARTING_SECTOR;
+	lMbrPartitionStart.QuadPart = bytesPerSector * BIOS_BOOT_PART_STARTING_SECTOR;
 
 	// Read core.img data and write it to USB drive
-	coreImgSize = ReadEntireFile(coreImgFilePath, endlessSBRData, MBR_PART_LENGTH_BYTES);
+	coreImgSize = ReadEntireFile(coreImgFilePath, coreImg, BIOS_BOOT_PART_LENGTH_BYTES);
 	IFFALSE_GOTOERROR(coreImgSize, "Couldn't read core.img");
 	IFFALSE_GOTOERROR(SetFilePointerEx(hPhysical, lMbrPartitionStart, NULL, FILE_BEGIN), "Error setting handle position");
-	IFFALSE_GOTOERROR(WriteFileWithRetry(hPhysical, endlessSBRData, coreImgSize, &coreImgBytesWritten, WRITE_RETRIES),
+	IFFALSE_GOTOERROR(WriteFileWithRetry(hPhysical, coreImg, coreImgSize, &coreImgBytesWritten, WRITE_RETRIES),
 		"Error writing BIOS boot partition");
 
 	retResult = true;
 
 error:
-	safe_free(endlessSBRData);
+	safe_free(coreImg);
 
 	return retResult;
 }
