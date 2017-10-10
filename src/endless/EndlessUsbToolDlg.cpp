@@ -822,8 +822,9 @@ BOOL CEndlessUsbToolDlg::OnInitDialog()
 	SetWindowLong(m_hWnd, GWL_STYLE, GetWindowLong(m_hWnd, GWL_STYLE)
 		& (~(WS_CAPTION | WS_BORDER)));
 
-    // Move window
+    // Resize and center window
     SetWindowPos(NULL, 0, 0, 748, 514, SWP_NOMOVE | SWP_NOZORDER);
+    CenterDialog(m_hWnd);
 
     GetIEVersion();
 

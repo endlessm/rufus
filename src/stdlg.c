@@ -495,6 +495,7 @@ void CreateStatusBar(void)
 	SetWindowPos(hStatusToolbar, GetDlgItem(hMainDialog, IDCANCEL), x, y, width, height, 0);
 	ShowWindow(hStatusToolbar, SW_SHOWNORMAL);
 }
+#endif
 
 /*
  * Center a dialog with regards to the main application Window or the desktop
@@ -523,6 +524,7 @@ void CenterDialog(HWND hDlg)
 	SetWindowPos(hDlg, HWND_TOP, rcParent.left + (rc.right / 2), rcParent.top + (rc.bottom / 2) - 25, 0, 0, SWP_NOSIZE);
 }
 
+#ifndef ENDLESSUSB_TOOL
 // http://stackoverflow.com/questions/431470/window-border-width-and-height-in-win32-how-do-i-get-it
 SIZE GetBorderSize(HWND hDlg)
 {
