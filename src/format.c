@@ -676,14 +676,13 @@ out:
 /*
  * Call on fmifs.dll's FormatEx() to format a partition. Returns FALSE with FormatStatus set on error.
  */
-BOOL FormatPartition(DWORD DriveIndex, wchar_t *wFSType, wchar_t *partLabel, ULONG ulClusterSize)
+BOOL FormatPartition(const char *VolumeName, wchar_t *wFSType, wchar_t *partLabel, ULONG ulClusterSize)
 {
 	BOOL r = FALSE;
 	PF_DECL(FormatEx);
-	char *locale, *VolumeName = NULL;
+	char *locale;
 	WCHAR* wVolumeName = NULL;
 
-	VolumeName = GetLogicalName(DriveIndex, FALSE, TRUE);
 	wVolumeName = utf8_to_wchar(VolumeName);
 	if (wVolumeName == NULL) {
 		uprintf("Could not read volume name\n");
@@ -707,7 +706,6 @@ BOOL FormatPartition(DWORD DriveIndex, wchar_t *wFSType, wchar_t *partLabel, ULO
 	}
 
 out:
-	safe_free(VolumeName);
 	safe_free(wVolumeName);
 	return r;
 }

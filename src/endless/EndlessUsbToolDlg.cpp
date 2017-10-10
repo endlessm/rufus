@@ -4915,17 +4915,21 @@ bool CEndlessUsbToolDlg::FormatFirstPartitionOnDrive(DWORD DriveIndex, const wch
 	BOOL result;
 	int formatRetries = 5;
 	bool returnValue = false;
+	char *name = NULL;
 
 	// Wait for the logical drive we just created to appear
 	uprintf("Waiting for logical drive to reappear...\n");
 	Sleep(200); // Radu: check if this is needed, that's what rufus does; I hate sync using sleep
 	IFFALSE_PRINTERROR(WaitForLogical(DriveIndex), "Warning: Logical drive was not found!"); // We try to continue even if this fails, just in case
 
+	name = GetLogicalName(DriveIndex, FALSE, TRUE);
+	IFFALSE_GOTOERROR(name != NULL, "GetLogicalName failed");
+
 	while (formatRetries-- > 0) {
 		// Clear any leftover error state
 		FormatStatus = 0;
 
-		if ((result = FormatPartition(DriveIndex, wFSType, wPartLabel, ulClusterSize))) {
+		if ((result = FormatPartition(name, wFSType, wPartLabel, ulClusterSize))) {
 			break;
 		}
 
@@ -4944,6 +4948,7 @@ bool CEndlessUsbToolDlg::FormatFirstPartitionOnDrive(DWORD DriveIndex, const wch
 error:
 	safe_free(wFSType);
 	safe_free(wPartLabel);
+	safe_free(name);
 	return returnValue;
 }
 
