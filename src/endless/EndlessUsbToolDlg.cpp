@@ -4697,13 +4697,9 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 
 	CEndlessUsbToolDlg *dlg = (CEndlessUsbToolDlg*)param;
 	DWORD DriveIndex = SelectedDrive.DeviceNumber;
-	BOOL result;
-	DWORD size;
 	HANDLE hPhysical = INVALID_HANDLE_VALUE;
-	CREATE_DISK createDiskData;
 	CString bootFilesPath = CEndlessUsbToolApp::TempFilePath(CString(BOOT_COMPONENTS_FOLDER)) + L"\\";
-	CString usbFilesPath;
-	DWORD BytesPerSector = 0;
+	DWORD BytesPerSector = SelectedDrive.Geometry.BytesPerSector;
 	CStringA eosliveDriveLetter, espDriveLetter;
 	const char *cszEspDriveLetter;
 
@@ -4719,18 +4715,13 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	UpdateProgress(OP_NEW_LIVE_CREATION, USB_PROGRESS_UNPACK_BOOT_ZIP);
 	CHECK_IF_CANCELLED;
 
-	// initialize create disk data
-	memset(&createDiskData, 0, sizeof(createDiskData));
-	createDiskData.PartitionStyle = PARTITION_STYLE_GPT;
-	createDiskData.Gpt.MaxPartitionCount = GPT_MAX_PARTITION_COUNT;
-
 	// get disk handle
 	hPhysical = GetPhysicalHandle(DriveIndex, TRUE, TRUE);
 	IFFALSE_GOTOERROR(hPhysical != INVALID_HANDLE_VALUE, "Error on acquiring disk handle.");
 
-	// initialize the disk
-	result = DeviceIoControl(hPhysical, IOCTL_DISK_CREATE_DISK, &createDiskData, sizeof(createDiskData), NULL, 0, &size, NULL);
-	IFFALSE_GOTOERROR(result != 0, "Error when calling IOCTL_DISK_CREATE_DISK");
+	// erase any existing partition
+	IFFALSE_GOTOERROR(ClearMBRGPT(hPhysical, SelectedDrive.DiskSize, BytesPerSector, FALSE), "ClearMBRGPT failed");
+	IFFALSE_GOTOERROR(DeletePartitions(hPhysical), "ErasePartitions failed");
 
 	// create partitions.
 	IFFALSE_GOTOERROR(CreateUSBPartitionLayout(hPhysical, BytesPerSector), "Error on CreateUSBPartitionLayout");

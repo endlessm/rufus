@@ -842,7 +842,7 @@ out:
 	return r;
 }
 
-static BOOL ClearMBRGPT(HANDLE hPhysicalDrive, LONGLONG DiskSize, DWORD SectorSize, BOOL add1MB)
+BOOL ClearMBRGPT(HANDLE hPhysicalDrive, LONGLONG DiskSize, DWORD SectorSize, BOOL add1MB)
 {
 	BOOL r = FALSE;
 	uint64_t i, last_sector = DiskSize/SectorSize;

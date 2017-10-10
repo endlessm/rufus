@@ -454,6 +454,7 @@ extern BOOL SetThreadAffinity(DWORD_PTR* thread_affinity, size_t num_threads);
 extern char* _printbits(size_t const size, void const * const ptr, int leading_zeroes);
 
 BOOL FormatPartition(const char *VolumeName, wchar_t *wFSType, wchar_t *partLabel, ULONG ulClusterSize);
+BOOL ClearMBRGPT(HANDLE hPhysicalDrive, LONGLONG DiskSize, DWORD SectorSize, BOOL add1MB);
 
 DWORD WINAPI FormatThread(void* param);
 DWORD WINAPI SaveImageThread(void* param);
