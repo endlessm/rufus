@@ -190,6 +190,91 @@ HANDLE GetPhysicalHandle(DWORD DriveIndex, BOOL bWriteAccess, BOOL bLockDrive)
 }
 
 /*
+ * Gets the device path for a (1-indexed) partition on the given drive,
+ * or NULL if no such partition exists.
+ * The returned string is allocated and must be freed
+ */
+char* GetPartitionLogicalName(DWORD DriveIndex, DWORD PartitionIndex)
+{
+	// Partitions of types that Windows understands (ie basic data and friends)
+	// are allocated names of the form \\?\Volume{GUID} by the volume manager,
+	// but we also need to deal with an EFI support partition and a BIOS boot
+	// partition, which do not get GUIDs of this form. However, partitions on a
+	// given disk are allocated predictable paths, so we can use those.
+	//
+	// AltMountVolume() implements a similar algorithm, but starts from a drive
+	// letter (rather than drive number), maps that to HarddiskXPartitionY,
+	// and replaces Y with the desired partition number.
+	//
+	// Useful references:
+	// - Windows Internals, Sixth Edition, Part 2, pp 136 onwards
+	// - https://blogs.msdn.microsoft.com/jeremykuhne/2016/05/02/dos-to-nt-a-paths-journey/
+	// - https://msdn.microsoft.com/en-us/library/windows/desktop/aa365461(v=vs.85).aspx
+	// - Run WinObj as administrator and look in \GLOBAL?? and \Device
+	BOOL success = FALSE;
+	char partition_name[MAX_PATH] = "";
+	char volume_name[MAX_PATH] = "";
+	static const char * const volume_name_prefix = "\\Device\\HarddiskVolume";
+	char win32_volume_name[MAX_PATH] = "\\\\?\\";
+	HANDLE hDrive = INVALID_HANDLE_VALUE;
+	STORAGE_DEVICE_NUMBER sdn = { 0 };
+	DWORD size = 0;
+
+	CheckDriveIndex(DriveIndex);
+	if (PartitionIndex == 0 || PartitionIndex > 3) {
+		uprintf("ERROR: unlikely PartitionIndex %d", PartitionIndex);
+		goto out;
+	}
+
+	// We could just return \\\\?\\HarddiskXPartitionY (where X and Y are
+	// reused if devices are unplugged and replugged)...
+	safe_sprintf(partition_name, sizeof(partition_name),
+		"Harddisk%dPartition%d", DriveIndex, PartitionIndex);
+
+	// But instead, resolve it to \Device\HarddiskVolumeZ (where Z is not reused),
+	// which also verifies that the partition really does exist.
+	if (!QueryDosDeviceA(partition_name, volume_name, sizeof(volume_name)) || (strlen(volume_name) == 0)) {
+		uprintf("Could not find the DOS volume name for '%s': %s", partition_name, WindowsErrorString());
+		goto out;
+	}
+
+	if (0 != safe_strnicmp(volume_name, volume_name_prefix, strlen(volume_name_prefix))) {
+		uprintf("Unexpected DOS volume name for '%s': %s", partition_name, volume_name);
+		goto out;
+	}
+
+	// Convert internal NT object name \Device\HarddiskVolumeZ to Win32 path
+	// \\?\HarddiskVolumeZ (a symlink to the former) which is needed for
+	// CreateFile() and FormatEx()
+	safe_strcpy(&win32_volume_name[4], sizeof(win32_volume_name) - 4, &volume_name[8]);
+
+	/* Quick consistency check */
+	hDrive = CreateFileA(win32_volume_name, GENERIC_READ, FILE_SHARE_READ|FILE_SHARE_WRITE,
+		NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (hDrive == INVALID_HANDLE_VALUE) {
+		uprintf("Could not open volume '%s': %s", win32_volume_name, WindowsErrorString());
+		goto out;
+	}
+
+	if ((!DeviceIoControl(hDrive, IOCTL_STORAGE_GET_DEVICE_NUMBER, NULL, 0,
+		&sdn, sizeof(sdn), &size, NULL)) || (size <= 0)) {
+		uprintf("Could not get device number for '%s': %s", win32_volume_name, WindowsErrorString());
+		goto out;
+	}
+
+	if (sdn.DeviceNumber != DriveIndex || sdn.PartitionNumber != PartitionIndex) {
+		uprintf("Mismatched DeviceNumber & PartitionNumber for '%s': %d, %d vs %d %d",
+			win32_volume_name, DriveIndex, PartitionIndex, sdn.DeviceNumber, sdn.PartitionNumber);
+	}
+
+	success = TRUE;
+
+out:
+	safe_closehandle(hDrive);
+	return success ? safe_strdup(win32_volume_name) : NULL;
+}
+
+/*
  * Return the first GUID volume name for the associated drive or NULL if not found
  * See http://msdn.microsoft.com/en-us/library/cc542456.aspx
  * The returned string is allocated and must be freed

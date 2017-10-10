@@ -78,6 +78,7 @@ BOOL SetAutoMount(BOOL enable);
 BOOL GetAutoMount(BOOL* enabled);
 char* GetPhysicalName(DWORD DriveIndex);
 HANDLE GetPhysicalHandle(DWORD DriveIndex, BOOL bWriteAccess, BOOL bLockDrive);
+char* GetPartitionLogicalName(DWORD DriveIndex, DWORD PartitionIndex);
 char* GetLogicalName(DWORD DriveIndex, BOOL bKeepTrailingBackslash, BOOL bSilent);
 BOOL WaitForLogical(DWORD DriveIndex);
 HANDLE GetLogicalHandle(DWORD DriveIndex, BOOL bWriteAccess, BOOL bLockDrive);
