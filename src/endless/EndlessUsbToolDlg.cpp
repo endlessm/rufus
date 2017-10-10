@@ -4723,6 +4723,14 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	IFFALSE_GOTOERROR(ClearMBRGPT(hPhysical, SelectedDrive.DiskSize, BytesPerSector, FALSE), "ClearMBRGPT failed");
 	IFFALSE_GOTOERROR(DeletePartitions(hPhysical), "ErasePartitions failed");
 
+	// write BIOS boot partition before partitioning the drive.
+	// https://msdn.microsoft.com/en-us/library/windows/desktop/aa365747%28v=vs.85%29.aspx?f=255&MSPPError=-2147217396 says:
+	// A write on a disk handle will succeed if one of the following conditions is true:
+	// * The sectors to be written to do not fall within a volume's extents.
+	// * [some other conditions]
+	// Having zeroed the partition table, this first condition is surely true.
+	IFFALSE_GOTOERROR(WriteBIOSBootPartitionToUSB(hPhysical, bootFilesPath, BytesPerSector), "Error on WriteBIOSBootPartitionToUSB");
+
 	// create partitions.
 	IFFALSE_GOTOERROR(CreateUSBPartitionLayout(hPhysical, BytesPerSector), "Error on CreateUSBPartitionLayout");
 
@@ -4733,9 +4741,8 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	Sleep(200); // Radu: check if this is needed, that's what rufus does; I hate sync using sleep
 	IFFALSE_PRINTERROR(WaitForLogical(DriveIndex), "Warning: Logical drive was not found!"); // We try to continue even if this fails, just in case
 
-	// Write MBR and BIOS boot partition to disk
+	// Write MBR to disk
 	IFFALSE_GOTOERROR(WriteMBRToUSB(hPhysical, bootFilesPath), "Error on WriteMBRToUSB");
-	IFFALSE_GOTOERROR(WriteBIOSBootPartitionToUSB(hPhysical, bootFilesPath, BytesPerSector), "Error on WriteBIOSBootPartitionToUSB");
 
 	safe_closehandle(hPhysical);
 
