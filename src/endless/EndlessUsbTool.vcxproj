@@ -271,6 +271,7 @@
   <ItemGroup>
     <ClInclude Include="..\dos.h" />
     <ClInclude Include="..\drive.h" />
+    <ClInclude Include="..\format.h" />
     <ClInclude Include="..\localization.h" />
     <ClInclude Include="..\msapi_utf8.h" />
     <ClInclude Include="..\rufus.h" />

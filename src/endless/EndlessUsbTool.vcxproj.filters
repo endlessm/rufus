@@ -90,6 +90,9 @@
     <ClInclude Include="..\dos.h">
       <Filter>Header Files\Rufus Headers</Filter>
     </ClInclude>
+    <ClInclude Include="..\format.h">
+      <Filter>Header Files\Rufus Headers</Filter>
+    </ClInclude>
     <ClInclude Include="DownloadManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
