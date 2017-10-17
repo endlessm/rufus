@@ -4723,6 +4723,10 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	hPhysical = GetPhysicalHandle(DriveIndex, TRUE, TRUE);
 	IFFALSE_GOTOERROR(hPhysical != INVALID_HANDLE_VALUE, "Error on acquiring disk handle.");
 
+	// Remove drive letters for existing volumes
+	IFFALSE_GOTOERROR(DeleteMountpointsForDrive(DriveIndex), "Couldn't delete mountpoints");
+	CHECK_IF_CANCELLED;
+
 	// erase any existing partition
 	IFFALSE_GOTOERROR(ClearMBRGPT(hPhysical, SelectedDrive.DiskSize, BytesPerSector, FALSE), "ClearMBRGPT failed");
 	IFFALSE_GOTOERROR(DeletePartitions(hPhysical), "ErasePartitions failed");
@@ -4810,6 +4814,37 @@ done:
 	safe_closehandle(hPhysical);
 	dlg->PostMessage(WM_FINISHED_ALL_OPERATIONS, 0, 0);
 	return 0;
+}
+
+// Lifted from Rufus' FormatThread
+bool CEndlessUsbToolDlg::DeleteMountpointsForDrive(DWORD DriveIndex)
+{
+	FUNCTION_ENTER;
+
+	char drive_name[] = "?:\\";
+	char drive_letters[27];
+	int i;
+
+	IFFALSE_RETURN_VALUE(GetDriveLetters(DriveIndex, drive_letters),
+		"Failed to get drive letters", false);
+
+	if (drive_letters[0] == 0) {
+		uprintf("No drive letters were assigned");
+		return true;
+	}
+
+	// Unmount all mounted volumes that belong to this drive
+	// Do it in reverse so that we always end on the first volume letter
+	for (i=(int)safe_strlen(drive_letters); i>0; i--) {
+		drive_name[0] = drive_letters[i - 1];
+
+		// TODO: check image is not on this drive
+		uprintf("Deleting mountpoint %s", drive_name);
+		// Try to continue on error. We will fail later if this causes an issue.
+		IFFALSE_PRINTERROR(DeleteVolumeMountPointA(drive_name), "Failed to delete mountpoint");
+	}
+
+	return true;
 }
 
 

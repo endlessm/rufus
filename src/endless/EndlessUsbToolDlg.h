@@ -399,6 +399,7 @@ private:
 	void ChangeDriveAutoRunAndMount(bool setEndlessValues);
 
 	static DWORD WINAPI CreateUSBStick(LPVOID param);
+	static bool DeleteMountpointsForDrive(DWORD DriveIndex);
 	static bool CreateUSBPartitionLayout(HANDLE hPhysical, DWORD &BytesPerSector);
 	static bool FormatFirstPartitionOnDrive(DWORD DriveIndex, const wchar_t *kFSType, ULONG ulClusterSize, HANDLE cancelEvent, const wchar_t *kPartLabel);
 	static bool FormatPartitionWithRetry(const char *partition, const wchar_t *kFSType, ULONG ulClusterSize, HANDLE cancelEvent, const wchar_t *kPartLabel);
