@@ -1395,6 +1395,9 @@ LRESULT CEndlessUsbToolDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lPara
             BOOL result = (BOOL)wParam;
             m_operationThread = INVALID_HANDLE_VALUE;
             if (result) {
+                IFFALSE_PRINTERROR(SetFormatPromptHook(),
+                    "Could not set 'Format Disk' prompt auto-close");
+
                 if (IsDualBootOrCombinedUsb()) {
                     m_cancelImageUnpack = 0;
                     if (m_selectedInstallMethod == InstallMethod_t::CombinedUsb) {
@@ -1437,6 +1440,7 @@ LRESULT CEndlessUsbToolDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lPara
             m_operationThread = INVALID_HANDLE_VALUE;
             m_currentStep = OP_NO_OPERATION_IN_PROGRESS;
 
+            ClrFormatPromptHook();
             EnableHibernate();
 
 			if (m_selectedInstallMethod != InstallMethod_t::InstallDualBoot) ChangeDriveAutoRunAndMount(false);
