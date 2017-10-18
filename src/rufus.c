@@ -3056,6 +3056,10 @@ relaunch:
 		}
 	}
 
+	// Set the hook to automatically close Windows' "You need to format the disk in drive..." prompt
+	if (!SetFormatPromptHook())
+		uprintf("Warning:Could not set 'Format Disk' prompt auto-close");
+
 	ShowWindow(hDlg, SW_SHOWNORMAL);
 	UpdateWindow(hDlg);
 
@@ -3268,6 +3272,7 @@ out:
 	if ((!external_loc_file) && (loc_file[0] != 0))
 		DeleteFileU(loc_file);
 	DestroyAllTooltips();
+	ClrFormatPromptHook();
 	exit_localization();
 	safe_free(image_path);
 	safe_free(locale_name);
