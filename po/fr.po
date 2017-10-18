@@ -10,8 +10,8 @@ msgstr ""
 "Project-Id-Version: rufus\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-03-08 02:28+0000\n"
-"PO-Revision-Date: 2017-09-22 23:31+0000\n"
-"Last-Translator: Will Thompson <wjt@endlessm.com>\n"
+"PO-Revision-Date: 2017-10-16 21:32+0000\n"
+"Last-Translator: Roddy Shuler <roddy@endlessm.com>\n"
 "Language-Team: French (http://www.transifex.com/endless-mobile-inc/rufus/language/fr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -42,10 +42,6 @@ msgstr "Créer Reformatter USB"
 msgctxt "ReformatterUsbText"
 msgid "Reformat any computer with Endless OS using a USB stick."
 msgstr "Reformatez n'importe quel ordinateur avec Endless OS en utilisant une clé USB"
-
-msgctxt "CompareOptionsLink"
-msgid "Compare the two options"
-msgstr "Comparer les deux options"
 
 msgctxt "SelectFilePreviousButton"
 msgid "Previous"
@@ -92,9 +88,11 @@ msgid ""
 " access."
 msgstr "Comprend les fonctions de base d'Endless OS et la possibilité de télécharger plus d'applications et de contenu plus tard. Cette version est la meilleure pour les ordinateurs avec un accès Internet fiable."
 
+#. This means "Download [the] Basic Version [of Endless OS]". Use the same
+#. translation as for the "BASIC" string.
 msgctxt "DownloadLightButton"
-msgid "Download EOS Basic"
-msgstr "Télécharger EOS Basic"
+msgid "Download Basic Version"
+msgstr "Télécharger la version de base"
 
 msgctxt "FullVersionText"
 msgid "FULL"
@@ -107,9 +105,11 @@ msgid ""
 " language for content and apps:"
 msgstr "Comprend Endless OS complet, avec plus de 100 applications et contenu. Cette version est idéale pour les ordinateurs sans accès à Internet fiable. Choisissez la langue pour le contenu et les applications :"
 
+#. This means "Download [the] Full Version [of Endless OS]". Use the same
+#. translation as for the "FULL" string.
 msgctxt "DownloadFullButton"
-msgid "Download EOS Full"
-msgstr "Télécharger EOS Full"
+msgid "Download Full Version"
+msgstr "Télécharger la version complète"
 
 msgctxt "SelectUSBPreviousButton"
 msgid "Previous"
@@ -401,10 +401,13 @@ msgctxt "MSG_311"
 msgid "Writing"
 msgstr "Écriture"
 
+#. If this FAQ is translated into your language, replace "en-us" with the
+#. right language code.
+#. Otherwise, use exactly the same URL.
 #, c-format
 msgctxt "MSG_312"
-msgid "https://support.endlessm.com/hc/en-us/articles/208895726"
-msgstr "https://support.endlessm.com/hc/en-us/articles/208895726"
+msgid "https://support.endlessm.com/hc/en-us/articles/115003662326"
+msgstr "https://support.endlessm.com/hc/en-us/articles/115003662326"
 
 #, c-format
 msgctxt "MSG_314"
@@ -556,6 +559,9 @@ msgctxt "MSG_336"
 msgid "Delete the invalid file (%s)."
 msgstr "Supprimez le fichier invalide (%s)."
 
+#. Placeholders are:
+#. 1. Basic/English/Spanish/..., as translated elsewhere
+#. 2. an amount of space, such as "32 GB"
 #, c-format
 msgctxt "MSG_337"
 msgid ""

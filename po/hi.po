@@ -5,13 +5,14 @@
 # Translators:
 # e2f_in_c3 <e2f_in_c3@outlook.com>, 2016
 # e2f_in c7 <e2f_in_c7@outlook.com>, 2016-2017
-# Roddy Shuler <roddy@endlessm.com>, 2016
+# Roddy Shuler <roddy@endlessm.com>, 2016-2017
+# Will Thompson <wjt@endlessm.com>, 2017
 msgid ""
 msgstr ""
 "Project-Id-Version: rufus\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-03-08 02:28+0000\n"
-"PO-Revision-Date: 2017-09-23 22:32+0000\n"
+"PO-Revision-Date: 2017-10-17 07:32+0000\n"
 "Last-Translator: e2f_in c7 <e2f_in_c7@outlook.com>\n"
 "Language-Team: Hindi (http://www.transifex.com/endless-mobile-inc/rufus/language/hi/)\n"
 "MIME-Version: 1.0\n"
@@ -43,10 +44,6 @@ msgstr "Reformatter USB क्रिएट करें"
 msgctxt "ReformatterUsbText"
 msgid "Reformat any computer with Endless OS using a USB stick."
 msgstr "USB स्टिक का उपयोग करके Endless OS से कंप्यूटर पुनः फ़ॉर्मेट करें."
-
-msgctxt "CompareOptionsLink"
-msgid "Compare the two options"
-msgstr "दोनों विकल्पों की तुलना करें"
 
 msgctxt "SelectFilePreviousButton"
 msgid "Previous"
@@ -93,9 +90,11 @@ msgid ""
 " access."
 msgstr "Endless OS की बेसिक सुविधाएं और अधिक ऐप्स और कंटेंट डाउनलोड करने का विकल्प शामिल है। यह वर्जन भरोसेमंद इंटरनेट ऐक्सेस वाले कम्प्यूटर के लिए सर्वोत्तम है।  "
 
+#. This means "Download [the] Basic Version [of Endless OS]". Use the same
+#. translation as for the "BASIC" string.
 msgctxt "DownloadLightButton"
-msgid "Download EOS Basic"
-msgstr "EOS बेसिक डाउनलोड करें"
+msgid "Download Basic Version"
+msgstr "मूलभूत संस्करण डाउनलोड करें"
 
 msgctxt "FullVersionText"
 msgid "FULL"
@@ -108,9 +107,11 @@ msgid ""
 " language for content and apps:"
 msgstr "100 से अधिक प्रीलोडेड ऐप्स और कंटेंट के साथ फुल Endless OS शामिल है। यह वर्जन बगैर भरोसेमंद इंटरनेट ऐक्सेस वाले कम्प्यूटर के लिए सर्वोत्तम है। कंटेंट और ऐप्स के लिए भाषा का चयन करें:  "
 
+#. This means "Download [the] Full Version [of Endless OS]". Use the same
+#. translation as for the "FULL" string.
 msgctxt "DownloadFullButton"
-msgid "Download EOS Full"
-msgstr "EOS Full डाउनलोड करें"
+msgid "Download Full Version"
+msgstr "पूर्ण संस्करण डाउनलोड करें"
 
 msgctxt "SelectUSBPreviousButton"
 msgid "Previous"
@@ -402,10 +403,13 @@ msgctxt "MSG_311"
 msgid "Writing"
 msgstr "लेखन"
 
+#. If this FAQ is translated into your language, replace "en-us" with the
+#. right language code.
+#. Otherwise, use exactly the same URL.
 #, c-format
 msgctxt "MSG_312"
-msgid "https://support.endlessm.com/hc/en-us/articles/208895726"
-msgstr "https://support.endlessm.com/hc/en-us/articles/208895726"
+msgid "https://support.endlessm.com/hc/en-us/articles/115003662326"
+msgstr "https://support.endlessm.com/hc/en-us/articles/115003662326"
 
 #, c-format
 msgctxt "MSG_314"
@@ -557,6 +561,9 @@ msgctxt "MSG_336"
 msgid "Delete the invalid file (%s)."
 msgstr "अमान्य फ़ाइल (%s) हटाएं."
 
+#. Placeholders are:
+#. 1. Basic/English/Spanish/..., as translated elsewhere
+#. 2. an amount of space, such as "32 GB"
 #, c-format
 msgctxt "MSG_337"
 msgid ""

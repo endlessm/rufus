@@ -4,7 +4,7 @@
 # 
 # Translators:
 # Hartono <hartono.s10@gmail.com>, 2017
-# Roddy Shuler <roddy@endlessm.com>, 2016
+# Roddy Shuler <roddy@endlessm.com>, 2016-2017
 # Septira Taruna <septira@endlessm.com>, 2017
 # Will Thompson <wjt@endlessm.com>, 2017
 msgid ""
@@ -12,8 +12,8 @@ msgstr ""
 "Project-Id-Version: rufus\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-03-08 02:28+0000\n"
-"PO-Revision-Date: 2017-09-23 22:32+0000\n"
-"Last-Translator: Septira Taruna <septira@endlessm.com>\n"
+"PO-Revision-Date: 2017-10-11 18:56+0000\n"
+"Last-Translator: Roddy Shuler <roddy@endlessm.com>\n"
 "Language-Team: Indonesian (http://www.transifex.com/endless-mobile-inc/rufus/language/id/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -44,10 +44,6 @@ msgstr "Buat USB Pemformat Ulang"
 msgctxt "ReformatterUsbText"
 msgid "Reformat any computer with Endless OS using a USB stick."
 msgstr "Memformat ulang komputer apa saja dengan Endless OS menggunakan stik USB."
-
-msgctxt "CompareOptionsLink"
-msgid "Compare the two options"
-msgstr "Bandingkan kedua pilihan"
 
 msgctxt "SelectFilePreviousButton"
 msgid "Previous"
@@ -94,9 +90,11 @@ msgid ""
 " access."
 msgstr "Termasuk fitur-fitur dasar Endless OS serta opsi untuk mengunduh aplikasi dan konten lainnya nanti. Versi ini paling cocok untuk komputer dengan akses internet yang stabil."
 
+#. This means "Download [the] Basic Version [of Endless OS]". Use the same
+#. translation as for the "BASIC" string.
 msgctxt "DownloadLightButton"
-msgid "Download EOS Basic"
-msgstr "Unduh EOS Dasar"
+msgid "Download Basic Version"
+msgstr ""
 
 msgctxt "FullVersionText"
 msgid "FULL"
@@ -109,9 +107,11 @@ msgid ""
 " language for content and apps:"
 msgstr "Termasuk Endless OS yang telah dilengkapi dengan lebih dari 100 aplikasi dan konten. Cocok untuk komputer tanpa akses internet yang stabil. Pilih bahasa untuk konten dan aplikasi:"
 
+#. This means "Download [the] Full Version [of Endless OS]". Use the same
+#. translation as for the "FULL" string.
 msgctxt "DownloadFullButton"
-msgid "Download EOS Full"
-msgstr "Unduh EOS Lengkap"
+msgid "Download Full Version"
+msgstr ""
 
 msgctxt "SelectUSBPreviousButton"
 msgid "Previous"
@@ -403,10 +403,13 @@ msgctxt "MSG_311"
 msgid "Writing"
 msgstr "Menulis"
 
+#. If this FAQ is translated into your language, replace "en-us" with the
+#. right language code.
+#. Otherwise, use exactly the same URL.
 #, c-format
 msgctxt "MSG_312"
-msgid "https://support.endlessm.com/hc/en-us/articles/208895726"
-msgstr "https://support.endlessm.com/hc/en-us/articles/208895726"
+msgid "https://support.endlessm.com/hc/en-us/articles/115003662326"
+msgstr "https://support.endlessm.com/hc/id/articles/115003662326"
 
 #, c-format
 msgctxt "MSG_314"
@@ -558,6 +561,9 @@ msgctxt "MSG_336"
 msgid "Delete the invalid file (%s)."
 msgstr "Hapus file yang tidak valid (%s)."
 
+#. Placeholders are:
+#. 1. Basic/English/Spanish/..., as translated elsewhere
+#. 2. an amount of space, such as "32 GB"
 #, c-format
 msgctxt "MSG_337"
 msgid ""

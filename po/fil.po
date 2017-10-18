@@ -3,13 +3,14 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
+# Will Thompson <wjt@endlessm.com>, 2017
 msgid ""
 msgstr ""
 "Project-Id-Version: rufus\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-03-08 02:28+0000\n"
-"PO-Revision-Date: 2017-08-22 09:49+0000\n"
-"Last-Translator: endlessmobile_build <philip@endlessm.com>\n"
+"PO-Revision-Date: 2017-10-11 18:56+0000\n"
+"Last-Translator: Roddy Shuler <roddy@endlessm.com>\n"
 "Language-Team: Filipino (http://www.transifex.com/endless-mobile-inc/rufus/language/fil/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -39,10 +40,6 @@ msgstr ""
 
 msgctxt "ReformatterUsbText"
 msgid "Reformat any computer with Endless OS using a USB stick."
-msgstr ""
-
-msgctxt "CompareOptionsLink"
-msgid "Compare the two options"
 msgstr ""
 
 msgctxt "SelectFilePreviousButton"
@@ -90,8 +87,10 @@ msgid ""
 " access."
 msgstr ""
 
+#. This means "Download [the] Basic Version [of Endless OS]". Use the same
+#. translation as for the "BASIC" string.
 msgctxt "DownloadLightButton"
-msgid "Download EOS Basic"
+msgid "Download Basic Version"
 msgstr ""
 
 msgctxt "FullVersionText"
@@ -105,8 +104,10 @@ msgid ""
 " language for content and apps:"
 msgstr ""
 
+#. This means "Download [the] Full Version [of Endless OS]". Use the same
+#. translation as for the "FULL" string.
 msgctxt "DownloadFullButton"
-msgid "Download EOS Full"
+msgid "Download Full Version"
 msgstr ""
 
 msgctxt "SelectUSBPreviousButton"
@@ -399,10 +400,13 @@ msgctxt "MSG_311"
 msgid "Writing"
 msgstr ""
 
+#. If this FAQ is translated into your language, replace "en-us" with the
+#. right language code.
+#. Otherwise, use exactly the same URL.
 #, c-format
 msgctxt "MSG_312"
-msgid "https://support.endlessm.com/hc/en-us/articles/208895726"
-msgstr ""
+msgid "https://support.endlessm.com/hc/en-us/articles/115003662326"
+msgstr "https://support.endlessm.com/hc/en-us/articles/115003662326"
 
 #, c-format
 msgctxt "MSG_314"
@@ -554,6 +558,9 @@ msgctxt "MSG_336"
 msgid "Delete the invalid file (%s)."
 msgstr ""
 
+#. Placeholders are:
+#. 1. Basic/English/Spanish/..., as translated elsewhere
+#. 2. an amount of space, such as "32 GB"
 #, c-format
 msgctxt "MSG_337"
 msgid ""

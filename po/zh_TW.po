@@ -4,12 +4,13 @@
 # 
 # Translators:
 # Roddy Shuler <roddy@endlessm.com>, 2017
+# Will Thompson <wjt@endlessm.com>, 2017
 msgid ""
 msgstr ""
 "Project-Id-Version: rufus\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-03-08 02:28+0000\n"
-"PO-Revision-Date: 2017-09-23 12:01+0000\n"
+"PO-Revision-Date: 2017-10-16 05:36+0000\n"
 "Last-Translator: Roddy Shuler <roddy@endlessm.com>\n"
 "Language-Team: Chinese (Taiwan) (http://www.transifex.com/endless-mobile-inc/rufus/language/zh_TW/)\n"
 "MIME-Version: 1.0\n"
@@ -41,10 +42,6 @@ msgstr "建立格式化所用之 USB"
 msgctxt "ReformatterUsbText"
 msgid "Reformat any computer with Endless OS using a USB stick."
 msgstr "使用 USB 隨身碟將 Endless 作業系統安裝在任何電腦上。"
-
-msgctxt "CompareOptionsLink"
-msgid "Compare the two options"
-msgstr "比較兩種選項"
 
 msgctxt "SelectFilePreviousButton"
 msgid "Previous"
@@ -91,9 +88,11 @@ msgid ""
 " access."
 msgstr "包含 Endless 作業系統的基本功能和隨後可下載更多應用程式和內容物的選項。這個版本最適合有穩定網路連接的電腦。"
 
+#. This means "Download [the] Basic Version [of Endless OS]". Use the same
+#. translation as for the "BASIC" string.
 msgctxt "DownloadLightButton"
-msgid "Download EOS Basic"
-msgstr "下載 EOS 基本教學"
+msgid "Download Basic Version"
+msgstr "下載基本版"
 
 msgctxt "FullVersionText"
 msgid "FULL"
@@ -106,9 +105,11 @@ msgid ""
 " language for content and apps:"
 msgstr "包含完整的 Endless 作業系統，預先安裝有超過 100 個應用程式和內容物。這個版本適合沒有穩定網路連接的電腦。選擇應用程式和內容物的語言："
 
+#. This means "Download [the] Full Version [of Endless OS]". Use the same
+#. translation as for the "FULL" string.
 msgctxt "DownloadFullButton"
-msgid "Download EOS Full"
-msgstr "下載 EOS 完整版"
+msgid "Download Full Version"
+msgstr "下載完整版"
 
 msgctxt "SelectUSBPreviousButton"
 msgid "Previous"
@@ -400,10 +401,13 @@ msgctxt "MSG_311"
 msgid "Writing"
 msgstr "撰寫中"
 
+#. If this FAQ is translated into your language, replace "en-us" with the
+#. right language code.
+#. Otherwise, use exactly the same URL.
 #, c-format
 msgctxt "MSG_312"
-msgid "https://support.endlessm.com/hc/en-us/articles/208895726"
-msgstr "https://support.endlessm.com/hc/en-us/articles/208895726"
+msgid "https://support.endlessm.com/hc/en-us/articles/115003662326"
+msgstr "https://support.endlessm.com/hc/en-us/articles/115003662326"
 
 #, c-format
 msgctxt "MSG_314"
@@ -555,6 +559,9 @@ msgctxt "MSG_336"
 msgid "Delete the invalid file (%s)."
 msgstr "刪除無效的檔案 (%s)。"
 
+#. Placeholders are:
+#. 1. Basic/English/Spanish/..., as translated elsewhere
+#. 2. an amount of space, such as "32 GB"
 #, c-format
 msgctxt "MSG_337"
 msgid ""
