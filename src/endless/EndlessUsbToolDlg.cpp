@@ -4702,6 +4702,7 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	CEndlessUsbToolDlg *dlg = (CEndlessUsbToolDlg*)param;
 	DWORD DriveIndex = SelectedDrive.DeviceNumber;
 	HANDLE hPhysical = INVALID_HANDLE_VALUE;
+	HANDLE hLogicalVolume = INVALID_HANDLE_VALUE;
 	CString bootFilesPath = CEndlessUsbToolApp::TempFilePath(CString(BOOT_COMPONENTS_FOLDER)) + L"\\";
 	DWORD BytesPerSector = SelectedDrive.Geometry.BytesPerSector;
 	CStringA eosliveDriveLetter, espDriveLetter;
@@ -4727,6 +4728,18 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	IFFALSE_GOTOERROR(DeleteMountpointsForDrive(DriveIndex), "Couldn't delete mountpoints");
 	CHECK_IF_CANCELLED;
 
+	// Lock and disappear the logical volume, if any, as per FormatThread.
+	// TODO: what if there's more than one logical volume?
+	hLogicalVolume = GetLogicalHandle(DriveIndex, FALSE, TRUE);
+	IFFALSE_GOTOERROR(hLogicalVolume != INVALID_HANDLE_VALUE, "Could not lock volume");
+	if (hLogicalVolume == NULL) {
+		// NULL is returned for cases where the drive is not yet partitioned
+		uprintf("Drive does not appear to be partitioned\n");
+	} else if (!UnmountVolume(hLogicalVolume)) {
+		uprintf("Trying to continue regardless...\n");
+	}
+	CHECK_IF_CANCELLED;
+
 	// erase any existing partition
 	IFFALSE_GOTOERROR(ClearMBRGPT(hPhysical, SelectedDrive.DiskSize, BytesPerSector, FALSE), "ClearMBRGPT failed");
 	IFFALSE_GOTOERROR(DeletePartitions(hPhysical), "ErasePartitions failed");
@@ -4742,12 +4755,18 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	// create partitions.
 	IFFALSE_GOTOERROR(CreateUSBPartitionLayout(hPhysical, BytesPerSector), "Error on CreateUSBPartitionLayout");
 
-	CHECK_IF_CANCELLED;
+	if (hLogicalVolume != NULL && hLogicalVolume != INVALID_HANDLE_VALUE) {
+		uprintf("Closing old volume");
+		IFFALSE_GOTOERROR(CloseHandle(hLogicalVolume), "Could not close old volume");
+		hLogicalVolume = INVALID_HANDLE_VALUE;
+	}
 
 	// Wait for the logical drive we just created to appear
 	uprintf("Waiting for logical drive to reappear...\n");
 	Sleep(200); // Radu: check if this is needed, that's what rufus does; I hate sync using sleep
 	IFFALSE_PRINTERROR(WaitForLogical(DriveIndex), "Warning: Logical drive was not found!"); // We try to continue even if this fails, just in case
+
+	CHECK_IF_CANCELLED;
 
 	// Write MBR to disk
 	IFFALSE_GOTOERROR(WriteMBRToUSB(hPhysical, bootFilesPath), "Error on WriteMBRToUSB");
@@ -4811,7 +4830,8 @@ done:
 	}
 
 	RemoveNonEmptyDirectory(bootFilesPath);
-	safe_closehandle(hPhysical);
+	safe_unlockclose(hLogicalVolume);
+	safe_unlockclose(hPhysical);
 	dlg->PostMessage(WM_FINISHED_ALL_OPERATIONS, 0, 0);
 	return 0;
 }
