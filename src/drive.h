@@ -93,6 +93,7 @@ BOOL AnalyzePBR(HANDLE hLogicalVolume);
 BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSystemNameSize, BOOL bSilent);
 BOOL UnmountVolume(HANDLE hDrive);
 BOOL MountVolume(char* drive_name, char *drive_guid);
+BOOL EnsureVolumeMounted(char* drive_name, char *drive_guid);
 BOOL AltUnmountVolume(const char* drive_name);
 char* AltMountVolume(const char* drive_name, uint8_t part_nr);
 BOOL RemountVolume(char* drive_name);

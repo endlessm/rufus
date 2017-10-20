@@ -5018,9 +5018,8 @@ bool CEndlessUsbToolDlg::MountFirstPartitionOnDrive(DWORD DriveIndex, CStringA &
 
 	// Mount partition
 	char drive_name[] = "?:\\";
-	drive_name[0] = GetUnusedDriveLetter();
-	IFFALSE_GOTOERROR(drive_name[0] != 0, "Could not find an unused drive letter");
-	IFFALSE_GOTOERROR(MountVolume(drive_name, guid_volume), "Could not mount volume.");
+	IFFALSE_GOTOERROR(EnsureVolumeMounted(drive_name, guid_volume), "Could not mount volume.");
+	IFFALSE_GOTOERROR(drive_name[0] != 0, "EnsureVolumeMounted succeeded but did not return a drive name...");
 	driveLetter = drive_name;
 
 	returnValue = true;
