@@ -13,7 +13,7 @@ msgstr ""
 "Project-Id-Version: rufus\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-03-08 02:28+0000\n"
-"PO-Revision-Date: 2017-10-11 18:56+0000\n"
+"PO-Revision-Date: 2017-10-19 17:54+0000\n"
 "Last-Translator: Roddy Shuler <roddy@endlessm.com>\n"
 "Language-Team: Spanish (http://www.transifex.com/endless-mobile-inc/rufus/language/es/)\n"
 "MIME-Version: 1.0\n"
@@ -95,7 +95,7 @@ msgstr "Incluye funciones básicas de Endless OS y la opción de descargar más 
 #. translation as for the "BASIC" string.
 msgctxt "DownloadLightButton"
 msgid "Download Basic Version"
-msgstr ""
+msgstr "Descargar versión básica"
 
 msgctxt "FullVersionText"
 msgid "FULL"
@@ -112,7 +112,7 @@ msgstr "Incluye Endless OS completo con más de 100 programas y contenido. Versi
 #. translation as for the "FULL" string.
 msgctxt "DownloadFullButton"
 msgid "Download Full Version"
-msgstr ""
+msgstr "Descargar versión completa"
 
 msgctxt "SelectUSBPreviousButton"
 msgid "Previous"

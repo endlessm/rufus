@@ -12,7 +12,7 @@ msgstr ""
 "Project-Id-Version: rufus\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-03-08 02:28+0000\n"
-"PO-Revision-Date: 2017-10-11 18:56+0000\n"
+"PO-Revision-Date: 2017-10-19 17:53+0000\n"
 "Last-Translator: Roddy Shuler <roddy@endlessm.com>\n"
 "Language-Team: Indonesian (http://www.transifex.com/endless-mobile-inc/rufus/language/id/)\n"
 "MIME-Version: 1.0\n"
@@ -94,7 +94,7 @@ msgstr "Termasuk fitur-fitur dasar Endless OS serta opsi untuk mengunduh aplikas
 #. translation as for the "BASIC" string.
 msgctxt "DownloadLightButton"
 msgid "Download Basic Version"
-msgstr ""
+msgstr "Unduh Versi Dasar"
 
 msgctxt "FullVersionText"
 msgid "FULL"
@@ -111,7 +111,7 @@ msgstr "Termasuk Endless OS yang telah dilengkapi dengan lebih dari 100 aplikasi
 #. translation as for the "FULL" string.
 msgctxt "DownloadFullButton"
 msgid "Download Full Version"
-msgstr ""
+msgstr "Unduh Versi Lengkap"
 
 msgctxt "SelectUSBPreviousButton"
 msgid "Previous"
