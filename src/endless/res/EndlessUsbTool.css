@@ -580,7 +580,7 @@ select:disabled {
 	font-size: 13px;
 	max-width: 240px;
 	height: 145px;
-	text-align: inherit;
+	text-align: justify;
 }
 
 /* Selects the .Fieldset adjacent to the first .Fieldset in the page, which is
@@ -598,12 +598,12 @@ select:disabled {
 #SelectFilePage .Fieldset select {
 	margin-top: 10px;
 	margin-bottom: 5px;
-	width: 191px;
+	width: 240px;
 }
 
 #SelectFilePage .Fieldset .Button {
 	/* 2px narrower than <select> because it has a 1px border each side */
-	width: 189px;
+	width: 238px;
 }
 
 #NoInternetConnection {
