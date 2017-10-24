@@ -1857,8 +1857,8 @@ void CEndlessUsbToolDlg::ErrorOccured(ErrorCause_t errorCause)
     SetElementText(_T(ELEMENT_ERROR_DELETE_TEXT), deleteFilesText);
 
     // Update the error description and "recovery" suggestion
+    CComBSTR message("");
     if (suggestionMsgId != 0) {
-        CComBSTR message;
         if (suggestionMsgId == MSG_334 || suggestionMsgId == MSG_303) {
             // Not enough space to download
             const CStringA downloadDriveA = ConvertUnicodeToUTF8(CEndlessUsbToolApp::m_imageDir.Left(3));
@@ -1883,8 +1883,8 @@ void CEndlessUsbToolDlg::ErrorOccured(ErrorCause_t errorCause)
         } else {
             message = UTF8ToBSTR(lmprintf(suggestionMsgId));
         }
-        SetElementText(_T(ELEMENT_ERROR_SUGGESTION), message);
     }
+    SetElementText(_T(ELEMENT_ERROR_SUGGESTION), message);
 
 	if (m_taskbarProgress != NULL) {
 		m_taskbarProgress->SetProgressState(m_hWnd, TBPF_ERROR);
