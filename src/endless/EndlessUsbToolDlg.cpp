@@ -1898,17 +1898,7 @@ void CEndlessUsbToolDlg::ErrorOccured(ErrorCause_t errorCause)
 	else
 		TrackEvent(_T("Failed"), ErrorCauseToStr(errorCause));
 
-	bool fatal = FALSE;
-	switch (errorCause) {
-	case ErrorCause_t::ErrorCauseDownloadFailed:
-	case ErrorCause_t::ErrorCauseVerificationFailed:
-	case ErrorCause_t::ErrorCauseWriteFailed:
-		fatal = FALSE;
-		break;
-	default:
-		fatal = TRUE;
-		break;
-	}
+	bool fatal = recoverButtonMsgId == 0;
 	Analytics::instance()->exceptionTracking(ErrorCauseToStr(errorCause), fatal);
 }
 
