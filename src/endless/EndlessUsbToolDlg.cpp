@@ -408,9 +408,7 @@ static LPCTSTR ErrorCauseToStr(ErrorCause_t errorCause)
         TOSTR(ErrorCause32BitEFI);
         TOSTR(ErrorCauseBitLocker);
         TOSTR(ErrorCauseNotNTFS);
-        TOSTR(ErrorCauseNonWindowsMBR);
         TOSTR(ErrorCauseNonEndlessMBR);
-        TOSTR(ErrorCauseCantCheckMBR);
         TOSTR(ErrorCauseInstallFailedDiskFull);
         TOSTR(ErrorCauseSuspended);
         TOSTR(ErrorCauseInstallEosldrFailed);
@@ -1788,14 +1786,6 @@ void CEndlessUsbToolDlg::ErrorOccured(ErrorCause_t errorCause)
         headlineMsgId = MSG_352;
         driveLetterInHeading = true;
         suggestionMsgId = IsCoding() ? MSG_308 : MSG_353;
-        break;
-    case ErrorCause_t::ErrorCauseNonWindowsMBR:
-        headlineMsgId = MSG_359;
-        suggestionMsgId = IsCoding() ? MSG_379 : MSG_360;
-        break;
-    case ErrorCause_t::ErrorCauseCantCheckMBR:
-        // TODO: new string here; or, better, eliminate this failure mode
-        suggestionMsgId = MSG_358;
         break;
     case ErrorCause_t::ErrorCauseNonEndlessMBR:
     case ErrorCause_t::ErrorCauseUninstallEosldrFailed:
