@@ -1717,6 +1717,9 @@ void CEndlessUsbToolDlg::ErrorOccured(ErrorCause_t errorCause)
     uint32_t recoverButtonMsgId = 0, suggestionMsgId = 0, headlineMsgId = IsCoding() ? MSG_381 : MSG_370;
     bool driveLetterInHeading = false;
 
+// Require all error causes to be handled
+#pragma warning( push )
+#pragma warning( error : 4061 )
     switch (errorCause) {
     case ErrorCause_t::ErrorCauseDownloadFailed:
         recoverButtonMsgId = MSG_RECOVER_RESUME;
@@ -1740,6 +1743,8 @@ void CEndlessUsbToolDlg::ErrorOccured(ErrorCause_t errorCause)
     case ErrorCause_t::ErrorCauseGeneric:
     case ErrorCause_t::ErrorCauseWriteFailed:
     case ErrorCause_t::ErrorCauseSuspended: // TODO: new string here
+    case ErrorCause_t::ErrorCauseCantUnpackBootZip:
+    case ErrorCause_t::ErrorCauseInstallEosldrFailed:
         recoverButtonMsgId = MSG_RECOVER_TRY_AGAIN;
         suggestionMsgId = m_selectedInstallMethod == InstallMethod_t::InstallDualBoot
 	    ? (IsCoding() ? MSG_385 : MSG_358)
@@ -1768,10 +1773,16 @@ void CEndlessUsbToolDlg::ErrorOccured(ErrorCause_t errorCause)
         // TODO: new string here; or, better, eliminate this failure mode
         suggestionMsgId = MSG_358;
         break;
+    case ErrorCause_t::ErrorCauseNonEndlessMBR:
+    case ErrorCause_t::ErrorCauseUninstallEosldrFailed:
+        uprintf("Uninstall-specific error cause %ls", ErrorCauseToStr(errorCause));
+        break;
+    case ErrorCause_t::ErrorCauseNone:
     default:
         uprintf("Unhandled error cause %ls(%d)", ErrorCauseToStr(errorCause), errorCause);
         break;
     }
+#pragma warning( pop )
 
     // Update the error button text if it's a "recoverable" error case or hide it otherwise
     if (recoverButtonMsgId != 0) {
