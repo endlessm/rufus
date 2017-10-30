@@ -90,6 +90,9 @@
     <ClInclude Include="..\dos.h">
       <Filter>Header Files\Rufus Headers</Filter>
     </ClInclude>
+    <ClInclude Include="..\format.h">
+      <Filter>Header Files\Rufus Headers</Filter>
+    </ClInclude>
     <ClInclude Include="DownloadManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -151,6 +154,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="UEFIBootSetup.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IOUtil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -255,6 +261,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Eosldr.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="IOUtil.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

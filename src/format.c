@@ -674,13 +674,46 @@ out:
 }
 
 /*
+ * Call on fmifs.dll's FormatEx() to format a partition. Returns FALSE with FormatStatus set on error.
+ */
+BOOL FormatPartition(const char *VolumeName, wchar_t *wFSType, wchar_t *partLabel, ULONG ulClusterSize)
+{
+	BOOL r = FALSE;
+	PF_DECL(FormatEx);
+	char *locale;
+	WCHAR* wVolumeName = NULL;
+
+	wVolumeName = utf8_to_wchar(VolumeName);
+	if (wVolumeName == NULL) {
+		uprintf("Could not read volume name\n");
+		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_GEN_FAILURE;
+		goto out;
+	}
+
+	// LoadLibrary("fmifs.dll") appears to changes the locale, which can lead to
+	// problems with tolower(). Make sure we restore the locale. For more details,
+	// see http://comments.gmane.org/gmane.comp.gnu.mingw.user/39300
+	locale = setlocale(LC_ALL, NULL);
+	PF_INIT_OR_OUT(FormatEx, Fmifs);
+	setlocale(LC_ALL, locale);
+
+	pfFormatEx(wVolumeName, SelectedDrive.Geometry.MediaType, wFSType, partLabel,
+		/* quick format */ TRUE, ulClusterSize, FormatExCallback);
+
+	if (!IS_ERROR(FormatStatus)) {
+		uprintf("Format completed.\n");
+		r = TRUE;
+	}
+
+out:
+	safe_free(wVolumeName);
+	return r;
+}
+
+/*
  * Call on fmifs.dll's FormatEx() to format the drive
  */
-#ifdef ENDLESSUSB_TOOL
-BOOL FormatDrive(DWORD DriveIndex, int fsToUse, const wchar_t *partLabel)
-#else
 static BOOL FormatDrive(DWORD DriveIndex)
-#endif // ENDLESSUSB_TOOL
 {
 	BOOL r = FALSE;
 	PF_DECL(FormatEx);
@@ -694,11 +727,6 @@ static BOOL FormatDrive(DWORD DriveIndex)
 	size_t i;
 	int fs;
 
-#ifdef ENDLESSUSB_TOOL
-    fs = fsToUse;
-    strcpy_s(FSType, sizeof(FSType), fs == FS_EXFAT ? "exFAT" : "FAT32");
-    UNREFERENCED_PARAMETER(i);
-#else
 	GetWindowTextU(hFileSystem, FSType, ARRAYSIZE(FSType));
 	// Might have a (Default) suffix => remove it
 	for (i=strlen(FSType); i>2; i--) {
@@ -713,7 +741,6 @@ static BOOL FormatDrive(DWORD DriveIndex)
 	} else {
 		PrintInfoDebug(0, MSG_222, FSType);
 	}
-#endif // ENDLESSUSB_TOOL
 	VolumeName = GetLogicalName(DriveIndex, TRUE, TRUE);
 	wVolumeName = utf8_to_wchar(VolumeName);
 	if (wVolumeName == NULL) {
@@ -733,11 +760,6 @@ static BOOL FormatDrive(DWORD DriveIndex)
 	PF_INIT(EnableVolumeCompression, Fmifs);
 	setlocale(LC_ALL, locale);
 
-#ifdef ENDLESSUSB_TOOL
-    wcscpy_s(wFSType, 64, fs == FS_EXFAT ? L"exFAT" : L"FAT32");
-    wcscpy_s(wLabel, 64, partLabel);
-    ulClusterSize = fs == FS_EXFAT ? 0x8000 : 0x200;
-#else
 	GetWindowTextW(hFileSystem, wFSType, ARRAYSIZE(wFSType));
 	// We may have a " (Default)" trail
 	for (i=0; i<wcslen(wFSType); i++) {
@@ -747,8 +769,6 @@ static BOOL FormatDrive(DWORD DriveIndex)
 		}
 	}
 	GetWindowTextW(hLabel, wLabel, ARRAYSIZE(wLabel));
-
-
 	// Make sure the label is valid
 	ToValidLabel(wLabel, (wFSType[0] == 'F') && (wFSType[1] == 'A') && (wFSType[2] == 'T'));
 	ulClusterSize = (ULONG)ComboBox_GetItemData(hClusterSize, ComboBox_GetCurSel(hClusterSize));
@@ -762,7 +782,7 @@ static BOOL FormatDrive(DWORD DriveIndex)
 	format_percent = 0.0f;
 	task_number = 0;
 	fs_index = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
-#endif // ENDLESSUSB_TOOL
+
 	uprintf("%s format was selected\n", IsChecked(IDC_QUICKFORMAT)?"Quick":"Slow");
 	pfFormatEx(wVolumeName, SelectedDrive.Geometry.MediaType, wFSType, wLabel,
 		IsChecked(IDC_QUICKFORMAT), ulClusterSize, FormatExCallback);
@@ -822,7 +842,7 @@ out:
 	return r;
 }
 
-static BOOL ClearMBRGPT(HANDLE hPhysicalDrive, LONGLONG DiskSize, DWORD SectorSize, BOOL add1MB)
+BOOL ClearMBRGPT(HANDLE hPhysicalDrive, LONGLONG DiskSize, DWORD SectorSize, BOOL add1MB)
 {
 	BOOL r = FALSE;
 	uint64_t i, last_sector = DiskSize/SectorSize;
@@ -1420,50 +1440,6 @@ static BOOL SetupWinToGo(const char* drive_name, BOOL use_ms_efi)
 	return TRUE;
 }
 
-/*
- * Detect if a Windows Format prompt is active, by enumerating the
- * whole Windows tree and looking for the relevant popup
- */
-static BOOL CALLBACK FormatPromptCallback(HWND hWnd, LPARAM lParam)
-{
-	char str_buf[MAX_PATH];
-	HWND *hFound = (HWND*)lParam;
-	static const char* security_string = "Microsoft Windows";
-
-	// The format prompt has the popup window style
-	if (GetWindowLong(hWnd, GWL_STYLE) & WS_POPUPWINDOW) {
-		str_buf[0] = 0;
-		GetWindowTextA(hWnd, str_buf, MAX_PATH);
-		str_buf[MAX_PATH-1] = 0;
-		if (safe_strcmp(str_buf, security_string) == 0) {
-			*hFound = hWnd;
-			return TRUE;
-		}
-	}
-	return TRUE;
-}
-
-/*
- * When we format a drive that doesn't have any existing partitions, we can't lock it
- * prior to partitioning, which means that Windows will display a "You need to format the
- * disk in drive X: before you can use it'. You will also get that popup if you start a
- * bad blocks check and cancel it before it completes. We have to close that popup manually.
- */
-static DWORD WINAPI CloseFormatPromptThread(LPVOID param) {
-	HWND hFormatPrompt;
-
-	while(format_op_in_progress) {
-		hFormatPrompt = NULL;
-		EnumChildWindows(GetDesktopWindow(), FormatPromptCallback, (LPARAM)&hFormatPrompt);
-		if (hFormatPrompt != NULL) {
-			SendMessage(hFormatPrompt, WM_COMMAND, (WPARAM)IDCANCEL, (LPARAM)0);
-			uprintf("Closed Windows format prompt\n");
-		}
-		Sleep(100);
-	}
-	ExitThread(0);
-}
-
 static void update_progress(const uint64_t processed_bytes)
 {
 	if (_GetTickCount64() > LastRefresh + MAX_REFRESH) {
@@ -1482,6 +1458,7 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, HANDLE hSourceImage)
 	LARGE_INTEGER li;
 	DWORD rSize, wSize, BufSize;
 	uint64_t wb, target_size = hSourceImage?img_report.projected_size:SelectedDrive.DiskSize;
+	int64_t bled_ret;
 	uint8_t *buffer = NULL, *aligned_buffer;
 	int i;
 
@@ -1492,19 +1469,16 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, HANDLE hSourceImage)
 	LastRefresh = 0;
 
 	if (img_report.compression_type != BLED_COMPRESSION_NONE) {
-		uprintf("Writing Compressed Image...");
+		uprintf("Writing compressed image...");
 		bled_init(_uprintf, update_progress, &FormatStatus);
-#ifndef ENDLESSUSB_TOOL
-        bled_uncompress_with_handles(hSourceImage, hPhysicalDrive, img_report.compression_type);
-#else
-/// RADU: propose this change to rufus
-		if (-1 == bled_uncompress_with_handles(hSourceImage, hPhysicalDrive, img_report.compression_type)) {
-            if (SCODE_CODE(FormatStatus) != ERROR_CANCELLED) {
-                FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_NO_MEDIA_IN_DRIVE;
-            }
-		}
-#endif // !ENDLESSUSB_TOOL
+		bled_ret = bled_uncompress_with_handles(hSourceImage, hPhysicalDrive, img_report.compression_type);
 		bled_exit();
+		if ((bled_ret < 0) && (SCODE_CODE(FormatStatus) != ERROR_CANCELLED)) {
+			// Unfortunately, different compression backends return different negative error codes
+			uprintf("Could not write compressed image: %" PRIi64, bled_ret);
+			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_WRITE_FAULT;
+			goto out;
+		}
 	} else {
 		uprintf(hSourceImage?"Writing Image...":"Zeroing drive...");
 		// Our buffer size must be a multiple of the sector size
@@ -1606,8 +1580,6 @@ DWORD WINAPI FormatThread(void* param)
 	char efi_dst[] = "?:\\efi\\boot\\bootx64.efi";
 	char kolibri_dst[] = "?:\\MTLD_F32";
 	char grub4dos_dst[] = "?:\\grldr";
-
-	//goto out;
 
 	PF_TYPE_DECL(WINAPI, LANGID, GetThreadUILanguage, (void));
 	PF_TYPE_DECL(WINAPI, LANGID, SetThreadUILanguage, (LANGID));
@@ -1712,7 +1684,6 @@ DWORD WINAPI FormatThread(void* param)
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_PARTITION_FAILURE;
 		goto out;
 	}
-	CreateThread(NULL, 0, CloseFormatPromptThread, NULL, 0, NULL);
 
 	if (zero_drive) {
 		WriteDrive(hPhysicalDrive, NULL);
@@ -1838,11 +1809,7 @@ DWORD WINAPI FormatThread(void* param)
 
 	// If FAT32 is requested and we have a large drive (>32 GB) use
 	// large FAT32 format, else use MS's FormatEx.
-#ifdef ENDLESSUSB_TOOL
-	ret = use_large_fat32?FormatFAT32(DriveIndex):FormatDrive(DriveIndex, fs, L"");
-#else
 	ret = use_large_fat32 ? FormatFAT32(DriveIndex) : FormatDrive(DriveIndex);
-#endif // ENDLESSUSB_TOOL
 	if (!ret) {
 		// Error will be set by FormatDrive() in FormatStatus
 		uprintf("Format error: %s\n", StrError(FormatStatus, TRUE));

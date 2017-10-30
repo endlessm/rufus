@@ -62,6 +62,18 @@ typedef enum ErrorCause {
     ErrorCauseInstallEosldrFailed,
     ErrorCauseUninstallEosldrFailed,
     ErrorCauseCantUnpackBootZip,
+    ErrorCauseGetPhysicalHandleFailed,
+    ErrorCauseDisappearingExistingVolumesFailed,
+    ErrorCauseErasePartitionsFailed,
+    ErrorCauseWriteBiosBootFailed,
+    ErrorCauseCreatePartitionsFailed,
+    ErrorCauseWriteMBRFailed,
+    ErrorCauseFormatExfatFailed,
+    ErrorCauseMountExfatFailed,
+    ErrorCauseMountESPFailed,
+    ErrorCauseFormatESPFailed,
+    ErrorCausePopulateESPFailed,
+    ErrorCausePopulateExfatFailed,
 } ErrorCause_t;
 
 typedef struct RemoteImageEntry {
@@ -399,10 +411,11 @@ private:
 	void ChangeDriveAutoRunAndMount(bool setEndlessValues);
 
 	static DWORD WINAPI CreateUSBStick(LPVOID param);
-	static bool CreateFakePartitionLayout(HANDLE hPhysical, PBYTE layout, PBYTE geometry);
-	static bool FormatFirstPartitionOnDrive(DWORD DriveIndex, int fsToUse, HANDLE m_cancelOperationEvent, const wchar_t *partLabel);
-	static bool MountFirstPartitionOnDrive(DWORD DriveIndex, CString &driveLetter);
-	static bool CreateCorrectPartitionLayout(HANDLE hPhysical, PBYTE layout, PBYTE geometry);
+	static bool DeleteMountpointsForDrive(DWORD DriveIndex);
+	static bool CreateUSBPartitionLayout(HANDLE hPhysical, DWORD &BytesPerSector);
+	static bool FormatFirstPartitionOnDrive(DWORD DriveIndex, const wchar_t *kFSType, ULONG ulClusterSize, HANDLE cancelEvent, const wchar_t *kPartLabel);
+	static bool FormatPartitionWithRetry(const char *partition, const wchar_t *kFSType, ULONG ulClusterSize, HANDLE cancelEvent, const wchar_t *kPartLabel);
+	static bool MountFirstPartitionOnDrive(DWORD DriveIndex, CStringA &driveLetter);
 
 	static bool UnpackZip(const CComBSTR source, const CComBSTR dest);
 	static void RemoveNonEmptyDirectory(const CString directoryPath);
@@ -410,7 +423,8 @@ private:
 	static void ImageUnpackCallback(const uint64_t read_bytes);
 	static void UpdateUnpackProgress(const uint64_t current_bytes, const uint64_t total_bytes);
 	static bool CopyFilesToexFAT(CEndlessUsbToolDlg *dlg, const CString &fromFolder, const CString &driveLetter);
-	static bool WriteMBRAndSBRToUSB(HANDLE hPhysical, const CString &bootFilesPath, DWORD bytesPerSector);
+	static bool WriteMBRToUSB(HANDLE hPhysical, const CString &bootFilesPath);
+	static bool WriteBIOSBootPartitionToUSB(HANDLE hPhysical, const CString &bootFilesPath, DWORD bytesPerSector);
 
 	static DWORD WINAPI SetupDualBoot(LPVOID param);
 	static bool SetupDualBootFiles(CEndlessUsbToolDlg *dlg, const CString &systemDriveLetter, const CString &bootFilesPath, ErrorCause &errorCause);

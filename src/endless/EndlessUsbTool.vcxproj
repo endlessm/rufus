@@ -271,6 +271,7 @@
   <ItemGroup>
     <ClInclude Include="..\dos.h" />
     <ClInclude Include="..\drive.h" />
+    <ClInclude Include="..\format.h" />
     <ClInclude Include="..\localization.h" />
     <ClInclude Include="..\msapi_utf8.h" />
     <ClInclude Include="..\rufus.h" />
@@ -289,6 +290,7 @@
     <ClInclude Include="grub\grub.h" />
     <ClInclude Include="grub\reed_solomon.h" />
     <ClInclude Include="Images.h" />
+    <ClInclude Include="IOUtil.h" />
     <ClInclude Include="json\json-forwards.h" />
     <ClInclude Include="json\json.h" />
     <ClInclude Include="localization_data.h" />
@@ -513,6 +515,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Images.cpp" />
+    <ClCompile Include="IOUtil.cpp" />
     <ClCompile Include="StringHelperMethods.cpp" />
     <ClCompile Include="jsoncpp.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
