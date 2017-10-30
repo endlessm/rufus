@@ -4102,7 +4102,7 @@ DWORD WINAPI CEndlessUsbToolDlg::FileCopyThread(void* param)
     FUNCTION_ENTER;
 
     CEndlessUsbToolDlg *dlg = (CEndlessUsbToolDlg*)param;
-    
+
     HANDLE hPhysical = INVALID_HANDLE_VALUE;
     DWORD size;
     DWORD DriveIndex = SelectedDrive.DeviceNumber;
@@ -4114,19 +4114,19 @@ DWORD WINAPI CEndlessUsbToolDlg::FileCopyThread(void* param)
     CString driveDestination, fileDestination, liveFileName;
     CStringA driveDestinationA, iniLanguage = INI_LOCALE_EN;
 
-	// Radu: why do we do this?
+    // Radu: why do we do this?
     memset(&SelectedDrive, 0, sizeof(SelectedDrive));
 
     // Query for disk and partition data
     hPhysical = GetPhysicalHandle(DriveIndex, TRUE, TRUE);
     IFFALSE_GOTOERROR(hPhysical != INVALID_HANDLE_VALUE, "Error on acquiring disk handle.");
-    
+
     result = DeviceIoControl(hPhysical, IOCTL_DISK_GET_DRIVE_GEOMETRY_EX, NULL, 0, geometry, sizeof(geometry), &size, NULL);
     IFFALSE_GOTOERROR(result != 0 && size > 0, "Error on querying disk geometry.");
 
     result = DeviceIoControl(hPhysical, IOCTL_DISK_GET_DRIVE_LAYOUT_EX, NULL, 0, layout, sizeof(layout), &size, NULL);
     IFFALSE_GOTOERROR(result != 0 && size > 0, "Error on querying disk layout.");
-    
+
     IFFALSE_GOTOERROR(DriveLayout->PartitionStyle == PARTITION_STYLE_GPT, "Unexpected partition type.");
     IFFALSE_GOTOERROR(DriveLayout->PartitionCount == EXPECTED_NUMBER_OF_PARTITIONS, "Error: Unexpected number of partitions.");
 
@@ -4162,19 +4162,19 @@ DWORD WINAPI CEndlessUsbToolDlg::FileCopyThread(void* param)
 
     // Check if user cancelled
     IFFALSE_GOTOERROR(WaitForSingleObject(dlg->m_cancelOperationEvent, 0) == WAIT_TIMEOUT, "User cancel.");
-	// Format the partition
-	IFFALSE_GOTOERROR(FormatFirstPartitionOnDrive(DriveIndex, L"exFAT", EXFAT_CLUSTER_SIZE, dlg->m_cancelOperationEvent, EXFAT_PARTITION_NAME_IMAGES), "Error on FormatFirstPartitionOnDrive");
+    // Format the partition
+    IFFALSE_GOTOERROR(FormatFirstPartitionOnDrive(DriveIndex, L"exFAT", EXFAT_CLUSTER_SIZE, dlg->m_cancelOperationEvent, EXFAT_PARTITION_NAME_IMAGES), "Error on FormatFirstPartitionOnDrive");
     // Mount it
-	IFFALSE_GOTOERROR(MountFirstPartitionOnDrive(DriveIndex, driveDestinationA), "Error on MountFirstPartitionOnDrive");
+    IFFALSE_GOTOERROR(MountFirstPartitionOnDrive(DriveIndex, driveDestinationA), "Error on MountFirstPartitionOnDrive");
     driveDestination = driveDestinationA;
 
     // Copy Files
-	liveFileName = CSTRING_GET_LAST(dlg->m_localFile, L'\\');
-	if (liveFileName == ENDLESS_IMG_FILE_NAME) {
-		fileDestination = driveDestination + CSTRING_GET_PATH(CSTRING_GET_LAST(dlg->m_localFileSig, L'\\'), L'.');
-	} else {
-		fileDestination = driveDestination + liveFileName;
-	}
+    liveFileName = CSTRING_GET_LAST(dlg->m_localFile, L'\\');
+    if (liveFileName == ENDLESS_IMG_FILE_NAME) {
+        fileDestination = driveDestination + CSTRING_GET_PATH(CSTRING_GET_LAST(dlg->m_localFileSig, L'\\'), L'.');
+    } else {
+        fileDestination = driveDestination + liveFileName;
+    }
     result = CopyFileEx(dlg->m_localFile, fileDestination, CEndlessUsbToolDlg::CopyProgressRoutine, dlg, NULL, 0);
     IFFALSE_GOTOERROR(result, "Copying live image failed/cancelled.");
 
