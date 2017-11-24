@@ -987,6 +987,12 @@ char* AltMountVolume(const char* drive_name, uint8_t part_nr)
 
 	p = buffer;
 	while (strlen(p) != 0) {
+		uprintf("- %s", p);
+		p += strlen(p) + 1;
+	}
+
+	p = buffer;
+	while (strlen(p) != 0) {
 		if ((strncmp("Harddisk", p, 8) == 0) && (strstr(&p[9], "Partition") != NULL)) {
 			target[1][0] = 0;
 			if (QueryDosDeviceA(p, target[1], MAX_PATH) && (strlen(target[1]) != 0))

@@ -4833,7 +4833,15 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 
 	// Mount and format ESP. (Yes, you can assign a drive letter to an unformatted volume!)
 	errorCause = ErrorCauseMountESPFailed;
-	cszEspDriveLetter = AltMountVolume(eosliveDriveLetter.Left(2), 2);
+	for (int i = 0; i < 5; i++) {
+		cszEspDriveLetter = AltMountVolume(eosliveDriveLetter.Left(2), 2);
+		if (cszEspDriveLetter != NULL) {
+			break;
+		} else if (i < 4) {
+			uprintf("Error mounting ESP, will retry");
+			Sleep(200);
+		}
+	}
 	IFFALSE_GOTOERROR(cszEspDriveLetter != NULL, "Error mounting ESP");
 	// The pointer returned by AltMountVolume() is to a static buffer...
 	espDriveLetter = cszEspDriveLetter;
