@@ -5531,7 +5531,17 @@ bool CEndlessUsbToolDlg::UnpackBootComponents(const CString &bootFilesZipPath, c
         return false;
     }
 
-    IFFALSE_RETURN_VALUE(UnpackZip(CComBSTR(bootFilesZipPath), CComBSTR(bootFilesPath)), "Error unpacking archive to local folder.", false);
+    // Rather than extracting the boot.zip's contents directly to a temporary
+    // directory, we first copy boot.zip to that temporary directory, then
+    // extract it. I know this seems pointless, but in fact it seems to work
+    // around an apparent Windows bug where the zip file is not properly
+    // unpacked if it's on a DVD, even though the exact same zip file is
+    // extracted properly when on any other medium.
+    // https://stackoverflow.com/q/47875272/173314
+    CString bootFilesZipCopyPath = bootFilesPath + CSTRING_GET_LAST(bootFilesZipPath, '\\');
+    IFFALSE_RETURN_VALUE(CopyFile(bootFilesZipPath, bootFilesZipCopyPath, FALSE), "Error copying boot.zip to local folder.", false);
+
+    IFFALSE_RETURN_VALUE(UnpackZip(CComBSTR(bootFilesZipCopyPath), CComBSTR(bootFilesPath)), "Error unpacking archive to local folder.", false);
     return true;
 }
 
