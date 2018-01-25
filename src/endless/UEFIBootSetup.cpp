@@ -303,7 +303,10 @@ int EFIGetBootEntryNumber(const wchar_t *desc, bool createNewEntry) {
 		for (i = 0; i < (int)(size / 2); i++) {
 			swprintf(varname, sizeof(varname), UEFI_VAR_BOOT_ENTRY_FORMAT, bootorder[i]);
 			size = GetFirmwareEnvironmentVariable(varname, UEFI_BOOT_NAMESPACE, vardata1, sizeof(vardata1));
-			IFFALSE_CONTINUE(size > 0, "");
+			if (size == 0) {
+				PRINT_ERROR_MSG_FMT("failed to read %ls", varname);
+				continue;
+			}
 
 			wchar_t *description = (wchar_t *)&vardata1[6];
 			// TODO: should we add more validation than just the boot entry description matching?
