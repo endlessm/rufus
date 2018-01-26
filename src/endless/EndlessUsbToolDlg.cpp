@@ -4076,6 +4076,8 @@ const GUID PARTITION_BIOS_BOOT_GUID =
 
 #define EXPECTED_NUMBER_OF_PARTITIONS	3
 #define EXFAT_PARTITION_NAME_IMAGES		L"eosimages"
+
+#define LIVE_PARTITION_COUNT            2
 #define EXFAT_PARTITION_NAME_LIVE		L"eoslive"
 
 #define EXFAT_CLUSTER_SIZE              0x8000
@@ -4682,15 +4684,11 @@ void CEndlessUsbToolDlg::SetJSONDownloadState(JSONDownloadState state)
 #define GPT_MAX_PARTITION_COUNT		128
 #define ESP_PART_STARTING_SECTOR	2048
 #define ESP_PART_LENGTH_BYTES		65011712
-#define BIOS_BOOT_PART_STARTING_SECTOR 129024
-#define BIOS_BOOT_PART_LENGTH_BYTES    1048576
 #define EXFAT_PART_STARTING_SECTOR	131072
 
 #define EFI_BOOT_SUBDIRECTORY			L"EFI\\BOOT"
 #define ENDLESS_BOOT_SUBDIRECTORY		L"EFI\\Endless"
 #define GRUB_BOOT_SUBDIRECTORY			L"grub"
-#define LIVE_BOOT_IMG_FILE				L"live\\boot.img"
-#define LIVE_CORE_IMG_FILE				L"live\\core.img"
 
 /* The offset of a magic number used by Windows NT.  */
 #define MBR_WINDOWS_NT_MAGIC 0x1b8
@@ -4775,7 +4773,7 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	// * [some other conditions]
 	// Having zeroed the partition table, this first condition is surely true.
 	errorCause = ErrorCauseWriteBiosBootFailed;
-	IFFALSE_GOTOERROR(WriteBIOSBootPartitionToUSB(hPhysical, bootFilesPath, BytesPerSector), "Error on WriteBIOSBootPartitionToUSB");
+	IFFALSE_GOTOERROR(WriteSBRToUSB(hPhysical, bootFilesPath, BytesPerSector), "Error on WriteSBRToUSB");
 
 	// create partitions.
 	errorCause = ErrorCauseCreatePartitionsFailed;
@@ -4915,53 +4913,38 @@ bool CEndlessUsbToolDlg::CreateUSBPartitionLayout(HANDLE hPhysical, DWORD &Bytes
 	IFFALSE_GOTOERROR(result != 0 && size > 0, "Error on querying disk geometry.");
 	BytesPerSector = DiskGeometry->Geometry.BytesPerSector;
 
-	// the EFI spec says the GPT will take the first and last two sectors of
-	// the disk, plus however much is allocated for partition entries. there
-	// must be at least 128 entries of at least 128 in size - in practice this
-	// is what everyone uses. 128 * 128 is 16k which will always be aligned to
-	// sector size which is at least 512, but a hypothetical GIANT SECTOR disk
-	// would need three sectors reserved for the whole partition table, so we
-	// use max()
-	LONGLONG gptLength = (2 * BytesPerSector) + max((128 * 128), BytesPerSector);
 	bool returnValue = false;
 
-	DriveLayout->PartitionStyle = PARTITION_STYLE_GPT;
-	DriveLayout->PartitionCount = EXPECTED_NUMBER_OF_PARTITIONS;
+	DriveLayout->PartitionStyle = PARTITION_STYLE_MBR;
+    DriveLayout->PartitionCount = 2; // TODO: try 4
 	IGNORE_RETVAL(CoCreateGuid(&DriveLayout->Gpt.DiskId));
 
-	LONGLONG partitionStart[EXPECTED_NUMBER_OF_PARTITIONS] = {
+	LONGLONG partitionStart[LIVE_PARTITION_COUNT] = {
 		EXFAT_PART_STARTING_SECTOR * BytesPerSector,
 		ESP_PART_STARTING_SECTOR * BytesPerSector,
-		BIOS_BOOT_PART_STARTING_SECTOR * BytesPerSector
 	};
-	LONGLONG partitionSize[EXPECTED_NUMBER_OF_PARTITIONS] = {
-		// there is a 2nd copy of the GPT at the end of the disk so we
-		// subtract the length here to avoid the operation failing
-		DiskGeometry->DiskSize.QuadPart - gptLength - partitionStart[0],
+	LONGLONG partitionSize[LIVE_PARTITION_COUNT] = {
+		DiskGeometry->DiskSize.QuadPart - partitionStart[0],
 		ESP_PART_LENGTH_BYTES,
-		BIOS_BOOT_PART_LENGTH_BYTES
 	};
-	GUID partitionType[EXPECTED_NUMBER_OF_PARTITIONS] = {
-		PARTITION_BASIC_DATA_GUID,
-		PARTITION_SYSTEM_GUID,
-		PARTITION_BIOS_BOOT_GUID
+	BYTE partitionType[LIVE_PARTITION_COUNT] = {
+		0x07,
+		0xEF,
 	};
-	wchar_t *partitionName[EXPECTED_NUMBER_OF_PARTITIONS] = {
-		EXFAT_PARTITION_NAME_LIVE,
-		L"",
-		L""
+	BOOLEAN bootIndicator[LIVE_PARTITION_COUNT] = {
+		TRUE,
+		FALSE,
 	};
 
-	for (int partIndex = 0; partIndex < EXPECTED_NUMBER_OF_PARTITIONS; partIndex++) {
+	for (int partIndex = 0; partIndex < LIVE_PARTITION_COUNT; partIndex++) {
 		currentPartition = &(DriveLayout->PartitionEntry[partIndex]);
-		currentPartition->PartitionStyle = PARTITION_STYLE_GPT;
+		currentPartition->PartitionStyle = PARTITION_STYLE_MBR;
 		currentPartition->StartingOffset.QuadPart = partitionStart[partIndex];
 		currentPartition->PartitionLength.QuadPart = partitionSize[partIndex];
 		currentPartition->PartitionNumber = partIndex + 1; // partition numbers start from 1
 		currentPartition->RewritePartition = TRUE;
-		currentPartition->Gpt.PartitionType = partitionType[partIndex];
-		IGNORE_RETVAL(CoCreateGuid(&currentPartition->Gpt.PartitionId));
-		wcscpy(currentPartition->Gpt.Name, partitionName[partIndex]);
+		currentPartition->Mbr.PartitionType = partitionType[partIndex];
+		currentPartition->Mbr.BootIndicator = bootIndicator[partIndex];
 	}
 
 	// push partition information to drive
@@ -5239,7 +5222,7 @@ bool CEndlessUsbToolDlg::WriteMBRToUSB(HANDLE hPhysical, const CString &bootFile
 
 	FAKE_FD fake_fd = { 0 };
 	FILE* fp = (FILE*)&fake_fd;
-	CString bootImgFilePath = bootFilesPath + LIVE_BOOT_IMG_FILE;
+	CString bootImgFilePath = bootFilesPath + NTFS_BOOT_IMG_FILE;
 	unsigned char endlessMBRData[MAX_BOOT_IMG_FILE_SIZE];
 	bool retResult = false;
 	size_t countRead;
@@ -5262,25 +5245,26 @@ error:
 	return retResult;
 }
 
-bool CEndlessUsbToolDlg::WriteBIOSBootPartitionToUSB(HANDLE hPhysical, const CString &bootFilesPath, DWORD bytesPerSector)
+bool CEndlessUsbToolDlg::WriteSBRToUSB(HANDLE hPhysical, const CString &bootFilesPath, DWORD bytesPerSector)
 {
 	FUNCTION_ENTER;
 
-	CString coreImgFilePath = bootFilesPath + LIVE_CORE_IMG_FILE;
-	unsigned char *coreImg = (unsigned char *) malloc(BIOS_BOOT_PART_LENGTH_BYTES);
+	CString coreImgFilePath = bootFilesPath + NTFS_CORE_IMG_FILE;
+	size_t maxCoreImgSize = (ESP_PART_STARTING_SECTOR - 1) * SECTOR_SIZE;
+	unsigned char *coreImg = (unsigned char *) malloc(maxCoreImgSize);
 	bool retResult = false;
 	size_t coreImgSize;
 	DWORD coreImgBytesWritten = 0;
-	LARGE_INTEGER lMbrPartitionStart;
+	LARGE_INTEGER lSbrStart;
 
-	lMbrPartitionStart.QuadPart = bytesPerSector * BIOS_BOOT_PART_STARTING_SECTOR;
+	lSbrStart.QuadPart = bytesPerSector;
 
 	// Read core.img data and write it to USB drive
-	coreImgSize = ReadEntireFile(coreImgFilePath, coreImg, BIOS_BOOT_PART_LENGTH_BYTES);
+	coreImgSize = ReadEntireFile(coreImgFilePath, coreImg, maxCoreImgSize);
 	IFFALSE_GOTOERROR(coreImgSize, "Couldn't read core.img");
-	IFFALSE_GOTOERROR(SetFilePointerEx(hPhysical, lMbrPartitionStart, NULL, FILE_BEGIN), "Error setting handle position");
+	IFFALSE_GOTOERROR(SetFilePointerEx(hPhysical, lSbrStart, NULL, FILE_BEGIN), "Error setting handle position");
 	IFFALSE_GOTOERROR(WriteFileWithRetry(hPhysical, coreImg, coreImgSize, &coreImgBytesWritten, WRITE_RETRIES),
-		"Error writing BIOS boot partition");
+		"Error writing core.img");
 
 	retResult = true;
 
