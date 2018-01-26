@@ -25,22 +25,19 @@ class CAppCmdLineInfo : public CCommandLineInfo
 {
 public:
     CAppCmdLineInfo(void) :
-        logDebugInfo(false), forceMbr(false)
+        logDebugInfo(false)
     {}
 
     virtual void ParseParam(const TCHAR* pszParam, BOOL bFlag, BOOL bLast)
     {
         if (0 == _tcscmp(_T("debug"), pszParam)) {
             logDebugInfo = true;
-        } else if (0 == _tcscmp(_T("forcembr"), pszParam)) {
-            forceMbr = true;
         } else {
             CCommandLineInfo::ParseParam(pszParam, bFlag, bLast);
         }
     }
 
     bool logDebugInfo;
-    bool forceMbr;
 };
 
 
@@ -53,7 +50,6 @@ END_MESSAGE_MAP()
 CString CEndlessUsbToolApp::m_appDir = L"";
 CString CEndlessUsbToolApp::m_imageDir = L"";
 bool CEndlessUsbToolApp::m_enableLogDebugging = false;
-bool CEndlessUsbToolApp::m_enableOverwriteMbr = false;
 CFile CEndlessUsbToolApp::m_logFile;
 
 // CEndlessUsbToolApp construction
@@ -122,8 +118,6 @@ BOOL CEndlessUsbToolApp::InitInstance()
     // check command line parameters;
     CAppCmdLineInfo commandLineInfo;
     ParseCommandLine(commandLineInfo);
-
-	m_enableOverwriteMbr = commandLineInfo.forceMbr;
 
 	//m_enableLogDebugging = commandLineInfo.logDebugInfo;
 	m_enableLogDebugging = true;

@@ -5973,7 +5973,7 @@ bool CEndlessUsbToolDlg::UninstallEndlessMBR(const CString & systemDriveLetter, 
     fake_fd._handle = (char*)hPhysical;
 
     IFTRUE_RETURN_VALUE(IsWindowsMBR(fp, systemDriveLetter), "Windows MBR detected so skipping MBR writing", true);
-    if (!CEndlessUsbToolApp::m_enableOverwriteMbr && !IsEndlessMBR(fp, endlessFilesPath)) {
+    if (!IsEndlessMBR(fp, endlessFilesPath)) {
         cause = ErrorCause_t::ErrorCauseNonEndlessMBR;
         return false;
     }
