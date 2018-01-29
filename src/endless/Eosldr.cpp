@@ -15,13 +15,6 @@
 // registry key
 #define REGKEY_BCD_GUID         L"EndlessBcdGuid"
 
-bool EosldrInstaller::CanInstall(const CString & bootFilesPath)
-{
-    FUNCTION_ENTER_FMT("%ls", bootFilesPath);
-
-    return !!PathFileExists(bootFilesPath + EOSLDR_SUBDIRECTORY);
-}
-
 // We mark eosldr[.mbr] readonly, hidden and system, but don't go all-out with
 // restrictive ACLs like we do for /endless/endless.img etc. There's no
 // irreplacable data in these files, and on systems booted with this method,

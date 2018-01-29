@@ -37,8 +37,6 @@ extern "C" {
 
 #include "usb.h"
 #include "mbr_grub2.h"
-#include "grub/grub.h"
-
 
 // RADU: try to remove the need for all of these
 OPENED_LIBRARIES_VARS;
@@ -410,9 +408,7 @@ static LPCTSTR ErrorCauseToStr(ErrorCause_t errorCause)
         TOSTR(ErrorCause32BitEFI);
         TOSTR(ErrorCauseBitLocker);
         TOSTR(ErrorCauseNotNTFS);
-        TOSTR(ErrorCauseNonWindowsMBR);
         TOSTR(ErrorCauseNonEndlessMBR);
-        TOSTR(ErrorCauseCantCheckMBR);
         TOSTR(ErrorCauseInstallFailedDiskFull);
         TOSTR(ErrorCauseSuspended);
         TOSTR(ErrorCauseInstallEosldrFailed);
@@ -1791,14 +1787,6 @@ void CEndlessUsbToolDlg::ErrorOccured(ErrorCause_t errorCause)
         driveLetterInHeading = true;
         suggestionMsgId = IsCoding() ? MSG_308 : MSG_353;
         break;
-    case ErrorCause_t::ErrorCauseNonWindowsMBR:
-        headlineMsgId = MSG_359;
-        suggestionMsgId = IsCoding() ? MSG_379 : MSG_360;
-        break;
-    case ErrorCause_t::ErrorCauseCantCheckMBR:
-        // TODO: new string here; or, better, eliminate this failure mode
-        suggestionMsgId = MSG_358;
-        break;
     case ErrorCause_t::ErrorCauseNonEndlessMBR:
     case ErrorCause_t::ErrorCauseUninstallEosldrFailed:
         uprintf("Uninstall-specific error cause %ls", ErrorCauseToStr(errorCause));
@@ -2132,10 +2120,9 @@ HRESULT CEndlessUsbToolDlg::OnInstallDualBootClicked(IHTMLElement* pElement)
 	uprintf("Is BitLocker/device encryption enabled on '%ls': %s", systemDriveLetter, isBitLockerEnabled ? "YES" : "NO");
 
 	const bool isBIOS = IsLegacyBIOSBoot();
-	const bool canInstallEosldr = true; // assume it'll be in the boot.zip; we'll check again later
 	ErrorCause cause = ErrorCauseNone;
 	// TODO: move bitlocker check in here too?
-	bool canInstall = CanInstallToDrive(systemDriveLetter, isBIOS, canInstallEosldr, cause);
+	bool canInstall = CanInstallToDrive(systemDriveLetter, isBIOS, cause);
 
 	if (ShouldUninstall()) {
 		QueryAndDoUninstall();
@@ -4718,10 +4705,6 @@ void CEndlessUsbToolDlg::SetJSONDownloadState(JSONDownloadState state)
 #define ENDLESS_BOOT_EFI_FILE			"bootx64.efi"
 #define BACKUP_BOOTTRACK_IMG			L"boottrack.img"
 #define BACKUP_MBR_IMG					L"mbr.img"
-#define MAX_BOOTTRACK_SIZE				(4 * 1024 * 1024) // 4Mb
-
-/* The offset of BOOT_DRIVE_CHECK.  */
-#define GRUB_BOOT_MACHINE_DRIVE_CHECK	0x66
 
 // Below defines need to be in this order
 #define USB_PROGRESS_UNPACK_BOOT_ZIP		2
@@ -5312,7 +5295,7 @@ error:
 #define DB_PROGRESS_CHECK_PARTITION		3
 #define DB_PROGRESS_FINISHED_UNPACK		95
 #define DB_PROGRESS_COPY_GRUB_FOLDER	98
-#define DB_PROGRESS_MBR_OR_EFI_SETUP	100
+#define DB_PROGRESS_BCD_OR_EFI_SETUP	100
 
 #define REGKEY_UTC_TIME_PATH	L"SYSTEM\\CurrentControlSet\\Control\\TimeZoneInformation"
 #define REGKEY_UTC_TIME			L"RealTimeIsUniversal"
@@ -5342,8 +5325,7 @@ DWORD WINAPI CEndlessUsbToolDlg::SetupDualBoot(LPVOID param)
 
 	// Double-check this is an NTFS drive and that we can install a bootloader.
 	const bool isBIOS = IsLegacyBIOSBoot();
-	const bool canInstallEosldr = dlg->m_eosldrInstaller->CanInstall(bootFilesPath);
-	IFFALSE_GOTOERROR(CanInstallToDrive(systemDriveLetter, isBIOS, canInstallEosldr, errorCause), "Can't install to this drive");
+	IFFALSE_GOTOERROR(CanInstallToDrive(systemDriveLetter, isBIOS, errorCause), "Can't install to this drive");
 
 	UpdateProgress(OP_SETUP_DUALBOOT, DB_PROGRESS_CHECK_PARTITION);
 
@@ -5414,14 +5396,10 @@ bool CEndlessUsbToolDlg::SetupDualBootFiles(CEndlessUsbToolDlg *dlg, const CStri
 	CHECK_IF_CANCELLED;
 
 	if (IsLegacyBIOSBoot()) {
-		if (dlg->m_eosldrInstaller->CanInstall(bootFilesPath)) {
-			if (!dlg->m_eosldrInstaller->Install(systemDriveLetter, bootFilesPath)) {
-				PRINT_ERROR_MSG("Error installing eosldr");
-				errorCause = ErrorCauseInstallEosldrFailed;
-				goto error;
-			}
-		} else {
-			IFFALSE_GOTOERROR(WriteMBRAndSBRToWinDrive(dlg, systemDriveLetter, bootFilesPath, endlessFilesPath), "Error on WriteMBRAndSBRToWinDrive");
+		if (!dlg->m_eosldrInstaller->Install(systemDriveLetter, bootFilesPath)) {
+			PRINT_ERROR_MSG("Error installing eosldr");
+			errorCause = ErrorCauseInstallEosldrFailed;
+			goto error;
 		}
 	} else {
 		IFFALSE_GOTOERROR(SetupEndlessEFI(systemDriveLetter, bootFilesPath), "Error on SetupEndlessEFI");
@@ -5436,7 +5414,7 @@ bool CEndlessUsbToolDlg::SetupDualBootFiles(CEndlessUsbToolDlg *dlg, const CStri
 	// disable Fast Start (aka Hiberboot) so that the NTFS partition is always cleanly unmounted at shutdown:
 	IFFALSE_PRINTERROR(SetEndlessRegistryKey(HKEY_LOCAL_MACHINE, REGKEY_FASTBOOT_PATH, REGKEY_FASTBOOT, CComVariant(0)), "Error on disabling fastboot.");
 
-	UpdateProgress(OP_SETUP_DUALBOOT, DB_PROGRESS_MBR_OR_EFI_SETUP);
+	UpdateProgress(OP_SETUP_DUALBOOT, DB_PROGRESS_BCD_OR_EFI_SETUP);
 
 	return true;
 
@@ -5557,7 +5535,7 @@ bool CEndlessUsbToolDlg::IsLegacyBIOSBoot()
 }
 
 // Checks preconditions for installing Endless OS to a given drive. Guaranteed to only modify 'cause' on error.
-bool CEndlessUsbToolDlg::CanInstallToDrive(const CString & systemDriveLetter, const bool isBIOS, const bool canInstallEosldr, ErrorCause &cause)
+bool CEndlessUsbToolDlg::CanInstallToDrive(const CString & systemDriveLetter, const bool isBIOS, ErrorCause &cause)
 {
 	FUNCTION_ENTER;
 	
@@ -5581,36 +5559,11 @@ bool CEndlessUsbToolDlg::CanInstallToDrive(const CString & systemDriveLetter, co
 		}
 	}
 
-	if (canInstallEosldr) {
-		return true;
-	} else if (CEndlessUsbToolApp::m_enableOverwriteMbr) {
-		uprintf("Not checking for Windows MBR as /forcembr is enabled.");
-		return true;
-	} else {
-		bool ret = false;
-
-		HANDLE hPhysical = GetPhysicalFromDriveLetter(systemDriveLetter);
-		if (hPhysical != INVALID_HANDLE_VALUE) {
-			FAKE_FD fake_fd = { 0 };
-			FILE* fp = (FILE*)&fake_fd;
-			fake_fd._handle = (char*)hPhysical;
-
-			if (IsWindowsMBR(fp, systemDriveLetter)) {
-				ret = true;
-			} else {
-				cause = ErrorCauseNonWindowsMBR;
-			}
-		} else {
-			PRINT_ERROR_MSG("can't check MBR; installation would fail so giving up now");
-			cause = ErrorCauseCantCheckMBR;
-		}
-		safe_closehandle(hPhysical);
-		return ret;
-	}
+	return true;
 
 error:
 	// Something unexpected happened happened
-	cause = ErrorCauseWriteFailed;
+    cause = ErrorCauseGeneric;
 	return false;
 }
 
@@ -5652,111 +5605,6 @@ static int write_bootmark(FILE *fp, unsigned long ulBytesPerSector)
             return 0;
     }
     return 1;
-}
-
-// Unconditionally write GRUB from 'bootFilesPath' to 'systemDriveLetter', backing up the current boot track to 'endlessFilesPath'.
-bool CEndlessUsbToolDlg::WriteMBRAndSBRToWinDrive(CEndlessUsbToolDlg *dlg, const CString &systemDriveLetter, const CString &bootFilesPath, const CString &endlessFilesPath)
-{
-	FUNCTION_ENTER;
-
-	bool retResult = false;
-	HANDLE hPhysical = INVALID_HANDLE_VALUE;
-	BYTE geometry[256] = { 0 };
-	PDISK_GEOMETRY_EX DiskGeometry = (PDISK_GEOMETRY_EX)(void*)geometry;
-	BYTE layout[4096] = { 0 };
-	PDRIVE_LAYOUT_INFORMATION_EX DriveLayout = (PDRIVE_LAYOUT_INFORMATION_EX)(void*)layout;
-	DWORD size;
-	BOOL result;
-	CString coreImgFilePath = bootFilesPath + NTFS_CORE_IMG_FILE;
-	FILE *bootImgFile = NULL, *boottrackImgFile = NULL;
-	FAKE_FD fake_fd = { 0 };
-	FILE* fp = (FILE*)&fake_fd;
-	CString bootImgFilePath = bootFilesPath + NTFS_BOOT_IMG_FILE;
-	unsigned char endlessMBRData[MAX_BOOT_IMG_FILE_SIZE];
-	size_t countRead;
-	unsigned char *boottrackData = NULL;	
-
-	// Get system disk handle
-	hPhysical = GetPhysicalFromDriveLetter(systemDriveLetter);
-	IFFALSE_GOTOERROR(hPhysical != INVALID_HANDLE_VALUE, "Error on acquiring disk handle.");
-
-	// get disk geometry information
-	result = DeviceIoControl(hPhysical, IOCTL_DISK_GET_DRIVE_GEOMETRY_EX, NULL, 0, geometry, sizeof(geometry), &size, NULL);
-	IFFALSE_GOTOERROR(result != 0 && size > 0, "Error on querying disk geometry.");
-	set_bytes_per_sector(DiskGeometry->Geometry.BytesPerSector);
-
-	// Check that SBR will "fit" before writing to disk
-	// Jira issue: https://movial.atlassian.net/browse/EOIFT-158
-	// This will be done in grub_util_bios_setup, here just get the last available sector for writing the SBR between MBR and first partition
-	result = DeviceIoControl(hPhysical, IOCTL_DISK_GET_DRIVE_LAYOUT_EX, NULL, 0, layout, sizeof(layout), &size, NULL);
-	IFFALSE_GOTOERROR(result != 0 && size > 0, "Error on querying disk layout.");
-	IFFALSE_GOTOERROR(DriveLayout->PartitionCount > 0, "We don't have any partitions?");
-	uprintf("BytesPerSector=%d, PartitionEntry[0].StartingOffset=%I64i", DiskGeometry->Geometry.BytesPerSector, DriveLayout->PartitionEntry[0].StartingOffset.QuadPart);
-
-	// preserve boot track before writing anything to disk
-	// Jira https://movial.atlassian.net/browse/EOIFT-169
-	LONGLONG minStartingOffset = MAX_BOOTTRACK_SIZE;
-	PARTITION_INFORMATION_EX *partition = NULL;
-	for (DWORD index = 0; index < DriveLayout->PartitionCount; index++) {
-		partition = &(DriveLayout->PartitionEntry[index]);
-		IFFALSE_GOTOERROR(partition->PartitionStyle == PARTITION_STYLE_MBR, "non-MBR partition in supposedly-MBR table(?)");
-		if (partition->Mbr.PartitionType == PARTITION_ENTRY_UNUSED) {
-			uprintf("Partition %d is unused", index);
-		} else {
-			uprintf("Partition %d starting offset = %I64i", index, partition->StartingOffset.QuadPart);
-			minStartingOffset = min(minStartingOffset, partition->StartingOffset.QuadPart);
-		}
-	}
-
-	dlg->TrackEvent(_T("BootTrackSize"), minStartingOffset);
-
-	IFFALSE_GOTOERROR(0 == _wfopen_s(&boottrackImgFile, endlessFilesPath + BACKUP_BOOTTRACK_IMG, L"wb"), "Error opening boottrack.img file");
-	boottrackData = (unsigned char*)malloc(DiskGeometry->Geometry.BytesPerSector);
-	LONGLONG boottrackNrSectors = minStartingOffset / DiskGeometry->Geometry.BytesPerSector;
-	uprintf("Trying to save %I64i sectors in file %ls", boottrackNrSectors, endlessFilesPath + BACKUP_BOOTTRACK_IMG);
-	for (LONGLONG i = 0; i < boottrackNrSectors; i++) {
-		int64_t result = read_sectors(hPhysical, DiskGeometry->Geometry.BytesPerSector, i, 1, boottrackData);
-		IFFALSE_GOTOERROR(result == DiskGeometry->Geometry.BytesPerSector, "Error reading from disk.");
-		IFFALSE_GOTOERROR(fwrite(boottrackData, 1, DiskGeometry->Geometry.BytesPerSector, boottrackImgFile) == DiskGeometry->Geometry.BytesPerSector, "Error writing data to boottrack.img.");
-	}
-	safe_closefile(boottrackImgFile);
-
-	// Write core.img
-	IFFALSE_GOTOERROR(grub_util_bios_setup(coreImgFilePath, hPhysical, boottrackNrSectors), "Error writing SBR to disk");
-
-	// Load boot.img from file
-	IFFALSE_GOTOERROR(0 == _wfopen_s(&bootImgFile, bootImgFilePath, L"rb"), "Error opening boot.img file");
-	countRead = fread(endlessMBRData, 1, MAX_BOOT_IMG_FILE_SIZE, bootImgFile);
-	IFFALSE_GOTOERROR(countRead == MAX_BOOT_IMG_FILE_SIZE, "Size of boot.img is not what is expected. Not enough data to read");
-
-	// Also, ensure we apply the workaround for stupid BIOSes: https://github.com/endlessm/grub/blob/master/util/setup.c#L384
-	// use boot.img from boot.zip rather than rufus - https://movial.atlassian.net/browse/EOIFT-170
-	unsigned char *boot_drive_check = (unsigned char *)(endlessMBRData + GRUB_BOOT_MACHINE_DRIVE_CHECK);
-	/* Replace the jmp (2 bytes) with double nop's.  */
-	boot_drive_check[0] = 0x90;
-	boot_drive_check[1] = 0x90;
-
-	// reusing boottrackImgFile, saving mbr.img for uninstall purposes
-	IFFALSE_GOTOERROR(0 == _wfopen_s(&boottrackImgFile, endlessFilesPath + BACKUP_MBR_IMG, L"wb"), "Error opening mbr.img file");
-	fwrite(endlessMBRData, 1, MBR_WINDOWS_NT_MAGIC, boottrackImgFile);
-	safe_closefile(boottrackImgFile);
-
-	// write boot.img to disk
-	fake_fd._handle = (char*)hPhysical;
-	set_bytes_per_sector(SelectedDrive.Geometry.BytesPerSector);
-	IFFALSE_GOTOERROR(write_data(fp, 0x0, endlessMBRData, MBR_WINDOWS_NT_MAGIC) != 0, "Error on write_data with boot.img contents.");
-    IFFALSE_PRINTERROR(write_bootmark(fp, DiskGeometry->Geometry.BytesPerSector), "Error on write_bootmark");
-
-	retResult = true;
-
-error:
-	safe_closehandle(hPhysical);
-	safe_closefile(bootImgFile);
-	safe_closefile(boottrackImgFile);
-
-	if (boottrackData != NULL) safe_free(boottrackData);
-
-	return retResult;
 }
 
 bool CEndlessUsbToolDlg::SetupEndlessEFI(const CString &systemDriveLetter, const CString &bootFilesPath)
@@ -6125,7 +5973,7 @@ bool CEndlessUsbToolDlg::UninstallEndlessMBR(const CString & systemDriveLetter, 
     fake_fd._handle = (char*)hPhysical;
 
     IFTRUE_RETURN_VALUE(IsWindowsMBR(fp, systemDriveLetter), "Windows MBR detected so skipping MBR writing", true);
-    if (!CEndlessUsbToolApp::m_enableOverwriteMbr && !IsEndlessMBR(fp, endlessFilesPath)) {
+    if (!IsEndlessMBR(fp, endlessFilesPath)) {
         cause = ErrorCause_t::ErrorCauseNonEndlessMBR;
         return false;
     }

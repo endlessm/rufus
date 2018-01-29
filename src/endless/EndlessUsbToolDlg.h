@@ -54,9 +54,7 @@ typedef enum ErrorCause {
     ErrorCause32BitEFI,
     ErrorCauseBitLocker,
     ErrorCauseNotNTFS,
-    ErrorCauseNonWindowsMBR,
     ErrorCauseNonEndlessMBR,
-    ErrorCauseCantCheckMBR,
     ErrorCauseInstallFailedDiskFull,
     ErrorCauseSuspended,
     ErrorCauseInstallEosldrFailed,
@@ -435,8 +433,7 @@ private:
 	static bool CopyMultipleItems(const CString &fromPath, const CString &toPath);
 	static bool IsLegacyBIOSBoot();
 	static bool IsWindowsMBR(FILE* fpDrive, const CString &TargetName);
-	static bool CanInstallToDrive(const CString &systemDriveLetter, const bool isBIOS, const bool canInstallEosldr, ErrorCause &cause);
-	static bool WriteMBRAndSBRToWinDrive(CEndlessUsbToolDlg *dlg, const CString &systemDriveLetter, const CString &bootFilesPath, const CString &endlessFilesPath);
+	static bool CanInstallToDrive(const CString &systemDriveLetter, const bool isBIOS, ErrorCause &cause);
 	static bool SetupEndlessEFI(const CString &systemDriveLetter, const CString &bootFilesPath);
 	static HANDLE GetPhysicalFromDriveLetter(const CString &driveLetter);
 
