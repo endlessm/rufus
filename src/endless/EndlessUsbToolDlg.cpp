@@ -4423,10 +4423,16 @@ DWORD WINAPI CEndlessUsbToolDlg::UpdateDownloadProgressThread(void* param)
             {
                 DownloadStatus_t downloadStatus;
                 bool result = dlg->m_downloadManager.GetDownloadProgress(currentJob, downloadStatus, jobName);
-                if (!result || downloadStatus.done || downloadStatus.error) {
-                    uprintf("CEndlessUsbToolDlg::UpdateDownloadProgressThread - Exiting");
+
+                IFFALSE_GOTO(result, "GetDownloadProgress failed", done);
+                if (downloadStatus.done || downloadStatus.error) {
+                    uprintf("GetDownloadProgress reported download %s", downloadStatus.done ? "done" : "error");
+                    /* Both of these cases are (supposed to be) handled and
+                     * reported elsewhere.
+                     */
                     goto done;
                 }
+
                 ::PostMessage(dlg->m_hWnd, WM_FILE_DOWNLOAD_STATUS, (WPARAM) new DownloadStatus_t(downloadStatus), 0);
                 break;
             }
@@ -4434,6 +4440,7 @@ DWORD WINAPI CEndlessUsbToolDlg::UpdateDownloadProgressThread(void* param)
     }
 
 done:
+    uprintf("%s exiting", __FUNCTION__);
     dlg->m_downloadUpdateThread = INVALID_HANDLE_VALUE;
     CoUninitialize();
     return 0;
