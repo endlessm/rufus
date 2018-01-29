@@ -71,7 +71,7 @@ struct ExtraEntries : DRIVE_LAYOUT_INFORMATION_EX
 #define UEFI_BOOT_NAMESPACE			L"{8BE4DF61-93CA-11d2-AA0D-00E098032B8C}"
 
 #define UEFI_VAR_BOOTORDER			L"BootOrder"
-#define UEFI_BOOT_ENTRY_NUM_FORMAT	"%04x"
+#define UEFI_BOOT_ENTRY_NUM_FORMAT	"%04X"
 #define UEFI_VAR_BOOT_ENTRY_FORMAT	L"Boot" _T(UEFI_BOOT_ENTRY_NUM_FORMAT)
 
 int print_drive_letter(WCHAR *VolumeName) {
@@ -303,7 +303,10 @@ int EFIGetBootEntryNumber(const wchar_t *desc, bool createNewEntry) {
 		for (i = 0; i < (int)(size / 2); i++) {
 			swprintf(varname, sizeof(varname), UEFI_VAR_BOOT_ENTRY_FORMAT, bootorder[i]);
 			size = GetFirmwareEnvironmentVariable(varname, UEFI_BOOT_NAMESPACE, vardata1, sizeof(vardata1));
-			IFFALSE_CONTINUE(size > 0, "");
+			if (size == 0) {
+				PRINT_ERROR_MSG_FMT("failed to read %ls", varname);
+				continue;
+			}
 
 			wchar_t *description = (wchar_t *)&vardata1[6];
 			// TODO: should we add more validation than just the boot entry description matching?
