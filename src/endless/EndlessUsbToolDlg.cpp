@@ -3597,9 +3597,6 @@ void CEndlessUsbToolDlg::GoToSelectStoragePage()
 		uprintf("Available space on drive %s is %s out of %s; we need %s to download and %s to install",
 			systemDrive, freeSize, totalSize, downloadSizeStr, minimumInstallSizeStr);
 	}
-	maximumInstallSize = RoundToSector((freeBytesAvailable.QuadPart - bytesInGig) - downloadSize);
-	// Measured in GB for consistency with StorageSizeGB
-	TrackEvent(_T("MaximumInstallSizeGB"), ROUND_TO_NEAREST_GIGABYTE(maximumInstallSize));
 
 	// update messages with needed space based on selected version
 	CStringA osVersion = lmprintf(isBaseImage ? MSG_400 : MSG_316);
@@ -3637,10 +3634,15 @@ void CEndlessUsbToolDlg::GoToSelectStoragePage()
 
 		ChangePage(_T(ELEMENT_STORAGE_PAGE));
 
-		TrackEvent(_T("StorageInsufficient"));
+		// Recorded in GB for consistency with StorageSizeGB and MaximumInstallSizeGB
+		TrackEvent(_T("StorageInsufficient"), ROUND_TO_NEAREST_GIGABYTE(freeBytesAvailable.QuadPart));
 
 		return;
 	}
+
+	maximumInstallSize = RoundToSector((freeBytesAvailable.QuadPart - bytesInGig) - downloadSize);
+	// Measured in GB for consistency with StorageSizeGB
+	TrackEvent(_T("MaximumInstallSizeGB"), ROUND_TO_NEAREST_GIGABYTE(maximumInstallSize));
 
 	// Add the entries
 	m_selectedInstallSizeBytes = minimumInstallSize;
