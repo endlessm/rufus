@@ -1,4 +1,5 @@
 version: "{build}-{branch}"
+image: Visual Studio 2017
 
 matrix:
   fast_finish: true
