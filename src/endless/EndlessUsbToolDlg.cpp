@@ -3262,6 +3262,10 @@ void CEndlessUsbToolDlg::StartInstallationProcess()
 				m_bootArchiveSize = localEntry->bootArchiveSize;
 				m_unpackedImageSig = localEntry->unpackedImgSigPath;
 			} else {
+				uprintf("Can't use local file. hasBootArchive: %s, hasBootArchiveSig: %s, hasUnpackedImgSig: %s",
+					localEntry->hasBootArchive ? "true" : "false",
+					localEntry->hasBootArchiveSig ? "true" : "false",
+					localEntry->hasUnpackedImgSig ? "true" : "false");
 				m_useLocalFile = false;
 			}
 		}
