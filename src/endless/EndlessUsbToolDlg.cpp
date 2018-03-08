@@ -1850,11 +1850,10 @@ void CEndlessUsbToolDlg::ErrorOccured(ErrorCause_t errorCause)
         if (suggestionMsgId == MSG_334 || suggestionMsgId == MSG_303) {
             // Not enough space to download
             const CStringA downloadDriveA = ConvertUnicodeToUTF8(CEndlessUsbToolApp::m_imageDir.Left(3));
-
-            POSITION p = m_remoteImages.FindIndex(m_selectedRemoteIndex);
+            RemoteImageEntry_t remote;
             ULONGLONG size = 0;
-            if (p != NULL) {
-                RemoteImageEntry_t remote = m_remoteImages.GetAt(p);
+
+            if (GetSelectedRemoteImage(remote)) {
                 size = remote.compressedSize + remote.bootArchiveSize;
             }
             // we don't take the signature files into account but we are taking about ~2KB compared to >2GB
@@ -3006,14 +3005,11 @@ HRESULT CEndlessUsbToolDlg::OnSelectFileNextClicked(IHTMLElement* pElement)
 		size = localEntry->extractedSize;
 		m_selectedFileSize = localEntry->fileSize;
     } else {
-		POSITION p = m_remoteImages.FindIndex(m_selectedRemoteIndex);
-		if (p == NULL) {
-			uprintf("Remote index value not valid.");
+		RemoteImageEntry_t remote;
+		if (!GetSelectedRemoteImage(remote)) {
 			ErrorOccured(ErrorCause_t::ErrorCauseGeneric);
 			return S_OK;
 		}
-
-		RemoteImageEntry_t remote = m_remoteImages.GetAt(p);
 
 		personality = remote.personality;
 		version = remote.version;
@@ -3142,9 +3138,8 @@ HRESULT CEndlessUsbToolDlg::OnSelectedRemoteFileChanged(IHTMLElement* pElement)
     IFFAILED_RETURN_VALUE(hr, "Error getting selected index value", S_OK);
 
     m_selectedRemoteIndex = selectedIndex;
-    POSITION p = m_remoteImages.FindIndex(selectedIndex);
-    IFFALSE_RETURN_VALUE(p != NULL, "Index value not valid.", S_OK);
-    RemoteImageEntry_t r = m_remoteImages.GetAt(p);
+    RemoteImageEntry_t r;
+    IFFALSE_RETURN_VALUE(GetSelectedRemoteImage(r), "Index value not valid.", S_OK);
     uprintf("OnSelectedRemoteFileChanged to REMOTE [%ls]", r.urlFile);
 
     if (r.personality != PERSONALITY_BASE) {
@@ -3278,7 +3273,16 @@ void CEndlessUsbToolDlg::StartInstallationProcess()
 	} else {
 		UpdateCurrentStep(OP_DOWNLOADING_FILES);
 
-		RemoteImageEntry_t remote = m_remoteImages.GetAt(m_remoteImages.FindIndex(m_selectedRemoteIndex));
+		RemoteImageEntry_t remote;
+
+		if (!GetSelectedRemoteImage(remote)) {
+			uprintf("Couldn't find remote image, despite m_useLocalFile being false");
+			ChangePage(_T(ELEMENT_INSTALL_PAGE));
+			FormatStatus = FORMAT_STATUS_CANCEL;
+			m_lastErrorCause = ErrorCause_t::ErrorCauseGeneric;
+			PostMessage(WM_FINISHED_ALL_OPERATIONS, 0, 0);
+			return;
+		}
 		DownloadType_t downloadType = GetSelectedDownloadType();
 
 		// live image file
@@ -3555,9 +3559,8 @@ ULONGLONG CEndlessUsbToolDlg::GetNeededSpaceForDualBoot(ULONGLONG *downloadSize,
 			neededSize = localEntry->extractedSize;
 		}
 	} else {
-		POSITION p = m_remoteImages.FindIndex(m_selectedRemoteIndex);
-		if (p != NULL) {
-			RemoteImageEntry_t remote = m_remoteImages.GetAt(p);
+		RemoteImageEntry_t remote;
+		if (GetSelectedRemoteImage(remote)) {
 			neededSize = remote.extractedSize;
 			if (GetExePath().Left(3) == GetSystemDrive()) {
 				*downloadSize = remote.compressedSize + remote.bootArchiveSize;
@@ -3879,12 +3882,12 @@ HRESULT CEndlessUsbToolDlg::CallJavascript(LPCTSTR method, CComVariant parameter
 }
 void CEndlessUsbToolDlg::UpdateCurrentStep(int currentStep)
 {
+    FUNCTION_ENTER_FMT("%ls (%d)", OperationToStr(currentStep), currentStep);
+
     if (m_currentStep == currentStep) {
         uprintf("Already at step %ls(%d)", OperationToStr(currentStep), currentStep);
         return;
     }
-
-    FUNCTION_ENTER;
 
     switch (m_currentStep)
     {
@@ -4394,11 +4397,9 @@ DWORD WINAPI CEndlessUsbToolDlg::UpdateDownloadProgressThread(void* param)
     CEndlessUsbToolDlg *dlg = (CEndlessUsbToolDlg*)param;
     RemoteImageEntry_t remote;
     DownloadType_t downloadType = dlg->GetSelectedDownloadType();
-    POSITION pos = dlg->m_remoteImages.FindIndex(dlg->m_selectedRemoteIndex);
     CString jobName;
 
-    IFFALSE_RETURN_VALUE(pos != NULL, "Index value not valid.", 0);
-    remote = dlg->m_remoteImages.GetAt(pos);
+    IFFALSE_RETURN_VALUE(dlg->GetSelectedRemoteImage(remote), "Can't find remote image.", 0);
 
     // Specify the appropriate COM threading model for your application.
     HRESULT hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
@@ -6333,6 +6334,20 @@ bool CEndlessUsbToolDlg::PackedImageAlreadyExists(const CString &filePath, ULONG
 	exists = true;
 error:
 	return exists;
+}
+
+bool CEndlessUsbToolDlg::GetSelectedRemoteImage(RemoteImageEntry &r)
+{
+    FUNCTION_ENTER;
+
+    POSITION p = m_remoteImages.FindIndex(m_selectedRemoteIndex);
+    if (p == NULL) {
+        PRINT_ERROR_MSG_FMT("Remote index value %ld not valid.", m_selectedRemoteIndex);
+        return false;
+    }
+
+    r = m_remoteImages.GetAt(p);
+    return true;
 }
 
 #define SIGNATURE_FILE_SIZE	819

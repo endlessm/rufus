@@ -467,6 +467,7 @@ private:
 
 	bool PackedImageAlreadyExists(const CString &filePath, ULONGLONG expectedSize, ULONGLONG expectedUnpackedSize, bool isInstaller);
 
+	bool GetSelectedRemoteImage(RemoteImageEntry &r);
 	ULONGLONG GetActualDownloadSize(const RemoteImageEntry &r, bool fullSize = false);
 	bool RemoteMatchesUnpackedImg(const CString &remoteFilePath, CString *unpackedImgSig = NULL);
 	bool IsDualBootOrCombinedUsb();
