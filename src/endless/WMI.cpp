@@ -79,7 +79,7 @@ static HRESULT GetWMIProxy(const CString &objectPath, CComPtr<IWbemServices> &pS
 
 static BOOL RunWMIQuery(const CString &objectPath, const CString &query, std::function< BOOL( CComPtr<IEnumWbemClassObject> & )> callback)
 {
-    FUNCTION_ENTER;
+    FUNCTION_ENTER_FMT("%ls \"%ls\"", objectPath, query);
 
     COMThreading t;
     HRESULT hres;
@@ -102,16 +102,41 @@ BOOL WMI::IsBitlockedDrive(const CString & drive)
     const CString objectPath(L"ROOT\\CIMV2\\Security\\MicrosoftVolumeEncryption");
     CString bitlockerQuery;
 
-    bitlockerQuery.Format(L"Select * from Win32_EncryptableVolume where ProtectionStatus != 0 and DriveLetter = '%ls'", drive);
+    bitlockerQuery.Format(L"Select * from Win32_EncryptableVolume where DriveLetter = '%ls'", drive);
 
     BOOL retResult = RunWMIQuery(objectPath, bitlockerQuery, [](CComPtr<IEnumWbemClassObject> &pEnumerator) {
-        HRESULT hres;
         CComPtr<IWbemClassObject> pclsObj;
         ULONG uReturned = 0;
+        HRESULT hres = pEnumerator->Next(0, 1, &pclsObj, &uReturned);
 
-        hres = pEnumerator->Next(0, 1, &pclsObj, &uReturned);
-        uprintf("IsBitlockedDrive: hres=%x and uReturned=%d", hres, uReturned);
-        return (hres == S_OK) && (uReturned == 1);
+        /* If we can't get the volume's properties, assume it is encrypted. */
+        IFFAILED_RETURN_VALUE(hres, "Next() failed", TRUE);
+        IFFALSE_RETURN_VALUE(uReturned == 1, "Next() didn't return 1 row", TRUE);
+
+        _variant_t vtProp;
+
+        /* https://msdn.microsoft.com/en-us/library/windows/desktop/aa376433(v=vs.85).aspx
+         * 0: FullyDecrypted. "For a standard hard drive (HDD), the volume is fully decrypted.
+         * For a hardware encrypted hard drive (EHDD), the volume is perpetually unlocked."
+         */
+        IFFAILED_RETURN_VALUE(
+            pclsObj->Get(L"ConversionStatus", 0, &vtProp, 0, 0),
+            "Could not get ConversionStatus", TRUE);
+        long conversionStatus = vtProp;
+
+        /* https://msdn.microsoft.com/en-us/library/windows/desktop/aa376448(v=vs.85).aspx
+         * "Protection is off if a volume is unencrypted or partially encrypted, or if the
+         * volume's encryption key is available in the clear on the hard disk."
+         * So though 0 is "Unprotected", this doesn't mean the disk is unencrypted.
+         */
+        IFFAILED_RETURN_VALUE(
+            pclsObj->Get(L"ProtectionStatus", 0, &vtProp, 0, 0),
+            "Could not get ProtectionStatus", TRUE);
+        long protectionStatus = vtProp;
+
+        uprintf("ConversionStatus = %ld, ProtectionStatus = %ld", conversionStatus, protectionStatus);
+        /* Let's play it safe and check both. */
+        return (conversionStatus != 0 || protectionStatus != 0) ? TRUE : FALSE;
     });
 
     uprintf("IsBitlockedDrive done with retResult=%d", retResult);
