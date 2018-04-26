@@ -111,7 +111,12 @@ BOOL WMI::IsBitlockedDrive(const CString & drive)
 
         /* If we can't get the volume's properties, assume it is encrypted. */
         IFFAILED_RETURN_VALUE(hres, "Next() failed", TRUE);
-        IFFALSE_RETURN_VALUE(uReturned == 1, "Next() didn't return 1 row", TRUE);
+
+        /* Machines with no Win32_EncryptableVolume objects are hopefully not
+         * encrypted with BitLocker (Windows feature disabled / not installed?)
+         * https://phabricator.endlessm.com/T22290
+         */
+        IFTRUE_RETURN_VALUE(uReturned == 0, "No matching Win32_EncryptableVolume found", FALSE);
 
         _variant_t vtProp;
 
