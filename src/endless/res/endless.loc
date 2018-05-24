@@ -239,7 +239,6 @@ t MSG_311 "Writing"
 # If this FAQ is translated into your language, replace "en-us" with the right language code.
 # Otherwise, use exactly the same URL.
 t MSG_312 "https://support.endlessm.com/hc/en-us/articles/115003662326"
-t MSG_314 "http://community.endlessm.com/"
 
 t MSG_315 "%s/%s Download"
 t MSG_316 "Full"

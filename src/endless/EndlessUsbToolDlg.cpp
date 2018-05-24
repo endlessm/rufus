@@ -352,6 +352,8 @@ const wchar_t* mainWindowTitle = L"Endless Installer";
 
 #define FORMAT_STATUS_CANCEL (ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_CANCELLED)
 
+#define COMMUNITY_URL "https://community.endlessos.com/"
+
 #pragma region Uninstall_registry_stuff
 #define REGKEY_WIN_UNINSTALL	L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\"
 #define REGKEY_ENDLESS_OS		ENDLESS_OS_NAME
@@ -365,6 +367,7 @@ const wchar_t* mainWindowTitle = L"Endless Installer";
 #define REGKEY_NOMODIFY			L"NoModify"
 
 #define REGKEY_DISPLAYNAME_TEXT	ENDLESS_OS_NAME
+#define REGKEY_HELP_LINK_TEXT	_T(COMMUNITY_URL)
 #define REGKEY_PUBLISHER_TEXT	L"Endless Mobile, Inc."
 #pragma endregion Uninstall_registry_stuff
 
@@ -2235,7 +2238,7 @@ HRESULT CEndlessUsbToolDlg::OnLinkClicked(IHTMLElement* pElement)
     CComBSTR id;
     HRESULT hr;
     uint32_t msg_id = 0;
-    char *url = NULL;
+    const char *url = NULL;
 
     IFFALSE_RETURN_VALUE(pElement != NULL, "OnLinkClicked: Error getting element id", S_OK);
 
@@ -2245,7 +2248,7 @@ HRESULT CEndlessUsbToolDlg::OnLinkClicked(IHTMLElement* pElement)
     if (id == _T(ELEMENT_CONNECTED_SUPPORT_LINK)) {
         msg_id = MSG_312;
     } else if (id == _T(ELEMENT_ENDLESS_SUPPORT) || id == _T(ELEMENT_STORAGE_SUPPORT_LINK)) {
-        msg_id = MSG_314;
+        url = COMMUNITY_URL;
     } else if (id == _T(ELEMENT_CONNECTED_LINK)) {
         WinExec("c:\\windows\\system32\\control.exe ncpa.cpl", SW_NORMAL);
     } else if (id == _T(ELEMENT_USBBOOT_HOWTO)) {
@@ -5966,7 +5969,7 @@ BOOL CEndlessUsbToolDlg::AddUninstallRegistryKeys(const CStringW &uninstallExePa
 	IFFALSE_GOTOERROR(result == ERROR_SUCCESS, "Error on CRegKey::Create.");
 
 	IFFALSE_GOTOERROR(ERROR_SUCCESS == registryKey.SetStringValue(REGKEY_DISPLAYNAME, REGKEY_DISPLAYNAME_TEXT), "Error on REGKEY_DISPLAYNAME");
-	IFFALSE_GOTOERROR(ERROR_SUCCESS == registryKey.SetStringValue(REGKEY_HELP_LINK, UTF8ToBSTR(lmprintf(MSG_314))), "Error on REGKEY_HELP_LINK");
+	IFFALSE_GOTOERROR(ERROR_SUCCESS == registryKey.SetStringValue(REGKEY_HELP_LINK, REGKEY_HELP_LINK_TEXT), "Error on REGKEY_HELP_LINK");
 	IFFALSE_GOTOERROR(ERROR_SUCCESS == registryKey.SetStringValue(REGKEY_UNINSTALL_STRING, CComBSTR(uninstallExePath)), "Error on REGKEY_UNINSTALL_STRING");
 	IFFALSE_GOTOERROR(ERROR_SUCCESS == registryKey.SetStringValue(REGKEY_INSTALL_LOCATION, CComBSTR(installPath)), "Error on REGKEY_INSTALL_LOCATION");
 	IFFALSE_GOTOERROR(ERROR_SUCCESS == registryKey.SetStringValue(REGKEY_PUBLISHER, REGKEY_PUBLISHER_TEXT), "Error on REGKEY_PUBLISHER");

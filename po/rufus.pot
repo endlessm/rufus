@@ -383,11 +383,6 @@ msgid "https://support.endlessm.com/hc/en-us/articles/115003662326"
 msgstr ""
 
 #, c-format
-msgctxt "MSG_314"
-msgid "http://community.endlessm.com/"
-msgstr ""
-
-#, c-format
 msgctxt "MSG_315"
 msgid "%s/%s Download"
 msgstr ""
