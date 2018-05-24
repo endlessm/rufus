@@ -2,13 +2,13 @@
 
 * {
     padding: 0px;
-    margin: 0px;	
+    margin: 0px;
 }
 
 
 body {
-	font-family: Lato;
-	background: #363d41
+    font-family: Lato;
+    background: #363d41
 }
 
 body.ModeNormal .ModeCoding,
@@ -17,295 +17,295 @@ body.ModeCoding .ModeNormal {
 }
 
 b {
-	font-family: LatoBold;
+    font-family: LatoBold;
 }
 
 #MainContainer {
     width: 746px;
     height: 512px;
-	border: 1px solid #363d41;
-	border-radius: 8px 8px 0 0;
-	overflow: hidden;
+    border: 1px solid #363d41;
+    border-radius: 8px 8px 0 0;
+    overflow: hidden;
 }
 
 /* Normal button */
 .Button {
-	height: 31px;
-	text-align: center;
-	cursor: pointer;
-	border: 1px solid;
-	border-color: #a1a1a1;
-	border-radius: 3px;
-	overflow: hidden;
+    height: 31px;
+    text-align: center;
+    cursor: pointer;
+    border: 1px solid;
+    border-color: #a1a1a1;
+    border-radius: 3px;
+    overflow: hidden;
 }
 
 .Button div {
-	color: #2e3436;	
-	padding-top: 8px;
-	padding-bottom: 6px;
-	text-align: center;
-	width: 100%;
-	height: 17px; /* .Button.height - padding-top - padding-bottom */
-	background: #fafafa; /*older than IE6 */
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#fafafa', endColorstr='#e0e0e0', GradientType=0); /* IE6-9 */
-	background-image: linear-gradient(to bottom, #fafafa, #ededed 40%, #e0e0e0); /* IE10+ */
-	
-	text-shadow: 0 1px rgba(255, 255, 255, 0.76923); /* IE10+ */
-	box-shadow: inset 0 1px white, 0 1px white; /* IE10+ */
-	transition: all 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94); /* IE10+ */
-	
-	font-size: 13px;
-	font-family: LatoMedium;
-	letter-spacing: 0.5px;
+    color: #2e3436;
+    padding-top: 8px;
+    padding-bottom: 6px;
+    text-align: center;
+    width: 100%;
+    height: 17px; /* .Button.height - padding-top - padding-bottom */
+    background: #fafafa; /*older than IE6 */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#fafafa', endColorstr='#e0e0e0', GradientType=0); /* IE6-9 */
+    background-image: linear-gradient(to bottom, #fafafa, #ededed 40%, #e0e0e0); /* IE10+ */
+
+    text-shadow: 0 1px rgba(255, 255, 255, 0.76923); /* IE10+ */
+    box-shadow: inset 0 1px white, 0 1px white; /* IE10+ */
+    transition: all 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94); /* IE10+ */
+
+    font-size: 13px;
+    font-family: LatoMedium;
+    letter-spacing: 0.5px;
 }
 
 .Button div:not([maxIE8]) {
-	height: 100%;
+    height: 100%;
 }
 
 .Button div:hover {
-	color: #2e3436;
-	background: #444444; /*older than IE6 */
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='white', endColorstr='#ededed',GradientType=0 ); /* IE6-9 */
-	background-image: linear-gradient(to bottom, white, #f7f7f7 40%, #ededed); /* IE10+ */
+    color: #2e3436;
+    background: #444444; /*older than IE6 */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='white', endColorstr='#ededed',GradientType=0 ); /* IE6-9 */
+    background-image: linear-gradient(to bottom, white, #f7f7f7 40%, #ededed); /* IE10+ */
 }
 
-.Button div:active {    
-	color: #8a8a8a;
-	background: #d6d6d6; /*older than IE6 */
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr=#d6d6d6, endColorstr='#e0e0e0',GradientType=0 ); /* IE6-9 */
-	background-image: linear-gradient(to bottom, #d6d6d6, gainsboro 40%, #e0e0e0); /* IE10+ */	
-	
-	box-shadow: inset 0 1px rgba(0, 0, 0, 0.07), inset 0 2px 1px -2px rgba(0, 0, 0, 0.6), 0 1px white; /* IE10+ */
+.Button div:active {
+    color: #8a8a8a;
+    background: #d6d6d6; /*older than IE6 */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr=#d6d6d6, endColorstr='#e0e0e0',GradientType=0 ); /* IE6-9 */
+    background-image: linear-gradient(to bottom, #d6d6d6, gainsboro 40%, #e0e0e0); /* IE10+ */
+
+    box-shadow: inset 0 1px rgba(0, 0, 0, 0.07), inset 0 2px 1px -2px rgba(0, 0, 0, 0.6), 0 1px white; /* IE10+ */
     transition-duration: 50ms; /* IE10+ */
 }
 
 .ButtonClose {
-	background-image:url("res:/IMG/#208");
-	background-repeat: no-repeat;
-	background-position: center;
-	border: none;
-	width: 33px !important;
-	height: 33px !important;
+    background-image:url("res:/IMG/#208");
+    background-repeat: no-repeat;
+    background-position: center;
+    border: none;
+    width: 33px !important;
+    height: 33px !important;
 }
 
 .ButtonClose:hover {
-	border: 1px solid;
-	border-color: #a1a1a1;
-	border-radius: 3px;
-	width: 31px !important;
-	height: 31px !important;
+    border: 1px solid;
+    border-color: #a1a1a1;
+    border-radius: 3px;
+    width: 31px !important;
+    height: 31px !important;
 }
 
 .ButtonClose:active {
-	background-color: #d6d6d6;
+    background-color: #d6d6d6;
 }
 
 /* Blue button */
 .ButtonBlue {
-	width: 160px;
-	border-color: #1c5187;	
+    width: 160px;
+    border-color: #1c5187;
 }
 
 .ButtonBlue:not([maxIE8]) {
-	width: 150px;
+    width: 150px;
 }
 
 .ButtonBlue div {
-	color: white;
-	background: #5f9ddd; /*older than IE6 */
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#5f9ddd', endColorstr='#3583d5',GradientType=0 ); /* IE6-9 */	
-	background-image: linear-gradient(to bottom, #5f9ddd, #4a90d9 40%, #3583d5);  /* IE10+ */
-	
-	text-shadow: 0 -1px rgba(0, 0, 0, 0.54353); /* IE10+ */
-	box-shadow: inset 0 1px rgba(255, 255, 255, 0.5), 0 1px white; /* IE10+ */
-	
-	font-family: LatoBlack;
+    color: white;
+    background: #5f9ddd; /*older than IE6 */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#5f9ddd', endColorstr='#3583d5',GradientType=0 ); /* IE6-9 */
+    background-image: linear-gradient(to bottom, #5f9ddd, #4a90d9 40%, #3583d5);  /* IE10+ */
+
+    text-shadow: 0 -1px rgba(0, 0, 0, 0.54353); /* IE10+ */
+    box-shadow: inset 0 1px rgba(255, 255, 255, 0.5), 0 1px white; /* IE10+ */
+
+    font-family: LatoBlack;
 }
 
 .ButtonBlue div:hover {
-	color: white;
-	background: #85b4e5; /*older than IE6 */    
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#85b4e5', endColorstr='#4a90d9',GradientType=0 ); /* IE6-9 */
-	background-image: linear-gradient(to bottom, #85b4e5, #5b9add 40%, #4a90d9); /* IE10+ */
-	
-	text-shadow: 0 -1px rgba(0, 0, 0, 0.51153); /* IE10+ */
+    color: white;
+    background: #85b4e5; /*older than IE6 */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#85b4e5', endColorstr='#4a90d9',GradientType=0 ); /* IE6-9 */
+    background-image: linear-gradient(to bottom, #85b4e5, #5b9add 40%, #4a90d9); /* IE10+ */
+
+    text-shadow: 0 -1px rgba(0, 0, 0, 0.51153); /* IE10+ */
 }
 
 .ButtonBlue div:active {
-	color: white;
-	background: #2b79cb; /*older than IE6 */    
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#2b79cb', endColorstr='#3583d5',GradientType=0 ); /* IE6-9 */
-	background-image: linear-gradient(to bottom, #2b79cb, #2e7fd3 40%, #3583d5); /* IE10+ */
-	
-	text-shadow: 0 -1px rgba(0, 0, 0, 0.62353); /* IE10+ */
+    color: white;
+    background: #2b79cb; /*older than IE6 */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#2b79cb', endColorstr='#3583d5',GradientType=0 ); /* IE6-9 */
+    background-image: linear-gradient(to bottom, #2b79cb, #2e7fd3 40%, #3583d5); /* IE10+ */
+
+    text-shadow: 0 -1px rgba(0, 0, 0, 0.62353); /* IE10+ */
     box-shadow: inset 0 1px rgba(0, 0, 0, 0.07), inset 0 2px 1px -2px rgba(0, 0, 0, 0.6), 0 1px white; /* IE10+ */
 }
 
 /* Disabled button */
 .ButtonDisabled  {
-	border-color: #a8a8a8;
+    border-color: #a8a8a8;
     cursor: not-allowed;
 }
 
 .ButtonDisabled div,
 .ButtonDisabled div:hover {
-	color: #c7c7c7;
-	background: transparent; /*older than IE6 */
-	filter: none;
-	background-image: transparent;
+    color: #c7c7c7;
+    background: transparent; /*older than IE6 */
+    filter: none;
+    background-image: transparent;
 
-	text-shadow: none; /* IE10+ */
-	box-shadow: inset 0 1px rgba(255, 255, 255, 0), 0 1px rgba(255, 255, 255, 0); /* IE10+ */
+    text-shadow: none; /* IE10+ */
+    box-shadow: inset 0 1px rgba(255, 255, 255, 0), 0 1px rgba(255, 255, 255, 0); /* IE10+ */
 }
 
 .FullWidthContent {
-	width: 100%;
-	clear:both;
+    width: 100%;
+    clear:both;
 }
 
 a {
-	color: #2a76c6; /* #3164a4 */ ;
-	cursor: pointer;
-	text-decoration: underline;
+    color: #2a76c6; /* #3164a4 */ ;
+    cursor: pointer;
+    text-decoration: underline;
 }
 
 a:hover {
-	color: #4a90d9;
+    color: #4a90d9;
 }
 
 a:active {
-	color: #2a76c6;
+    color: #2a76c6;
 }
 
 select {
-	border-radius: 5px;
-	border: 2px solid #b9bcb5;
-	background-color: #ffffff;
-	color: #00000;	
-	font-size: 14px;
-	cursor: pointer;
-	padding-left: 10px;
-	height: 33px;
+    border-radius: 5px;
+    border: 2px solid #b9bcb5;
+    background-color: #ffffff;
+    color: #00000;
+    font-size: 14px;
+    cursor: pointer;
+    padding-left: 10px;
+    height: 33px;
 }
 
 select:disabled {
-	border-width: 1px;
-	color: #b9bbbb;
-	background-color: transparent;
+    border-width: 1px;
+    color: #b9bbbb;
+    background-color: transparent;
 }
 
 .ContentTitle {
-	font-size: 16px;
-	margin-top: 40px;
-	color: #2e2e2e;
-	font-family: LatoBold;
-	min-height: 30px;
+    font-size: 16px;
+    margin-top: 40px;
+    color: #2e2e2e;
+    font-family: LatoBold;
+    min-height: 30px;
 }
 
 
 /* Wizard page */
 .WizardPage {
-	background-color: #e6e6e6;
-	color: #656565;
+    background-color: #e6e6e6;
+    color: #656565;
 }
 
 .hidden {
-	display: none;
+    display: none;
 }
 
 .PageHeader {
     border-bottom: 1px solid #a1a1a1;
-	border-radius: 8px 8px 0 0;
-	height: 34px;
-	cursor: default;
-	padding: 6px;
-	
-	font-size: medium;
-	
-	background: #f7f7f7; /*older than IE6 */
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f7f7f7', endColorstr='#ededed',GradientType=0 ); /* IE6-9 */
-	background-image: linear-gradient(to bottom, #f7f7f7, #ededed); /* IE10+ */
-	
-	box-shadow: inset 0 -1px #d9d9d9, inset 0 1px white; /* IE10+ */
+    border-radius: 8px 8px 0 0;
+    height: 34px;
+    cursor: default;
+    padding: 6px;
+
+    font-size: medium;
+
+    background: #f7f7f7; /*older than IE6 */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f7f7f7', endColorstr='#ededed',GradientType=0 ); /* IE6-9 */
+    background-image: linear-gradient(to bottom, #f7f7f7, #ededed); /* IE10+ */
+
+    box-shadow: inset 0 -1px #d9d9d9, inset 0 1px white; /* IE10+ */
 }
 
 .PageHeader .PageHeaderTitle {
     color: black;
-	text-align: center;
-	font-family: LatoBlack;    
-	font-size: 18px;
-	padding-top: 7px;
+    text-align: center;
+    font-family: LatoBlack;
+    font-size: 18px;
+    padding-top: 7px;
     padding-left: 12px;
     padding-right: 12px;
-	margin: 0px auto;	
-	letter-spacing: 0.5px;
-	max-width: 570px;
+    margin: 0px auto;
+    letter-spacing: 0.5px;
+    max-width: 570px;
 }
 
 .PageHeader .Button {
-	width: 80px;
-	float: left;
+    width: 80px;
+    float: left;
 }
 
 .PageHeader .ButtonRight {
-	float: right;	
+    float: right;
 }
 
-.PageContent {	
-	height: 415px;
-	border: 1px solid transparent;	
+.PageContent {
+    height: 415px;
+    border: 1px solid transparent;
 }
 
 /* Wizard Page indicator */
 .PageIndicator {
-	height: 50px;
-	text-align: center;
+    height: 50px;
+    text-align: center;
 }
 
 .PageIndicator ul {
-	display:inline-block;
-	margin-top: 10px;
-	/* hack for IE <=7 centering */
-	*display:inline;
-	*zoom:1;	
+    display:inline-block;
+    margin-top: 10px;
+    /* hack for IE <=7 centering */
+    *display:inline;
+    *zoom:1;
 }
 
 .PageIndicator ul li {
-	list-style: none;
-	float:left;	
+    list-style: none;
+    float:left;
 }
 
 .PageIndicator li span {
-	display:block;
-	width: 6px;
-	height: 6px;
-	margin: 2px;
-	background-image:url("res:/IMG/#200");
+    display:block;
+    width: 6px;
+    height: 6px;
+    margin: 2px;
+    background-image:url("res:/IMG/#200");
 }
 
 .PageIndicator li span.PageSelected {
-	background-image: url("res:/IMG/#201");
+    background-image: url("res:/IMG/#201");
 }
 
 .ContentContainer {
-	margin: 0px auto;
-	border-top: 1px solid #d0d0d0;
+    margin: 0px auto;
+    border-top: 1px solid #d0d0d0;
 }
 
 .PageSubtitle {
-	text-align: center;
-	height: 55px;
-	margin-top: 35px;
-	font-size: 17px;
+    text-align: center;
+    height: 55px;
+    margin-top: 35px;
+    font-size: 17px;
 }
 
 .RoundedCornersContainer {
-	width: 100%;
-	border: 1px solid #cecece;
-	border-radius: 10px;
-	background: #dbdbdb;
-	overflow: hidden;
+    width: 100%;
+    border: 1px solid #cecece;
+    border-radius: 10px;
+    background: #dbdbdb;
+    overflow: hidden;
 }
 
 .LanguageContainer {
@@ -319,18 +319,18 @@ select:disabled {
 
 #DualBootInstallPage .ContentContainer {
     height: 328px;
-	width: 670px;
-	border: 0;
+    width: 670px;
+    border: 0;
 }
 
 #DualBootInstallPage .RoundedCornersContainer {
     background: transparent; /*older than IE6 */
     height: 230px;
-	margin-top: 25px;
+    margin-top: 25px;
 }
 
 #DualBootInstallPage .PageContent .FullWidthContent {
-	padding-top: 10px;
+    padding-top: 10px;
     text-align: center;
 }
 
@@ -338,21 +338,21 @@ select:disabled {
 #DualBootInstallPage .RoundedCornersContainer {
     margin-top: 40px;
     font-size: 14px;
-	text-align: center;
+    text-align: center;
 }
 
 #DualBootContentLogo {
-	position: absolute;
-	padding: 0 15px;
-	top: 74px; /* trial and error to match up with the design */
-	left: 315px; /* (page width (746px) - logo width (85px) - padding (30px)) // 2 */
-	background: #e6e6e6; /* .WizardPage background; covers up some of the border */
+    position: absolute;
+    padding: 0 15px;
+    top: 74px; /* trial and error to match up with the design */
+    left: 315px; /* (page width (746px) - logo width (85px) - padding (30px)) // 2 */
+    background: #e6e6e6; /* .WizardPage background; covers up some of the border */
 }
 
 #DualBootContentLogoImage {
-	width: 85px;
-	height: 37px;
-	background: url("res:/IMG/#209") 0 0 no-repeat;
+    width: 85px;
+    height: 37px;
+    background: url("res:/IMG/#209") 0 0 no-repeat;
 }
 
 #DualBootContentTitle {
@@ -360,28 +360,28 @@ select:disabled {
     font-family: LatoBold;
     color: #000000;
     width: 100%;
-	margin: 0;
-	padding-top: 20px;
-	text-align: center;
+    margin: 0;
+    padding-top: 20px;
+    text-align: center;
 }
 
 #DualBootContentDescription {
     width: 70%;
-	margin: 0 15%;
+    margin: 0 15%;
     padding-top: 20px;
     letter-spacing: 0.5px;
-	text-align: center;
+    text-align: center;
 }
 
 #DualBootInstallButtonC {
-	margin: 20px auto;
+    margin: 20px auto;
 }
 
 #DualBootRecommendation {
     font-family: LatoBold;
     font-size: 11px;
     width: 85%;
-	margin: 0 7.5%;
+    margin: 0 7.5%;
     text-align: center;
 }
 
@@ -390,12 +390,11 @@ select:disabled {
     font-size: 14px;
 }
 
-
 /* Advanced page */
 
 #AdvancedPage .ContentContainer {
-	width: 670px;
-	border: 0;
+    width: 670px;
+    border: 0;
 }
 
 #AdvancedPage .RoundedCornersContainer {
@@ -408,8 +407,8 @@ select:disabled {
 }
 
 .ContentPanel {
-	float: left;
-	width: 320px;
+    float: left;
+    width: 320px;
     margin-top: 30px;
     padding-bottom: 25px;
 }
@@ -419,46 +418,46 @@ select:disabled {
 }
 
 .ContentPanel * {
-	margin: 0px auto;
+    margin: 0px auto;
 }
 
 .ContentPanel .Button {
-	margin-top: 25px;
+    margin-top: 25px;
 }
 
 .PanelImage {
-	width: 211px;
-	height: 113px;
-	background-repeat: no-repeat;
-	margin-top: 30px;
-	background-position: center; 
+    width: 211px;
+    height: 113px;
+    background-repeat: no-repeat;
+    margin-top: 30px;
+    background-position: center;
 }
 
 #LeftPaneImage {
-	background-image: url("res:/IMG/#202");
+    background-image: url("res:/IMG/#202");
 }
 
 #RightPaneImage {
-	background-image: url("res:/IMG/#203");
+    background-image: url("res:/IMG/#203");
 }
 
 .PanelText {
-	width: 80%;
-	font-size: 15px;
-	margin-top: 20px;
-	text-align: center;
-	height: 30px;
+    width: 80%;
+    font-size: 15px;
+    margin-top: 20px;
+    text-align: center;
+    height: 30px;
     font-family: LatoBold;
 }
 
 #AdvancedPage .PageContent .FullWidthContent {
-	/*height: 25px;*/
-	text-align: center;
-	padding-top: 15px;
+    /*height: 25px;*/
+    text-align: center;
+    padding-top: 15px;
 }
 
 .LanguageSelect {
-	width: 254px;	
+    width: 254px;
 }
 
 #AdvancedInstallReminder {
@@ -487,30 +486,30 @@ select:disabled {
 #SelectStoragePage .PageContent,
 #InstallingPage .PageContent,
 #ThankYouPage .PageContent  {
-	margin: 0px auto;
+    margin: 0px auto;
 }
 
 #SelectFilePage #SelectFileLocalNotPresent {
-	width: 670px;
+    width: 670px;
 }
 
 #SelectFilePage #SelectFileLocalPresent,
 #SelectStoragePage .ContentContainer,
 #SelectUSBPage .ContentContainer {
-	width: 515px;
-	padding-left: 20px;
+    width: 515px;
+    padding-left: 20px;
 }
-	
+
 #SelectStoragePage .ContentContainer,
 #SelectUSBPage .ContentContainer {
-	padding-left: 40px;
+    padding-left: 40px;
 }
 
 #SelectFilePage select,
 #SelectStoragePage select,
-#SelectUSBPage select, 
+#SelectUSBPage select,
 #NewDiskNameContainer  {
-	width: 460px;
+    width: 460px;
 }
 
 #NewDiskNameContainer {
@@ -518,152 +517,152 @@ select:disabled {
 }
 
 #SelectFilePage .ContentTitle {
-	margin-left: 20px;
+    margin-left: 20px;
 }
 
 #DownloadNewImage {
-	margin-top: 60px;
+    margin-top: 60px;
 }
 
-#SelectFilePage .Fieldset {	
-	width: 320px;
-	height: 254px;
-	border: 1px solid #cecece;
-	border-radius: 10px;
-	margin-top: 46px;
+#SelectFilePage .Fieldset {
+    width: 320px;
+    height: 254px;
+    border: 1px solid #cecece;
+    border-radius: 10px;
+    margin-top: 46px;
 }
 
 #SelectFilePage .Fieldset * {
-	margin: 0px auto;
-	text-align: center;
+    margin: 0px auto;
+    text-align: center;
 }
 
 #SelectFilePage .Fieldset:first-child {
-	float: left;
+    float: left;
 }
 
 #SelectFilePage .Fieldset:first-child  + .Fieldset{
-	float: right;
+    float: right;
 }
 
 #SelectFilePage .Fieldset .FieldsetTitle{
-	font-size: 26px;
-	font-family: LatoLight;
-	color: #000000;	
-	margin-top: -18px;
+    font-size: 26px;
+    font-family: LatoLight;
+    color: #000000;
+    margin-top: -18px;
     zoom: 1; /* Fix for IE7 clipping the top of the title */
 }
 
 #SelectFilePage .Fieldset .FieldsetTitle span {
-	background-color: #e6e6e6;
-	min-width: 235px;
-	padding: 0px 15px;
+    background-color: #e6e6e6;
+    min-width: 235px;
+    padding: 0px 15px;
 }
 
 #SelectFilePage .Fieldset .FieldsetTitle b {
-	font-family: LatoBold;
+    font-family: LatoBold;
 }
 
 /*#SelectFilePage .Fieldset .FieldsetTitle sup {
-	font-size: 16px;
-	font-family: LatoBold;
+    font-size: 16px;
+    font-family: LatoBold;
 }*/
 
 #SelectFilePage .Fieldset .FieldsetSubtitle {
-	margin-top: 9px;
-	font-family: LatoMedium;
-	font-size: 16px;
+    margin-top: 9px;
+    font-family: LatoMedium;
+    font-size: 16px;
 }
 
 #SelectFilePage .Fieldset .FieldsetDescription {
-	margin-top: 19px;
-	font-size: 13px;
-	max-width: 240px;
-	height: 145px;
-	text-align: justify;
+    margin-top: 19px;
+    font-size: 13px;
+    max-width: 240px;
+    height: 145px;
+    text-align: justify;
 }
 
 /* Selects the .Fieldset adjacent to the first .Fieldset in the page, which is
  * to say the right column.
  */
 #SelectFilePage .Fieldset:first-child  + .Fieldset .FieldsetDescription {
-	/*  145   description height (above)
-	 * - 33   select { height }
-	 * - 10   select { margin-top }
-	 * -  5   select { margin-bottom }
-	 */
-	height: 97px;
+    /*  145   description height (above)
+     * - 33   select { height }
+     * - 10   select { margin-top }
+     * -  5   select { margin-bottom }
+     */
+    height: 97px;
 }
 
 #SelectFilePage .Fieldset select {
-	margin-top: 10px;
-	margin-bottom: 5px;
-	width: 240px;
+    margin-top: 10px;
+    margin-bottom: 5px;
+    width: 240px;
 }
 
 #SelectFilePage .Fieldset .Button {
-	/* 2px narrower than <select> because it has a 1px border each side */
-	width: 238px;
+    /* 2px narrower than <select> because it has a 1px border each side */
+    width: 238px;
 }
 
 #NoInternetConnection {
-	text-align: center;
+    text-align: center;
 }
 
 #NoInternetConnectionTitle {
-	color: #000000;
-	font-family: LatoBold;
-	font-size: 16px;
+    color: #000000;
+    font-family: LatoBold;
+    font-size: 16px;
 }
 
 #NoInternetConnectionSubtitle {
-	font-size: 13px;
-	margin-top: 5px;
+    font-size: 13px;
+    margin-top: 5px;
 }
 
 #OfflineText {
-	font-family: LatoBold;
+    font-family: LatoBold;
 }
 
 #NewDiskNameContainer {
-	margin-top: 10px;
-	font-size: 13px;
+    margin-top: 10px;
+    font-size: 13px;
 }
-	
+
 #NewDiskNameContainer  div{
-	width: 46%;
-	float: left;
+    width: 46%;
+    float: left;
 }
 
 #NewDiskNameContainer label {
-	display: block;
-	font-family: LatoBold;
-	margin-bottom: 5px;
+    display: block;
+    font-family: LatoBold;
+    margin-bottom: 5px;
 }
 
 #NewDiskSizeLabel,
 #NewDiskSize{
-	float: right;
-	clear: both;
+    float: right;
+    clear: both;
 }
 
 .AgreementContainer b {
-	font-family: LatoBold;
+    font-family: LatoBold;
 }
 
 .AgreementContainer * {
-	color: black;
-	font-size: 13px;
-	font-family: LatoMedium;
+    color: black;
+    font-size: 13px;
+    font-family: LatoMedium;
 }
 
 #AgreementContainer div {
-	margin-top: 10px;
-	min-height: 70px;
-	text-align: center;
-	width: 460px;
-	color: red;
-	font-size: 12px;
+    margin-top: 10px;
+    min-height: 70px;
+    text-align: center;
+    width: 460px;
+    color: red;
+    font-size: 12px;
 }
 
 /* Select Storage Page */
@@ -671,7 +670,7 @@ select:disabled {
 #StorageFooter {
     padding-top: 10px;
     font-size: 13px;
-	font-family: Lato;
+    font-family: Lato;
     margin-top: 100px !important;
 }
 
@@ -680,10 +679,10 @@ select:disabled {
 }
 
 #SelectStoragePage .ContentTitle {
-	min-height: 70px;
-	/*text-align: center;*/
-	font-size: 13px;
-	font-family: Lato;
+    min-height: 70px;
+    /*text-align: center;*/
+    font-size: 13px;
+    font-family: Lato;
 }
 
 #SelectStorageAvailableSpace {
@@ -697,161 +696,161 @@ select:disabled {
 #InstallingPage .ContentContainer,
 #ThankYouPage .ContentContainer,
 #ErrorPage .ContentContainer {
-	border: 0;
-	width: 572px;
+    border: 0;
+    width: 572px;
 }
 
 #InstallingPage .ContentTitle {
-	width: 100%;
-	text-align: center;
-	font-size: 18px;
-	font-family: Lato;
-	margin-top: 44px;
+    width: 100%;
+    text-align: center;
+    font-size: 18px;
+    font-family: Lato;
+    margin-top: 44px;
 }
 
 #CurrentStepText {
-	font-family: LatoBold;
+    font-family: LatoBold;
 }
 
 #HideCornersContainer {
-	margin: 0px auto 16px;
-	width: 493px; /* ProgressBarContainer width+2*border */
-	height: 5px; /* ProgressBarContainer height+2*border */
-	overflow: hidden;
-	box-shadow: 0 1px white; /* IE10+ */	
+    margin: 0px auto 16px;
+    width: 493px; /* ProgressBarContainer width+2*border */
+    height: 5px; /* ProgressBarContainer height+2*border */
+    overflow: hidden;
+    box-shadow: 0 1px white; /* IE10+ */
 }
 
 #HideCornersContainer,
 #ProgressBarContainer,
 #ProgressBar {
-	border-radius: 4px;
+    border-radius: 4px;
 }
 
 #ProgressBarContainer,
 #ProgressBar {
-	height: 3px;
-	border: 1px solid;
+    height: 3px;
+    border: 1px solid;
 
 }
 
 #ProgressBarContainer {
-	width: 491px;
-	border-color: #a8a8a7;
-	background: #ced0cf; /*older than IE6 */
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ced0cf', endColorstr='#c4c5c5', GradientType=0); /* IE6-9 */
-	background-image: linear-gradient(to bottom, #ced0cf, #dcdedd 50%, #c4c5c5); /* IE10+ */
+    width: 491px;
+    border-color: #a8a8a7;
+    background: #ced0cf; /*older than IE6 */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ced0cf', endColorstr='#c4c5c5', GradientType=0); /* IE6-9 */
+    background-image: linear-gradient(to bottom, #ced0cf, #dcdedd 50%, #c4c5c5); /* IE10+ */
 }
 
 #ProgressBar {
-	width: 100px;
-	margin-left: -1px;
-	margin-top: -1px;
-	border-color:#366aa7;
-	height: 3px;
-	background: #769ecb; /*older than IE6 */
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#769ecb', endColorstr='#5486bd', GradientType=0); /* IE6-9 */
-	background-image: linear-gradient(to bottom, #769ecb, #7ba7d3 50%, #5486bd); /* IE10+ */
+    width: 100px;
+    margin-left: -1px;
+    margin-top: -1px;
+    border-color:#366aa7;
+    height: 3px;
+    background: #769ecb; /*older than IE6 */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#769ecb', endColorstr='#5486bd', GradientType=0); /* IE6-9 */
+    background-image: linear-gradient(to bottom, #769ecb, #7ba7d3 50%, #5486bd); /* IE10+ */
 }
 
 #InstallingPage .ContentContainer .FullWidthContent {
-	text-align: center;
-	font-size: 13px;
+    text-align: center;
+    font-size: 13px;
 }
 
 #MarketingContainer {
-	height: 251px;
-	margin-top: 35px;
+    height: 251px;
+    margin-top: 35px;
 }
 
 #MarketingImage {
-	background: url("res:/IMG/#205") 0 0 no-repeat;
-	width: 572px;
-	height: 251px;
+    background: url("res:/IMG/#205") 0 0 no-repeat;
+    width: 572px;
+    height: 251px;
 }
 
 /* Thank you Page */
 
 #InstallOkImage {
-	width: 91px;
-	height: 72px;
-	background-image: url("res:/IMG/#206");
-	margin: 40px auto 0px;
+    width: 91px;
+    height: 72px;
+    background-image: url("res:/IMG/#206");
+    margin: 40px auto 0px;
 }
 
 #ErrorMessage,
 #ThankYouMessage {
-	margin: 23px auto;
-	max-width: 310px;
-	text-align: center;
+    margin: 23px auto;
+    max-width: 310px;
+    text-align: center;
 }
 
 .ImageDataRow {
-	text-align: center;
-	margin: 0px auto;
-	font-size: 13px;
+    text-align: center;
+    margin: 0px auto;
+    font-size: 13px;
 }
 
 .ImageDataRow label {
 }
 
 #SecureBootReminder {
-	margin-top: 38px;	
-	height: 113px;
-	font-size: 13px;	
+    margin-top: 38px;
+    height: 113px;
+    font-size: 13px;
 
 }
 
 #ReminderTextContainer {
-	margin-left: 40px;
-	margin-right: 40px;
+    margin-left: 40px;
+    margin-right: 40px;
 }
 
 #ReminderTextContainer .ReminderTitle {
-	padding-top: 31px;
-	font-family: LatoBold;	
+    padding-top: 31px;
+    font-family: LatoBold;
 }
 
 /* Error Page */
 
 #ErrorImage {
-	width: 80px;
-	height: 75px;
-	background-image: url("res:/IMG/#207");
-	margin: 65px auto 0px;
+    width: 80px;
+    height: 75px;
+    background-image: url("res:/IMG/#207");
+    margin: 65px auto 0px;
 }
 
 #ErrorMessageSuggestion {
-	margin-bottom: 25px;
-	max-width: 275px;
+    margin-bottom: 25px;
+    max-width: 275px;
 }
 
 #ErrorPage .PageContent .Button {
-	margin: 35px auto 10px;
+    margin: 35px auto 10px;
 }
 #DeleteFilesContainer {
-	margin-bottom: 20px;
-	min-height: 20px !important;
+    margin-bottom: 20px;
+    min-height: 20px !important;
 }
 
 
 #VersionContainer {
-	position: absolute;
-	right: 5px;
-	bottom: 10px;
+    position: absolute;
+    right: 5px;
+    bottom: 10px;
 
-	font-size: 9px;
-	text-align: right;
+    font-size: 9px;
+    text-align: right;
 }
 
 #VersionContainer, #VersionContainer a {
-	color: #d6d6d6;
-	text-decoration: none;
+    color: #d6d6d6;
+    text-decoration: none;
 }
 
 #VersionContainer a {
-	padding: 5px;
+    padding: 5px;
 }
 
 #VersionContainer a:hover {
-	color: #5f9ddd;
+    color: #5f9ddd;
 }
