@@ -390,6 +390,11 @@ select:disabled {
     font-size: 14px;
 }
 
+#PrivacyPolicyText {
+    margin-top: 7px;
+    font-size: 11px;
+}
+
 /* Advanced page */
 
 #AdvancedPage .ContentContainer {

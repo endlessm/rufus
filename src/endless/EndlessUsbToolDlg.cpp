@@ -205,6 +205,7 @@ DWORD usbDevicesCount;
 #define ELEMENT_ERROR_DELETE_CHECKBOX   "DeleteFilesCheckbox"
 #define ELEMENT_ERROR_DELETE_TEXT       "DeleteFilesText"
 
+#define ELEMENT_PRIVACY_POLICY_LINK     "PrivacyPolicyLink"
 #define ELEMENT_VERSION_LINK            "VersionLink"
 
 // Javascript methods
@@ -364,6 +365,7 @@ const wchar_t* mainWindowTitle = L"Endless Installer";
 #define CONNECTED_SUPPORT_URL        "https://support.endlessm.com/hc/en-us/articles/115003662326"
 #define USBBOOT_HOWTO_SUPPORT_URL    "https://support.endlessm.com/hc/en-us/articles/210527103"
 #define USB_LEARN_MORE_SUPPORT_URL   "https://support.endlessm.com/hc/en-us/articles/213585826"
+#define PRIVACY_POLICY_SUPPORT_URL   "https://support.endlessm.com/hc/en-us/articles/214475943"
 
 #pragma region Uninstall_registry_stuff
 #define REGKEY_WIN_UNINSTALL	L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\"
@@ -488,6 +490,7 @@ BEGIN_DHTML_EVENT_MAP(CEndlessUsbToolDlg)
 	DHTML_EVENT_ONCLICK(_T(ELEMENT_DUALBOOT_CLOSE_BUTTON), OnCloseAppClicked)
 	DHTML_EVENT_ONCLICK(_T(ELEMENT_DUALBOOT_ADVANCED_LINK), OnAdvancedOptionsClicked)
 	DHTML_EVENT_ONCLICK(_T(ELEMENT_DUALBOOT_INSTALL_BUTTON), OnInstallDualBootClicked)
+    DHTML_EVENT_ONCLICK(_T(ELEMENT_PRIVACY_POLICY_LINK), OnLinkClicked)
     DHTML_EVENT_ONCLICK(_T(ELEMENT_VERSION_LINK), OnLinkClicked)
 
 	// Advanced Page Handlers
@@ -2267,6 +2270,8 @@ HRESULT CEndlessUsbToolDlg::OnLinkClicked(IHTMLElement* pElement)
         support_url_en_us = USBBOOT_HOWTO_SUPPORT_URL;
     } else if (id == _T(ELEMENT_USB_LEARN_MORE)) {
         support_url_en_us = USB_LEARN_MORE_SUPPORT_URL;
+    } else if (id == _T(ELEMENT_PRIVACY_POLICY_LINK)) {
+        support_url_en_us = PRIVACY_POLICY_SUPPORT_URL;
     } else if (id == _T(ELEMENT_VERSION_LINK)) {
         url = RELEASE_VER_TAG_URL;
     } else {

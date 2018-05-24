@@ -96,6 +96,7 @@
 #define HTML_ELEM_SelectStorageNextButton	2059
 #define HTML_ELEM_SelectStoragePreviousButton 2060
 #define HTML_ELEM_SelectStoragePageTitle	2061
+#define HTML_ELEM_PrivacyPolicyText			2062
 
 #define HTML_ELEM_StorageAgreementText 2063
 #define HTML_ELEM_DualBootLanguageLabel 2064

@@ -216,6 +216,10 @@ msgctxt "AdvancedOptionsText"
 msgid "For advanced install options using an <b>Endless USB Stick</b>, <a id='AdvancedOptionsLink'>click here</a>."
 msgstr ""
 
+msgctxt "PrivacyPolicyText"
+msgid "We collect anonymous data to improve this installer for everybody. <a id='PrivacyPolicyLink'>Click here</a> for more information, and to learn how to opt out."
+msgstr ""
+
 msgctxt "SelectStorageNextButton"
 msgid "Next"
 msgstr ""

@@ -161,6 +161,7 @@ t DualBootContentDescription "Each time you start your computer, you will be abl
 t DualBootInstallButton "Install Endless"
 t DualBootRecommendation "Recommended: At least 32 GB of free space on the system drive."
 t AdvancedOptionsText "For advanced install options using an <b>Endless USB Stick</b>, <a id='AdvancedOptionsLink'>click here</a>."
+t PrivacyPolicyText "We collect anonymous data to improve this installer for everybody. <a id='PrivacyPolicyLink'>Click here</a> for more information, and to learn how to opt out."
 t SelectStorageNextButton "Next"
 t SelectStoragePreviousButton "Previous"
 t SelectStoragePageTitle "Storage Space for Endless OS"
