@@ -2248,10 +2248,10 @@ HRESULT CEndlessUsbToolDlg::OnLinkClicked(IHTMLElement* pElement)
         msg_id = MSG_314;
     } else if (id == _T(ELEMENT_CONNECTED_LINK)) {
         WinExec("c:\\windows\\system32\\control.exe ncpa.cpl", SW_NORMAL);
-	} else if (id == _T(ELEMENT_USBBOOT_HOWTO)) {
-		msg_id = MSG_329;
-	} else if (id == _T(ELEMENT_USB_LEARN_MORE)) {
-		msg_id = MSG_371;
+    } else if (id == _T(ELEMENT_USBBOOT_HOWTO)) {
+        msg_id = MSG_329;
+    } else if (id == _T(ELEMENT_USB_LEARN_MORE)) {
+        msg_id = MSG_371;
     } else if (id == _T(ELEMENT_VERSION_LINK)) {
         url = RELEASE_VER_TAG_URL;
     } else {
@@ -2263,11 +2263,10 @@ HRESULT CEndlessUsbToolDlg::OnLinkClicked(IHTMLElement* pElement)
     }
 
     if (url != NULL) {
-        // Radu: do we care about the errors?
         ShellExecuteA(NULL, "open", url, NULL, NULL, SW_SHOWNORMAL);
     }
 
-	return S_OK;
+    return S_OK;
 }
 
 HRESULT CEndlessUsbToolDlg::OnLanguageChanged(IHTMLElement* pElement)
