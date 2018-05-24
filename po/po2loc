@@ -97,33 +97,6 @@ with open(LOC_FILE, 'r') as f:
             break
 
 
-class BadTranslation(Exception):
-    pass
-
-
-support_url_rx = re.compile(r'https://support.endlessm.com/hc/([^/]+)/articles/(\d+)(?:\s*)$')
-def check_support_url(lang, entry):
-    m_en = support_url_rx.match(entry.msgid)
-    m_tr = support_url_rx.match(entry.msgstr)
-
-    def bad(reason):
-        raise BadTranslation("{entry.msgctxt} is mistranslated into {lang}: "
-                             "{reason}\n{entry}".format(entry=entry, reason=reason, lang=lang))
-
-    if not m_en:
-        if m_tr:
-            bad("English is not a support URL, but translation is")
-    elif not m_tr:
-        bad("English is a support URL, but translation is not")
-    else:
-        en_lang, en_id = m_en.groups()
-        tr_lang, tr_id = m_tr.groups()
-        if en_id != tr_id:
-            bad("Translated FAQ has a different ID to the English one. "
-                "They should be identical, except for the language code "
-                "if a version exists in that language")
-
-
 # Re-write the file starting with the preamble
 # and then append with Endless translations
 problems = []
@@ -153,11 +126,6 @@ with open(LOC_FILE, 'w') as f:
             if not msgstr:
                 # Use the English string if no translation yet
                 msgstr = entry.msgid
-            else:
-                try:
-                    check_support_url(lang, entry)
-                except BadTranslation as e:
-                    problems.append(e)
             # Escape quotes and line feeds
             msgstr = msgstr.replace('"', '\\"')
             msgstr = msgstr.replace('\n', '\\n')

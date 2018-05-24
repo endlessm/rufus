@@ -236,9 +236,12 @@ t MSG_309 "Installing"
 t MSG_310 "Verifying"
 t MSG_311 "Writing"
 
-# If this FAQ is translated into your language, replace "en-us" with the right language code.
-# Otherwise, use exactly the same URL.
-t MSG_312 "https://support.endlessm.com/hc/en-us/articles/115003662326"
+# Locale ID for https://support.endlessm.com/ URLs, in lower-case. Check
+# https://support.zendesk.com/hc/en-us/articles/203761906 to find the right
+# one for this language. For example, Simplified Chinese should use "zh-cn".
+# (For historical reasons, the Brazilian Portuguese translation should use
+# "pt", not "pt-br".) If your language is not listed there, use "en-us".
+t MSG_317 "en-us"
 
 t MSG_315 "%s/%s Download"
 t MSG_316 "Full"
@@ -271,10 +274,6 @@ t MSG_326 "Resume"
 t MSG_327 "Download again"
 # This should match the string in quotes in MSG_325
 t MSG_328 "Try again"
-
-# If this FAQ is translated into your language, replace "en-us" with the right language code.
-# Otherwise, use exactly the same URL.
-t MSG_329 "https://support.endlessm.com/hc/en-us/articles/210527103"
 
 t MSG_330 "You have selected a slow USB device (USB 1.0). Please use a USB 3.0 device for the best experience."
 t MSG_331 "You have selected a slow USB device (USB 1.0). Please use a USB 2.0 device for a better experience."
@@ -338,7 +337,6 @@ t MSG_368 "Internet Explorer %d is not supported. Please click OK to download In
 t MSG_369 "%s Download"
 t MSG_370 "Oops, something went wrong setting up Endless OS."
 t MSG_381 "Oops, something went wrong setting up Endless Code."
-t MSG_371 "https://support.endlessm.com/hc/en-us/articles/213585826"
 t MSG_372 "No USB device found. If you've inserted one, try a different USB port or a different USB device."
 t MSG_386 "The Endless Installer requires Windows 7 or newer."
 

@@ -354,6 +354,17 @@ const wchar_t* mainWindowTitle = L"Endless Installer";
 
 #define COMMUNITY_URL "https://community.endlessos.com/"
 
+#define SUPPORT_URL_BASE             "https://support.endlessm.com/hc/"
+#define SUPPORT_URL_BASE_WITH_LOCALE "https://support.endlessm.com/hc/en-us"
+#define SUPPORT_URL_TAIL_OFFSET      (sizeof SUPPORT_URL_BASE_WITH_LOCALE - 1)
+/* We include the full literal URLs in the source tree, even though we only ever
+ * use the tails to build localized URLs, so the en-us links can be searched
+ * for and followed easily by developers.
+ */
+#define CONNECTED_SUPPORT_URL        "https://support.endlessm.com/hc/en-us/articles/115003662326"
+#define USBBOOT_HOWTO_SUPPORT_URL    "https://support.endlessm.com/hc/en-us/articles/210527103"
+#define USB_LEARN_MORE_SUPPORT_URL   "https://support.endlessm.com/hc/en-us/articles/213585826"
+
 #pragma region Uninstall_registry_stuff
 #define REGKEY_WIN_UNINSTALL	L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\"
 #define REGKEY_ENDLESS_OS		ENDLESS_OS_NAME
@@ -2237,7 +2248,8 @@ HRESULT CEndlessUsbToolDlg::OnLinkClicked(IHTMLElement* pElement)
 
     CComBSTR id;
     HRESULT hr;
-    uint32_t msg_id = 0;
+    const char *support_url_en_us = NULL;
+    CStringA support_url;
     const char *url = NULL;
 
     IFFALSE_RETURN_VALUE(pElement != NULL, "OnLinkClicked: Error getting element id", S_OK);
@@ -2246,23 +2258,29 @@ HRESULT CEndlessUsbToolDlg::OnLinkClicked(IHTMLElement* pElement)
     IFFAILED_RETURN_VALUE(hr, "OnLinkClicked: Error getting element id", S_OK);
 
     if (id == _T(ELEMENT_CONNECTED_SUPPORT_LINK)) {
-        msg_id = MSG_312;
+        support_url_en_us = CONNECTED_SUPPORT_URL;
     } else if (id == _T(ELEMENT_ENDLESS_SUPPORT) || id == _T(ELEMENT_STORAGE_SUPPORT_LINK)) {
         url = COMMUNITY_URL;
     } else if (id == _T(ELEMENT_CONNECTED_LINK)) {
         WinExec("c:\\windows\\system32\\control.exe ncpa.cpl", SW_NORMAL);
     } else if (id == _T(ELEMENT_USBBOOT_HOWTO)) {
-        msg_id = MSG_329;
+        support_url_en_us = USBBOOT_HOWTO_SUPPORT_URL;
     } else if (id == _T(ELEMENT_USB_LEARN_MORE)) {
-        msg_id = MSG_371;
+        support_url_en_us = USB_LEARN_MORE_SUPPORT_URL;
     } else if (id == _T(ELEMENT_VERSION_LINK)) {
         url = RELEASE_VER_TAG_URL;
     } else {
         uprintf("Unknown link clicked %ls", id);
     }
 
-    if (msg_id != 0) {
-        url = lmprintf(msg_id);
+    if (support_url_en_us != NULL) {
+        const char *lang_code = lmprintf(MSG_317);
+
+        support_url = SUPPORT_URL_BASE;
+        support_url += lang_code;
+        support_url += (support_url_en_us + SUPPORT_URL_TAIL_OFFSET);
+
+        url = support_url.GetString();
     }
 
     if (url != NULL) {
