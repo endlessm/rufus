@@ -6,14 +6,14 @@
 # Mariana Barbosa <mariana@endlessm.com>, 2016-2017
 # Mariana Barbosa <mari@endlessm.com>, 2016
 # Roddy Shuler <roddy@endlessm.com>, 2016-2017
-# Will Thompson <wjt@endlessm.com>, 2016-2017
+# Will Thompson <wjt@endlessm.com>, 2016-2018
 msgid ""
 msgstr ""
 "Project-Id-Version: rufus\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-03-08 02:28+0000\n"
-"PO-Revision-Date: 2017-10-15 12:40+0000\n"
-"Last-Translator: Mariana Barbosa <mariana@endlessm.com>\n"
+"PO-Revision-Date: 2018-05-25 14:35+0000\n"
+"Last-Translator: Will Thompson <wjt@endlessm.com>\n"
 "Language-Team: Portuguese (Brazil) (http://www.transifex.com/endless-os/rufus/language/pt_BR/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -236,6 +236,13 @@ msgid ""
 "id='AdvancedOptionsLink'>click here</a>."
 msgstr "Para opções avançadas utilizando <b>Pendrive Endless OS</b>, <a id='AdvancedOptionsLink'>clique aqui</a>. "
 
+msgctxt "PrivacyPolicyText"
+msgid ""
+"We collect anonymous data to improve this installer for everybody. <a "
+"id='PrivacyPolicyLink'>Click here</a> for more information, and to learn how"
+" to opt out."
+msgstr ""
+
 msgctxt "SelectStorageNextButton"
 msgid "Next"
 msgstr "Próximo"
@@ -403,18 +410,15 @@ msgctxt "MSG_311"
 msgid "Writing"
 msgstr "Gravando"
 
-#. If this FAQ is translated into your language, replace "en-us" with the
-#. right language code.
-#. Otherwise, use exactly the same URL.
+#. Locale ID for https://support.endlessm.com/ URLs, in lower-case. Check
+#. https://support.zendesk.com/hc/en-us/articles/203761906 to find the right
+#. one for this language. For example, Simplified Chinese should use "zh-cn".
+#. (For historical reasons, the Brazilian Portuguese translation should use
+#. "pt", not "pt-br".) If your language is not listed there, use "en-us".
 #, c-format
-msgctxt "MSG_312"
-msgid "https://support.endlessm.com/hc/en-us/articles/115003662326"
-msgstr "https://support.endlessm.com/hc/pt/articles/115003662326"
-
-#, c-format
-msgctxt "MSG_314"
-msgid "http://community.endlessm.com/"
-msgstr "http://community.endlessm.com/"
+msgctxt "MSG_317"
+msgid "en-us"
+msgstr "pt"
 
 #, c-format
 msgctxt "MSG_315"
@@ -502,14 +506,6 @@ msgstr "Baixe novamente"
 msgctxt "MSG_328"
 msgid "Try again"
 msgstr "Tente novamente"
-
-#. If this FAQ is translated into your language, replace "en-us" with the
-#. right language code.
-#. Otherwise, use exactly the same URL.
-#, c-format
-msgctxt "MSG_329"
-msgid "https://support.endlessm.com/hc/en-us/articles/210527103"
-msgstr "https://support.endlessm.com/hc/pt/articles/210527103"
 
 #, c-format
 msgctxt "MSG_330"
@@ -713,11 +709,6 @@ msgstr "Download de %s"
 msgctxt "MSG_370"
 msgid "Oops, something went wrong setting up Endless OS."
 msgstr "Opa! Algo errado aconteceu ao configurar o Endless OS."
-
-#, c-format
-msgctxt "MSG_371"
-msgid "https://support.endlessm.com/hc/en-us/articles/213585826"
-msgstr "https://support.endlessm.com/hc/pt/articles/213585826"
 
 #, c-format
 msgctxt "MSG_372"

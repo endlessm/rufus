@@ -4,13 +4,13 @@
 # 
 # Translators:
 # Roddy Shuler <roddy@endlessm.com>, 2017
-# Will Thompson <wjt@endlessm.com>, 2017
+# Will Thompson <wjt@endlessm.com>, 2017-2018
 msgid ""
 msgstr ""
 "Project-Id-Version: rufus\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-03-08 02:28+0000\n"
-"PO-Revision-Date: 2017-10-20 11:42+0000\n"
+"PO-Revision-Date: 2018-05-25 14:34+0000\n"
 "Last-Translator: Will Thompson <wjt@endlessm.com>\n"
 "Language-Team: German (http://www.transifex.com/endless-os/rufus/language/de/)\n"
 "MIME-Version: 1.0\n"
@@ -234,6 +234,13 @@ msgid ""
 "id='AdvancedOptionsLink'>click here</a>."
 msgstr "<a id='AdvancedOptionsLink'>Weitere Optionen für USB-Installation</a>."
 
+msgctxt "PrivacyPolicyText"
+msgid ""
+"We collect anonymous data to improve this installer for everybody. <a "
+"id='PrivacyPolicyLink'>Click here</a> for more information, and to learn how"
+" to opt out."
+msgstr ""
+
 msgctxt "SelectStorageNextButton"
 msgid "Next"
 msgstr "Weiter"
@@ -401,18 +408,15 @@ msgctxt "MSG_311"
 msgid "Writing"
 msgstr "Schreibe"
 
-#. If this FAQ is translated into your language, replace "en-us" with the
-#. right language code.
-#. Otherwise, use exactly the same URL.
+#. Locale ID for https://support.endlessm.com/ URLs, in lower-case. Check
+#. https://support.zendesk.com/hc/en-us/articles/203761906 to find the right
+#. one for this language. For example, Simplified Chinese should use "zh-cn".
+#. (For historical reasons, the Brazilian Portuguese translation should use
+#. "pt", not "pt-br".) If your language is not listed there, use "en-us".
 #, c-format
-msgctxt "MSG_312"
-msgid "https://support.endlessm.com/hc/en-us/articles/115003662326"
-msgstr "https://support.endlessm.com/hc/en-us/articles/115003662326"
-
-#, c-format
-msgctxt "MSG_314"
-msgid "http://community.endlessm.com/"
-msgstr "http://community.endlessm.com/"
+msgctxt "MSG_317"
+msgid "en-us"
+msgstr "de"
 
 #, c-format
 msgctxt "MSG_315"
@@ -500,14 +504,6 @@ msgstr "Erneut herunterladen"
 msgctxt "MSG_328"
 msgid "Try again"
 msgstr "Erneut versuchen"
-
-#. If this FAQ is translated into your language, replace "en-us" with the
-#. right language code.
-#. Otherwise, use exactly the same URL.
-#, c-format
-msgctxt "MSG_329"
-msgid "https://support.endlessm.com/hc/en-us/articles/210527103"
-msgstr "https://support.endlessm.com/hc/en-us/articles/210527103"
 
 #, c-format
 msgctxt "MSG_330"
@@ -711,11 +707,6 @@ msgstr "%s herunterladen"
 msgctxt "MSG_370"
 msgid "Oops, something went wrong setting up Endless OS."
 msgstr "Huch, beim Einrichten von Endless-OS ist ein Problem aufgetreten."
-
-#, c-format
-msgctxt "MSG_371"
-msgid "https://support.endlessm.com/hc/en-us/articles/213585826"
-msgstr "https://support.endlessm.com/hc/en-us/articles/213585826"
 
 #, c-format
 msgctxt "MSG_372"
