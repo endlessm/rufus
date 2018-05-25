@@ -94,6 +94,7 @@ const loc_control_id control_id[] = {
 	LOC_CTRL_HTML(DualBootInstallButton),
 	LOC_CTRL_HTML(DualBootRecommendation),
 	LOC_CTRL_HTML(AdvancedOptionsText),
+	LOC_CTRL_HTML(PrivacyPolicyText),
 	LOC_CTRL_HTML(SelectStorageNextButton),
 	LOC_CTRL_HTML(SelectStoragePreviousButton),
 	LOC_CTRL_HTML(SelectStoragePageTitle),
