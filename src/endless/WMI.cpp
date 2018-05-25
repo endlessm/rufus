@@ -392,7 +392,6 @@ HRESULT WmiObject::ExecMethod(
 
     // Get the parameter specification
     CComPtr<IWbemClassObject> pInParamsDefinition;
-    WBEM_E_TYPE_MISMATCH;
     hres = m_pClass->GetMethod(wszMethodName, 0, &pInParamsDefinition, NULL);
     IFFAILED_RETURN_RES(hres, "GetMethod failed");
 
