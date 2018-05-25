@@ -25,6 +25,35 @@ public:
     }
 };
 
+class WmiObject {
+public:
+    WmiObject(IWbemServices *pSvc, IWbemClassObject *pClass, IWbemClassObject *pInstance) :
+        m_pSvc(pSvc),
+        m_pClass(pClass),
+        m_pInstance(pInstance)
+    {
+    }
+
+    HRESULT ExecMethod(
+        LPCWSTR wszMethodName,
+        IWbemClassObject **ppOutParams = NULL,
+        LPCWSTR wszParam1Name = NULL, const CComVariant &cvParam1 = CComVariant(),
+        LPCWSTR wszParam2Name = NULL, const CComVariant &cvParam2 = CComVariant(),
+        LPCWSTR wszParam3Name = NULL, const CComVariant &cvParam3 = CComVariant(),
+        LPCWSTR wszParam4Name = NULL, const CComVariant &cvParam4 = CComVariant());
+
+protected:
+    static HRESULT EnumerateProperties(IWbemClassObject *pObject);
+    static HRESULT Get(IWbemClassObject *pObject, LPCWSTR wszName, VARIANT *vParam);
+    static HRESULT Put(IWbemClassObject *pObject, LPCWSTR wszName, const VARIANT &cvParam);
+
+    CComPtr<IWbemServices> m_pSvc;
+    // Methods are looked up on this
+    CComPtr<IWbemClassObject> m_pClass;
+    // Methods are called on this -- may equal m_pClass
+    CComPtr<IWbemClassObject> m_pInstance;
+};
+
 static HRESULT GetWMIProxy(const CString &objectPath, CComPtr<IWbemServices> &pSvc)
 {
     FUNCTION_ENTER;
@@ -221,35 +250,6 @@ typedef enum BcdBootMgrElementTypes {
 // Inspired by https://github.com/sysprogs/BazisLib/blob/master/bzshlp/Win32/BCD.cpp and
 // https://social.msdn.microsoft.com/Forums/sqlserver/en-US/a9996e4a-d2d7-4c42-87d2-48096ea47eb5/wmi-bcdobjects-using-c?forum=windowsgeneraldevelopmentissues#cb08edd9-297b-453d-a7ca-6c96574aee3f
 // -- thanks, both.
-class WmiObject {
-public:
-    WmiObject(IWbemServices *pSvc, IWbemClassObject *pClass, IWbemClassObject *pInstance) :
-        m_pSvc(pSvc),
-        m_pClass(pClass),
-        m_pInstance(pInstance)
-    {
-    }
-
-    HRESULT ExecMethod(
-        LPCWSTR wszMethodName,
-        IWbemClassObject **ppOutParams = NULL,
-        LPCWSTR wszParam1Name = NULL, const CComVariant &cvParam1 = CComVariant(),
-        LPCWSTR wszParam2Name = NULL, const CComVariant &cvParam2 = CComVariant(),
-        LPCWSTR wszParam3Name = NULL, const CComVariant &cvParam3 = CComVariant(),
-        LPCWSTR wszParam4Name = NULL, const CComVariant &cvParam4 = CComVariant());
-
-protected:
-    static HRESULT EnumerateProperties(IWbemClassObject *pObject);
-    static HRESULT Get(IWbemClassObject *pObject, LPCWSTR wszName, VARIANT *vParam);
-    static HRESULT Put(IWbemClassObject *pObject, LPCWSTR wszName, const VARIANT &cvParam);
-
-    CComPtr<IWbemServices> m_pSvc;
-    // Methods are looked up on this
-    CComPtr<IWbemClassObject> m_pClass;
-    // Methods are called on this -- may equal m_pClass
-    CComPtr<IWbemClassObject> m_pInstance;
-};
-
 class BcdBootmgr : public WmiObject {
 public:
     BcdBootmgr() : WmiObject(NULL, NULL, NULL) {}
