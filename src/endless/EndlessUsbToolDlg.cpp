@@ -6036,11 +6036,9 @@ BOOL CEndlessUsbToolDlg::UninstallDualBoot(CEndlessUsbToolDlg *dlg)
 	CString systemDriveLetter = GetSystemDrive();
 	CString endlessFilesPath = systemDriveLetter + PATH_ENDLESS_SUBDIRECTORY;
 	CStringA endlessImgPath = ConvertUnicodeToUTF8(endlessFilesPath + ENDLESS_IMG_FILE_NAME);
-	HANDLE hPhysical = GetPhysicalFromDriveLetter(systemDriveLetter);
+	HANDLE hPhysical = INVALID_HANDLE_VALUE;
 	CString exePath = GetExePath();
 	CString image_state;
-
-	IFFALSE_GOTOERROR(hPhysical != INVALID_HANDLE_VALUE, "Error on acquiring disk handle.");
 
 	if (IsLegacyBIOSBoot()) {
 		if (dlg->m_eosldrInstaller->IsInstalled(systemDriveLetter)) {
@@ -6054,14 +6052,21 @@ BOOL CEndlessUsbToolDlg::UninstallDualBoot(CEndlessUsbToolDlg *dlg)
 				goto error;
 			}
 		} else {
+			hPhysical = GetPhysicalFromDriveLetter(systemDriveLetter);
+			IFFALSE_GOTOERROR(hPhysical != INVALID_HANDLE_VALUE, "Error on acquiring disk handle.");
+
 			// remove GRUB MBR, reinstate Windows'
 			IFFALSE_GOTOERROR(
 					UninstallEndlessMBR(systemDriveLetter, endlessFilesPath, hPhysical, dlg->m_lastErrorCause),
 					"Couldn't uninstall Endless MBR");
 		}
 	} else { // remove EFI entry
-		bool found_boot_entry;
-		bool ret = UninstallEndlessEFI(systemDriveLetter, hPhysical, found_boot_entry);
+		bool found_boot_entry, ret;
+
+		hPhysical = GetPhysicalFromDriveLetter(systemDriveLetter);
+		IFFALSE_GOTOERROR(hPhysical != INVALID_HANDLE_VALUE, "Error on acquiring disk handle.");
+
+		ret = UninstallEndlessEFI(systemDriveLetter, hPhysical, found_boot_entry);
 		dlg->TrackEvent(_T("FoundBootEntry"), found_boot_entry ? _T("True") : _T("False"));
 		IFFALSE_GOTOERROR(ret, "UninstallEndlessEFI failed");
 	}
