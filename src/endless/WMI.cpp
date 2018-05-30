@@ -25,6 +25,37 @@ public:
     }
 };
 
+class WmiObject {
+public:
+    WmiObject(IWbemServices *pSvc, IWbemClassObject *pClass, IWbemClassObject *pInstance) :
+        m_pSvc(pSvc),
+        m_pClass(pClass),
+        m_pInstance(pInstance)
+    {
+    }
+
+    HRESULT ExecMethod(
+        LPCWSTR wszMethodName,
+        IWbemClassObject **ppOutParams = NULL,
+        LPCWSTR wszParam1Name = NULL, const CComVariant &cvParam1 = CComVariant(),
+        LPCWSTR wszParam2Name = NULL, const CComVariant &cvParam2 = CComVariant(),
+        LPCWSTR wszParam3Name = NULL, const CComVariant &cvParam3 = CComVariant(),
+        LPCWSTR wszParam4Name = NULL, const CComVariant &cvParam4 = CComVariant());
+
+protected:
+    static HRESULT EnumerateProperties(IWbemClassObject *pObject);
+    static HRESULT Get(IWbemClassObject *pObject, LPCWSTR wszName, VARIANT *vParam);
+    static HRESULT Put(IWbemClassObject *pObject, LPCWSTR wszName, const VARIANT &cvParam);
+
+    CComPtr<IWbemServices> m_pSvc;
+    // Method in-parameter definitions are looked up on this. May be NULL if
+    // no methods need in-parameters, in which case it's an error to pass any
+    // parameters to ::ExecMethod.
+    CComPtr<IWbemClassObject> m_pClass;
+    // Methods are called on this. May equal m_pClass.
+    CComPtr<IWbemClassObject> m_pInstance;
+};
+
 static HRESULT GetWMIProxy(const CString &objectPath, CComPtr<IWbemServices> &pSvc)
 {
     FUNCTION_ENTER;
@@ -77,7 +108,7 @@ static HRESULT GetWMIProxy(const CString &objectPath, CComPtr<IWbemServices> &pS
     return hres;
 }
 
-static BOOL RunWMIQuery(const CString &objectPath, const CString &query, std::function< BOOL( CComPtr<IEnumWbemClassObject> & )> callback)
+static BOOL RunWMIQuery(const CString &objectPath, const CString &query, std::function< BOOL( CComPtr<IWbemServices> &, CComPtr<IEnumWbemClassObject> & )> callback)
 {
     FUNCTION_ENTER_FMT("%ls \"%ls\"", objectPath, query);
 
@@ -92,7 +123,7 @@ static BOOL RunWMIQuery(const CString &objectPath, const CString &query, std::fu
     hres = pSvc->ExecQuery(bstr_t("WQL"), bstr_t(query), WBEM_FLAG_FORWARD_ONLY | WBEM_RETURN_WHEN_COMPLETE, NULL, &pEnumerator);
     IFFAILED_RETURN_VALUE(hres, "Error on pSvc->ExecQuery.", FALSE);
 
-    return callback(pEnumerator);
+    return callback(pSvc, pEnumerator);
 }
 
 BOOL WMI::IsBitlockedDrive(const CString & drive)
@@ -104,7 +135,7 @@ BOOL WMI::IsBitlockedDrive(const CString & drive)
 
     bitlockerQuery.Format(L"Select * from Win32_EncryptableVolume where DriveLetter = '%ls'", drive);
 
-    BOOL retResult = RunWMIQuery(objectPath, bitlockerQuery, [](CComPtr<IEnumWbemClassObject> &pEnumerator) {
+    BOOL retResult = RunWMIQuery(objectPath, bitlockerQuery, [](CComPtr<IWbemServices> &pSvc, CComPtr<IEnumWbemClassObject> &pEnumerator) {
         CComPtr<IWbemClassObject> pclsObj;
         ULONG uReturned = 0;
         HRESULT hres = pEnumerator->Next(0, 1, &pclsObj, &uReturned);
@@ -123,10 +154,19 @@ BOOL WMI::IsBitlockedDrive(const CString & drive)
         /* https://msdn.microsoft.com/en-us/library/windows/desktop/aa376433(v=vs.85).aspx
          * 0: FullyDecrypted. "For a standard hard drive (HDD), the volume is fully decrypted.
          * For a hardware encrypted hard drive (EHDD), the volume is perpetually unlocked."
+         *
+         * On Windows 10, ConversionStatus is a property on the volume object, but this is not
+         * documented, and on Windows 7 the property appears not to be defined. So we have to
+         * call GetConversionStatus.
          */
+        WmiObject obj(pSvc, NULL /* pClass, not needed */, pclsObj);
+        CComPtr<IWbemClassObject> pConversionStatusResult;
         IFFAILED_RETURN_VALUE(
-            pclsObj->Get(L"ConversionStatus", 0, &vtProp, 0, 0),
-            "Could not get ConversionStatus", TRUE);
+            obj.ExecMethod(L"GetConversionStatus", &pConversionStatusResult),
+            "Could not call GetConversionStatus", TRUE);
+        IFFAILED_RETURN_VALUE(
+            pConversionStatusResult->Get(L"ConversionStatus", 0, &vtProp, 0, 0),
+            "Could not get ConversionStatus from GetConversionStatus result", TRUE);
         long conversionStatus = vtProp;
 
         /* https://msdn.microsoft.com/en-us/library/windows/desktop/aa376448(v=vs.85).aspx
@@ -155,7 +195,7 @@ BOOL WMI::GetMachineInfo(CString & manufacturer, CString & model)
     const CString objectPath(L"ROOT\\CIMV2");
     const CString query(L"Select * from Win32_ComputerSystem");
 
-    return RunWMIQuery(objectPath, query, [&](CComPtr<IEnumWbemClassObject> &pEnumerator) {
+    return RunWMIQuery(objectPath, query, [&](CComPtr<IWbemServices> &pSvc, CComPtr<IEnumWbemClassObject> &pEnumerator) {
         while (pEnumerator)
         {
             CComPtr<IWbemClassObject> pclsObj;
@@ -221,35 +261,6 @@ typedef enum BcdBootMgrElementTypes {
 // Inspired by https://github.com/sysprogs/BazisLib/blob/master/bzshlp/Win32/BCD.cpp and
 // https://social.msdn.microsoft.com/Forums/sqlserver/en-US/a9996e4a-d2d7-4c42-87d2-48096ea47eb5/wmi-bcdobjects-using-c?forum=windowsgeneraldevelopmentissues#cb08edd9-297b-453d-a7ca-6c96574aee3f
 // -- thanks, both.
-class WmiObject {
-public:
-    WmiObject(IWbemServices *pSvc, IWbemClassObject *pClass, IWbemClassObject *pInstance) :
-        m_pSvc(pSvc),
-        m_pClass(pClass),
-        m_pInstance(pInstance)
-    {
-    }
-
-    HRESULT ExecMethod(
-        LPCWSTR wszMethodName,
-        IWbemClassObject **ppOutParams = NULL,
-        LPCWSTR wszParam1Name = NULL, const CComVariant &cvParam1 = CComVariant(),
-        LPCWSTR wszParam2Name = NULL, const CComVariant &cvParam2 = CComVariant(),
-        LPCWSTR wszParam3Name = NULL, const CComVariant &cvParam3 = CComVariant(),
-        LPCWSTR wszParam4Name = NULL, const CComVariant &cvParam4 = CComVariant());
-
-protected:
-    static HRESULT EnumerateProperties(IWbemClassObject *pObject);
-    static HRESULT Get(IWbemClassObject *pObject, LPCWSTR wszName, VARIANT *vParam);
-    static HRESULT Put(IWbemClassObject *pObject, LPCWSTR wszName, const VARIANT &cvParam);
-
-    CComPtr<IWbemServices> m_pSvc;
-    // Methods are looked up on this
-    CComPtr<IWbemClassObject> m_pClass;
-    // Methods are called on this -- may equal m_pClass
-    CComPtr<IWbemClassObject> m_pInstance;
-};
-
 class BcdBootmgr : public WmiObject {
 public:
     BcdBootmgr() : WmiObject(NULL, NULL, NULL) {}
@@ -392,9 +403,10 @@ HRESULT WmiObject::ExecMethod(
 
     // Get the parameter specification
     CComPtr<IWbemClassObject> pInParamsDefinition;
-    WBEM_E_TYPE_MISMATCH;
-    hres = m_pClass->GetMethod(wszMethodName, 0, &pInParamsDefinition, NULL);
-    IFFAILED_RETURN_RES(hres, "GetMethod failed");
+    if (m_pClass != NULL) {
+        hres = m_pClass->GetMethod(wszMethodName, 0, &pInParamsDefinition, NULL);
+        IFFAILED_RETURN_RES(hres, "GetMethod failed");
+    }
 
     CComPtr<IWbemClassObject> pInParams;
     if (pInParamsDefinition == NULL) {
