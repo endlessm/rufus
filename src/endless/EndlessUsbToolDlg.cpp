@@ -314,7 +314,7 @@ enum endless_action_type {
 #define FILE_GZ_EXTENSION	"gz"
 #define FILE_XZ_EXTENSION	"xz"
 
-#define RELEASE_JSON_URLPATH       _T("https://d1anzknqnc1kmb.cloudfront.net/")
+#define RELEASE_JSON_URLPATH       _T("https://images-dl.endlessm.com/")
 #define PRIVATE_JSON_URLPATH       _T("http://images.endlessm-sf.com/")
 
 #define JSON_LIVE_FILE             "releases-eos-3.json"
