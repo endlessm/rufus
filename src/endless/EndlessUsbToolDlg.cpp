@@ -1338,7 +1338,7 @@ LRESULT CEndlessUsbToolDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lPara
             DownloadStatus_t *downloadStatus = (DownloadStatus_t *)wParam;
             IFFALSE_BREAK(downloadStatus != NULL, "downloadStatus is NULL");
 
-            bool isReleaseJsonDownload = downloadStatus->jobName == DownloadManager::GetJobName(DownloadType_t::DownloadTypeReleseJson);
+            bool isReleaseJsonDownload = downloadStatus->jobName == DownloadManager::GetJobName(DownloadType_t::DownloadTypeReleaseJson);
             // DO STUFF
             if (downloadStatus->error) {
 				if (isReleaseJsonDownload) {
@@ -2616,11 +2616,11 @@ void CEndlessUsbToolDlg::StartJSONDownload()
     ListOfStrings urls = { JsonLiveFileURL(), JsonInstallerFileURL() };
     ListOfStrings files = { liveJson, installerJson };
 
-    success = m_downloadManager.AddDownload(DownloadType_t::DownloadTypeReleseJson, urls, files, true);
+    success = m_downloadManager.AddDownload(DownloadType_t::DownloadTypeReleaseJson, urls, files, true);
     if (!success) {
         // If resuming a possibly-existing download failed, try harder to start a new one.
         // In theory this shouldn't be necessary but this is done for the image download case so who knows!
-        success = m_downloadManager.AddDownload(DownloadType_t::DownloadTypeReleseJson, urls, files, false);
+        success = m_downloadManager.AddDownload(DownloadType_t::DownloadTypeReleaseJson, urls, files, false);
     }
 
     if (!success) {

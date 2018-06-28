@@ -103,7 +103,7 @@ bool DownloadManager::AddDownload(DownloadType_t type, ListOfStrings urls, ListO
     if (jobSuffix != NULL) jobName += jobSuffix;
     uprintf("DownloadManager::AddDownload job %ls", jobName);
 
-    if(type != DownloadType_t::DownloadTypeReleseJson && jobSuffix == NULL) {
+    if(type != DownloadType_t::DownloadTypeReleaseJson && jobSuffix == NULL) {
         uprintf("Error: AddDownload NO SUFFIX ADDED");
     }
         
@@ -154,7 +154,7 @@ usecurrentjob:
         IFFAILED_GOTOERROR(hr, "Error creating instance of IBackgroundCopyJob.");
 
         ULONG secondsRetry = MINIMUM_RETRY_DELAY_SEC;
-        if (type == DownloadType_t::DownloadTypeReleseJson) {
+        if (type == DownloadType_t::DownloadTypeReleaseJson) {
             secondsRetry = MINIMUM_RETRY_DELAY_SEC_JSON;
         }
         currentJob->SetPriority(BG_JOB_PRIORITY_FOREGROUND);

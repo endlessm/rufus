@@ -15,7 +15,7 @@
     STDMETHOD(QueryInterface)(REFIID riid, LPVOID *ppvObj);
 
 typedef enum DownloadType {
-    DownloadTypeReleseJson,
+    DownloadTypeReleaseJson,
     DownloadTypeLiveImage,
     DownloadTypeInstallerImage,
 	DownloadTypeDualBootFiles,
@@ -26,7 +26,7 @@ static LPCTSTR DownloadTypeToString(DownloadType_t type)
 {
     switch (type)
     {
-        TOSTR(DownloadTypeReleseJson);
+        TOSTR(DownloadTypeReleaseJson);
         TOSTR(DownloadTypeLiveImage);
         TOSTR(DownloadTypeInstallerImage);
 		TOSTR(DownloadTypeDualBootFiles);
