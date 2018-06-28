@@ -83,7 +83,7 @@ error:
     return false;
 }
 
-bool DownloadManager::AddDownload(DownloadType_t type, ListOfStrings urls, ListOfStrings files, bool resumeExisting, LPCTSTR jobSuffix)
+bool DownloadManager::AddDownload(DownloadType_t type, const CString &urlBase, ListOfStrings urlPaths, ListOfStrings files, bool resumeExisting, LPCTSTR jobSuffix)
 {
     FUNCTION_ENTER;
 
@@ -94,10 +94,11 @@ bool DownloadManager::AddDownload(DownloadType_t type, ListOfStrings urls, ListO
     ULONG count = 0;
     CString jobName;
     bool jobExisted = false;
-    WCHAR* pLocalFileName = NULL, *pRemoteName = NULL;
+    CComPtr<IBackgroundCopyJobHttpOptions> httpOptions;
+    ULONG securityFlags;
     
     IFFALSE_GOTOERROR(m_bcManager != NULL, "Manager is NULL. Was Init called?");
-    IFFALSE_GOTOERROR(urls.size() == files.size(), "Count of files and urls differ.");
+    IFFALSE_GOTOERROR(urlPaths.size() == files.size(), "Count of files and urlPaths differ.");
 
     jobName = DownloadManager::GetJobName(type);
     if (jobSuffix != NULL) jobName += jobSuffix;
@@ -112,38 +113,46 @@ bool DownloadManager::AddDownload(DownloadType_t type, ListOfStrings urls, ListO
     
     if (currentJob != NULL) {
         CComPtr<IEnumBackgroundCopyFiles> pFileList;
-        CComPtr<IBackgroundCopyFile> pFile;
         ULONG cFileCount = 0, index = 0;
 
         IFFAILED_GOTO(currentJob->EnumFiles(&pFileList), "Error getting filelist.", canceljob);
         IFFALSE_GOTO(pFileList != NULL, "Error getting filelist.", canceljob);
         IFFAILED_GOTO(pFileList->GetCount(&cFileCount), "Error getting file count.", canceljob);
-        IFFALSE_GOTO(cFileCount == urls.size(), "Number of files doesn't match.", canceljob);
+        IFFALSE_GOTO(cFileCount == urlPaths.size(), "Number of files doesn't match.", canceljob);
 
         //Enumerate the files in the job.
         for (index = 0; index < cFileCount; index++) {
+            CComPtr<IBackgroundCopyFile> pFile;
+            CComPtr<IBackgroundCopyFile2> pFile2;
+            CComHeapPtr<WCHAR> pLocalFileName, pRemoteName;
+
+            CString remoteName;
+
             IFFALSE_GOTO(S_OK == pFileList->Next(1, &pFile, NULL), "Error querying for file object.", canceljob);
-            IFFAILED_GOTO(pFile->GetLocalName(&pLocalFileName), "Error querying for local file name.", canceljob);
-            IFFAILED_GOTO(pFile->GetRemoteName(&pRemoteName), "Error querying for remote file name.", canceljob);
-            
-            ListOfStrings::iterator foundUrlItem = std::find_if(urls.begin(), urls.end(), [&pRemoteName](LPCTSTR url) { return 0 == wcscmp(url, pRemoteName); });
-            IFFALSE_GOTO(foundUrlItem != urls.end(), "URL no found in list.", canceljob);
-            ListOfStrings::iterator file = files.begin() + (foundUrlItem - urls.begin());
+            IFFAILED_GOTO(pFile->QueryInterface(&pFile2), "Error querying for IBackgroundCopyFile2 interface.", canceljob);
+            IFFAILED_GOTO(pFile2->GetLocalName(&pLocalFileName), "Error querying for local file name.", canceljob);
+            IFFAILED_GOTO(pFile2->GetRemoteName(&pRemoteName), "Error querying for remote file name.", canceljob);
+
+            remoteName = pRemoteName;
+
+            ListOfStrings::iterator foundUrlItem = std::find_if(urlPaths.begin(), urlPaths.end(),
+                [&remoteName](const CString &url) { return remoteName.Right(url.GetLength()) == url; });
+            IFFALSE_GOTO(foundUrlItem != urlPaths.end(), "URL not found in list.", canceljob);
+            ListOfStrings::iterator file = files.begin() + (foundUrlItem - urlPaths.begin());
             IFFALSE_GOTO(0 == wcscmp(*file, pLocalFileName), "Local file doesn't match at url index.", canceljob);
-            
-            CoTaskMemFree(pLocalFileName); pLocalFileName = NULL;
-            CoTaskMemFree(pRemoteName); pRemoteName = NULL;
-            pFile = NULL;
+
+            CString fullUrl = urlBase + *foundUrlItem;
+            if (fullUrl != remoteName) {
+                uprintf("Adjusting remote URL from %ls to %ls", remoteName, fullUrl);
+                /* If a later file in the job doesn't match, the job will be deleted anyway, so we can just fix up each URL while we're checking. */
+                IFFAILED_GOTO(pFile2->SetRemoteName(fullUrl), "Couldn't adjust remote URL", canceljob);
+            }
         }
 
     }
     goto usecurrentjob;
 
 canceljob:
-    // extra cleaning in case the for loop exited because of error
-    // No need to check for NULL as CoTaskMemFree handles it
-    CoTaskMemFree(pLocalFileName);
-    CoTaskMemFree(pRemoteName);
     // cancel the job
     hr = currentJob->Cancel();
     currentJob = NULL;
@@ -161,12 +170,19 @@ usecurrentjob:
         hr = currentJob->SetMinimumRetryDelay(secondsRetry);
         IFFAILED_PRINTERROR(hr, "Error on SetMinimumRetryDelay");
 
-        for (auto url = urls.begin(), file = files.begin(); url != urls.end(); url++, file++) {
-            uprintf("Adding download [%ls]->[%ls]", *url, *file);
-            hr = currentJob->AddFile(*url, *file);
+        for (auto url = urlPaths.begin(), file = files.begin(); url != urlPaths.end(); url++, file++) {
+            CString fullUrl = urlBase + *url;
+            uprintf("Adding download [%ls]->[%ls]", fullUrl, *file);
+            hr = currentJob->AddFile(fullUrl, *file);
             IFFAILED_GOTOERROR(hr, "Error adding file to download job");
         }
     }
+
+    /* Set ALLOW_REPORT to update remote URLs when we follow a redirect */
+    IFFAILED_GOTOERROR(currentJob->QueryInterface(&httpOptions), "Error getting HttpOptions interface");
+    IFFAILED_GOTOERROR(httpOptions->GetSecurityFlags(&securityFlags), "Error calling GetSecurityFlags");
+    securityFlags |= BG_HTTP_REDIRECT_POLICY_ALLOW_REPORT;
+    IFFAILED_GOTOERROR(httpOptions->SetSecurityFlags(securityFlags), "Error calling SetSecurityFlags");
 
     hr = currentJob->SetNotifyInterface(this);
     IFFAILED_GOTOERROR(hr, "Error calling SetNotifyInterface.");

@@ -57,7 +57,7 @@ public:
     bool Init(HWND window, DWORD statusMessageId);
     bool Uninit();
 
-    bool AddDownload(DownloadType_t type, ListOfStrings urls, ListOfStrings files, bool resumeExisting, LPCTSTR jobSuffix = NULL);
+    bool AddDownload(DownloadType_t type, const CString &urlBase, ListOfStrings urlPaths, ListOfStrings files, bool resumeExisting, LPCTSTR jobSuffix = NULL);
 
     static CString GetJobName(DownloadType_t type);
 
