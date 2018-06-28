@@ -84,11 +84,9 @@ private:
     static void PopulateErrorDetails(DownloadStatus_t &downloadStatus, IBackgroundCopyError *pError);
     static void PopulateErrorDetails(DownloadStatus_t &downloadStatus, IBackgroundCopyJob *pJob);
 
-    LONG m_PendingJobModificationCount;
     static volatile ULONG m_refCount;
     HWND m_dispatchWindow;
     DWORD m_statusMsgId;
     CComPtr<IBackgroundCopyManager> m_bcManager;
-    CComPtr<IBackgroundCopyJob> m_bcReleaseJson;
     CString m_latestEosVersion;
 };

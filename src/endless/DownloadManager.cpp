@@ -31,7 +31,6 @@ DownloadManager::DownloadManager()
     FUNCTION_ENTER;
 
     m_bcManager = NULL;
-    m_PendingJobModificationCount = 0;
     m_latestEosVersion = "";
 }
 
