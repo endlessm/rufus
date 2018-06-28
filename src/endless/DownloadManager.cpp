@@ -178,6 +178,8 @@ usecurrentjob:
         }
     }
 
+    SetState(jobName, BG_JOB_STATE_QUEUED);
+
     /* Set ALLOW_REPORT to update remote URLs when we follow a redirect */
     IFFAILED_GOTOERROR(currentJob->QueryInterface(&httpOptions), "Error getting HttpOptions interface");
     IFFAILED_GOTOERROR(httpOptions->GetSecurityFlags(&securityFlags), "Error calling GetSecurityFlags");
@@ -209,6 +211,8 @@ STDMETHODIMP DownloadManager::JobTransferred(IBackgroundCopyJob *pJob)
     //Add logic that will not block the callback thread. If you need to perform
     //extensive logic at this time, consider creating a separate thread to perform
     //the work.
+
+    LogRemoteURLs(pJob);
 
     hr = pJob->Complete();
     if (FAILED(hr))
@@ -270,6 +274,18 @@ void DownloadManager::PopulateErrorDetails(DownloadStatus_t & downloadStatus, IB
     }
 }
 
+bool DownloadManager::SetState(const CString & jobName, BG_JOB_STATE state)
+{
+    CSingleLock lock(&m_lastStateForJobMutex);
+    lock.Lock();
+    if (m_lastStateForJob[jobName] != state) {
+        m_lastStateForJob[jobName] = state;
+        return true;
+    }
+
+    return false;
+}
+
 STDMETHODIMP DownloadManager::JobError(IBackgroundCopyJob *pJob, IBackgroundCopyError *pError)
 {
     FUNCTION_ENTER;
@@ -294,6 +310,32 @@ STDMETHODIMP DownloadManager::JobError(IBackgroundCopyJob *pJob, IBackgroundCopy
     return S_OK;
 }
 
+HRESULT DownloadManager::LogRemoteURLs(CComPtr<IBackgroundCopyJob> pJob)
+{
+    FUNCTION_ENTER;
+
+    CComPtr<IEnumBackgroundCopyFiles> pFileList;
+    ULONG cFileCount = 0, index = 0;
+
+    IFFAILED_RETURN_RES(pJob->EnumFiles(&pFileList), "Error getting filelist.");
+    IFFAILED_RETURN_RES(pFileList->GetCount(&cFileCount), "Error getting file count.");
+
+    //Enumerate the files in the job.
+    for (index = 0; index < cFileCount; index++) {
+        CComPtr<IBackgroundCopyFile> pFile;
+        CComHeapPtr<WCHAR> pRemoteName;
+        CString remoteName;
+        HRESULT hr = pFileList->Next(1, &pFile, NULL);
+        IFFALSE_RETURN_VALUE(S_OK == hr, "Error querying for file object.", hr);
+        IFFAILED_RETURN_RES(pFile->GetRemoteName(&pRemoteName), "Error querying for remote file name.");
+
+        remoteName = pRemoteName;
+        uprintf("Remote URL %ld: %ls", index + 1, pRemoteName);
+    }
+
+    return S_OK;
+}
+
 STDMETHODIMP DownloadManager::JobModification(IBackgroundCopyJob *JobModification, DWORD dwReserved)
 {
     FUNCTION_ENTER;
@@ -301,6 +343,7 @@ STDMETHODIMP DownloadManager::JobModification(IBackgroundCopyJob *JobModificatio
     HRESULT hr;
     CComHeapPtr<WCHAR> pszJobName;
     BG_JOB_STATE State;
+    bool stateChanged = false;
     DownloadStatus_t downloadStatus = DownloadStatusNull;
 
     hr = JobModification->GetDisplayName(&pszJobName);
@@ -314,12 +357,24 @@ STDMETHODIMP DownloadManager::JobModification(IBackgroundCopyJob *JobModificatio
     IFFAILED_GOTOERROR(hr, "GetState failed");
 
     uprintf("Job %ls %ls (0x%X)", pszJobName, JobStateToStr(State), State);
+    stateChanged = SetState(downloadStatus.jobName, State);
 
     switch (State) {
     case BG_JOB_STATE_ACKNOWLEDGED:
+        if (stateChanged) {
+            LogRemoteURLs(JobModification);
+        }
         downloadStatus.done = true;
         break;
+    case BG_JOB_STATE_TRANSFERRING:
+        if (stateChanged) {
+            LogRemoteURLs(JobModification);
+        }
+        break;
     case BG_JOB_STATE_TRANSFERRED:
+        if (stateChanged) {
+            LogRemoteURLs(JobModification);
+        }
         //Call pJob->Complete(); to acknowledge that the transfer is complete
         //and make the file available to the client.
         uprintf("Job %ls DONE\n", pszJobName);
@@ -329,6 +384,10 @@ STDMETHODIMP DownloadManager::JobModification(IBackgroundCopyJob *JobModificatio
         break;
     case BG_JOB_STATE_TRANSIENT_ERROR:
     {
+        if (stateChanged) {
+            LogRemoteURLs(JobModification);
+        }
+
         downloadStatus.transientError = true;
 
         CComPtr<IBackgroundCopyError> pError;
@@ -344,7 +403,10 @@ STDMETHODIMP DownloadManager::JobModification(IBackgroundCopyJob *JobModificatio
         downloadStatus.error = true;
         break;
     case BG_JOB_STATE_ERROR:
-        // handled by the JobError callback
+        if (stateChanged) {
+            LogRemoteURLs(JobModification);
+        }
+        // the rest is handled by the JobError callback
         return S_OK;
     default:
         return S_OK;

@@ -7,6 +7,7 @@
 #include "GeneralCode.h"
 
 #include <vector>
+#include <map>
 
 /// IUnknown methods declaration macro
 #define DECLARE_IUNKNOWN \
@@ -63,6 +64,7 @@ public:
 
     static bool GetDownloadProgress(CComPtr<IBackgroundCopyJob> &currentJob, DownloadStatus_t &downloadStatus, const CString &jobName);
     static HRESULT GetExistingJob(CComPtr<IBackgroundCopyManager> &bcManager, LPCWSTR jobName, CComPtr<IBackgroundCopyJob> &existingJob);
+    static HRESULT LogRemoteURLs(CComPtr<IBackgroundCopyJob> pJob);
 
     void ClearExtraDownloadJobs(bool forceCancel = false);
 
@@ -83,10 +85,14 @@ private:
     void ReportStatus(const DownloadStatus_t &downloadStatus);
     static void PopulateErrorDetails(DownloadStatus_t &downloadStatus, IBackgroundCopyError *pError);
     static void PopulateErrorDetails(DownloadStatus_t &downloadStatus, IBackgroundCopyJob *pJob);
+    bool SetState(const CString &jobName, BG_JOB_STATE state);
 
     static volatile ULONG m_refCount;
     HWND m_dispatchWindow;
     DWORD m_statusMsgId;
     CComPtr<IBackgroundCopyManager> m_bcManager;
     CString m_latestEosVersion;
+
+    std::map<CString, BG_JOB_STATE> m_lastStateForJob;
+    CCriticalSection m_lastStateForJobMutex;
 };
