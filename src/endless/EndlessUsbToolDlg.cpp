@@ -314,8 +314,7 @@ enum endless_action_type {
 #define FILE_GZ_EXTENSION	"gz"
 #define FILE_XZ_EXTENSION	"xz"
 
-#define RELEASE_JSON_URLPATH       _T("https://d1anzknqnc1kmb.cloudfront.net/")
-#define PRIVATE_JSON_URLPATH       _T("http://images.endlessm-sf.com/")
+#define IMAGE_SERVER_BASE          _T("https://images-dl.endlessm.com/")
 
 #define JSON_LIVE_FILE             "releases-eos-3.json"
 #define JSON_CODING_LIVE_FILE      "releases-coding-3.json"
@@ -1338,7 +1337,7 @@ LRESULT CEndlessUsbToolDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lPara
             DownloadStatus_t *downloadStatus = (DownloadStatus_t *)wParam;
             IFFALSE_BREAK(downloadStatus != NULL, "downloadStatus is NULL");
 
-            bool isReleaseJsonDownload = downloadStatus->jobName == DownloadManager::GetJobName(DownloadType_t::DownloadTypeReleseJson);
+            bool isReleaseJsonDownload = downloadStatus->jobName == DownloadManager::GetJobName(DownloadType_t::DownloadTypeReleaseJson);
             // DO STUFF
             if (downloadStatus->error) {
 				if (isReleaseJsonDownload) {
@@ -2616,11 +2615,11 @@ void CEndlessUsbToolDlg::StartJSONDownload()
     ListOfStrings urls = { JsonLiveFileURL(), JsonInstallerFileURL() };
     ListOfStrings files = { liveJson, installerJson };
 
-    success = m_downloadManager.AddDownload(DownloadType_t::DownloadTypeReleseJson, urls, files, true);
+    success = m_downloadManager.AddDownload(DownloadType_t::DownloadTypeReleaseJson, IMAGE_SERVER_BASE, urls, files, true);
     if (!success) {
         // If resuming a possibly-existing download failed, try harder to start a new one.
         // In theory this shouldn't be necessary but this is done for the image download case so who knows!
-        success = m_downloadManager.AddDownload(DownloadType_t::DownloadTypeReleseJson, urls, files, false);
+        success = m_downloadManager.AddDownload(DownloadType_t::DownloadTypeReleaseJson, IMAGE_SERVER_BASE, urls, files, false);
     }
 
     if (!success) {
@@ -3315,15 +3314,15 @@ void CEndlessUsbToolDlg::StartInstallationProcess()
 		DownloadType_t downloadType = GetSelectedDownloadType();
 
 		// live image file
-		CString url = CString(RELEASE_JSON_URLPATH) + remote.urlFile;
+		CString url = remote.urlFile;
 		m_localFile = GET_IMAGE_PATH(CSTRING_GET_LAST(remote.urlFile, '/'));
 		bool localFileExists = PackedImageAlreadyExists(m_localFile, remote.compressedSize, remote.extractedSize, false);
 
 		// live image signature file
-		CString urlAsc = CString(RELEASE_JSON_URLPATH) + remote.urlSignature;
+		CString urlAsc = remote.urlSignature;
 		if(RemoteMatchesUnpackedImg(m_localFile, &m_localFileSig)) {
 			m_localFile = GET_IMAGE_PATH(ENDLESS_IMG_FILE_NAME);
-			urlAsc = CString(RELEASE_JSON_URLPATH) + remote.urlUnpackedSignature;
+			urlAsc = remote.urlUnpackedSignature;
 		} else {
 			m_localFileSig = GET_IMAGE_PATH(CSTRING_GET_LAST(remote.urlSignature, '/'));
 		}
@@ -3333,15 +3332,15 @@ void CEndlessUsbToolDlg::StartInstallationProcess()
 		CString urlInstaller, urlInstallerAsc, installerFile, installerAscFile;
 		CString urlBootFiles, urlBootFilesAsc, urlImageSig;
 		if (IsDualBootOrCombinedUsb()) {
-			urlBootFiles = CString(RELEASE_JSON_URLPATH) +  remote.urlBootArchive;
+			urlBootFiles = remote.urlBootArchive;
 			m_bootArchive = GET_IMAGE_PATH(CSTRING_GET_LAST(urlBootFiles, '/'));
 
-			urlBootFilesAsc = CString(RELEASE_JSON_URLPATH) + remote.urlBootArchiveSignature;
+			urlBootFilesAsc = remote.urlBootArchiveSignature;
 			m_bootArchiveSig = GET_IMAGE_PATH(CSTRING_GET_LAST(urlBootFilesAsc, '/'));
 
 			m_bootArchiveSize = remote.bootArchiveSize;
 
-			urlImageSig = CString(RELEASE_JSON_URLPATH) + remote.urlUnpackedSignature;
+			urlImageSig = remote.urlUnpackedSignature;
 			m_unpackedImageSig = GET_IMAGE_PATH(CSTRING_GET_LAST(urlImageSig, '/'));
 
 			if (localFileExists) {
@@ -3361,11 +3360,11 @@ void CEndlessUsbToolDlg::StartInstallationProcess()
 			}
 		} else {
 			// installer image file + signature
-			urlInstaller = CString(RELEASE_JSON_URLPATH) + m_installerImage.urlFile;
+			urlInstaller = m_installerImage.urlFile;
 			installerFile = GET_IMAGE_PATH(CSTRING_GET_LAST(m_installerImage.urlFile, '/'));
 			bool installerFileExists = PackedImageAlreadyExists(installerFile, m_installerImage.compressedSize, m_installerImage.extractedSize, true);
 
-			urlInstallerAsc = CString(RELEASE_JSON_URLPATH) + m_installerImage.urlSignature;
+			urlInstallerAsc = m_installerImage.urlSignature;
 			installerAscFile = GET_IMAGE_PATH(CSTRING_GET_LAST(m_installerImage.urlSignature, '/'));
 
 			if (installerFileExists) {
@@ -3386,10 +3385,10 @@ void CEndlessUsbToolDlg::StartInstallationProcess()
 		}
 
 		// Try resuming the download if it exists
-		bool status = m_downloadManager.AddDownload(downloadType, urls, files, true, remote.downloadJobName);
+		bool status = m_downloadManager.AddDownload(downloadType, IMAGE_SERVER_BASE, urls, files, true, remote.downloadJobName);
 		if (!status) {
 			// start the download again
-			status = m_downloadManager.AddDownload(downloadType, urls, files, false, remote.downloadJobName);
+			status = m_downloadManager.AddDownload(downloadType, IMAGE_SERVER_BASE, urls, files, false, remote.downloadJobName);
 			if (!status) {
 				ChangePage(_T(ELEMENT_INSTALL_PAGE));
 				// RADU: add custom error values for each of the errors so we can identify them and show a custom message for each
@@ -6310,8 +6309,8 @@ const char* CEndlessUsbToolDlg::JsonLiveFile(bool withCompressedSuffix)
 const wchar_t* CEndlessUsbToolDlg::JsonLiveFileURL()
 {
     return IsCoding()
-        ? (PRIVATE_JSON_URLPATH _T(JSON_CODING_LIVE_FILE JSON_SUFFIX))
-        : (RELEASE_JSON_URLPATH _T(JSON_LIVE_FILE        JSON_SUFFIX));
+        ? _T(JSON_CODING_LIVE_FILE JSON_SUFFIX)
+        : _T(JSON_LIVE_FILE        JSON_SUFFIX);
 }
 
 const char* CEndlessUsbToolDlg::JsonInstallerFile(bool withCompressedSuffix)
@@ -6324,7 +6323,7 @@ const char* CEndlessUsbToolDlg::JsonInstallerFile(bool withCompressedSuffix)
 
 const wchar_t* CEndlessUsbToolDlg::JsonInstallerFileURL()
 {
-    return RELEASE_JSON_URLPATH _T(JSON_INSTALLER_FILE JSON_SUFFIX);
+    return _T(JSON_INSTALLER_FILE JSON_SUFFIX);
 }
 
 bool CEndlessUsbToolDlg::ShouldUninstall()
