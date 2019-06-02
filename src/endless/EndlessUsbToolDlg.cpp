@@ -270,6 +270,7 @@ static_assert(
 #define RUFUS_LOCALE_VI     "vi-VN"
 #define RUFUS_LOCALE_TH     "th-TH"
 #define RUFUS_LOCALE_ID     "id-ID"
+#define RUFUS_LOCALE_HU     "hu-HU"
 
 // INI file language codes
 #define INI_LOCALE_EN       "en_US.utf8"
@@ -282,6 +283,7 @@ static_assert(
 #define INI_LOCALE_VI       "vi_VN.utf8"
 #define INI_LOCALE_TH       "th_TH.utf8"
 #define INI_LOCALE_ID       "id_ID.utf8"
+#define INI_LOCALE_HU       "hu_HU.utf8"
 
 enum custom_message {
     WM_FILES_CHANGED = UM_NO_UPDATE + 1,
@@ -625,6 +627,7 @@ CEndlessUsbToolDlg::CEndlessUsbToolDlg(UINT globalMessage, CWnd* pParent /*=NULL
     m_localeToIniLocale[RUFUS_LOCALE_ID] = INI_LOCALE_ID;
     m_localeToIniLocale[RUFUS_LOCALE_TH] = INI_LOCALE_TH;
     m_localeToIniLocale[RUFUS_LOCALE_VI] = INI_LOCALE_VI;
+    m_localeToIniLocale[RUFUS_LOCALE_HU] = INI_LOCALE_HU;
 }
 
 CEndlessUsbToolDlg::~CEndlessUsbToolDlg() {
