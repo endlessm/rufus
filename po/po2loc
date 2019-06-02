@@ -100,7 +100,7 @@ with open(LOC_FILE, 'r') as f:
 # Re-write the file starting with the preamble
 # and then append with Endless translations
 problems = []
-with open(LOC_FILE, 'w') as f:
+with open(LOC_FILE, "w", newline="\r\n") as f:
     f.write(preamble)
     if not have_marker:
         f.write('\n')
