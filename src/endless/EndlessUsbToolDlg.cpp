@@ -5690,7 +5690,7 @@ HANDLE CEndlessUsbToolDlg::GetPhysicalFromDriveLetter(const CString &driveLetter
 	safe_closehandle(hPhysical);
 
 	FormatStatus = 0;
-	hPhysical = GetPhysicalHandle(drive_number, writeAccess, TRUE);
+	hPhysical = GetPhysicalHandle(drive_number, writeAccess, FALSE);
 	IFFALSE_GOTOERROR(hPhysical != INVALID_HANDLE_VALUE, "Error on acquiring disk handle.");
 
 error:
