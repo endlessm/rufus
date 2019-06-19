@@ -435,7 +435,7 @@ private:
 	static bool IsWindowsMBR(FILE* fpDrive, const CString &TargetName);
 	static bool CanInstallToDrive(const CString &systemDriveLetter, const bool isBIOS, ErrorCause &cause);
 	static bool SetupEndlessEFI(const CString &systemDriveLetter, const CString &bootFilesPath);
-	static HANDLE GetPhysicalFromDriveLetter(const CString &driveLetter);
+	static HANDLE GetPhysicalFromDriveLetter(const CString &driveLetter, bool writeAccess);
 
 	// used by ImageUnpackCallback
 	// bled doesn't allow us to set a context variable for the callback
