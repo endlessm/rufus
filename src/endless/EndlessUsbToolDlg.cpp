@@ -5654,7 +5654,7 @@ bool CEndlessUsbToolDlg::SetupEndlessEFI(const CString &systemDriveLetter, const
 	CString windowsEspDriveLetter;
 	const char *espMountLetter = NULL;
 
-	hPhysical = GetPhysicalFromDriveLetter(systemDriveLetter);
+	hPhysical = GetPhysicalFromDriveLetter(systemDriveLetter, false);
 	IFFALSE_GOTOERROR(hPhysical != INVALID_HANDLE_VALUE, "Error on acquiring disk handle.");
 
 	IFFALSE_GOTOERROR(MountESPFromDrive(hPhysical, &espMountLetter, systemDriveLetter), "Error on MountESPFromDrive");
@@ -5674,7 +5674,7 @@ error:
 	return retResult;
 }
 
-HANDLE CEndlessUsbToolDlg::GetPhysicalFromDriveLetter(const CString &driveLetter)
+HANDLE CEndlessUsbToolDlg::GetPhysicalFromDriveLetter(const CString &driveLetter, bool writeAccess)
 {
 	FUNCTION_ENTER;
 
@@ -5690,7 +5690,7 @@ HANDLE CEndlessUsbToolDlg::GetPhysicalFromDriveLetter(const CString &driveLetter
 	safe_closehandle(hPhysical);
 
 	FormatStatus = 0;
-	hPhysical = GetPhysicalHandle(drive_number, TRUE, TRUE);
+	hPhysical = GetPhysicalHandle(drive_number, writeAccess, FALSE);
 	IFFALSE_GOTOERROR(hPhysical != INVALID_HANDLE_VALUE, "Error on acquiring disk handle.");
 
 error:
@@ -6076,7 +6076,7 @@ BOOL CEndlessUsbToolDlg::UninstallDualBoot(CEndlessUsbToolDlg *dlg)
 				goto error;
 			}
 		} else {
-			hPhysical = GetPhysicalFromDriveLetter(systemDriveLetter);
+			hPhysical = GetPhysicalFromDriveLetter(systemDriveLetter, true);
 			IFFALSE_GOTOERROR(hPhysical != INVALID_HANDLE_VALUE, "Error on acquiring disk handle.");
 
 			// remove GRUB MBR, reinstate Windows'
@@ -6087,7 +6087,7 @@ BOOL CEndlessUsbToolDlg::UninstallDualBoot(CEndlessUsbToolDlg *dlg)
 	} else { // remove EFI entry
 		bool found_boot_entry, ret;
 
-		hPhysical = GetPhysicalFromDriveLetter(systemDriveLetter);
+		hPhysical = GetPhysicalFromDriveLetter(systemDriveLetter, false);
 		IFFALSE_GOTOERROR(hPhysical != INVALID_HANDLE_VALUE, "Error on acquiring disk handle.");
 
 		ret = UninstallEndlessEFI(systemDriveLetter, hPhysical, found_boot_entry);
