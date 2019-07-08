@@ -1331,7 +1331,7 @@ t ErrorMessage "Hoppá! Valami rosszul sült el az Endless OS telepítése közb
 t EndlessSupportContainer "Ha továbbra is problémákba ütközik, kérjen segítséget az <a id='EndlessSupport'>Endless közösségi fórumán</a>."
 t DualBootPageTitle "Endless OS"
 t DualBootContentTitle "Az Endless OS letöltése és telepítése ezen a számítógépen."
-t DualBootContentDescription "Minden alkalommal, amikor bekapcsolja számítógépét alkalma lesz választani az Endless és a Windows között. A Windowson lévő alkalmazásait és fájljait nem érintik az Endless OS-en történő munkálatok. (Természetesen a másik meghajtón lévő fájlokat is elérheti, módosíthatja az Endless OS használata közben.)"
+t DualBootContentDescription "Minden alkalommal, amikor bekapcsolja számítógépét alkalma lesz választani az Endless és a Windows között. A Windowson lévő alkalmazásait és fájljait nem érintik az Endless OS-en történő munkálatok."
 t DualBootInstallButton "Endless telepítése"
 t DualBootRecommendation "Javasolt: Legalább 32 GB szabad hely a rendszer meghajtón."
 t AdvancedOptionsText " Haladó telepítési opciókért <b>Endless USB segítségével </b>, <a id='AdvancedOptionsLink'>kattinson ide</a>."
