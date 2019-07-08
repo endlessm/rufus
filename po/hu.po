@@ -4,15 +4,15 @@
 # 
 # Translators:
 # Gyula Szabó <gyhun95@gmail.com>, 2018
-# Will Thompson <wjt@endlessm.com>, 2018
+# Will Thompson <wjt@endlessm.com>, 2018-2019
 # Zoltan Hoppar <hopparz@gmail.com>, 2018
 msgid ""
 msgstr ""
 "Project-Id-Version: rufus\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-03-08 02:28+0000\n"
-"PO-Revision-Date: 2018-08-17 20:18+0000\n"
-"Last-Translator: Gyula Szabó <gyhun95@gmail.com>\n"
+"PO-Revision-Date: 2019-07-08 14:05+0000\n"
+"Last-Translator: Will Thompson <wjt@endlessm.com>\n"
 "Language-Team: Hungarian (http://www.transifex.com/endless-os/rufus/language/hu/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -219,7 +219,7 @@ msgctxt "DualBootContentDescription"
 msgid ""
 "Each time you start your computer, you will be able to choose between "
 "Endless and Windows. Your apps and files on Windows will not be affected."
-msgstr "Minden alkalommal, amikor bekapcsolja számítógépét alkalma lesz választani az Endless és a Windows között. A Windowson lévő alkalmazásait és fájljait nem érintik az Endless OS-en történő munkálatok. (Természetesen a másik meghajtón lévő fájlokat is elérheti, módosíthatja az Endless OS használata közben.)"
+msgstr "Minden alkalommal, amikor bekapcsolja számítógépét alkalma lesz választani az Endless és a Windows között. A Windowson lévő alkalmazásait és fájljait nem érintik az Endless OS-en történő munkálatok."
 
 msgctxt "DualBootInstallButton"
 msgid "Install Endless"
