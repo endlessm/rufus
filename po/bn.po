@@ -4,7 +4,7 @@
 # 
 # Translators:
 # Aditi Kabir <aditi.kabir@gmail.com>, 2016
-# Roddy Shuler <roddy@endlessm.com>, 2016-2017
+# Roddy Shuler <roddy@stanfordalumni.org>, 2016-2017
 # Shimon Sharmin <oparthib@gmail.com>, 2016
 # Will Thompson <wjt@endlessm.com>, 2017-2018
 msgid ""

@@ -46,9 +46,9 @@ LANGS = collections.OrderedDict([
     ('hi', {'tag': 'hi-IN',
             'name': 'Hindi (हिन्दी)',
             'lcids': '0x0439'}),
-    # ('hu', {'tag': 'hu-HU',
-    #         'name': 'Hungarian (Magyar)',
-    #         'lcids': '0x040e'}),
+    ('hu', {'tag': 'hu-HU',
+            'name': 'Hungarian (Magyar)',
+            'lcids': '0x040e'}),
     ('id', {'tag': 'id-ID',
             'name': 'Indonesian (Bahasa Indonesia)',
             'lcids': '0x0421'}),
@@ -100,7 +100,7 @@ with open(LOC_FILE, 'r') as f:
 # Re-write the file starting with the preamble
 # and then append with Endless translations
 problems = []
-with open(LOC_FILE, 'w') as f:
+with open(LOC_FILE, "w", newline="\r\n") as f:
     f.write(preamble)
     if not have_marker:
         f.write('\n')

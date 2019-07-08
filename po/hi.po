@@ -4,8 +4,8 @@
 # 
 # Translators:
 # e2f_in_c3 <e2f_in_c3@outlook.com>, 2016
-# e2f_in c7 <e2f_in_c7@outlook.com>, 2016-2017
-# Roddy Shuler <roddy@endlessm.com>, 2016-2017
+# 25c299dc371da5bff014f86901f492aa, 2016-2017
+# Roddy Shuler <roddy@stanfordalumni.org>, 2016-2017
 # Will Thompson <wjt@endlessm.com>, 2017-2018
 msgid ""
 msgstr ""
@@ -13,7 +13,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-03-08 02:28+0000\n"
 "PO-Revision-Date: 2018-06-20 04:17+0000\n"
-"Last-Translator: Roddy Shuler <roddy@endlessm.com>\n"
+"Last-Translator: Roddy Shuler <roddy@stanfordalumni.org>\n"
 "Language-Team: Hindi (http://www.transifex.com/endless-os/rufus/language/hi/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"

@@ -3,7 +3,7 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
-# Roddy Shuler <roddy@endlessm.com>, 2017
+# Roddy Shuler <roddy@stanfordalumni.org>, 2017
 # Will Thompson <wjt@endlessm.com>, 2017-2018
 msgid ""
 msgstr ""

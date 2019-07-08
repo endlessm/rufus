@@ -3,6 +3,7 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
+# Gyula Szabó <gyhun95@gmail.com>, 2018
 # Will Thompson <wjt@endlessm.com>, 2018
 # Zoltan Hoppar <hopparz@gmail.com>, 2018
 msgid ""
@@ -10,8 +11,8 @@ msgstr ""
 "Project-Id-Version: rufus\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-03-08 02:28+0000\n"
-"PO-Revision-Date: 2018-05-25 14:35+0000\n"
-"Last-Translator: Will Thompson <wjt@endlessm.com>\n"
+"PO-Revision-Date: 2018-08-17 20:18+0000\n"
+"Last-Translator: Gyula Szabó <gyhun95@gmail.com>\n"
 "Language-Team: Hungarian (http://www.transifex.com/endless-os/rufus/language/hu/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -29,23 +30,23 @@ msgstr "Előző"
 
 msgctxt "LiveUsbButton"
 msgid "Create Live USB"
-msgstr ""
+msgstr "Live USB készítése"
 
 msgctxt "LiveUsbText"
 msgid "Try Endless OS by running it from a USB stick."
-msgstr ""
+msgstr "Endless OS kipróbálása USB-ről futtatva."
 
 msgctxt "ReformatterUsbButton"
 msgid "Create Reformatter USB"
-msgstr ""
+msgstr "Újraformázó USB készítése"
 
 msgctxt "ReformatterUsbText"
 msgid "Reformat any computer with Endless OS using a USB stick."
-msgstr ""
+msgstr "Bármely számítógép újraformázása Endless OS-szel, egy USB használatával."
 
 msgctxt "SelectFilePreviousButton"
 msgid "Previous"
-msgstr ""
+msgstr "Előző"
 
 msgctxt "SelectFileNextButton"
 msgid "Next"
@@ -53,40 +54,40 @@ msgstr "Következő"
 
 msgctxt "SelectFilePageTitle"
 msgid "Select Your Endless OS Version"
-msgstr ""
+msgstr "Válassza ki az Endless OS Verzióját"
 
 msgctxt "SelectFileSubtitle"
 msgid "Choose the version of Endless OS that’s best for you."
-msgstr ""
+msgstr "Válassza azt az Endless OS verziót, amely a legjobb az Ön számára."
 
 msgctxt "NoInternetConnectionTitle"
 msgid "Unfortunately, there was a problem connecting to the server."
-msgstr ""
+msgstr "Sajnos, probléma lépett fel a szerverhez való csatlakozás során."
 
 msgctxt "NoInternetConnectionSubtitle"
 msgid ""
 "Make sure you're <a id='ConnectedLink'>connected to the internet</a>, and if"
 " the problem persists, visit our <a id='ConnectedSupportLink'>support</a>."
-msgstr ""
+msgstr "Győződjön meg róla, hogy <a id='ConnectedLink'>csatlakozik az internethez</a>, és amennyiben a probléma továbbra is fennáll, látogassa meg a  <a id='ConnectedSupportLink'>támogatás</a> szekciót."
 
 msgctxt "ExistingImageFile"
 msgid "Use existing image file:"
-msgstr ""
+msgstr "Meglévő képfájl használata:"
 
 msgctxt "DownloadNewImage"
 msgid "Download a new version:"
-msgstr ""
+msgstr "Új verzió letöltése:"
 
 msgctxt "LightVersionText"
 msgid "BASIC"
-msgstr ""
+msgstr "ALAP"
 
 msgctxt "LightDownloadDescription"
 msgid ""
 "Includes basic features of Endless OS and the option to download more apps "
 "and content later. This version is best for computers with reliable internet"
 " access."
-msgstr ""
+msgstr "Tartalmazza az Endless operációs rendszer alapfunkcióit, és később további alkalmazásokat és tartalmakat tölthet le. Ez a verzió a legmegfelelőbb a megbízható internet-hozzáféréssel rendelkező számítógépek számára."
 
 #. This means "Download [the] Basic Version [of Endless OS]". Use the same
 #. translation as for the "BASIC" string.
@@ -103,37 +104,37 @@ msgid ""
 "Includes full Endless OS, preloaded with more than 100 apps and content. "
 "This version is ideal for computers without reliable internet access. Choose"
 " language for content and apps:"
-msgstr ""
+msgstr "Tartalmazza a teljes Endless operációs rendszert, amelyre több mint 100 alkalmazás és tartalom tvan előtelepítve. Ez a verzió ideális a megbízható internet-hozzáférés nélküli számítógépek számára. Válasszon nyelvet a tartalomhoz és az alkalmazásokhoz:"
 
 #. This means "Download [the] Full Version [of Endless OS]". Use the same
 #. translation as for the "FULL" string.
 msgctxt "DownloadFullButton"
 msgid "Download Full Version"
-msgstr ""
+msgstr "Teljes verzió letöltése"
 
 msgctxt "SelectUSBPreviousButton"
 msgid "Previous"
-msgstr ""
+msgstr "Előző"
 
 msgctxt "SelectUSBNextButton"
 msgid "Next"
-msgstr ""
+msgstr "Következő"
 
 msgctxt "SelectUSBPageTitle"
 msgid "Select USB Drive"
-msgstr ""
+msgstr "USB meghajtó kiválasztása"
 
 msgctxt "SelectUSBSubtitle"
 msgid "Choose the USB device you would like to use."
-msgstr ""
+msgstr "Válassza ki az USB eszközt, amelyet használni szeretne."
 
 msgctxt "USBDisksFound"
 msgid "USB drive found:"
-msgstr ""
+msgstr "USB meghajtó megtalálva:"
 
 msgctxt "NewDiskNameLabel"
 msgid "New USB device contents:"
-msgstr ""
+msgstr "Új USB meghajtó tartalmak:"
 
 msgctxt "NewDiskSizeLabel"
 msgid "Size:"
@@ -142,7 +143,7 @@ msgstr "Méret:"
 msgctxt "AgreementCheckboxText"
 msgid ""
 "I understand that this will <b>erase all my files</b> on the USB device."
-msgstr ""
+msgstr "Megértettem, hogy <b>minden fájlom törlődni fog</b> az USB eszközön."
 
 msgctxt "InstallingPageTitle"
 msgid "Endless OS"
@@ -174,19 +175,19 @@ msgstr "Tartalom:"
 
 msgctxt "ThankYouDualBootReminder"
 msgid "Restart your computer and select \"Endless OS\" from the menu."
-msgstr ""
+msgstr "Indítsa újra számítógépét és válassza az \"Endless OS\"-t a menüből."
 
 msgctxt "ThankYouLiveReminder"
 msgid "To try Endless OS now, restart your computer."
-msgstr ""
+msgstr "Az Endless OS azonnali kipróbálásához, indítsa újra számítógépét."
 
 msgctxt "ThankYouReflasherReminder"
 msgid "Now you're ready to install Endless OS on more computers."
-msgstr ""
+msgstr "Most már készen áll arra, hogy más számítógépekre is telepítse az Endless OS-t."
 
 msgctxt "UsbBootHowToLink"
 msgid "How to start your computer from a USB stick."
-msgstr ""
+msgstr "Hogyan indíthatja el számítógépét egy USB-ről."
 
 msgctxt "ErrorPageTitle"
 msgid "Error"
@@ -198,13 +199,13 @@ msgstr "Befejezés"
 
 msgctxt "ErrorMessage"
 msgid "Oops, something went wrong setting up Endless OS."
-msgstr ""
+msgstr "Hoppá! Valami rosszul sült el az Endless OS telepítése közben."
 
 msgctxt "EndlessSupportContainer"
 msgid ""
 "If you keep having trouble, you can get help on the <a "
 "id='EndlessSupport'>Endless community forum</a>."
-msgstr ""
+msgstr "Ha továbbra is problémákba ütközik, kérjen segítséget az <a id='EndlessSupport'>Endless közösségi fórumán</a>."
 
 msgctxt "DualBootPageTitle"
 msgid "Endless OS"
@@ -212,13 +213,13 @@ msgstr "Endless OS"
 
 msgctxt "DualBootContentTitle"
 msgid "Download and Install Endless on this Computer"
-msgstr ""
+msgstr "Az Endless OS letöltése és telepítése ezen a számítógépen."
 
 msgctxt "DualBootContentDescription"
 msgid ""
 "Each time you start your computer, you will be able to choose between "
 "Endless and Windows. Your apps and files on Windows will not be affected."
-msgstr ""
+msgstr "Minden alkalommal, amikor bekapcsolja számítógépét alkalma lesz választani az Endless és a Windows között. A Windowson lévő alkalmazásait és fájljait nem érintik az Endless OS-en történő munkálatok. (Természetesen a másik meghajtón lévő fájlokat is elérheti, módosíthatja az Endless OS használata közben.)"
 
 msgctxt "DualBootInstallButton"
 msgid "Install Endless"
@@ -226,20 +227,20 @@ msgstr "Endless telepítése"
 
 msgctxt "DualBootRecommendation"
 msgid "Recommended: At least 32 GB of free space on the system drive."
-msgstr ""
+msgstr "Javasolt: Legalább 32 GB szabad hely a rendszer meghajtón."
 
 msgctxt "AdvancedOptionsText"
 msgid ""
 "For advanced install options using an <b>Endless USB Stick</b>, <a "
 "id='AdvancedOptionsLink'>click here</a>."
-msgstr ""
+msgstr " Haladó telepítési opciókért <b>Endless USB segítségével </b>, <a id='AdvancedOptionsLink'>kattinson ide</a>."
 
 msgctxt "PrivacyPolicyText"
 msgid ""
 "We collect anonymous data to improve this installer for everybody. <a "
 "id='PrivacyPolicyLink'>Click here</a> for more information, and to learn how"
 " to opt out."
-msgstr ""
+msgstr "Névtelen adatokat gyűjtünk, hogy jobbá tehessük ezt a telepítőt mindenki számára. <a id='PrivacyPolicyLink'>Kattintson ide </a> a további információkért, és tudja meg, hogyan kapcsolhatja ki ezt."
 
 msgctxt "SelectStorageNextButton"
 msgid "Next"
@@ -251,14 +252,14 @@ msgstr "Előző"
 
 msgctxt "SelectStoragePageTitle"
 msgid "Storage Space for Endless OS"
-msgstr ""
+msgstr "Tárhely az Endless OS számára"
 
 msgctxt "StorageAgreementText"
 msgid ""
 "Note: We recommend backing up any important files before continuing. Should "
 "you experience any problems with your computer after installation, you can "
 "find help at <a id='StorageSupportLink'>Endless Support</a>."
-msgstr ""
+msgstr "Megjegyzés: Javasoljuk, hogy készítsen biztonsági mentést a fontosabb fájljairól, mielőtt tovább lépne. Amennyiben bármi problémát tapasztalna a számítógépével telepítés után, segítséget kaphat az <a id='StorageSupportLink'>Endless támogatói oldalán </a>."
 
 msgctxt "DualBootLanguageLabel"
 msgid "Select Language"
@@ -268,19 +269,19 @@ msgctxt "AdvancedInstallReminder"
 msgid ""
 "To create an Endless USB Stick you will need a USB device with at least 8 GB"
 " of storage space."
-msgstr ""
+msgstr "Endless USB készítéséhez szüksége lesz egy, legalább 8 GB-os pendrivera."
 
 msgctxt "AdvancedOptionsSubtitle"
 msgid "With an <b>Endless USB Stick</b> you can:"
-msgstr ""
+msgstr "Egy <b>Endless USB segítségével </b>:"
 
 msgctxt "CombinedUsbButton"
 msgid "Create Endless USB Stick"
-msgstr ""
+msgstr "Készítsen Endless USB kulcsot"
 
 msgctxt "USBLearnMore"
 msgid "Learn more about the Endless USB Stick"
-msgstr ""
+msgstr "Tudjon meg többet az Endless USB-ről"
 
 #. *Short* size names. These can be used as suffixes
 msgctxt "MSG_020"
@@ -310,7 +311,7 @@ msgstr "PB"
 #, c-format
 msgctxt "MSG_045"
 msgid "USB Storage Device (Generic)"
-msgstr ""
+msgstr "USB tárolóeszköz (Általános)"
 
 #. Used for USB drives that don't have a drive letter. Placeholders are:
 #. 1. a name for the disk (such as "SanDisk Ultra")
@@ -319,30 +320,30 @@ msgstr ""
 #, c-format
 msgctxt "MSG_046"
 msgid "%s (Disk %d) [%s]"
-msgstr ""
+msgstr "%s (Lemez %d) [%s]"
 
 #. Used when a drive is detected that contains more than one partition
 #, c-format
 msgctxt "MSG_047"
 msgid "Multiple Partitions"
-msgstr ""
+msgstr "Több partíció"
 
 #, c-format
 msgctxt "MSG_049"
 msgid "Endless - Cancellation"
-msgstr ""
+msgstr "Endless - Visszavonás"
 
 #, c-format
 msgctxt "MSG_095"
 msgid "Endless Image"
-msgstr ""
+msgstr "Endless kép"
 
 #, c-format
 msgctxt "MSG_105"
 msgid ""
 "Warning: Cancelling may cause the device to malfunction. If you are sure you"
 " want to cancel, click YES. Otherwise, click NO."
-msgstr ""
+msgstr "Vigyázat: A visszavonás az eszköz hibás működését eredményezheti. Amennyiben biztos benne, hogy mégis ezt az opciót választja, kattintson az IGEN-re. Amennyiben mégsem, kattintson a NEM-re."
 
 #, c-format
 msgctxt "MSG_107"
@@ -357,7 +358,7 @@ msgstr "Megszakítás, kérem várjon"
 #, c-format
 msgctxt "MSG_300"
 msgid "Error downloading file."
-msgstr ""
+msgstr "Hiba a fájl letöltésekor."
 
 #. Download progress. Placeholders:
 #. 1. size downloaded (such as 1.2Gb)
@@ -367,46 +368,46 @@ msgstr ""
 #, c-format
 msgctxt "MSG_302"
 msgid "%s of %s (%s/s)"
-msgstr ""
+msgstr "%s a %s (%s/s)"
 
 #, c-format
 msgctxt "MSG_304"
 msgid "Downloading"
-msgstr ""
+msgstr "Letöltés"
 
 #. Displayed alongside MSG_306. Placeholders:
 #. 1. the step number (typically 1, 2 or 3)
 #, c-format
 msgctxt "MSG_305"
 msgid "Step %d"
-msgstr ""
+msgstr "Lépés %d"
 
 #. Displayed alongside MSG_305. Placeholders:
 #. 1. the number of steps (typically 2 or 3)
 #, c-format
 msgctxt "MSG_306"
 msgid "of %d:"
-msgstr ""
+msgstr "a %d:"
 
 #, c-format
 msgctxt "MSG_307"
 msgid "No Label"
-msgstr ""
+msgstr "Nincs cimke"
 
 #, c-format
 msgctxt "MSG_309"
 msgid "Installing"
-msgstr ""
+msgstr "Telepítés"
 
 #, c-format
 msgctxt "MSG_310"
 msgid "Verifying"
-msgstr ""
+msgstr "Ellenőrzés"
 
 #, c-format
 msgctxt "MSG_311"
 msgid "Writing"
-msgstr ""
+msgstr "Írás"
 
 #. Locale ID for https://support.endlessm.com/ URLs, in lower-case. Check
 #. https://support.zendesk.com/hc/en-us/articles/203761906 to find the right
@@ -421,42 +422,42 @@ msgstr "hu"
 #, c-format
 msgctxt "MSG_315"
 msgid "%s/%s Download"
-msgstr ""
+msgstr "%s/%s Letöltés"
 
 #, c-format
 msgctxt "MSG_316"
 msgid "Full"
-msgstr ""
+msgstr "Teljes"
 
 #, c-format
 msgctxt "MSG_319"
 msgid "%s (%s)"
-msgstr ""
+msgstr "%s (%s)"
 
 #, c-format
 msgctxt "MSG_320"
 msgid "Great! Endless OS has been successfully installed."
-msgstr ""
+msgstr "Nagyszerű! Az Endless OS telepítése sikeresen befejeződött."
 
 #, c-format
 msgctxt "MSG_343"
 msgid "Great! Your Endless OS Live USB has been created."
-msgstr ""
+msgstr "Nagyszerű! Az Endless OS Live USB-je elkészült."
 
 #, c-format
 msgctxt "MSG_344"
 msgid "Great! Your Endless OS Reformatter USB has been created."
-msgstr ""
+msgstr "Nagyszerű! Az Endless OS Újraformázó USB-je elkészült."
 
 #, c-format
 msgctxt "MSG_321"
 msgid "Select Your Endless OS Version"
-msgstr ""
+msgstr "Válassza ki az Endless OS Verzióját"
 
 #, c-format
 msgctxt "MSG_322"
 msgid "Is this the version you’d like to use? If not, select another."
-msgstr ""
+msgstr "Ez az a verzió, amelyet használni szeretne? Ha nem, válasszon másikat."
 
 #. The string in quotes should match MSG_326
 #, c-format
@@ -464,7 +465,7 @@ msgctxt "MSG_323"
 msgid ""
 "We couldn’t finish getting Endless OS. Check your internet connection and "
 "click \"Resume\" to carry on downloading."
-msgstr ""
+msgstr "Nem sikerült befejezni az Endless OS letöltését. Ellenőrizze az internet kapcsolatát és kattintson a \"Folytatás\"-ra a letöltés folytatásához."
 
 #. The string in quotes should match MSG_327
 #, c-format
@@ -472,7 +473,7 @@ msgctxt "MSG_324"
 msgid ""
 "Something is wrong with your Endless OS file. Click \"Download Again\" to "
 "try downloading it again."
-msgstr ""
+msgstr "Valami nem jó az Endless OS fájllal. Kattintson a \"Letöltés újra\" gombra, az ismételt próbálkozáshoz."
 
 #. The string in quotes should match MSG_328
 #, c-format
@@ -480,58 +481,58 @@ msgctxt "MSG_325"
 msgid ""
 "Something went wrong writing Endless OS to your USB device. Find a different"
 " device and click \"Try Again\"."
-msgstr ""
+msgstr "Valami rosszul sült el Az Endless OS USB-re történő írása során. Keressen egy másik eszközt és kattintson az \"Újra\" gombra."
 
 #, c-format
 msgctxt "MSG_358"
 msgid "Something went wrong installing Endless OS to your computer."
-msgstr ""
+msgstr "Valami rosszul sült el az Endless OS telepítése közben."
 
 #. This should match the string in quotes in MSG_323
 #, c-format
 msgctxt "MSG_326"
 msgid "Resume"
-msgstr ""
+msgstr "Folytatás"
 
 #. This should match the string in quotes in MSG_324
 #, c-format
 msgctxt "MSG_327"
 msgid "Download again"
-msgstr ""
+msgstr "Letöltés újra"
 
 #. This should match the string in quotes in MSG_325
 #, c-format
 msgctxt "MSG_328"
 msgid "Try again"
-msgstr ""
+msgstr "Újra"
 
 #, c-format
 msgctxt "MSG_330"
 msgid ""
 "You have selected a slow USB device (USB 1.0). Please use a USB 3.0 device "
 "for the best experience."
-msgstr ""
+msgstr "Lassú USB eszközt választott (USB 1.0). Kérjük használjon egy USB 3.0-ás eszközt a legjobb élmény érdekében."
 
 #, c-format
 msgctxt "MSG_331"
 msgid ""
 "You have selected a slow USB device (USB 1.0). Please use a USB 2.0 device "
 "for a better experience."
-msgstr ""
+msgstr "Lassú USB eszközt választott (USB 1.0). Kérjük használjon egy USB 2.0-ás eszközt a jobb élmény érdekében."
 
 #, c-format
 msgctxt "MSG_332"
 msgid ""
 "You have selected a slower USB device (USB 2.0). Please use a USB 3.0 device"
 " for the best experience."
-msgstr ""
+msgstr "Egy lassabb USB eszközt választott (USB 2.0). Kérjük használjon egy USB 3.0-ás eszközt a legjobb élmény érdekében."
 
 #, c-format
 msgctxt "MSG_333"
 msgid ""
 "Your USB 3.0 device is inserted into a USB 2.0 port. Please insert it into a"
 " USB 3.0 port (usually blue) for the best experience."
-msgstr ""
+msgstr "Az USB 3.0-ás eszköze egy USB 2.0-ás portba lett dugva. Kérjük tegye át egy USB 3.0-ás aljzatba (általában kék) a legjobb élmény érdekében."
 
 #. Placeholders are:
 #. 1. drive (such as "C:\")
@@ -541,19 +542,19 @@ msgctxt "MSG_334"
 msgid ""
 "There isn’t enough disk space on %s for downloading Endless OS. Please free "
 "up %s and click “Resume” to start downloading."
-msgstr ""
+msgstr "Nincs elég hely a %s-n az Endless OS letöltéséhez.. Kérjük szabadítson fel %s-t és kattintson a \"Folytatás\"-ra a letöltés megkezdéséhez."
 
 #, c-format
 msgctxt "MSG_335"
 msgid ""
 "The selected version of Endless OS requires %s of free disk space, but only "
 "%s is available. Please free up some space on drive %s to continue."
-msgstr ""
+msgstr "Az Endless OS választott verziója legalább %s helyet igényel, azonban csak %s elérhető. Kérjük szabadítson fel helyet a %s meghajtón a folytatáshoz."
 
 #, c-format
 msgctxt "MSG_336"
 msgid "Delete the invalid file (%s)."
-msgstr ""
+msgstr "Törölje a hibás fájlt (%s)."
 
 #. Placeholders are:
 #. 1. Basic/English/Spanish/..., as translated elsewhere
@@ -562,22 +563,22 @@ msgstr ""
 msgctxt "MSG_337"
 msgid ""
 "For Endless OS %s, we recommend selecting at least %s of storage space."
-msgstr ""
+msgstr "Az Endless OS %s verziójához, legalább %s tárhelyet javasolnk."
 
 #, c-format
 msgctxt "MSG_338"
 msgid "%s (Minimum)"
-msgstr ""
+msgstr "%s (Minimum)"
 
 #, c-format
 msgctxt "MSG_339"
 msgid "%s (Recommended)"
-msgstr ""
+msgstr "%s (Javasolt)"
 
 #, c-format
 msgctxt "MSG_340"
 msgid "%s (Maximum)"
-msgstr ""
+msgstr "%s (Maximum)"
 
 #. Placeholders are:
 #. 1. free space on system drive
@@ -587,200 +588,200 @@ msgstr ""
 #, c-format
 msgctxt "MSG_341"
 msgid "You currently have %s free on your %s %s drive."
-msgstr ""
+msgstr "Jelenleg%s szabad hely van a(z) %s %s meghajtón."
 
 #, c-format
 msgctxt "MSG_342"
 msgid "Select how much of your %s drive to dedicate to Endless OS."
-msgstr ""
+msgstr "Válassza ki, mekkora kapacitást szán a(z) %s meghajtón az Endless OS számára!"
 
 #, c-format
 msgctxt "MSG_350"
 msgid "Unfortunately, there is not enough storage space."
-msgstr ""
+msgstr "Sajnos, nincs elég tárhely."
 
 #, c-format
 msgctxt "MSG_351"
 msgid ""
 "To continue installing Endless OS, please free up at least %s by deleting "
 "videos, photos, or other large files on your %s drive."
-msgstr ""
+msgstr "Az Endless OS telepítésének folytatásához, kérjük szabadítson fel legalább %s helyet, videók, fotók és más nagyméretű fájlok törlésével a(z) %s meghajtón."
 
 #, c-format
 msgctxt "MSG_352"
 msgid "Unfortunately, your %s drive uses an unsupported format."
-msgstr ""
+msgstr "Sajnos a %s meghajtó nem támogatott formátumot használ."
 
 #, c-format
 msgctxt "MSG_353"
 msgid "Endless OS can only be installed on an NTFS drive."
-msgstr ""
+msgstr "Az Endless OS csak NTFS meghajtóra telepíthető."
 
 #, c-format
 msgctxt "MSG_354"
 msgid "Unfortunately, your computer is incompatible with Endless OS."
-msgstr ""
+msgstr "Sajnos, az Ön számítógépe nem kompatibilis az Endless OS-el."
 
 #, c-format
 msgctxt "MSG_355"
 msgid "Endless OS only supports 64-bit computers."
-msgstr ""
+msgstr "Az Endless OS csak 64-bites számítógépeket támogat."
 
 #, c-format
 msgctxt "MSG_356"
 msgid "Unfortunately, your %s drive is encrypted."
-msgstr ""
+msgstr "Sajnos, a(z) %s meghajtó titkosított."
 
 #, c-format
 msgctxt "MSG_357"
 msgid ""
 "Endless OS cannot be installed on drives which are protected with Device "
 "Encryption or BitLocker."
-msgstr ""
+msgstr "Az Endless OS nem telepíthető olyan meghajtókra, amik Eszköztitkosítással, vagy BitLockerrel vannak védve."
 
 #, c-format
 msgctxt "MSG_359"
 msgid "Unfortunately, your computer has another OS installed already."
-msgstr ""
+msgstr "Sajnos, az Ön számítógépén már telepítve van egy másik operációs rendszer,"
 
 #, c-format
 msgctxt "MSG_360"
 msgid "Endless OS only supports dual-boot on Windows-only systems."
-msgstr ""
+msgstr "Az Endless OS csak dual-boot módot támogat a Windows-only rendszereken."
 
 #, c-format
 msgctxt "MSG_361"
 msgid ""
 "Are you sure you want to uninstall Endless OS? This will erase all apps and "
 "documents stored within your Endless OS installation."
-msgstr ""
+msgstr "Biztosan el szeretné távolítani az Endless OS-t? Ez törölni fogja az összes alkalmazását és dokumentumait amelyek az Endless OS-en vannak tárolva."
 
 #, c-format
 msgctxt "MSG_362"
 msgid "Endless OS has been uninstalled successfully"
-msgstr ""
+msgstr "Az Endless OS eltávolítása befejeződött."
 
 #, c-format
 msgctxt "MSG_363"
 msgid ""
 "There was a problem uninstalling Endless OS. Please contact us for "
 "assistance."
-msgstr ""
+msgstr "Probléma lépett fel az Endless OS eltávolítása során. Kérjük lépjen kapcsolatba velünk, segítségért."
 
 #, c-format
 msgctxt "MSG_364"
 msgid "Uninstall Endless from this Computer"
-msgstr ""
+msgstr "Az Endless OS eltávolítása erről a számítógépről"
 
 #, c-format
 msgctxt "MSG_365"
 msgid ""
 "If you uninstall Endless, Windows will run automatically when you start your"
 " computer. Any apps and files stored in Endless will be erased."
-msgstr ""
+msgstr "Ha eltávolítja az Endless OS-t, a Windows automatikusan fog indulni a számítógép indításakor. Bármilyen alkalmazás és fájl, amelyet az Endless-en tárol, törölve lesz."
 
 #, c-format
 msgctxt "MSG_366"
 msgid "Uninstall Endless"
-msgstr ""
+msgstr "Az Endless OS eltávolítása"
 
 #, c-format
 msgctxt "MSG_367"
 msgid ""
 "Make sure you back up any important documents from Endless before you "
 "uninstall."
-msgstr ""
+msgstr "Győződjön meg róla, hogy lementett minden fontos dokumentumot az Endlessről, mielőtt törölné."
 
 #, c-format
 msgctxt "MSG_368"
 msgid ""
 "Internet Explorer %d is not supported. Please click OK to download Internet "
 "Explorer %d, install it, then run the Endless Installer again."
-msgstr ""
+msgstr "Az Internet Explorer%d nem támogatott. Kérjük, kattintson az OK-ra, hogy letöltse az Internet Explorer %d-t, telepítse, majd futtassa ismét az Endless Telepítőt."
 
 #, c-format
 msgctxt "MSG_369"
 msgid "%s Download"
-msgstr ""
+msgstr "%s Letöltés"
 
 #, c-format
 msgctxt "MSG_370"
 msgid "Oops, something went wrong setting up Endless OS."
-msgstr ""
+msgstr "Hoppá, valami rosszul sült el az Endless OS beállítása során."
 
 #, c-format
 msgctxt "MSG_372"
 msgid ""
 "No USB device found. If you've inserted one, try a different USB port or a "
 "different USB device."
-msgstr ""
+msgstr "Nem található USB eszköz. Ha csatlakoztatott már egyet, próbálja másik USB portba dugni, vagy próbálkozzon egy másik USB-vel."
 
 #, c-format
 msgctxt "MSG_386"
 msgid "The Endless Installer requires Windows 7 or newer."
-msgstr ""
+msgstr "Az Endless Telepítő Windows 7-es, vagy újabb verziót igényel."
 
 #, c-format
 msgctxt "MSG_400"
 msgid "Basic"
-msgstr ""
+msgstr "Alap"
 
 #, c-format
 msgctxt "MSG_401"
 msgid "English"
-msgstr ""
+msgstr "Angol"
 
 #, c-format
 msgctxt "MSG_402"
 msgid "Spanish"
-msgstr ""
+msgstr "Spanyol"
 
 #, c-format
 msgctxt "MSG_403"
 msgid "Portuguese (Brazilian)"
-msgstr ""
+msgstr "Portugál(Brazil)"
 
 #, c-format
 msgctxt "MSG_404"
 msgid "Arabic"
-msgstr ""
+msgstr "Arab"
 
 #, c-format
 msgctxt "MSG_405"
 msgid "French"
-msgstr ""
+msgstr "Francia"
 
 #, c-format
 msgctxt "MSG_406"
 msgid "Chinese Simplified"
-msgstr ""
+msgstr "Kínai (egyszerűsített)"
 
 #, c-format
 msgctxt "MSG_407"
 msgid "Bengali"
-msgstr ""
+msgstr "Bengáli"
 
 #, c-format
 msgctxt "MSG_408"
 msgid "Spanish (Guatemala)"
-msgstr ""
+msgstr "Spanyol (Guatemala)"
 
 #, c-format
 msgctxt "MSG_409"
 msgid "Spanish (Mexico)"
-msgstr ""
+msgstr "Spanyol (Mexico)"
 
 #, c-format
 msgctxt "MSG_410"
 msgid "Indonesian"
-msgstr ""
+msgstr "Indonéz"
 
 #, c-format
 msgctxt "MSG_411"
 msgid "Thai"
-msgstr ""
+msgstr "Thai"
 
 #, c-format
 msgctxt "MSG_412"
 msgid "Vietnamese"
-msgstr ""
+msgstr "Vietnámi"
