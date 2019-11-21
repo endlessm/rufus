@@ -3,14 +3,15 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
+# Muha Aliss <muhaaliss@gmail.com>, 2019
 # Will Thompson <wjt@endlessm.com>, 2017-2018
 msgid ""
 msgstr ""
 "Project-Id-Version: rufus\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-03-08 02:28+0000\n"
-"PO-Revision-Date: 2018-05-25 14:36+0000\n"
-"Last-Translator: Will Thompson <wjt@endlessm.com>\n"
+"PO-Revision-Date: 2019-09-05 01:55+0000\n"
+"Last-Translator: Muha Aliss <muhaaliss@gmail.com>\n"
 "Language-Team: Turkish (http://www.transifex.com/endless-os/rufus/language/tr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -20,19 +21,19 @@ msgstr ""
 
 msgctxt "AdvancedPageTitle"
 msgid "Advanced Install Options"
-msgstr ""
+msgstr "Gelişmiş Kurulum Seçenekleri"
 
 msgctxt "AdvancedPagePreviousButton"
 msgid "Previous"
-msgstr ""
+msgstr "Önceki"
 
 msgctxt "LiveUsbButton"
 msgid "Create Live USB"
-msgstr ""
+msgstr "Canlı USB Oluştur"
 
 msgctxt "LiveUsbText"
 msgid "Try Endless OS by running it from a USB stick."
-msgstr ""
+msgstr "Endless'i bir USB çubuğundan çalıştırarak deneyin."
 
 msgctxt "ReformatterUsbButton"
 msgid "Create Reformatter USB"
@@ -40,95 +41,95 @@ msgstr ""
 
 msgctxt "ReformatterUsbText"
 msgid "Reformat any computer with Endless OS using a USB stick."
-msgstr ""
+msgstr "USB çubuğu kullanarak Endless ile herhangi bir bilgisayarı yeniden biçimlendirin."
 
 msgctxt "SelectFilePreviousButton"
 msgid "Previous"
-msgstr ""
+msgstr "Önceki"
 
 msgctxt "SelectFileNextButton"
 msgid "Next"
-msgstr ""
+msgstr "Sonraki"
 
 msgctxt "SelectFilePageTitle"
 msgid "Select Your Endless OS Version"
-msgstr ""
+msgstr "Endless Sürümünüzü Seçin"
 
 msgctxt "SelectFileSubtitle"
 msgid "Choose the version of Endless OS that’s best for you."
-msgstr ""
+msgstr "Sizin için en iyi olan Endless sürümünü seçin."
 
 msgctxt "NoInternetConnectionTitle"
 msgid "Unfortunately, there was a problem connecting to the server."
-msgstr ""
+msgstr "Ne yazık ki, sunucuya bağlanırken bir sorun oluştu."
 
 msgctxt "NoInternetConnectionSubtitle"
 msgid ""
 "Make sure you're <a id='ConnectedLink'>connected to the internet</a>, and if"
 " the problem persists, visit our <a id='ConnectedSupportLink'>support</a>."
-msgstr ""
+msgstr "<a id='ConnectedLink'>İnternete bağlı</a> olduğunuzdan emin olun ve sorun devam ederse, <a id='ConnectedSupportLink'>desteğimizi</a> ziyaret edin."
 
 msgctxt "ExistingImageFile"
 msgid "Use existing image file:"
-msgstr ""
+msgstr "Mevcut imaj dosyasını kullan:"
 
 msgctxt "DownloadNewImage"
 msgid "Download a new version:"
-msgstr ""
+msgstr "Yeni bir sürüm indir:"
 
 msgctxt "LightVersionText"
 msgid "BASIC"
-msgstr ""
+msgstr "TEMEL"
 
 msgctxt "LightDownloadDescription"
 msgid ""
 "Includes basic features of Endless OS and the option to download more apps "
 "and content later. This version is best for computers with reliable internet"
 " access."
-msgstr ""
+msgstr "Endless'in temel özelliklerini ve daha sonra daha fazla uygulama ve içerik indirme seçeneğini içerir. Bu sürüm güvenilir internet erişimi olan bilgisayarlar için en iyisidir."
 
 #. This means "Download [the] Basic Version [of Endless OS]". Use the same
 #. translation as for the "BASIC" string.
 msgctxt "DownloadLightButton"
 msgid "Download Basic Version"
-msgstr ""
+msgstr "Temel Sürümü İndirin"
 
 msgctxt "FullVersionText"
 msgid "FULL"
-msgstr ""
+msgstr "FULL"
 
 msgctxt "FullDownloadDescription"
 msgid ""
 "Includes full Endless OS, preloaded with more than 100 apps and content. "
 "This version is ideal for computers without reliable internet access. Choose"
 " language for content and apps:"
-msgstr ""
+msgstr "Önceden yüklenmiş 100'den fazla uygulama ve içerikle Full Endless'i içerir. Bu sürüm güvenilir internet erişimi olmayan bilgisayarlar için idealdir. İçerik ve uygulamalar için dili seçin:"
 
 #. This means "Download [the] Full Version [of Endless OS]". Use the same
 #. translation as for the "FULL" string.
 msgctxt "DownloadFullButton"
 msgid "Download Full Version"
-msgstr ""
+msgstr "Full versiyonu indir"
 
 msgctxt "SelectUSBPreviousButton"
 msgid "Previous"
-msgstr ""
+msgstr "Önceki"
 
 msgctxt "SelectUSBNextButton"
 msgid "Next"
-msgstr ""
+msgstr "Sonraki"
 
 msgctxt "SelectUSBPageTitle"
 msgid "Select USB Drive"
-msgstr ""
+msgstr "USB Sürücüyü Seç"
 
 msgctxt "SelectUSBSubtitle"
 msgid "Choose the USB device you would like to use."
-msgstr ""
+msgstr "Kullanmak istediğiniz USB cihazını seçin."
 
 msgctxt "USBDisksFound"
 msgid "USB drive found:"
-msgstr ""
+msgstr "Bulunan USB sürücü:"
 
 msgctxt "NewDiskNameLabel"
 msgid "New USB device contents:"
@@ -136,180 +137,180 @@ msgstr ""
 
 msgctxt "NewDiskSizeLabel"
 msgid "Size:"
-msgstr ""
+msgstr "Boyut:"
 
 msgctxt "AgreementCheckboxText"
 msgid ""
 "I understand that this will <b>erase all my files</b> on the USB device."
-msgstr ""
+msgstr "Bunun USB aygıtımdaki <b>tüm dosyalarımı sileceğini</b> anlıyorum."
 
 msgctxt "InstallingPageTitle"
 msgid "Endless OS"
-msgstr ""
+msgstr "Endless"
 
 msgctxt "InstallCancelButton"
 msgid "Cancel"
-msgstr ""
+msgstr "İptal"
 
 msgctxt "ThankYouPageTitle"
 msgid "Thank you"
-msgstr ""
+msgstr "Teşekkürler"
 
 msgctxt "CloseAppButton"
 msgid "Close"
-msgstr ""
+msgstr "Kapat"
 
 msgctxt "InstallerVersion"
 msgid "Version:"
-msgstr ""
+msgstr "Versiyon:"
 
 msgctxt "InstallerLanguage"
 msgid "Language:"
-msgstr ""
+msgstr "Dil:"
 
 msgctxt "InstallerContent"
 msgid "Content:"
-msgstr ""
+msgstr "İçerik:"
 
 msgctxt "ThankYouDualBootReminder"
 msgid "Restart your computer and select \"Endless OS\" from the menu."
-msgstr ""
+msgstr "Bilgisayarınızı yeniden başlatın ve menüden \"Endless\" seçeneğini seçin."
 
 msgctxt "ThankYouLiveReminder"
 msgid "To try Endless OS now, restart your computer."
-msgstr ""
+msgstr "Şimdi Endless'i denemek için bilgisayarınızı yeniden başlatın."
 
 msgctxt "ThankYouReflasherReminder"
 msgid "Now you're ready to install Endless OS on more computers."
-msgstr ""
+msgstr "Artık Endless'i daha fazla bilgisayara kurmaya hazırsınız."
 
 msgctxt "UsbBootHowToLink"
 msgid "How to start your computer from a USB stick."
-msgstr ""
+msgstr "Bilgisayarınız bir USB çubuğundan nasıl başlatılır."
 
 msgctxt "ErrorPageTitle"
 msgid "Error"
-msgstr ""
+msgstr "Hata"
 
 msgctxt "CloseAppButton1"
 msgid "Finish"
-msgstr ""
+msgstr "Bitti"
 
 msgctxt "ErrorMessage"
 msgid "Oops, something went wrong setting up Endless OS."
-msgstr ""
+msgstr "Hata! Endless kurulurken bir şeyler ters gitti."
 
 msgctxt "EndlessSupportContainer"
 msgid ""
 "If you keep having trouble, you can get help on the <a "
 "id='EndlessSupport'>Endless community forum</a>."
-msgstr ""
+msgstr "Sorun yaşamaya devam ederseniz, <a id='EndlessSupport'>Endless topluluk forumunda</a> yardım alabilirsiniz."
 
 msgctxt "DualBootPageTitle"
 msgid "Endless OS"
-msgstr ""
+msgstr "Endless"
 
 msgctxt "DualBootContentTitle"
 msgid "Download and Install Endless on this Computer"
-msgstr ""
+msgstr "Bu Bilgisayara Endless İndir ve Yükle"
 
 msgctxt "DualBootContentDescription"
 msgid ""
 "Each time you start your computer, you will be able to choose between "
 "Endless and Windows. Your apps and files on Windows will not be affected."
-msgstr ""
+msgstr "Bilgisayarınızı her başlattığınızda, Endless ve Windows arasında seçim yapabileceksiniz. Windows'daki uygulamalarınız ve dosyalarınız etkilenmeyecek."
 
 msgctxt "DualBootInstallButton"
 msgid "Install Endless"
-msgstr ""
+msgstr "Endless'i Kur"
 
 msgctxt "DualBootRecommendation"
 msgid "Recommended: At least 32 GB of free space on the system drive."
-msgstr ""
+msgstr "Önerilen: Sistem sürücüsünde en az 32 GB boş alan."
 
 msgctxt "AdvancedOptionsText"
 msgid ""
 "For advanced install options using an <b>Endless USB Stick</b>, <a "
 "id='AdvancedOptionsLink'>click here</a>."
-msgstr ""
+msgstr "<b>Endless USB Bellek</b> kullananlar gelişmiş kurulum seçenekleri için buraya <a id='AdvancedOptionsLink'>tıklayın</a>."
 
 msgctxt "PrivacyPolicyText"
 msgid ""
 "We collect anonymous data to improve this installer for everybody. <a "
 "id='PrivacyPolicyLink'>Click here</a> for more information, and to learn how"
 " to opt out."
-msgstr ""
+msgstr "Bu yükleyiciyi herkes adına geliştirmek için adsız veriler topluyoruz. Daha fazla bilgi için ve nasıl vazgeçileceğini öğrenmek için burayı <a id='PrivacyPolicyLink'>tıklayın</a>."
 
 msgctxt "SelectStorageNextButton"
 msgid "Next"
-msgstr ""
+msgstr "Sonraki"
 
 msgctxt "SelectStoragePreviousButton"
 msgid "Previous"
-msgstr ""
+msgstr "Önceki"
 
 msgctxt "SelectStoragePageTitle"
 msgid "Storage Space for Endless OS"
-msgstr ""
+msgstr "Endless için Depolama Alanı"
 
 msgctxt "StorageAgreementText"
 msgid ""
 "Note: We recommend backing up any important files before continuing. Should "
 "you experience any problems with your computer after installation, you can "
 "find help at <a id='StorageSupportLink'>Endless Support</a>."
-msgstr ""
+msgstr "Not: Devam etmeden önce önemli dosyaları yedeklemenizi öneririz. Yüklemeden sonra bilgisayarınızla ilgili herhangi bir sorun yaşarsanız, <a id='StorageSupportLink'>Endless Destek</a>'te yardım bulabilirsiniz."
 
 msgctxt "DualBootLanguageLabel"
 msgid "Select Language"
-msgstr ""
+msgstr "Dil Seçin"
 
 msgctxt "AdvancedInstallReminder"
 msgid ""
 "To create an Endless USB Stick you will need a USB device with at least 8 GB"
 " of storage space."
-msgstr ""
+msgstr "Endless USB Bellek oluşturmak için en az 8 GB depolama alanına sahip bir USB cihazına ihtiyacınız olacaktır."
 
 msgctxt "AdvancedOptionsSubtitle"
 msgid "With an <b>Endless USB Stick</b> you can:"
-msgstr ""
+msgstr "Endless USB Bellek ile yapabilecekleriniz:"
 
 msgctxt "CombinedUsbButton"
 msgid "Create Endless USB Stick"
-msgstr ""
+msgstr "Endless USB Bellek Oluşturun"
 
 msgctxt "USBLearnMore"
 msgid "Learn more about the Endless USB Stick"
-msgstr ""
+msgstr "Endless USB Bellek hakkında daha fazla bilgi edinin"
 
 #. *Short* size names. These can be used as suffixes
 msgctxt "MSG_020"
 msgid "bytes"
-msgstr ""
+msgstr "bayt"
 
 msgctxt "MSG_021"
 msgid "KB"
-msgstr ""
+msgstr "KB"
 
 msgctxt "MSG_022"
 msgid "MB"
-msgstr ""
+msgstr "MB"
 
 msgctxt "MSG_023"
 msgid "GB"
-msgstr ""
+msgstr "GB"
 
 msgctxt "MSG_024"
 msgid "TB"
-msgstr ""
+msgstr "TB"
 
 msgctxt "MSG_025"
 msgid "PB"
-msgstr ""
+msgstr "PB"
 
 #, c-format
 msgctxt "MSG_045"
 msgid "USB Storage Device (Generic)"
-msgstr ""
+msgstr "USB Depolama Aygıtı (Genel)"
 
 #. Used for USB drives that don't have a drive letter. Placeholders are:
 #. 1. a name for the disk (such as "SanDisk Ultra")
@@ -324,7 +325,7 @@ msgstr ""
 #, c-format
 msgctxt "MSG_047"
 msgid "Multiple Partitions"
-msgstr ""
+msgstr "Çoklu bölüm"
 
 #, c-format
 msgctxt "MSG_049"
@@ -334,29 +335,29 @@ msgstr ""
 #, c-format
 msgctxt "MSG_095"
 msgid "Endless Image"
-msgstr ""
+msgstr "Endless İmaj"
 
 #, c-format
 msgctxt "MSG_105"
 msgid ""
 "Warning: Cancelling may cause the device to malfunction. If you are sure you"
 " want to cancel, click YES. Otherwise, click NO."
-msgstr ""
+msgstr "Uyarı: İptal etmek, cihazın bozulmasına neden olabilir. İptal etmek istediğinize eminseniz, EVET'i tıklayın. Aksi takdirde, HAYIR'ı tıklayın."
 
 #, c-format
 msgctxt "MSG_107"
 msgid "All files"
-msgstr ""
+msgstr "Tüm dosyalar"
 
 #, c-format
 msgctxt "MSG_201"
 msgid "Cancelling, please wait"
-msgstr ""
+msgstr "İptal ediliyor, lütfen bekleyin"
 
 #, c-format
 msgctxt "MSG_300"
 msgid "Error downloading file."
-msgstr ""
+msgstr "Dosya indirilirken hata oluştu."
 
 #. Download progress. Placeholders:
 #. 1. size downloaded (such as 1.2Gb)
@@ -371,7 +372,7 @@ msgstr ""
 #, c-format
 msgctxt "MSG_304"
 msgid "Downloading"
-msgstr ""
+msgstr "İndiriliyor"
 
 #. Displayed alongside MSG_306. Placeholders:
 #. 1. the step number (typically 1, 2 or 3)
@@ -390,22 +391,22 @@ msgstr ""
 #, c-format
 msgctxt "MSG_307"
 msgid "No Label"
-msgstr ""
+msgstr "Etiket yok"
 
 #, c-format
 msgctxt "MSG_309"
 msgid "Installing"
-msgstr ""
+msgstr "Kuruluyor"
 
 #, c-format
 msgctxt "MSG_310"
 msgid "Verifying"
-msgstr ""
+msgstr "Doğrulanıyor"
 
 #, c-format
 msgctxt "MSG_311"
 msgid "Writing"
-msgstr ""
+msgstr "Yazılıyor"
 
 #. Locale ID for https://support.endlessm.com/ URLs, in lower-case. Check
 #. https://support.zendesk.com/hc/en-us/articles/203761906 to find the right
@@ -425,7 +426,7 @@ msgstr ""
 #, c-format
 msgctxt "MSG_316"
 msgid "Full"
-msgstr ""
+msgstr "Full"
 
 #, c-format
 msgctxt "MSG_319"
@@ -435,12 +436,12 @@ msgstr ""
 #, c-format
 msgctxt "MSG_320"
 msgid "Great! Endless OS has been successfully installed."
-msgstr ""
+msgstr "Harika! Endless başarıyla kuruldu."
 
 #, c-format
 msgctxt "MSG_343"
 msgid "Great! Your Endless OS Live USB has been created."
-msgstr ""
+msgstr "Harika! Endless Canlı USB'niz oluşturuldu."
 
 #, c-format
 msgctxt "MSG_344"
@@ -450,12 +451,12 @@ msgstr ""
 #, c-format
 msgctxt "MSG_321"
 msgid "Select Your Endless OS Version"
-msgstr ""
+msgstr "Endless Sürümünüzü Seçin"
 
 #, c-format
 msgctxt "MSG_322"
 msgid "Is this the version you’d like to use? If not, select another."
-msgstr ""
+msgstr "Kullanmak istediğiniz sürüm bu mu? Değilse, başka birini seçin."
 
 #. The string in quotes should match MSG_326
 #, c-format
@@ -463,7 +464,7 @@ msgctxt "MSG_323"
 msgid ""
 "We couldn’t finish getting Endless OS. Check your internet connection and "
 "click \"Resume\" to carry on downloading."
-msgstr ""
+msgstr "Endless'i indirmeyi bitiremedik. İnternet bağlantınızı kontrol edin ve indirmeye devam etmek için \"Devam Et\" düğmesine tıklayın."
 
 #. The string in quotes should match MSG_327
 #, c-format
@@ -471,7 +472,7 @@ msgctxt "MSG_324"
 msgid ""
 "Something is wrong with your Endless OS file. Click \"Download Again\" to "
 "try downloading it again."
-msgstr ""
+msgstr "Endless dosyanızda bir sorun var. Tekrar indirmeyi denemek için \"Tekrar İndir\"i tıklayın."
 
 #. The string in quotes should match MSG_328
 #, c-format
@@ -479,58 +480,58 @@ msgctxt "MSG_325"
 msgid ""
 "Something went wrong writing Endless OS to your USB device. Find a different"
 " device and click \"Try Again\"."
-msgstr ""
+msgstr "Endless'i USB cihazınıza yazarken bir şeyler ters gitti. Farklı bir cihaz bulun ve \"Tekrar Dene\"yi tıklayın."
 
 #, c-format
 msgctxt "MSG_358"
 msgid "Something went wrong installing Endless OS to your computer."
-msgstr ""
+msgstr "Bilgisayarınıza Endless yüklenirken bir şeyler ters gitti."
 
 #. This should match the string in quotes in MSG_323
 #, c-format
 msgctxt "MSG_326"
 msgid "Resume"
-msgstr ""
+msgstr "Devam"
 
 #. This should match the string in quotes in MSG_324
 #, c-format
 msgctxt "MSG_327"
 msgid "Download again"
-msgstr ""
+msgstr "Yeniden indir"
 
 #. This should match the string in quotes in MSG_325
 #, c-format
 msgctxt "MSG_328"
 msgid "Try again"
-msgstr ""
+msgstr "Tekrar dene"
 
 #, c-format
 msgctxt "MSG_330"
 msgid ""
 "You have selected a slow USB device (USB 1.0). Please use a USB 3.0 device "
 "for the best experience."
-msgstr ""
+msgstr "Yavaş bir USB cihazı (USB 1.0) seçtiniz. En iyi deneyim için lütfen bir USB 3.0 cihazı kullanın."
 
 #, c-format
 msgctxt "MSG_331"
 msgid ""
 "You have selected a slow USB device (USB 1.0). Please use a USB 2.0 device "
 "for a better experience."
-msgstr ""
+msgstr "Yavaş bir USB cihazı (USB 1.0) seçtiniz. Daha iyi bir deneyim için lütfen bir USB 2.0 cihazı kullanın."
 
 #, c-format
 msgctxt "MSG_332"
 msgid ""
 "You have selected a slower USB device (USB 2.0). Please use a USB 3.0 device"
 " for the best experience."
-msgstr ""
+msgstr "Daha yavaş bir USB cihazı (USB 2.0) seçtiniz. En iyi deneyim için lütfen bir USB 3.0 cihazı kullanın."
 
 #, c-format
 msgctxt "MSG_333"
 msgid ""
 "Your USB 3.0 device is inserted into a USB 2.0 port. Please insert it into a"
 " USB 3.0 port (usually blue) for the best experience."
-msgstr ""
+msgstr "USB 3.0 cihazınız bir USB 2.0 portuna takılı. En iyi deneyim için lütfen onu bir USB 3.0 portuna (genellikle mavi) takın."
 
 #. Placeholders are:
 #. 1. drive (such as "C:\")
@@ -540,19 +541,19 @@ msgctxt "MSG_334"
 msgid ""
 "There isn’t enough disk space on %s for downloading Endless OS. Please free "
 "up %s and click “Resume” to start downloading."
-msgstr ""
+msgstr "Endless'i indirmek için %s yeterli disk alanı yok. Lütfen %s boşaltın ve indirmeye başlamak için “Devam Et” düğmesine tıklayın."
 
 #, c-format
 msgctxt "MSG_335"
 msgid ""
 "The selected version of Endless OS requires %s of free disk space, but only "
 "%s is available. Please free up some space on drive %s to continue."
-msgstr ""
+msgstr "Seçili Endless sürümü için %s boş disk alanı gerekir, ancak yalnızca %s kullanılabilir. Devam etmek için lütfen %s numaralı sürücüde biraz yer açın."
 
 #, c-format
 msgctxt "MSG_336"
 msgid "Delete the invalid file (%s)."
-msgstr ""
+msgstr "Geçersiz dosyayı silin (%s)."
 
 #. Placeholders are:
 #. 1. Basic/English/Spanish/..., as translated elsewhere
@@ -561,22 +562,22 @@ msgstr ""
 msgctxt "MSG_337"
 msgid ""
 "For Endless OS %s, we recommend selecting at least %s of storage space."
-msgstr ""
+msgstr "Endless %s için en az %s depolama alanı seçmenizi öneririz."
 
 #, c-format
 msgctxt "MSG_338"
 msgid "%s (Minimum)"
-msgstr ""
+msgstr "%s (Minimum)"
 
 #, c-format
 msgctxt "MSG_339"
 msgid "%s (Recommended)"
-msgstr ""
+msgstr "%s (Önerilen)"
 
 #, c-format
 msgctxt "MSG_340"
 msgid "%s (Maximum)"
-msgstr ""
+msgstr "%s (Maksimum)"
 
 #. Placeholders are:
 #. 1. free space on system drive
@@ -591,104 +592,104 @@ msgstr ""
 #, c-format
 msgctxt "MSG_342"
 msgid "Select how much of your %s drive to dedicate to Endless OS."
-msgstr ""
+msgstr "%s sürücünüzün ne kadarının Endless'e tahsis edileceğini seçin."
 
 #, c-format
 msgctxt "MSG_350"
 msgid "Unfortunately, there is not enough storage space."
-msgstr ""
+msgstr "Ne yazık ki, yeterli depolama alanı yok."
 
 #, c-format
 msgctxt "MSG_351"
 msgid ""
 "To continue installing Endless OS, please free up at least %s by deleting "
 "videos, photos, or other large files on your %s drive."
-msgstr ""
+msgstr "Endless'i kurmaya devam etmek için, %s sürücünüzdeki videoları, fotoğrafları veya diğer büyük dosyaları silerek en az %s boşaltın."
 
 #, c-format
 msgctxt "MSG_352"
 msgid "Unfortunately, your %s drive uses an unsupported format."
-msgstr ""
+msgstr "Ne yazık ki, %s sürücünüz desteklenmeyen bir format kullanıyor."
 
 #, c-format
 msgctxt "MSG_353"
 msgid "Endless OS can only be installed on an NTFS drive."
-msgstr ""
+msgstr "Endless yalnızca bir NTFS sürücüsüne yüklenebilir."
 
 #, c-format
 msgctxt "MSG_354"
 msgid "Unfortunately, your computer is incompatible with Endless OS."
-msgstr ""
+msgstr "Ne yazık ki, bilgisayarınız Endless ile uyumlu değil."
 
 #, c-format
 msgctxt "MSG_355"
 msgid "Endless OS only supports 64-bit computers."
-msgstr ""
+msgstr "Endless yalnızca 64 bit bilgisayarları destekler."
 
 #, c-format
 msgctxt "MSG_356"
 msgid "Unfortunately, your %s drive is encrypted."
-msgstr ""
+msgstr "Ne yazık ki, %s sürücünüz şifrelenmiştir."
 
 #, c-format
 msgctxt "MSG_357"
 msgid ""
 "Endless OS cannot be installed on drives which are protected with Device "
 "Encryption or BitLocker."
-msgstr ""
+msgstr "Endless, Aygıt Şifreleme veya BitLocker ile korunan sürücülere yüklenemez."
 
 #, c-format
 msgctxt "MSG_359"
 msgid "Unfortunately, your computer has another OS installed already."
-msgstr ""
+msgstr "Ne yazık ki, bilgisayarınızda zaten yüklü bir işletim sistemi var."
 
 #, c-format
 msgctxt "MSG_360"
 msgid "Endless OS only supports dual-boot on Windows-only systems."
-msgstr ""
+msgstr "Endless yalnızca Windows sistemlerinde yalnızca çift önyüklemeyi destekler."
 
 #, c-format
 msgctxt "MSG_361"
 msgid ""
 "Are you sure you want to uninstall Endless OS? This will erase all apps and "
 "documents stored within your Endless OS installation."
-msgstr ""
+msgstr "Endless'i kaldırmak istediğinizden emin misiniz? Bu, Endless kurulumunuzda depolanan tüm uygulamaları ve belgeleri siler."
 
 #, c-format
 msgctxt "MSG_362"
 msgid "Endless OS has been uninstalled successfully"
-msgstr ""
+msgstr "Endless başarıyla kaldırıldı"
 
 #, c-format
 msgctxt "MSG_363"
 msgid ""
 "There was a problem uninstalling Endless OS. Please contact us for "
 "assistance."
-msgstr ""
+msgstr "Endless'i kaldırırken bir sorun oluştu. Lütfen yardım için bizimle iletişime geçin."
 
 #, c-format
 msgctxt "MSG_364"
 msgid "Uninstall Endless from this Computer"
-msgstr ""
+msgstr "Endless'i Bu Bilgisayardan Kaldırma"
 
 #, c-format
 msgctxt "MSG_365"
 msgid ""
 "If you uninstall Endless, Windows will run automatically when you start your"
 " computer. Any apps and files stored in Endless will be erased."
-msgstr ""
+msgstr "Endless'i kaldırırsanız, bilgisayarınızı başlattığınızda Windows otomatik olarak çalışacaktır. Endless ta depolanan tüm uygulamalar ve dosyalar silinir."
 
 #, c-format
 msgctxt "MSG_366"
 msgid "Uninstall Endless"
-msgstr ""
+msgstr "Endless Kaldırma"
 
 #, c-format
 msgctxt "MSG_367"
 msgid ""
 "Make sure you back up any important documents from Endless before you "
 "uninstall."
-msgstr ""
+msgstr "Kaldırmadan önce tüm önemli belgeleri Endless'ten yedeklediğinizden emin olun."
 
 #, c-format
 msgctxt "MSG_368"
@@ -700,86 +701,86 @@ msgstr ""
 #, c-format
 msgctxt "MSG_369"
 msgid "%s Download"
-msgstr ""
+msgstr "%s indir"
 
 #, c-format
 msgctxt "MSG_370"
 msgid "Oops, something went wrong setting up Endless OS."
-msgstr ""
+msgstr "Hata! Endless kurulurken bir şeyler ters gitti."
 
 #, c-format
 msgctxt "MSG_372"
 msgid ""
 "No USB device found. If you've inserted one, try a different USB port or a "
 "different USB device."
-msgstr ""
+msgstr "USB cihazı bulunamadı. Bir tane taktıysanız, farklı bir USB portu veya farklı bir USB cihazı deneyin."
 
 #, c-format
 msgctxt "MSG_386"
 msgid "The Endless Installer requires Windows 7 or newer."
-msgstr ""
+msgstr "Endless Yükleyici, Windows 7 veya daha yenisini gerektirir."
 
 #, c-format
 msgctxt "MSG_400"
 msgid "Basic"
-msgstr ""
+msgstr "Temel"
 
 #, c-format
 msgctxt "MSG_401"
 msgid "English"
-msgstr ""
+msgstr "İngilizce"
 
 #, c-format
 msgctxt "MSG_402"
 msgid "Spanish"
-msgstr ""
+msgstr "İspanyolca"
 
 #, c-format
 msgctxt "MSG_403"
 msgid "Portuguese (Brazilian)"
-msgstr ""
+msgstr "Portekizce (Brezilya)"
 
 #, c-format
 msgctxt "MSG_404"
 msgid "Arabic"
-msgstr ""
+msgstr "Arapça"
 
 #, c-format
 msgctxt "MSG_405"
 msgid "French"
-msgstr ""
+msgstr "Fransızca"
 
 #, c-format
 msgctxt "MSG_406"
 msgid "Chinese Simplified"
-msgstr ""
+msgstr "Basitleştirilmiş Çince"
 
 #, c-format
 msgctxt "MSG_407"
 msgid "Bengali"
-msgstr ""
+msgstr "Bengalce"
 
 #, c-format
 msgctxt "MSG_408"
 msgid "Spanish (Guatemala)"
-msgstr ""
+msgstr "İspanyolca (Guatemala)"
 
 #, c-format
 msgctxt "MSG_409"
 msgid "Spanish (Mexico)"
-msgstr ""
+msgstr "İspanyolca (Meksika)"
 
 #, c-format
 msgctxt "MSG_410"
 msgid "Indonesian"
-msgstr ""
+msgstr "Endonezce"
 
 #, c-format
 msgctxt "MSG_411"
 msgid "Thai"
-msgstr ""
+msgstr "Tay"
 
 #, c-format
 msgctxt "MSG_412"
 msgid "Vietnamese"
-msgstr ""
+msgstr "Vietnamca"
