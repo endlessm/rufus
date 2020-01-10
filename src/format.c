@@ -691,7 +691,7 @@ out:
 	return r;
 }
 
-static BOOL ClearMBRGPT(HANDLE hPhysicalDrive, LONGLONG DiskSize, DWORD SectorSize, BOOL add1MB)
+BOOL ClearMBRGPT(HANDLE hPhysicalDrive, LONGLONG DiskSize, DWORD SectorSize, BOOL add1MB)
 {
 	BOOL r = FALSE;
 	uint64_t i, j, last_sector = DiskSize/SectorSize, num_sectors_to_clear;
@@ -1703,9 +1703,25 @@ DWORD WINAPI FormatThread(void* param)
 	char kolibri_dst[] = "?:\\MTLD_F32";
 	char grub4dos_dst[] = "?:\\grldr";
 
+#ifdef ENDLESSUSB_TOOL
+	/* In the first round of endless patches, rufus read these variables from
+	 * widgets here. Now they're updated elsewhere, but I'm hoping we can still
+	 * override them here successfully.
+	 */
+	fs_type = FS_FAT32;
+	boot_type = BT_IMAGE;
+	partition_type = PARTITION_STYLE_MBR;
+	target_type= TT_BIOS;
+	/* - */
+
+	use_large_fat32 = 0;
+	windows_to_go = 0;
+#else
 	use_large_fat32 = (fs_type == FS_FAT32) && ((SelectedDrive.DiskSize > LARGE_FAT32_SIZE) || (force_large_fat32));
 	windows_to_go = (image_options & IMOP_WINTOGO) && (boot_type == BT_IMAGE) && HAS_WINTOGO(img_report) &&
 		(ComboBox_GetCurSel(GetDlgItem(hMainDialog, IDC_IMAGE_OPTION)) == 1);
+#endif // ENDLESSUSB_TOOL
+
 	large_drive = (SelectedDrive.DiskSize > (1*TB));
 	if (large_drive)
 		uprintf("Notice: Large drive detected (may produce short writes)");
@@ -2332,4 +2348,43 @@ out:
 	safe_unlockclose(hPhysicalDrive);
 	PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)TRUE, 0);
 	ExitThread(0);
+}
+
+/*
+ * Call on fmifs.dll's FormatEx() to format a partition. Returns FALSE with FormatStatus set on error.
+ *
+ * Endless variant of old FormatDrive() function that no longer exists upstream.
+ */
+BOOL Endless_FormatPartition(const char *VolumeName, wchar_t *wFSType, wchar_t *partLabel, ULONG ulClusterSize)
+{
+	BOOL r = FALSE;
+	PF_DECL(FormatEx);
+	char *locale;
+	WCHAR* wVolumeName = NULL;
+
+	wVolumeName = utf8_to_wchar(VolumeName);
+	if (wVolumeName == NULL) {
+		uprintf("Could not read volume name\n");
+		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_GEN_FAILURE;
+		goto out;
+	}
+
+	// LoadLibrary("fmifs.dll") appears to changes the locale, which can lead to
+	// problems with tolower(). Make sure we restore the locale. For more details,
+	// see http://comments.gmane.org/gmane.comp.gnu.mingw.user/39300
+	locale = setlocale(LC_ALL, NULL);
+	PF_INIT_OR_OUT(FormatEx, Fmifs);
+	setlocale(LC_ALL, locale);
+
+	pfFormatEx(wVolumeName, SelectedDrive.Geometry.MediaType, wFSType, partLabel,
+		/* quick format */ TRUE, ulClusterSize, FormatExCallback);
+
+	if (!IS_ERROR(FormatStatus)) {
+		uprintf("Format completed.\n");
+		r = TRUE;
+	}
+
+out:
+	safe_free(wVolumeName);
+	return r;
 }

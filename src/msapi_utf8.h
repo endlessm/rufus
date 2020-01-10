@@ -367,7 +367,7 @@ static __inline int GetWindowTextLengthU(HWND hWnd)
 	ret = GetWindowTextLengthW(hWnd);
 	err = GetLastError();
 	if (ret == 0) goto out;
-	wbuf = calloc(ret, sizeof(wchar_t));
+	wbuf = (wchar_t*)calloc(ret, sizeof(wchar_t));
 	err = GetLastError();
 	if (wbuf == NULL) {
 		err = ERROR_OUTOFMEMORY; ret = 0; goto out;
@@ -878,10 +878,10 @@ static __inline BOOL WINAPI GetOpenSaveFileNameU(LPOPENFILENAMEA lpofn, BOOL sav
 	}
 	wofn.nMaxCustFilter = lpofn->nMaxCustFilter;
 	wofn.nFilterIndex = lpofn->nFilterIndex;
-	wofn.lpstrFile = calloc(lpofn->nMaxFile, sizeof(wchar_t));
+	wofn.lpstrFile = (LPWSTR)calloc(lpofn->nMaxFile, sizeof(wchar_t));
 	utf8_to_wchar_no_alloc(lpofn->lpstrFile, wofn.lpstrFile, lpofn->nMaxFile);
 	wofn.nMaxFile = lpofn->nMaxFile;
-	wofn.lpstrFileTitle = calloc(lpofn->nMaxFileTitle, sizeof(wchar_t));
+	wofn.lpstrFileTitle = (LPWSTR)calloc(lpofn->nMaxFileTitle, sizeof(wchar_t));
 	utf8_to_wchar_no_alloc(lpofn->lpstrFileTitle, wofn.lpstrFileTitle, lpofn->nMaxFileTitle);
 	wofn.nMaxFileTitle = lpofn->nMaxFileTitle;
 	wofn.lpstrInitialDir = utf8_to_wchar(lpofn->lpstrInitialDir);
