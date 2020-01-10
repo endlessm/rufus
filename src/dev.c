@@ -48,6 +48,12 @@ extern StrArray DriveId, DriveName, DriveLabel, DriveHub;
 extern uint32_t DrivePort[MAX_DRIVES];
 extern BOOL enable_HDDs, use_fake_units, enable_vmdk, usb_debug, list_non_usb_removable_drives, its_a_me_mario;
 
+#ifdef ENDLESSUSB_TOOL
+extern DWORD usbDeviceSpeed[128];
+extern BOOL usbDeviceSpeedIsLower[128];
+extern DWORD usbDevicesCount;
+#endif // ENDLESSUSB_TOOL
+
 /*
  * Get the VID, PID and current device speed
  */
@@ -490,6 +496,10 @@ BOOL GetDevices(DWORD devnum)
 	// Add a dummy for string index zero, as this is what non matching hashes will point to
 	StrArrayAdd(&dev_if_path, "", TRUE);
 
+#ifdef ENDLESSUSB_TOOL
+	usbDevicesCount = 0;
+#endif // ENDLESSUSB_TOOL
+
 	device_id = (char*)malloc(MAX_PATH);
 	if (device_id == NULL)
 		goto out;
@@ -785,6 +795,13 @@ BOOL GetDevices(DWORD devnum)
 				if (its_a_me_mario && (props.vid == 0x0525) && (props.pid == 0x622b))
 					continue;
 				static_sprintf(str, "%04X:%04X", props.vid, props.pid);
+#ifdef ENDLESSUSB_TOOL
+				if (usbDevicesCount < sizeof(usbDeviceSpeed) / sizeof(usbDeviceSpeed[0])) {
+					usbDeviceSpeed[usbDevicesCount] = props.speed;
+					usbDeviceSpeedIsLower[usbDevicesCount] = props.is_LowerSpeed;
+					usbDevicesCount++;
+				}
+#endif // ENDLESSUSB_TOOL
 			}
 			if (props.speed >= USB_SPEED_MAX)
 				props.speed = 0;
@@ -949,7 +966,9 @@ BOOL GetDevices(DWORD devnum)
 					DrivePort[DriveHub.Index - 1] = props.port;
 
 				IGNORE_RETVAL(ComboBox_SetItemData(hDeviceList, ComboBox_AddStringU(hDeviceList, entry), drive_index));
+#ifndef ENDLESSUSB_TOOL
 				maxwidth = max(maxwidth, GetEntryWidth(hDeviceList, entry));
+#endif // !ENDLESSUSB_TOOL
 				safe_closehandle(hDrive);
 				safe_free(devint_detail_data);
 				break;
@@ -972,7 +991,9 @@ BOOL GetDevices(DWORD devnum)
 	if (!found)
 		i = 0;
 	IGNORE_RETVAL(ComboBox_SetCurSel(hDeviceList, i));
+#ifndef ENDLESSUSB_TOOL
 	SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE<<16) | IDC_DEVICE, 0);
+#endif // !ENDLESSUSB_TOOL
 	r = TRUE;
 
 out:

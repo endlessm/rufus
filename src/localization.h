@@ -22,6 +22,12 @@
 
 #pragma once
 
+#ifdef ENDLESSUSB_TOOL
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+#endif // ENDLESSUSB_TOOL
+
 // Number of concurrent localization messages (i.e. messages we can concurrently
 // reference at the same time). Must be a power of 2.
 #define LOC_MESSAGE_NB          32
@@ -148,8 +154,15 @@ typedef struct loc_dlg_list_struct {
 extern const loc_parse parse_cmd[7];
 extern struct list_head locale_list;
 extern char *default_msg_table[], *current_msg_table[], **msg_table;
+#ifdef ENDLESSUSB_TOOL
+extern int loc_line_nr;
+extern char *loc_filename, *embedded_loc_filename;
+extern BOOL en_msg_mode;
+extern BOOL global_is_default_localization;
+#else // ENDLESSUSB_TOOL
 int loc_line_nr;
 char *loc_filename, *embedded_loc_filename;
+#endif // !ENDLESSUSB_TOOL
 BOOL en_msg_mode;
 
 void free_loc_cmd(loc_cmd* lcmd);
@@ -171,3 +184,9 @@ loc_cmd* get_locale_from_name(char* locale_name, BOOL fallback);
 void toggle_default_locale(void);
 const char* get_name_from_id(int id);
 WORD get_language_id(loc_cmd* lcmd);
+
+#ifdef ENDLESSUSB_TOOL
+#ifdef __cplusplus
+}
+#endif
+#endif // ENDLESSUSB_TOOL

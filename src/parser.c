@@ -393,6 +393,12 @@ BOOL get_loc_data_file(const char* filename, loc_cmd* lcmd)
 		goto out;
 	}
 
+#ifdef ENDLESSUSB_TOOL
+	if (!populate_default) {
+		global_is_default_localization = (lcmd == default_locale);
+	}
+#endif // ENDLESSUSB_TOOL
+
 	if (msg_table == NULL) {
 		// Initialize the default message table (usually en-US)
 		msg_table = default_msg_table;

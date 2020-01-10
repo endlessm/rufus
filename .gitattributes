@@ -8,7 +8,6 @@ configure       eol=lf
 install-sh      eol=lf
 *.sln           eol=crlf
 *.vcxproj*      eol=crlf
-*.rc            eol=crlf
 *.cmd           eol=crlf
 *.txt           eol=crlf
 *.loc           eol=crlf
@@ -18,3 +17,5 @@ install-sh      eol=lf
 .gitignore      export-ignore
 *.creole        export-ignore
 
+*.po            eol=lf
+*.pot           eol=lf

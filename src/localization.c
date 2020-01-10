@@ -30,11 +30,21 @@
 #include <string.h>
 #include <stddef.h>
 
-#include "rufus.h"
+#ifdef ENDLESSUSB_TOOL
+#include "endless\resource.h"
+#else // ENDLESSUSB_TOOL
 #include "resource.h"
+#endif // ENDLESSUSB_TOOL
+
 #include "msapi_utf8.h"
 #include "localization.h"
+
+#ifdef ENDLESSUSB_TOOL
+#include "endless\localization_data.h"
+BOOL global_is_default_localization = FALSE;
+#else // ENDLESSUSB_TOOL
 #include "localization_data.h"
+#endif // ENDLESSUSB_TOOL
 
 /*
  * List of supported locale commands, with their parameter syntax:
@@ -247,7 +257,11 @@ BOOL dispatch_loc_cmd(loc_cmd* lcmd)
 	}
 
 	// Don't process UI commands when we're dealing with the default
+#ifdef ENDLESSUSB_TOOL
+	if (msg_table == default_msg_table && !global_is_default_localization) {
+#else
 	if (msg_table == default_msg_table) {
+#endif // ENDLESSUSB_TOOL
 		free_loc_cmd(lcmd);
 		return TRUE;
 	}
