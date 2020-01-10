@@ -191,10 +191,13 @@ static HANDLE GetHandle(char* Path, BOOL bLockDrive, BOOL bWriteAccess, BOOL bWr
 
 		EndTime = GetTickCount64() + DRIVE_ACCESS_TIMEOUT;
 		do {
+			uprintf("Attempting FSCTL_LOCK_VOLUME for drive %s", Path);
 			if (DeviceIoControl(hDrive, FSCTL_LOCK_VOLUME, NULL, 0, NULL, 0, &size, NULL))
 				goto out;
-			if (IS_ERROR(FormatStatus))	// User cancel
+			if (IS_ERROR(FormatStatus)) {	// User cancel
+				uprintf("FormatStatus = 0x%x '%s', giving up\n", FormatStatus, StrError(FormatStatus, TRUE));
 				break;
+			}
 			Sleep(DRIVE_ACCESS_TIMEOUT / DRIVE_ACCESS_RETRIES);
 		} while (GetTickCount64() < EndTime);
 		// If we reached this section, either we didn't manage to get a lock or the user cancelled
@@ -939,7 +942,11 @@ BOOL GetDriveLabel(DWORD DriveIndex, char* letters, char** label)
 	WCHAR VolumeName[MAX_PATH + 1] = { 0 }, FileSystemName[64];
 	DWORD VolumeSerialNumber, MaximumComponentLength, FileSystemFlags;
 
+#ifdef ENDLESSUSB_TOOL
+	*label = lmprintf(MSG_307);
+#else // ENDLESSUSB_TOOL
 	*label = STR_NO_LABEL;
+#endif // ENDLESSUSB_TOOL
 
 	if (!GetDriveLetters(DriveIndex, letters))
 		return FALSE;
@@ -1817,4 +1824,56 @@ const char* GetGPTPartitionType(const GUID* guid)
 	int i;
 	for (i = 0; (i < ARRAYSIZE(gpt_type)) && !CompareGUID(guid, gpt_type[i].guid); i++);
 	return (i < ARRAYSIZE(gpt_type)) ? gpt_type[i].name : GuidToString(guid);
+}
+
+ /*
+ * Mount the volume identified by drive_guid on a drive letter, if it is not already, and return the mount point in drive_guid.
+ * drive_guid should be initialized to "?:\"; the first character will be overwritten with the mounted drive letter.
+ */
+BOOL Endless_EnsureVolumeMounted(char* drive_name, char *drive_guid)
+{
+	char mounted_guid[52];	// You need at least 51 characters on XP
+	char mounted_letter[16] = {0};
+	DWORD size;
+
+	if (drive_name[0] != '?')
+		return FALSE;
+
+	// For fixed disks, Windows may already have remounted the volume.
+	if ( (GetVolumePathNamesForVolumeNameA(drive_guid, mounted_letter, sizeof(mounted_letter), &size))
+	  && (size > 1) ) {
+		uprintf("Volume is already mounted at %c", mounted_letter[0]);
+		drive_name[0] = mounted_letter[0];
+		return TRUE;
+	}
+
+	drive_name[0] = GetUnusedDriveLetter();
+	if (drive_name[0] == 0) {
+		uprintf("Could not find an unused drive letter");
+		return FALSE;
+	}
+
+	if (SetVolumeMountPointA(drive_name, drive_guid)) {
+		uprintf("%s mounted as %s", drive_guid, drive_name);
+		return TRUE;
+	} else {
+		// If the OS mounted something on that letter in parallel, this operation can fail
+		// with ERROR_DIR_NOT_EMPTY. If that's the case, just check that mountpoints match
+		if (GetLastError() == ERROR_DIR_NOT_EMPTY) {
+			if (!GetVolumeNameForVolumeMountPointA(drive_name, mounted_guid, sizeof(mounted_guid))) {
+				uprintf("%s already mounted, but volume GUID could not be checked: %s",
+					drive_name, WindowsErrorString());
+				return FALSE;
+			}
+			if (safe_strcmp(drive_guid, mounted_guid) != 0) {
+				uprintf("%s already mounted, but volume GUID doesn't match. Hoped for %s, got %s",
+					drive_name, drive_guid, mounted_guid);
+				return FALSE;
+			}
+			uprintf("%s was already mounted as %s\n", drive_guid, drive_name);
+			return TRUE;
+		} else {
+			return FALSE;
+		}
+	}
 }

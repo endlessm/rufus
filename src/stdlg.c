@@ -83,6 +83,7 @@ void SetDialogFocus(HWND hDlg, HWND hCtrl)
 	SendMessage(hDlg, WM_NEXTDLGCTL, (WPARAM)hCtrl, TRUE);
 }
 
+#ifndef ENDLESSUSB_TOOL
 /*
  * We need a sub-callback to read the content of the edit box on exit and update
  * our path, else if what the user typed does match the selection, it is discarded.
@@ -233,6 +234,7 @@ fallback:
 	safe_free(bi.lpszTitle);
 	dialog_showing--;
 }
+#endif // !ENDLESSUSB_TOOL
 
 /*
  * Return the UTF8 path of a file selected through a load or save dialog
@@ -411,6 +413,8 @@ fallback:
 	dialog_showing--;
 	return filepath;
 }
+
+#ifndef ENDLESSUSB_TOOL
 
 /*
  * Create the application status bar
@@ -2114,6 +2118,8 @@ HICON CreateMirroredIcon(HICON hiconOrg)
 	DestroyIcon(hiconOrg);
 	return hicon;
 }
+
+#endif // !ENDLESSUSB_TOOL
 
 #ifdef RUFUS_TEST
 static __inline LPWORD lpwAlign(LPWORD addr)

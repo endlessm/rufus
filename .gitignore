@@ -54,3 +54,18 @@ res/loc/pollock/bin
 res/loc/pollock/obj
 rufus_files
 stamp-h1
+
+#endless additions below this point
+# Visual Studio byproducts
+.vs/
+
+# Visual C++ cache files
+*.VC.VC.opendb
+*.VC.db
+ipch/
+
+# Generated code
+/src/Endless/Version.h
+
+# 7z objects
+/src/7z/**/O
