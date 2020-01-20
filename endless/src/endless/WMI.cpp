@@ -223,6 +223,42 @@ BOOL WMI::GetMachineInfo(CString & manufacturer, CString & model)
     });
 }
 
+BOOL WMI::IsHyperVEnabled(void)
+{
+    FUNCTION_ENTER;
+
+    const CString objectPath(L"ROOT\\CIMV2");
+    CString hyperVQuery;
+
+    hyperVQuery.Format(L"Select * from Win32_OptionalFeature where Name = 'Microsoft-Hyper-V'");
+
+    return RunWMIQuery(objectPath, hyperVQuery, [](CComPtr<IWbemServices>& pSvc, CComPtr<IEnumWbemClassObject>& pEnumerator) {
+        while (pEnumerator)
+        {
+            CComPtr<IWbemClassObject> pclsObj;
+            ULONG uReturn = 0;
+            HRESULT hr = pEnumerator->Next(WBEM_INFINITE, 1,
+                &pclsObj, &uReturn);
+
+            if (0 == uReturn)
+            {
+                break;
+            }
+
+            VARIANT vtProp;
+
+            hr = pclsObj->Get(L"InstallState", 0, &vtProp, 0, 0);
+            UINT32 istate = vtProp.uintVal;
+            VariantClear(&vtProp);
+            if (istate == 1)
+                return TRUE;
+        }
+
+        return FALSE;
+        });
+}
+
+
 #pragma region BCD
 
 // http://www.geoffchappell.com/notes/windows/boot/bcd/objects.htm
