@@ -20,6 +20,7 @@ public:
 	void setLanguage(const CString &language);
 	void setManufacturerModel(const CString &manufacturer, const CString &model);
 	void setFirmware(const CString &firmware);
+	void setVirtualization(const CString &firmware);
 
 private:
 	void sendRequest(const CString &body, BOOL lastRequest = FALSE);
@@ -38,5 +39,6 @@ private:
 	CString m_model;
 	CString m_firmware;
 	CString m_windowsVersion;
+	CString m_virtualization;
 	CWinThread *m_workerThread;
 };
