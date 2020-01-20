@@ -7,6 +7,7 @@
 namespace WMI {
     BOOL IsBitlockedDrive(const CString &drive);
     BOOL GetMachineInfo(CString &manufacturer, CString &model);
+    BOOL IsHyperVEnabled(void);
 
     // Adds an entry for the given bootloader to the system boot menu.
     // Supported on BIOS systems running Windows Vista or newer.
