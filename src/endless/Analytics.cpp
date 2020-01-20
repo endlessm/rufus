@@ -296,6 +296,11 @@ void Analytics::setFirmware(const CString &firmware)
 	urlEncode(firmware, m_firmware);
 }
 
+void Analytics::setVirtualization(const CString &virtualization)
+{
+	urlEncode(virtualization, m_virtualization);
+}
+
 void Analytics::sendRequest(const CString &body, BOOL lastRequest)
 {
 	FUNCTION_ENTER;
@@ -364,4 +369,7 @@ void Analytics::prefixId(CString &id)
 
 	if (m_firmware)
 	    id.AppendFormat(L"cd5=%s&", m_firmware);
+
+	if (m_virtualization)
+	    id.AppendFormat(L"cd6=%s&", m_virtualization);
 }
