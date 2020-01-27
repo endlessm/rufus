@@ -897,6 +897,21 @@ BOOL CEndlessUsbToolDlg::OnInitDialog()
     auto isBIOS = IsLegacyBIOSBoot();
     Analytics::instance()->setFirmware(isBIOS ? L"BIOS" : L"EFI");
 
+    if (nWindowsVersion == WINDOWS_7)
+        Analytics::instance()->setVirtualization(L"Unknown");
+    else {
+        if (WMI::IsHyperVEnabled())
+            Analytics::instance()->setVirtualization(L"HyperV");
+        else {
+            auto vmCapable = IsProcessorFeaturePresent(PF_VIRT_FIRMWARE_ENABLED);
+
+            if (vmCapable)
+                Analytics::instance()->setVirtualization(L"Capable");
+            else
+                Analytics::instance()->setVirtualization(L"None");
+        }
+    }
+
     Analytics::instance()->startSession();
 
     if (nWindowsVersion < WINDOWS_7) {
