@@ -1,4 +1,6 @@
+!IFNDEF ENDLESS_STATIC_BUILD
 LIBS = $(LIBS) oleaut32.lib ole32.lib
+!ENDIF
 
 !IFNDEF MY_NO_UNICODE
 CFLAGS = $(CFLAGS) -DUNICODE -D_UNICODE
@@ -21,6 +23,12 @@ MY_ML = ml64 -Dx64 -WX
 MY_ML = armasm -WX
 !ELSE
 MY_ML = ml -WX
+!IFDEF ENDLESS_STATIC_BUILD
+# The asm code here does not contain any structured exception handlers, so mark
+# the objects as containing no (unsafe) exception handlers. This allows the
+# final executable to be linked with -safeseh.
+MY_ML = $(MY_ML) -safeseh
+!ENDIF
 !ENDIF
 
 
@@ -36,7 +44,9 @@ LFLAGS = $(LFLAGS) -OPT:NOWIN98
 !IF "$(PLATFORM)" != "arm" && "$(PLATFORM)" != "arm64"
 CFLAGS = $(CFLAGS) -Gr
 !ENDIF
+!IFNDEF ENDLESS_STATIC_BUILD
 LIBS = $(LIBS) user32.lib advapi32.lib shell32.lib
+!ENDIF
 !ENDIF
 
 !IF "$(PLATFORM)" == "arm"
@@ -45,13 +55,17 @@ COMPL_ASM = $(MY_ML) $** $O/$(*B).obj
 COMPL_ASM = $(MY_ML) -c -Fo$O/ $**
 !ENDIF
 
-CFLAGS = $(CFLAGS) -nologo -c -Fo$O/ -W4 -WX -EHsc -Gy -GR- -GF
+CFLAGS = $(CFLAGS) -nologo -c -Fo$O/ -W4 -WX -EHsc -Gy -GR- -GF -Zi -Fd$O/7z.pdb
 
 !IFDEF MY_DYNAMIC_LINK
 CFLAGS = $(CFLAGS) -MD
 !ELSE
 !IFNDEF MY_SINGLE_THREAD
+!IFDEF MY_DEBUG
+CFLAGS = $(CFLAGS) -MTd
+!ELSE
 CFLAGS = $(CFLAGS) -MT
+!ENDIF
 !ENDIF
 !ENDIF
 
@@ -84,10 +98,15 @@ CFLAGS_O1 = $(CFLAGS) -O1
 !ENDIF
 CFLAGS_O2 = $(CFLAGS) -O2
 
-LFLAGS = $(LFLAGS) -nologo -OPT:REF -OPT:ICF
+LFLAGS = $(LFLAGS) -nologo
+!IFNDEF ENDLESS_STATIC_BUILD
+LFLAGS = $(LFLAGS) -OPT:REF -OPT:ICF
+!ENDIF
 
 !IFNDEF UNDER_CE
+!IFNDEF ENDLESS_STATIC_BUILD
 LFLAGS = $(LFLAGS) /LARGEADDRESSAWARE
+!ENDIF
 !ENDIF
 
 !IFDEF DEF_FILE
@@ -145,8 +164,14 @@ $O:
 $O/asm:
 	if not exist "$O/asm" mkdir "$O/asm"
 
-$(PROGPATH): $O $O/asm $(OBJS) $(DEF_FILE)
+!IFDEF ENDLESS_STATIC_BUILD
+$(PROGPATH): $O $O/Asm $(OBJS) $(DEF_FILE)
+	lib $(LFLAGS) -out:$(PROGPATH) $(OBJS) $(LIBS)
+!ELSE
+$(PROGPATH): $O $O/Asm $(OBJS) $(DEF_FILE)
 	link $(LFLAGS) -out:$(PROGPATH) $(OBJS) $(LIBS)
+!ENDIF
+
 
 !IFNDEF NO_DEFAULT_RES
 $O\resource.res: $(*B).rc
