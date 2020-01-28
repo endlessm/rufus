@@ -2313,4 +2313,6 @@ REGISTER_ARC_I(
   NArcInfoFlags::kMultiSignature,
   NULL)
 
+// Linker hack: see ArchiveExports.cpp
+bool linkMe = false;
 }}
