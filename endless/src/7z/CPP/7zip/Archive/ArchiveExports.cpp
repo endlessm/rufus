@@ -149,3 +149,32 @@ STDAPI GetIsArc(UInt32 formatIndex, Func_IsArc *isArc)
   *isArc = g_Arcs[formatIndex]->IsArc;
   return S_OK;
 }
+
+// Hack: force SquashfsHandler.obj to be linked. It is not explicitly
+// referenced by the application -- it registers itself in a static initializer
+// -- and by default the linker ignores unreferenced objs from static
+// libraries. It is possible to disable this behaviour but for a host of
+// reasons it is problematic to do so:
+// 1. if enabled for the whole application, bled fails to link with a
+//    mysterious error
+// 2. this project is a Makefile project, so (apparently) can't be added as a
+//    Reference to EndlessUsbTool, so the linker flag cannot be scoped to this
+//    library
+// 3. in any case, discarding unused formats is actually rather useful to keep
+//    the binary size down
+// This obj is transitively referenced by the app so is linked; we add an
+// artificial reference to SquashfsHandler.obj to force it to be linked, and
+// hence run its static initializer.
+namespace NArchive {
+  namespace NSquashfs {
+    extern bool linkMe;
+  }
+}
+
+class ForceLink {
+public:
+  ForceLink() {
+    NArchive::NSquashfs::linkMe = true;
+  }
+};
+static const ForceLink forceLink;
