@@ -1,0 +1,788 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# 
+# Translators:
+# Aditi Kabir <aditi.kabir@gmail.com>, 2016
+# Roddy Shuler <roddy@stanfordalumni.org>, 2016-2017
+# Shimon Sharmin <oparthib@gmail.com>, 2016
+# Will Thompson <wjt@endlessm.com>, 2017-2018
+msgid ""
+msgstr ""
+"Project-Id-Version: rufus\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-03-08 02:28+0000\n"
+"PO-Revision-Date: 2018-05-25 14:33+0000\n"
+"Last-Translator: Will Thompson <wjt@endlessm.com>\n"
+"Language-Team: Bengali (http://www.transifex.com/endless-os/rufus/language/bn/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: bn\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgctxt "AdvancedPageTitle"
+msgid "Advanced Install Options"
+msgstr "সংস্থাপনের উন্নত বিকল্পসমূহ"
+
+msgctxt "AdvancedPagePreviousButton"
+msgid "Previous"
+msgstr "পূর্ববর্তী"
+
+msgctxt "LiveUsbButton"
+msgid "Create Live USB"
+msgstr "সক্রিয় USB তৈরি"
+
+msgctxt "LiveUsbText"
+msgid "Try Endless OS by running it from a USB stick."
+msgstr "USB স্টিক থেকে এন্ডলেস OS চালানোর চেষ্টা করুন।"
+
+msgctxt "ReformatterUsbButton"
+msgid "Create Reformatter USB"
+msgstr "ইউএসবি পুনঃ ফর্ম্যাটকারী তৈরি করুন "
+
+msgctxt "ReformatterUsbText"
+msgid "Reformat any computer with Endless OS using a USB stick."
+msgstr "একটি ইউএসবি স্টিক থেকে যে কোন কম্পিউটারে এন্ডলেস ওএস দিয়ে পুনঃ ফর্ম্যাট করুন। "
+
+msgctxt "SelectFilePreviousButton"
+msgid "Previous"
+msgstr "পূর্ববর্তী"
+
+msgctxt "SelectFileNextButton"
+msgid "Next"
+msgstr "পরবর্তী"
+
+msgctxt "SelectFilePageTitle"
+msgid "Select Your Endless OS Version"
+msgstr "আপনার এন্ডলেস OS সংস্করণটি নির্বাচন করুন"
+
+msgctxt "SelectFileSubtitle"
+msgid "Choose the version of Endless OS that’s best for you."
+msgstr "আপনার জন্য সঠিক এন্ডলেস OS সংস্করণটি নির্বাচন করুন।"
+
+msgctxt "NoInternetConnectionTitle"
+msgid "Unfortunately, there was a problem connecting to the server."
+msgstr "দুর্ভাগ্যক্রমে, সার্ভারের সাথে সংযুক্ত হতে সমস্যা হচ্ছে।"
+
+msgctxt "NoInternetConnectionSubtitle"
+msgid ""
+"Make sure you're <a id='ConnectedLink'>connected to the internet</a>, and if"
+" the problem persists, visit our <a id='ConnectedSupportLink'>support</a>."
+msgstr "নিশ্চিত করুন আপনি  <a id='ConnectedLink'> ইন্টারনেটের সাথে সংযুক্ত </a>, এবং যদি সমস্যা হতেই থাকে, আমাদের <a id='ConnectedSupportLink'>সাহায্য</a> কেন্দ্রে যান।"
+
+msgctxt "ExistingImageFile"
+msgid "Use existing image file:"
+msgstr "ছবির বিদ্যমান ফাইল ব্যবহার করুন:"
+
+msgctxt "DownloadNewImage"
+msgid "Download a new version:"
+msgstr "নতুন ভার্সন ডাউনলোড করুন:"
+
+msgctxt "LightVersionText"
+msgid "BASIC"
+msgstr "প্রাথমিক"
+
+msgctxt "LightDownloadDescription"
+msgid ""
+"Includes basic features of Endless OS and the option to download more apps "
+"and content later. This version is best for computers with reliable internet"
+" access."
+msgstr "এন্ডলেস OS -এর প্রাথমিক বৈশিষ্ট্যসমূহ এবং পরবর্তীতে আরো এ্যাপ ও বিষয়বস্তু ডাউনলোড করার সুযোগ এতে অন্তর্ভুক্ত রয়েছে। নির্ভরযোগ্য ইন্টারনেট সংযোগসহ কম্পিউটারসমূহের জন্য এই সংস্করণটি সঠিক।"
+
+#. This means "Download [the] Basic Version [of Endless OS]". Use the same
+#. translation as for the "BASIC" string.
+msgctxt "DownloadLightButton"
+msgid "Download Basic Version"
+msgstr ""
+
+msgctxt "FullVersionText"
+msgid "FULL"
+msgstr "সম্পূর্ণ"
+
+msgctxt "FullDownloadDescription"
+msgid ""
+"Includes full Endless OS, preloaded with more than 100 apps and content. "
+"This version is ideal for computers without reliable internet access. Choose"
+" language for content and apps:"
+msgstr "সম্পূর্ণ এন্ডলেস OS অন্তর্ভুক্ত, সাথে আগে থেকেই দেয়া রয়েছে 100 থেকেও বেশি এ্যাপ ও বিষয়বস্তু। নির্ভরযোগ্য ইন্টারনেট সংযোগ ছাড়া কম্পিউটারসমূহের জন্য এই সংস্করণটি সঠিক। বিষয়বস্তু ও এ্যাপের জন্য ভাষা নির্বাচন করুন:"
+
+#. This means "Download [the] Full Version [of Endless OS]". Use the same
+#. translation as for the "FULL" string.
+msgctxt "DownloadFullButton"
+msgid "Download Full Version"
+msgstr ""
+
+msgctxt "SelectUSBPreviousButton"
+msgid "Previous"
+msgstr "পূর্ববর্তী"
+
+msgctxt "SelectUSBNextButton"
+msgid "Next"
+msgstr "পরবর্তী"
+
+msgctxt "SelectUSBPageTitle"
+msgid "Select USB Drive"
+msgstr "USB ড্রাইভ নির্বাচন করুন"
+
+msgctxt "SelectUSBSubtitle"
+msgid "Choose the USB device you would like to use."
+msgstr "আপনি যে USB ডিভাইসটি ব্যবহার করবেন তা নির্বাচন করুন।"
+
+msgctxt "USBDisksFound"
+msgid "USB drive found:"
+msgstr "USB ড্রাইভ পাওয়া গেছে:"
+
+msgctxt "NewDiskNameLabel"
+msgid "New USB device contents:"
+msgstr "নতুন USB ডিভাইসের সামগ্রীসমূহ:"
+
+msgctxt "NewDiskSizeLabel"
+msgid "Size:"
+msgstr "আয়তন:"
+
+msgctxt "AgreementCheckboxText"
+msgid ""
+"I understand that this will <b>erase all my files</b> on the USB device."
+msgstr "আমি বুঝতে পারছি যে এতে USB ডিভাইসে <b>আমার সকল ফাইল মুছে ফেলা হবে</b>।"
+
+msgctxt "InstallingPageTitle"
+msgid "Endless OS"
+msgstr "এন্ডলেস OS"
+
+msgctxt "InstallCancelButton"
+msgid "Cancel"
+msgstr "বাতিল"
+
+msgctxt "ThankYouPageTitle"
+msgid "Thank you"
+msgstr "ধন্যবাদ"
+
+msgctxt "CloseAppButton"
+msgid "Close"
+msgstr "বন্ধ করুন"
+
+msgctxt "InstallerVersion"
+msgid "Version:"
+msgstr "ভার্সন:"
+
+msgctxt "InstallerLanguage"
+msgid "Language:"
+msgstr "ভাষা:"
+
+msgctxt "InstallerContent"
+msgid "Content:"
+msgstr "সূচী:"
+
+msgctxt "ThankYouDualBootReminder"
+msgid "Restart your computer and select \"Endless OS\" from the menu."
+msgstr "আপনার কম্পিউটার পুনরায় চালু করুন এবং তালিকা থেকে \"এন্ডলেস OS\" নির্বাচন করুন।"
+
+msgctxt "ThankYouLiveReminder"
+msgid "To try Endless OS now, restart your computer."
+msgstr "এখুনি এন্ডলেস OS পরখ করে দেখতে, আপনার কম্পিউটার পুনরায় চালু করুন।"
+
+msgctxt "ThankYouReflasherReminder"
+msgid "Now you're ready to install Endless OS on more computers."
+msgstr "এখন আপনি আরো কম্পিউটারে এন্ডলেস OS সংস্থাপন করার জন্য তৈরি।"
+
+msgctxt "UsbBootHowToLink"
+msgid "How to start your computer from a USB stick."
+msgstr "একটি USB স্টিক থেকে আপনার কম্পিউটার চালু করার পন্থা।"
+
+msgctxt "ErrorPageTitle"
+msgid "Error"
+msgstr "ভুল হয়েছে"
+
+msgctxt "CloseAppButton1"
+msgid "Finish"
+msgstr "শেষ করুন"
+
+msgctxt "ErrorMessage"
+msgid "Oops, something went wrong setting up Endless OS."
+msgstr "ওহ, এন্ডলেস OS সেটআপ করতে কোন সমস্যা হয়েছে।"
+
+msgctxt "EndlessSupportContainer"
+msgid ""
+"If you keep having trouble, you can get help on the <a "
+"id='EndlessSupport'>Endless community forum</a>."
+msgstr "আপনার যদি কোন সমস্যা হয়ে থাকে, তাহলে আপনি <a id='EndlessSupport'> এন্ডলেস কমিউনিটি ফোরাম </a> সাহায্য পেতে পারেন।"
+
+msgctxt "DualBootPageTitle"
+msgid "Endless OS"
+msgstr "এন্ডলেস OS"
+
+msgctxt "DualBootContentTitle"
+msgid "Download and Install Endless on this Computer"
+msgstr "এই কম্পিউটারে এন্ডলেস নামিয়ে ইনস্টল করে নিন "
+
+msgctxt "DualBootContentDescription"
+msgid ""
+"Each time you start your computer, you will be able to choose between "
+"Endless and Windows. Your apps and files on Windows will not be affected."
+msgstr "আপনি যতবার কম্পিউটার চালু করবেন, আপনি এন্ডলেস আর উইন্ডোজের মধ্যে বেছে নিতে পারবেন। উইন্ডোজে আপনার অ্যাপস আর ফাইলে কোন ক্ষতি হবে না। "
+
+msgctxt "DualBootInstallButton"
+msgid "Install Endless"
+msgstr "এন্ডলেস সংস্থাপন করুন"
+
+msgctxt "DualBootRecommendation"
+msgid "Recommended: At least 32 GB of free space on the system drive."
+msgstr "সুপারিশকৃত: সিস্টেম ড্রাইভে কমপক্ষে 32 GB খালি জায়গা প্রয়োজন।"
+
+msgctxt "AdvancedOptionsText"
+msgid ""
+"For advanced install options using an <b>Endless USB Stick</b>, <a "
+"id='AdvancedOptionsLink'>click here</a>."
+msgstr "<b>এন্ডলেস USB স্টিক</b> ব্যবহার করে সংস্থাপনের উন্নত বিকল্পের জন্য, <a id='AdvancedOptionsLink'>এখানে চাপুন</a>।"
+
+msgctxt "PrivacyPolicyText"
+msgid ""
+"We collect anonymous data to improve this installer for everybody. <a "
+"id='PrivacyPolicyLink'>Click here</a> for more information, and to learn how"
+" to opt out."
+msgstr ""
+
+msgctxt "SelectStorageNextButton"
+msgid "Next"
+msgstr "পরবর্তী"
+
+msgctxt "SelectStoragePreviousButton"
+msgid "Previous"
+msgstr "পূর্ববর্তী"
+
+msgctxt "SelectStoragePageTitle"
+msgid "Storage Space for Endless OS"
+msgstr "এন্ডলেস OS -এর জন্য সংরক্ষণ করার জায়গা"
+
+msgctxt "StorageAgreementText"
+msgid ""
+"Note: We recommend backing up any important files before continuing. Should "
+"you experience any problems with your computer after installation, you can "
+"find help at <a id='StorageSupportLink'>Endless Support</a>."
+msgstr "দ্রষ্টব্য: এগিয়ে যাবার আগে যে কোন গুরুত্বপূর্ণ ফাইল সংরক্ষণ করে রাখার জন্য সুপারিশ করা হচ্ছে। সংস্থাপন করার পর যদি আপনার কম্পিউটারে কোন সমস্যা পরিলক্ষিত হয়, তবে আপনি <a id='StorageSupportLink'>এন্ডলেস সহায়তাকেন্দ্র</a> থেকে সাহায্য পেতে পারেন।"
+
+msgctxt "DualBootLanguageLabel"
+msgid "Select Language"
+msgstr "ভাষা নির্বাচন করুন"
+
+msgctxt "AdvancedInstallReminder"
+msgid ""
+"To create an Endless USB Stick you will need a USB device with at least 8 GB"
+" of storage space."
+msgstr "একটি এন্ডলেস USB স্টিক তৈরি করার জন্য কমপক্ষে 8 GB সংরক্ষণ করার মতো জায়গাসহ একটি USB ডিভাইস প্রয়োজন হবে আপনার।"
+
+msgctxt "AdvancedOptionsSubtitle"
+msgid "With an <b>Endless USB Stick</b> you can:"
+msgstr "একটি  <b>এন্ডলেস ইউএসবি স্টিক দিয়ে </b>আপনি পারবেন: "
+
+msgctxt "CombinedUsbButton"
+msgid "Create Endless USB Stick"
+msgstr "একটি এন্ডলেস ইউএসবি স্টিক তৈরি করুন "
+
+msgctxt "USBLearnMore"
+msgid "Learn more about the Endless USB Stick"
+msgstr "এন্ডলেস ইউএসবি স্টিক সম্পর্কে আরও জানুন "
+
+#. *Short* size names. These can be used as suffixes
+msgctxt "MSG_020"
+msgid "bytes"
+msgstr "বাইটস"
+
+msgctxt "MSG_021"
+msgid "KB"
+msgstr ""
+
+msgctxt "MSG_022"
+msgid "MB"
+msgstr ""
+
+msgctxt "MSG_023"
+msgid "GB"
+msgstr ""
+
+msgctxt "MSG_024"
+msgid "TB"
+msgstr ""
+
+msgctxt "MSG_025"
+msgid "PB"
+msgstr ""
+
+#, c-format
+msgctxt "MSG_045"
+msgid "USB Storage Device (Generic)"
+msgstr ""
+
+#. Used for USB drives that don't have a drive letter. Placeholders are:
+#. 1. a name for the disk (such as "SanDisk Ultra")
+#. 2. the disk number (normally a low number like 2 or 3)
+#. 3. the disk's size (such as "16 Gb")
+#, c-format
+msgctxt "MSG_046"
+msgid "%s (Disk %d) [%s]"
+msgstr "%s (ডিস্ক %d) [%s]"
+
+#. Used when a drive is detected that contains more than one partition
+#, c-format
+msgctxt "MSG_047"
+msgid "Multiple Partitions"
+msgstr ""
+
+#, c-format
+msgctxt "MSG_049"
+msgid "Endless - Cancellation"
+msgstr "এন্ডলেস - বাতিল"
+
+#, c-format
+msgctxt "MSG_095"
+msgid "Endless Image"
+msgstr "Endless চিত্র"
+
+#, c-format
+msgctxt "MSG_105"
+msgid ""
+"Warning: Cancelling may cause the device to malfunction. If you are sure you"
+" want to cancel, click YES. Otherwise, click NO."
+msgstr "সতর্কীকরণ: বাতিল করে দিলে ডিভাইসটিতে ত্রুটি দেখা দিতে পারে। আপনি যদি বাতিল করার বিষয়ে নিশ্চিত থাকেন, হ্যাঁ চাপুন।নইলে, না চাপুন।"
+
+#, c-format
+msgctxt "MSG_107"
+msgid "All files"
+msgstr "সকল ফাইলসমূহ"
+
+#, c-format
+msgctxt "MSG_201"
+msgid "Cancelling, please wait"
+msgstr "বাতিল করা হচ্ছে, অনুগ্রহ করে অপেক্ষা করুন"
+
+#, c-format
+msgctxt "MSG_300"
+msgid "Error downloading file."
+msgstr "ফাইল ডাউনলোপ করতে ভুল হয়েছে।"
+
+#. Download progress. Placeholders:
+#. 1. size downloaded (such as 1.2Gb)
+#. 2. total size (such as 11.6Gb)
+#. 3. download speed (such as 100Mb/s, except the "/s" is part of this string,
+#. not the placeholder)
+#, c-format
+msgctxt "MSG_302"
+msgid "%s of %s (%s/s)"
+msgstr "%s (%s/s) এর %s"
+
+#, c-format
+msgctxt "MSG_304"
+msgid "Downloading"
+msgstr "ডাউনলোড হচ্ছে"
+
+#. Displayed alongside MSG_306. Placeholders:
+#. 1. the step number (typically 1, 2 or 3)
+#, c-format
+msgctxt "MSG_305"
+msgid "Step %d"
+msgstr "ধাপ %d"
+
+#. Displayed alongside MSG_305. Placeholders:
+#. 1. the number of steps (typically 2 or 3)
+#, c-format
+msgctxt "MSG_306"
+msgid "of %d:"
+msgstr "%d এর:"
+
+#, c-format
+msgctxt "MSG_307"
+msgid "No Label"
+msgstr "কোন লেবেল নেই"
+
+#, c-format
+msgctxt "MSG_309"
+msgid "Installing"
+msgstr "সংস্থাপিত হচ্ছে"
+
+#, c-format
+msgctxt "MSG_310"
+msgid "Verifying"
+msgstr "যাচাইকরণ হচ্ছে"
+
+#, c-format
+msgctxt "MSG_311"
+msgid "Writing"
+msgstr "লেখা হচ্ছে"
+
+#. Locale ID for https://support.endlessm.com/ URLs, in lower-case. Check
+#. https://support.zendesk.com/hc/en-us/articles/203761906 to find the right
+#. one for this language. For example, Simplified Chinese should use "zh-cn".
+#. (For historical reasons, the Brazilian Portuguese translation should use
+#. "pt", not "pt-br".) If your language is not listed there, use "en-us".
+#, c-format
+msgctxt "MSG_317"
+msgid "en-us"
+msgstr ""
+
+#, c-format
+msgctxt "MSG_315"
+msgid "%s/%s Download"
+msgstr "%s/%s ডাউনলোড "
+
+#, c-format
+msgctxt "MSG_316"
+msgid "Full"
+msgstr "Full"
+
+#, c-format
+msgctxt "MSG_319"
+msgid "%s (%s)"
+msgstr "%s (%s) "
+
+#, c-format
+msgctxt "MSG_320"
+msgid "Great! Endless OS has been successfully installed."
+msgstr "দারুণ! এন্ডলেস OS সফলভাবে সংস্থাপিত হয়েছে।"
+
+#, c-format
+msgctxt "MSG_343"
+msgid "Great! Your Endless OS Live USB has been created."
+msgstr "দারুণ! আপনার এন্ডলেস OS সক্রিয় USB তৈরি হয়েছে।"
+
+#, c-format
+msgctxt "MSG_344"
+msgid "Great! Your Endless OS Reformatter USB has been created."
+msgstr ""
+
+#, c-format
+msgctxt "MSG_321"
+msgid "Select Your Endless OS Version"
+msgstr "আপনার এন্ডলেস OS ভার্সন নির্বাচন করুন"
+
+#, c-format
+msgctxt "MSG_322"
+msgid "Is this the version you’d like to use? If not, select another."
+msgstr "আপনি কি এই সংস্করণটিই ব্যবহার করতে আগ্রহী? যদি না হয়, অন্য আরেকটি নির্বাচন করুন।"
+
+#. The string in quotes should match MSG_326
+#, c-format
+msgctxt "MSG_323"
+msgid ""
+"We couldn’t finish getting Endless OS. Check your internet connection and "
+"click \"Resume\" to carry on downloading."
+msgstr "আমরা এন্ডলেস OS নামানো শেষ করতে পারিনি। অনুগ্রহ করে আপনার ইন্টারনেট সংযোগ পরীক্ষা করুন এবং ডাউনলোড চালিয়ে যেতে \"পুনরায়\" চাপুন।"
+
+#. The string in quotes should match MSG_327
+#, c-format
+msgctxt "MSG_324"
+msgid ""
+"Something is wrong with your Endless OS file. Click \"Download Again\" to "
+"try downloading it again."
+msgstr "আপনার এন্ডলেস OS ফাইলটিতে কোন সমস্যা হয়েছে।আবার ডাউনলোড করার চেষ্টা করতে \"আবার ডাউনলোড\" চাপুন।"
+
+#. The string in quotes should match MSG_328
+#, c-format
+msgctxt "MSG_325"
+msgid ""
+"Something went wrong writing Endless OS to your USB device. Find a different"
+" device and click \"Try Again\"."
+msgstr "আপনার USB ডিভাইসে এন্ডলেস OS যুক্ত করতে কোনো সমস্যা হয়েছে। অন্য একটি ডিভাইস অনুসন্ধান করুন এবং \"আবার চেষ্টা করুন\" চাপুন।"
+
+#, c-format
+msgctxt "MSG_358"
+msgid "Something went wrong installing Endless OS to your computer."
+msgstr "আপনার কম্পিউটারে এন্ডলেস OS সংস্থাপন করতে কোন সমস্যা হয়েছে।"
+
+#. This should match the string in quotes in MSG_323
+#, c-format
+msgctxt "MSG_326"
+msgid "Resume"
+msgstr "পুনরায়"
+
+#. This should match the string in quotes in MSG_324
+#, c-format
+msgctxt "MSG_327"
+msgid "Download again"
+msgstr "আবার ডাউনলোড"
+
+#. This should match the string in quotes in MSG_325
+#, c-format
+msgctxt "MSG_328"
+msgid "Try again"
+msgstr "আবার চেষ্টা করুন"
+
+#, c-format
+msgctxt "MSG_330"
+msgid ""
+"You have selected a slow USB device (USB 1.0). Please use a USB 3.0 device "
+"for the best experience."
+msgstr "আপনি একটি ধীরগতির USB ডিভাইস (USB 1.0) বেছে নিয়েছেন। আরো ভাল কাজ করাতে অনুগ্রহ করে USB 3.0 ডিভাইস ব্যবহার করুন।"
+
+#, c-format
+msgctxt "MSG_331"
+msgid ""
+"You have selected a slow USB device (USB 1.0). Please use a USB 2.0 device "
+"for a better experience."
+msgstr "আপনি একটি ধীরগতির USB ডিভাইস (USB 1.0) বেছে নিয়েছেন। আরো ভাল কাজ করাতে অনুগ্রহ করে USB 2.0 ডিভাইস ব্যবহার করুন।"
+
+#, c-format
+msgctxt "MSG_332"
+msgid ""
+"You have selected a slower USB device (USB 2.0). Please use a USB 3.0 device"
+" for the best experience."
+msgstr "আপনি একটি ধীরগতির USB ডিভাইস (USB 2.0) বেছে নিয়েছেন। আরো ভাল কাজ করাতে অনুগ্রহ করে USB 3.0 ডিভাইস ব্যবহার করুন।"
+
+#, c-format
+msgctxt "MSG_333"
+msgid ""
+"Your USB 3.0 device is inserted into a USB 2.0 port. Please insert it into a"
+" USB 3.0 port (usually blue) for the best experience."
+msgstr "আপনার USB 3.0 ডিভাইস আপনি একটি USB 2.0 পোর্টের সাথে সংযুক্ত করেছেন। আরো ভাল কাজ করাতে অনুগ্রহ করে একটি USB 3.0 পোর্টের (সাধারণত নীল) সাথে সংযুক্ত করুন।"
+
+#. Placeholders are:
+#. 1. drive (such as "C:\")
+#. 2. amount of space needed (eg "4.7GB")
+#, c-format
+msgctxt "MSG_334"
+msgid ""
+"There isn’t enough disk space on %s for downloading Endless OS. Please free "
+"up %s and click “Resume” to start downloading."
+msgstr ""
+
+#, c-format
+msgctxt "MSG_335"
+msgid ""
+"The selected version of Endless OS requires %s of free disk space, but only "
+"%s is available. Please free up some space on drive %s to continue."
+msgstr "নির্বাচিত এন্ডলেস OS ভার্সনটির জন্য ডিস্কে %s পরিমাণ খালি জায়গা প্রয়োজন, কিন্তু মাত্র %s পরিমাণ খালি আছে। চালিয়ে যেতে হলে অনুগ্রহ করে %s ড্রাইভে কিছু জায়গা খালি করুন।"
+
+#, c-format
+msgctxt "MSG_336"
+msgid "Delete the invalid file (%s)."
+msgstr "অকার্যকরী ফাইল (%s) মুছুন।"
+
+#. Placeholders are:
+#. 1. Basic/English/Spanish/..., as translated elsewhere
+#. 2. an amount of space, such as "32 GB"
+#, c-format
+msgctxt "MSG_337"
+msgid ""
+"For Endless OS %s, we recommend selecting at least %s of storage space."
+msgstr "এন্ডলেস OS %s -এর জন্য, কমপক্ষে %s সংরক্ষণ করার জায়গা থাকা সুপারিশ করা হচ্ছে।"
+
+#, c-format
+msgctxt "MSG_338"
+msgid "%s (Minimum)"
+msgstr "%s (কমপক্ষে)"
+
+#, c-format
+msgctxt "MSG_339"
+msgid "%s (Recommended)"
+msgstr "%s (সুপারিশকৃত)"
+
+#, c-format
+msgctxt "MSG_340"
+msgid "%s (Maximum)"
+msgstr "%s (সর্বোচ্চ)"
+
+#. Placeholders are:
+#. 1. free space on system drive
+#. 2. total size of system drive
+#. 3. drive letter of system drive (usually "C:")
+#. eg: "You currently have 120GB free on your 400GB C: drive."
+#, c-format
+msgctxt "MSG_341"
+msgid "You currently have %s free on your %s %s drive."
+msgstr "বর্তমানে আপনার %s %s ড্রাইভে %s খালি জায়গা আছে।"
+
+#, c-format
+msgctxt "MSG_342"
+msgid "Select how much of your %s drive to dedicate to Endless OS."
+msgstr "আপনার %s ড্রাইভের কতোটুকু এন্ডলেস OS -এর জন্য ব্যবহৃত হবে নির্বাচন করুন।"
+
+#, c-format
+msgctxt "MSG_350"
+msgid "Unfortunately, there is not enough storage space."
+msgstr "দুর্ভাগ্যক্রমে, সংরক্ষণ করার মতো যথেষ্ট খালি জায়গা নেই।"
+
+#, c-format
+msgctxt "MSG_351"
+msgid ""
+"To continue installing Endless OS, please free up at least %s by deleting "
+"videos, photos, or other large files on your %s drive."
+msgstr "এন্ডলেস OS সংস্থাপন চালিয়ে যেতে, অনুগ্রহ করে আপনার %s ড্রাইভ থেকে ভিডিও, ছবি বা অন্য কোন বড় আকারের ফাইল মুছে ফেলার মাধ্যমে কমপক্ষে %s জায়গা খালি করুন।"
+
+#, c-format
+msgctxt "MSG_352"
+msgid "Unfortunately, your %s drive uses an unsupported format."
+msgstr "দুর্ভাগ্যক্রমে, আপনার %s ড্রাইভ একটি অসমর্থিত ফরম্যাট ব্যবহার করছে।"
+
+#, c-format
+msgctxt "MSG_353"
+msgid "Endless OS can only be installed on an NTFS drive."
+msgstr "শুধুমাত্র NTFS ড্রাইভে এন্ডলেস OS  সংস্থাপিত হতে পারবে।"
+
+#, c-format
+msgctxt "MSG_354"
+msgid "Unfortunately, your computer is incompatible with Endless OS."
+msgstr "দুর্ভাগ্যক্রমে, আপনার কম্পিউটার এন্ডলেস OS -এর সাথে সামঞ্জস্যপূর্ণ নয়।"
+
+#, c-format
+msgctxt "MSG_355"
+msgid "Endless OS only supports 64-bit computers."
+msgstr "এন্ডলেস OS শুধুমাত্র 64-বিট কম্পিউটারসমূহে সমর্থিত।"
+
+#, c-format
+msgctxt "MSG_356"
+msgid "Unfortunately, your %s drive is encrypted."
+msgstr "দুর্ভাগ্যক্রমে, আপনার %s ড্রাইভ এনক্রিপ্ট করা।"
+
+#, c-format
+msgctxt "MSG_357"
+msgid ""
+"Endless OS cannot be installed on drives which are protected with Device "
+"Encryption or BitLocker."
+msgstr "এন্ডলেস ওএস এমন কোন ড্রাইভে ইনস্টল করা যাবে না যা ডিভাইস এনক্রিপশন না বিটলকার দিয়ে সুরক্ষিত। "
+
+#, c-format
+msgctxt "MSG_359"
+msgid "Unfortunately, your computer has another OS installed already."
+msgstr "দুর্ভাগ্যবশতঃ আপনার কম্পিউটারে অন্য ওএস ইনস্টল করা আছে এগে থেকেই। "
+
+#, c-format
+msgctxt "MSG_360"
+msgid "Endless OS only supports dual-boot on Windows-only systems."
+msgstr "এন্ডলেস ওস শুধু উইন্ডোজ আছে এমন সিস্টেমে দ্বৈত বুট সমর্থন করে। "
+
+#, c-format
+msgctxt "MSG_361"
+msgid ""
+"Are you sure you want to uninstall Endless OS? This will erase all apps and "
+"documents stored within your Endless OS installation."
+msgstr "আপনি নিশ্চিতভাবে এন্ডলেস ওএস আনইনস্টল করতে চান? এতে করে এন্ডলেস ওএস দিয়ে রাখা সব অ্যাপস আর ডকুমেন্ট মুছে যাবে। "
+
+#, c-format
+msgctxt "MSG_362"
+msgid "Endless OS has been uninstalled successfully"
+msgstr "এন্ডলেস ওএস সফলভাবে আনইনস্টল হয়েছে "
+
+#, c-format
+msgctxt "MSG_363"
+msgid ""
+"There was a problem uninstalling Endless OS. Please contact us for "
+"assistance."
+msgstr "এন্ডলেস ওএস আনইনস্টল করতে সমস্যা হচ্ছে। অনুগ্রহ করে আমাদের সাথে যোগাযোগ করুন সহায়তার জন্য। "
+
+#, c-format
+msgctxt "MSG_364"
+msgid "Uninstall Endless from this Computer"
+msgstr "এই কম্পিউটার থেকে এন্ডলেস আনইনস্টল করুন "
+
+#, c-format
+msgctxt "MSG_365"
+msgid ""
+"If you uninstall Endless, Windows will run automatically when you start your"
+" computer. Any apps and files stored in Endless will be erased."
+msgstr "আপনি যদি এন্ডলেস আনইনস্টল করেন, আপনি যখন কম্পিউটার চলু করবেন তখন উইন্ডোজ স্বয়ংক্রিয়ভাবে চালু হয়ে যাবে। এন্ডলেস দিয়ে রাখা সব অ্যাপস আর ডকুমেন্ট মুছে যাবে।  "
+
+#, c-format
+msgctxt "MSG_366"
+msgid "Uninstall Endless"
+msgstr "এন্ডলেস আনইনস্টল করুন "
+
+#, c-format
+msgctxt "MSG_367"
+msgid ""
+"Make sure you back up any important documents from Endless before you "
+"uninstall."
+msgstr "নিশ্চিত হোন যে আপনার গুরুত্বপূর্ণ ডকুমেন্টের ব্যাক আপ রেখেছেন এন্ডলেস আনইনস্টল করার আগে। "
+
+#, c-format
+msgctxt "MSG_368"
+msgid ""
+"Internet Explorer %d is not supported. Please click OK to download Internet "
+"Explorer %d, install it, then run the Endless Installer again."
+msgstr "ইন্টারনেট এক্সপ্লোরার %d সমর্থিত নয়। অনুগ্রহ করে ওকে চাপুন ইন্টারনেট এক্সপ্লোরার %d ডাউনলোড করতে, ইনস্টল করুন, তারপর এন্ডলেস ইনস্টলার পুনরায় চালু করতে। "
+
+#, c-format
+msgctxt "MSG_369"
+msgid "%s Download"
+msgstr "%s ডাউনলোড "
+
+#, c-format
+msgctxt "MSG_370"
+msgid "Oops, something went wrong setting up Endless OS."
+msgstr "ওহ, এন্ডলেস  ওএস সেট আপ করতে কোন একটা ভুল হয়েছে। "
+
+#, c-format
+msgctxt "MSG_372"
+msgid ""
+"No USB device found. If you've inserted one, try a different USB port or a "
+"different USB device."
+msgstr "কোন ইউএসবি ডিভাইস পাওয়া যায় নি। আপনি যদি কোন একটি প্রবেশ করিয়ে থাকেবন, তাহলে অন্য আরেকটি ইউএসবি পোর্ট বা অন্য কোন ইউএসবি দিয়ে চেষ্টা করুন। "
+
+#, c-format
+msgctxt "MSG_386"
+msgid "The Endless Installer requires Windows 7 or newer."
+msgstr ""
+
+#, c-format
+msgctxt "MSG_400"
+msgid "Basic"
+msgstr "প্রাথমিক"
+
+#, c-format
+msgctxt "MSG_401"
+msgid "English"
+msgstr "ইংরেজি"
+
+#, c-format
+msgctxt "MSG_402"
+msgid "Spanish"
+msgstr "স্প্যানিশ"
+
+#, c-format
+msgctxt "MSG_403"
+msgid "Portuguese (Brazilian)"
+msgstr "পর্তুগিজ (ব্রাজিলিয়ান)"
+
+#, c-format
+msgctxt "MSG_404"
+msgid "Arabic"
+msgstr "আরবি"
+
+#, c-format
+msgctxt "MSG_405"
+msgid "French"
+msgstr "ফ্রেঞ্চ"
+
+#, c-format
+msgctxt "MSG_406"
+msgid "Chinese Simplified"
+msgstr "সহজ চাইনিজ"
+
+#, c-format
+msgctxt "MSG_407"
+msgid "Bengali"
+msgstr "বাংলা"
+
+#, c-format
+msgctxt "MSG_408"
+msgid "Spanish (Guatemala)"
+msgstr "স্প্যানিশ (গুয়াতেমালা)"
+
+#, c-format
+msgctxt "MSG_409"
+msgid "Spanish (Mexico)"
+msgstr ""
+
+#, c-format
+msgctxt "MSG_410"
+msgid "Indonesian"
+msgstr ""
+
+#, c-format
+msgctxt "MSG_411"
+msgid "Thai"
+msgstr ""
+
+#, c-format
+msgctxt "MSG_412"
+msgid "Vietnamese"
+msgstr ""

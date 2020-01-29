@@ -1,0 +1,54 @@
+/* 
+Theoretically eot files will work for all versions of IE from 6 to latest (Edge at this point).
+If it doesn't make the binary too big it doesn't hurt to add the TTF files also in case MS decides to drop EOT support.
+We can of course take into consideration including woff files also.
+
+Unfortunately we need to define different names for the fonts based on font-weight because previous to IE9 IE doesn't know
+how to select the proper font based on element font-weight.
+*/
+
+/* Fonts CSS */
+@font-face {
+    font-family: Lato;
+    src:     url("res:/CUS/#120"); /* EOT file for IE6-8 */
+    src:     url('res:/CUS/#120?#iefix') format('embedded-opentype'), /* apparently for IE9, haven't seen any issues but doesn't hurt to have it*/
+             url('res:/CUS/#110') format('truetype'); /* TTF file for normal browsers IE9+ */
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: LatoMedium;
+    src:     url("res:/CUS/#121"); /* EOT file for IE6-8 */
+    src:     url('res:/CUS/#121?#iefix') format('embedded-opentype'), /* apparently for IE9, haven't seen any issues but doesn't hurt to have it*/
+             url('res:/CUS/#111') format('truetype'); /* TTF file for normal browsers IE9+ */
+    font-weight: 600;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: LatoBold;
+    src:     url("res:/CUS/#122"); /* EOT file for IE6-8 */
+    src:     url('res:/CUS/#122?#iefix') format('embedded-opentype'), /* apparently for IE9, haven't seen any issues but doesn't hurt to have it*/
+             url('res:/CUS/#112') format('truetype'); /* TTF file for normal browsers IE9+ */
+    font-weight: bold;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: LatoBlack;
+    src:     url("res:/CUS/#123"); /* EOT file for IE6-8 */
+    src:     url('res:/CUS/#123?#iefix') format('embedded-opentype'), /* apparently for IE9, haven't seen any issues but doesn't hurt to have it*/
+             url('res:/CUS/#113') format('truetype'); /* TTF file for normal browsers IE9+ */
+    font-weight: 900;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: LatoLight;
+    src:     url("res:/CUS/#124"); /* EOT file for IE6-8 */
+    src:     url('res:/CUS/#124?#iefix') format('embedded-opentype'), /* apparently for IE9, haven't seen any issues but doesn't hurt to have it*/
+             url('res:/CUS/#114') format('truetype'); /* TTF file for normal browsers IE9+ */
+    font-weight: 900;
+    font-style: normal;
+}

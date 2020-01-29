@@ -1,0 +1,103 @@
+#!/usr/bin/env python3
+
+import os
+import re
+
+# Script to parse the endless.loc file into a placeholder rufus.pot
+# that can be used with standard translation tools such as Transifex
+
+PO_DIR = os.path.dirname(__file__)
+LOC_FILE = os.path.normpath(os.path.join(
+    PO_DIR, '..', 'src', 'endless', 'res', 'endless.loc'))
+POT_FILE = os.path.join(PO_DIR, 'rufus.pot')
+
+PREAMBLE = '''# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\\n"
+"Report-Msgid-Bugs-To: \\n"
+"POT-Creation-Date: 2016-03-08 02:28+0000\\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\\n"
+"Language-Team: LANGUAGE <LL@li.org>\\n"
+"Language: \\n"
+"MIME-Version: 1.0\\n"
+"Content-Type: text/plain; charset=UTF-8\\n"
+"Content-Transfer-Encoding: 8bit\\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\\n"
+'''
+
+# Numbered strings outside 02x are used as arguments to printf.
+is_c_format_string_rx = re.compile(r'MSG_(\d+)$')
+def is_c_format_string(label):
+    m = is_c_format_string_rx.match(label)
+    return m is not None and not m.group(1).startswith('02')
+
+
+with open(LOC_FILE, 'r', encoding='utf-8') as loc_file, \
+     open(POT_FILE, 'w', newline='\n', encoding='utf-8') as pot_file:
+    pot_file.write(PREAMBLE)
+    found = False
+    in_debug_block = False
+    comments = []
+
+    for line in loc_file:
+        if line.startswith('g'):
+            # We found the last line before the start of strings
+            break
+    for line in loc_file:
+        if in_debug_block:
+            if line.startswith('#') and 'END NO NEED TO TRANSLATE' in line:
+                # We reached the end of the debug block
+                in_debug_block = False
+            continue
+        if line.startswith('l'):
+            # We found the start of translations for a language,
+            # so we can stop parsing
+            break
+        if line.startswith('t'):
+            # This is a string that needs translation
+            tokens = line.split()
+            label = tokens[1]
+            string = ' '.join(tokens[2:])
+
+            # Skip Endless Code-related strings, which are not yet finalized.
+            if 'Code' in string:
+                continue
+
+            if found:
+                # Close the previously found string
+                pot_file.write('msgstr ""\n')
+            pot_file.write('\n')
+
+            for comment in comments:
+                pot_file.write('#. {}\n'.format(comment))
+            comments = []
+
+            # TODO: find source locations for this string?
+
+            if is_c_format_string(label):
+                pot_file.write('#, c-format\n')
+            # Note the use of context rather than comments
+            # to allow duplicates of the same msgid
+            pot_file.write('msgctxt "' + label + '"\n')
+            pot_file.write('msgid ' + string + '\n')
+            found = True
+        elif line.strip().startswith('"'):
+            # This is a continuation of the previous string
+            pot_file.write(line.strip() + '\n')
+        elif line.startswith('#') and "NO NEED TO TRANSLATE" in line:
+            # This is the start of debug messages
+            # Exclude until the end marker
+            in_debug_block = True
+        elif line.startswith('#'):
+            comments.append(line[1:].strip())
+            
+    if found:
+        # Close the last found string
+        pot_file.write('msgstr ""\n')

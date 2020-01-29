@@ -1,0 +1,344 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Header Files\Rufus Headers">
+      <UniqueIdentifier>{c17b5888-430f-425f-9c1b-a2bbbbd25ad9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Rufus Sources">
+      <UniqueIdentifier>{e4f8130e-30b4-4470-afc7-4353abdbe67d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Images">
+      <UniqueIdentifier>{d0eb9995-ab80-4a76-b789-54ade241a598}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\json">
+      <UniqueIdentifier>{d9d02c0e-ffa3-47dc-af4d-ea54dc23f1a2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\gpt">
+      <UniqueIdentifier>{c0b7778b-6aae-455f-ba0c-8eb933a20b7b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gpt">
+      <UniqueIdentifier>{d7d3f9b4-b736-4776-913c-a241b6a15836}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\pgp">
+      <UniqueIdentifier>{641ee531-0e36-4d3a-a0ff-c5652a56006d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\pgp">
+      <UniqueIdentifier>{d407e9f3-1a5a-4e7c-a316-bad5af8b4dce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Fonts">
+      <UniqueIdentifier>{eb816419-08c4-478e-975e-0f629f716a0a}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="EndlessUsbTool.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EndlessUsbToolDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\msapi_utf8.h">
+      <Filter>Header Files\Rufus Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\localization.h">
+      <Filter>Header Files\Rufus Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\rufus.h">
+      <Filter>Header Files\Rufus Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="localization_data.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\usb.h">
+      <Filter>Header Files\Rufus Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\drive.h">
+      <Filter>Header Files\Rufus Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\smart.h">
+      <Filter>Header Files\Rufus Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dos.h">
+      <Filter>Header Files\Rufus Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\format.h">
+      <Filter>Header Files\Rufus Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="DownloadManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="json\json-forwards.h">
+      <Filter>Header Files\json</Filter>
+    </ClInclude>
+    <ClInclude Include="json\json.h">
+      <Filter>Header Files\json</Filter>
+    </ClInclude>
+    <ClInclude Include="gpt\gpt.h">
+      <Filter>Header Files\gpt</Filter>
+    </ClInclude>
+    <ClInclude Include="gpt\gpt_errors.h">
+      <Filter>Header Files\gpt</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneralCode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PGPSignature.h">
+      <Filter>Header Files\pgp</Filter>
+    </ClInclude>
+    <ClInclude Include="Version.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="gpt\crc32.h">
+      <Filter>Header Files\gpt</Filter>
+    </ClInclude>
+    <ClInclude Include="WindowsUsbDefines.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Analytics.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="StringHelperMethods.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Images.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EndlessISO.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ImageSigningKey.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WMI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Eosldr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Log2LL.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="UEFIBootSetup.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IOUtil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="EndlessUsbTool.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="EndlessUsbToolDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\stdfn.c">
+      <Filter>Source Files\Rufus Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\localization.c">
+      <Filter>Source Files\Rufus Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\stdio.c">
+      <Filter>Source Files\Rufus Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\parser.c">
+      <Filter>Source Files\Rufus Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\usb.c">
+      <Filter>Source Files\Rufus Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\smart.c">
+      <Filter>Source Files\Rufus Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\drive.c">
+      <Filter>Source Files\Rufus Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\format.c">
+      <Filter>Source Files\Rufus Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\dos.c">
+      <Filter>Source Files\Rufus Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\dos_locale.c">
+      <Filter>Source Files\Rufus Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\iso.c">
+      <Filter>Source Files\Rufus Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\syslinux.c">
+      <Filter>Source Files\Rufus Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\icon.c">
+      <Filter>Source Files\Rufus Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\vhd.c">
+      <Filter>Source Files\Rufus Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\badblocks.c">
+      <Filter>Source Files\Rufus Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\stdlg.c">
+      <Filter>Source Files\Rufus Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="DownloadManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jsoncpp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="gpt\gpt.c">
+      <Filter>Source Files\gpt</Filter>
+    </ClCompile>
+    <ClCompile Include="PGPSignature.cpp">
+      <Filter>Source Files\pgp</Filter>
+    </ClCompile>
+    <ClCompile Include="gpt\crc32.c">
+      <Filter>Source Files\gpt</Filter>
+    </ClCompile>
+    <ClCompile Include="Analytics.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="UEFIBootSetup.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="StringHelperMethods.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Images.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="EndlessISO.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneralCode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WMI.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Eosldr.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="IOUtil.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\EndlessUsbTool.rc2">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\EndlessUsbTool.css">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\EndlessUsbTool.htm">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\EndlessUsbTool.js">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\fonts\eot\Lato-Black.eot">
+      <Filter>Resource Files\Fonts</Filter>
+    </None>
+    <None Include="res\fonts\eot\Lato-Bold.eot">
+      <Filter>Resource Files\Fonts</Filter>
+    </None>
+    <None Include="res\fonts\eot\Lato-Light.eot">
+      <Filter>Resource Files\Fonts</Filter>
+    </None>
+    <None Include="res\fonts\eot\Lato-Medium.eot">
+      <Filter>Resource Files\Fonts</Filter>
+    </None>
+    <None Include="res\fonts\eot\Lato-Regular.eot">
+      <Filter>Resource Files\Fonts</Filter>
+    </None>
+    <None Include="res\EndlessFonts.css">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\endless.loc">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="GenerateVersion.ps1" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="EndlessUsbTool.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\EndlessUsbTool.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\images\checked_sign.png">
+      <Filter>Resource Files\Images</Filter>
+    </Image>
+    <Image Include="res\images\left_panel_image.png">
+      <Filter>Resource Files\Images</Filter>
+    </Image>
+    <Image Include="res\images\magnifying_glass.png">
+      <Filter>Resource Files\Images</Filter>
+    </Image>
+    <Image Include="res\images\right_panel_image.png">
+      <Filter>Resource Files\Images</Filter>
+    </Image>
+    <Image Include="res\images\secure_boot.png">
+      <Filter>Resource Files\Images</Filter>
+    </Image>
+    <Image Include="res\images\warning_sign.png">
+      <Filter>Resource Files\Images</Filter>
+    </Image>
+    <Image Include="res\images\wizard_page_indicator.png">
+      <Filter>Resource Files\Images</Filter>
+    </Image>
+    <Image Include="res\images\wizard_page_indicator_selected.png">
+      <Filter>Resource Files\Images</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="EndlessUsbTool.manifest">
+      <Filter>Resource Files</Filter>
+    </Manifest>
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="res\fonts\ttf\Lato-Black.ttf">
+      <Filter>Resource Files\Fonts</Filter>
+    </Font>
+    <Font Include="res\fonts\ttf\Lato-Bold.ttf">
+      <Filter>Resource Files\Fonts</Filter>
+    </Font>
+    <Font Include="res\fonts\ttf\Lato-Light.ttf">
+      <Filter>Resource Files\Fonts</Filter>
+    </Font>
+    <Font Include="res\fonts\ttf\Lato-Medium.ttf">
+      <Filter>Resource Files\Fonts</Filter>
+    </Font>
+    <Font Include="res\fonts\ttf\Lato-Regular.ttf">
+      <Filter>Resource Files\Fonts</Filter>
+    </Font>
+  </ItemGroup>
+</Project>
