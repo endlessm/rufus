@@ -1,0 +1,261 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+#include "version.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#ifndef APSTUDIO_INVOKED
+#include "targetver.h"
+#endif
+#include "afxres.h"
+#include "verrsrc.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (United States) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#ifndef APSTUDIO_INVOKED\r\n"
+    "#include ""targetver.h""\r\n"
+    "#endif\r\n"
+    "#include ""afxres.h""\r\n"
+    "#include ""verrsrc.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)\r\n"
+    "LANGUAGE 9, 1\r\n"
+    "#include ""res\\EndlessUsbTool.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""afxres.rc""      // Standard components\r\n"
+    "#if !defined(_AFXDLL)\r\n"
+    "#include ""afxribbon.rc""   // MFC ribbon and control bar resources\r\n"
+    "#endif\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON                    "res/EndlessUsbTool.ico"
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// HTML
+//
+
+IDR_HTML_ENDLESSUSBTOOL_DIALOG HTML                    "res/EndlessUsbTool.htm"
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// CUS
+//
+
+IDR_HTML_ENDLESSUSBTOOL_CSS CUS                     "res/EndlessUsbTool.css"
+
+IDR_HTML_FONTS_CSS      CUS                     "res/EndlessFonts.css"
+
+IDR_HTML_ENDLESSUSBTOOL_JS CUS                     "res/EndlessUsbTool.js"
+
+IDR_HTML_EOT_REGULAR    CUS                     "res/fonts/eot/Lato-Regular.eot"
+
+IDR_HTML_EOT_MEDIUM     CUS                     "res/fonts/eot/Lato-Medium.eot"
+
+IDR_HTML_EOT_BOLD       CUS                     "res/fonts/eot/Lato-Bold.eot"
+
+IDR_HTML_EOT_BLACK      CUS                     "res/fonts/eot/Lato-Black.eot"
+
+IDR_HTML_EOT_LIGHT      CUS                     "res/fonts/eot/Lato-Light.eot"
+
+IDR_HTML_TTF_REGULAR    CUS                     "res/fonts/ttf/Lato-Regular.ttf"
+
+IDR_HTML_TTF_MEDIUM     CUS                     "res/fonts/ttf/Lato-Medium.ttf"
+
+IDR_HTML_TTF_BOLD       CUS                     "res/fonts/ttf/Lato-Bold.ttf"
+
+IDR_HTML_TTF_BLACK      CUS                     "res/fonts/ttf/Lato-Black.ttf"
+
+IDR_HTML_TTF_LIGHT      CUS                     "res/fonts/ttf/Lato-Light.ttf"
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// IMG
+//
+
+IDR_IMG_PAGE_INDICATOR  IMG                     "res/images/wizard_page_indicator.png"
+
+IDR_IMG_PAGE_INDICATOR_SEL IMG                     "res/images/wizard_page_indicator_selected.png"
+
+IDR_IMG_LEFT_PANEL_IMAGE IMG                     "res/images/left_panel_image.png"
+
+IDR_IMG_RIGHT_PANEL_IMAGE IMG                     "res/images/right_panel_image.png"
+
+IDR_IMG_SOFTWARE_SCREENS     IMG                     "res/images/software_screens.png"
+
+IDR_IMG_CHECKED         IMG                     "res/images/checked_sign.png"
+
+IDR_IMG_WARNING         IMG                     "res/images/warning_sign.png"
+
+IDR_IMG_CLOSE_WINDOW         IMG                "res/images/close_window.png"
+
+IDR_IMG_ENDLESS_LOGO         IMG                "res/images/Endless_mark_orange_85.png"
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// RCDATA
+//
+
+IDR_LC_ENDLESS_LOC      RCDATA                  "res/endless.loc"
+
+IDR_UEFI_NTFS           RCDATA                  "../../res/uefi/uefi-ntfs.img"
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ENDLESSUSBTOOL_DIALOG DIALOGEX 0, 0, 339, 250
+STYLE DS_SETFONT | DS_FIXEDSYS | DS_CENTER | WS_POPUP
+EXSTYLE WS_EX_APPWINDOW
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    CONTROL         "Bootable",IDC_BOOT,"Button",BS_AUTOCHECKBOX | NOT WS_VISIBLE,15,16,44,10
+    CONTROL         "Quick format",IDC_QUICK_FORMAT,"Button",BS_AUTOCHECKBOX | NOT WS_VISIBLE,18,33,57,10
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION RELEASE_VER_MAIN, RELEASE_VER_MAIN2, RELEASE_VER_SUB, RELEASE_VER_SUB2
+ PRODUCTVERSION RELEASE_VER_MAIN, RELEASE_VER_MAIN2, RELEASE_VER_SUB, RELEASE_VER_SUB2
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x40004L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "CompanyName", "Endless Mobile"
+            VALUE "FileDescription", "Endless Installer"
+            VALUE "FileVersion", RELEASE_VER_STR "\0"
+            VALUE "InternalName", "endless-installer.exe"
+            VALUE "LegalCopyright", "Endless Mobile, Inc."
+            VALUE "OriginalFilename", "endless-installer.exe"
+            VALUE "ProductName", "Endless Installer"
+            VALUE "ProductVersion", RELEASE_VER_STR "\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO
+BEGIN
+    IDD_ENDLESSUSBTOOL_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 332
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 243
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// AFX_DIALOG_LAYOUT
+//
+
+IDD_ENDLESSUSBTOOL_DIALOG AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+#endif    // English (United States) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+LANGUAGE 9, 1
+#include "res\EndlessUsbTool.rc2"  // non-Microsoft Visual C++ edited resources
+#include "afxres.rc"      // Standard components
+#if !defined(_AFXDLL)
+#include "afxribbon.rc"   // MFC ribbon and control bar resources
+#endif
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

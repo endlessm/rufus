@@ -1,0 +1,786 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# 
+# Translators:
+# Roddy Shuler <roddy@stanfordalumni.org>, 2016-2017
+# Will Thompson <wjt@endlessm.com>, 2017-2018
+msgid ""
+msgstr ""
+"Project-Id-Version: rufus\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-03-08 02:28+0000\n"
+"PO-Revision-Date: 2018-06-19 22:26+0000\n"
+"Last-Translator: Roddy Shuler <roddy@stanfordalumni.org>\n"
+"Language-Team: Arabic (http://www.transifex.com/endless-os/rufus/language/ar/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: ar\n"
+"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
+
+msgctxt "AdvancedPageTitle"
+msgid "Advanced Install Options"
+msgstr "خيارات التثبيت المتقدمة"
+
+msgctxt "AdvancedPagePreviousButton"
+msgid "Previous"
+msgstr "السابق"
+
+msgctxt "LiveUsbButton"
+msgid "Create Live USB"
+msgstr "إنشاء فلاشة USB حية"
+
+msgctxt "LiveUsbText"
+msgid "Try Endless OS by running it from a USB stick."
+msgstr "جرِّب نظام تشغيل Endless OS من خلال تشغيله من فلاشة USB."
+
+msgctxt "ReformatterUsbButton"
+msgid "Create Reformatter USB"
+msgstr "إنشاء وحدة إعادة التهيئة Reformatter USB"
+
+msgctxt "ReformatterUsbText"
+msgid "Reformat any computer with Endless OS using a USB stick."
+msgstr "أعد تهيئة أي جهاز كمبيوتر بنظام  Endless OS وذلك باستخدام وحدة تخزين USB."
+
+msgctxt "SelectFilePreviousButton"
+msgid "Previous"
+msgstr "السابق"
+
+msgctxt "SelectFileNextButton"
+msgid "Next"
+msgstr "التالي"
+
+msgctxt "SelectFilePageTitle"
+msgid "Select Your Endless OS Version"
+msgstr "حدد إصدار Endless OS الخاص بك"
+
+msgctxt "SelectFileSubtitle"
+msgid "Choose the version of Endless OS that’s best for you."
+msgstr "اختر إصدار نظام تشغيل Endless OS الأفضل بالنسبة لك."
+
+msgctxt "NoInternetConnectionTitle"
+msgid "Unfortunately, there was a problem connecting to the server."
+msgstr "للأسف، هناك مشكلة في الاتصال بالخادم."
+
+msgctxt "NoInternetConnectionSubtitle"
+msgid ""
+"Make sure you're <a id='ConnectedLink'>connected to the internet</a>, and if"
+" the problem persists, visit our <a id='ConnectedSupportLink'>support</a>."
+msgstr "تأكد من أنك <a id='ConnectedLink'>متصل بالإنترنت</a>، وإذا استمرت المشكلة، تفضل بزيارة صفحة <a id='ConnectedSupportLink'>الدعم</a> الخاصة بنا."
+
+msgctxt "ExistingImageFile"
+msgid "Use existing image file:"
+msgstr "استخدِم ملف الصورة الموجود:"
+
+msgctxt "DownloadNewImage"
+msgid "Download a new version:"
+msgstr "تنزيل إصدارٍ جديد:"
+
+msgctxt "LightVersionText"
+msgid "BASIC"
+msgstr "الإصدار الأساسي"
+
+msgctxt "LightDownloadDescription"
+msgid ""
+"Includes basic features of Endless OS and the option to download more apps "
+"and content later. This version is best for computers with reliable internet"
+" access."
+msgstr "يتضمن الميّزات الأساسية لنظام تشغيل Endless OS وخيار تنزيّل المزيد من التطبيقات والمحتوى في وقتٍ لاحق. هذا الإصدار أفضل إصدار لأجهزة الكمبيوتر ذات الاتصال القوي والآمن بالإنترنت."
+
+#. This means "Download [the] Basic Version [of Endless OS]". Use the same
+#. translation as for the "BASIC" string.
+msgctxt "DownloadLightButton"
+msgid "Download Basic Version"
+msgstr "تنزيل الإصدار الأساسي"
+
+msgctxt "FullVersionText"
+msgid "FULL"
+msgstr "الإصدار الكامل"
+
+msgctxt "FullDownloadDescription"
+msgid ""
+"Includes full Endless OS, preloaded with more than 100 apps and content. "
+"This version is ideal for computers without reliable internet access. Choose"
+" language for content and apps:"
+msgstr "يتضمن نظام تشغيل Endless OS الكامل أكثر من 100 تطبيق ومحتوى تم تحميله مسبقاً. هذا الإصدار هو الإصدار المثالي لأجهزة الكمبيوتر التي تعمل بدون اتصال قوي وآمن بالإنترنت. اختر لغة المحتوى والتطبيقات:"
+
+#. This means "Download [the] Full Version [of Endless OS]". Use the same
+#. translation as for the "FULL" string.
+msgctxt "DownloadFullButton"
+msgid "Download Full Version"
+msgstr "تنزيل الإصدار الكامل"
+
+msgctxt "SelectUSBPreviousButton"
+msgid "Previous"
+msgstr "السابق"
+
+msgctxt "SelectUSBNextButton"
+msgid "Next"
+msgstr "التالي"
+
+msgctxt "SelectUSBPageTitle"
+msgid "Select USB Drive"
+msgstr "حدد محرك أقراص USB"
+
+msgctxt "SelectUSBSubtitle"
+msgid "Choose the USB device you would like to use."
+msgstr "اختر جهاز USB الذي ترغب في استخدامه."
+
+msgctxt "USBDisksFound"
+msgid "USB drive found:"
+msgstr "لقد تم العثور على محرك أقراص USB:"
+
+msgctxt "NewDiskNameLabel"
+msgid "New USB device contents:"
+msgstr "محتويات جهاز USB الجديدة:"
+
+msgctxt "NewDiskSizeLabel"
+msgid "Size:"
+msgstr "الحجم:"
+
+msgctxt "AgreementCheckboxText"
+msgid ""
+"I understand that this will <b>erase all my files</b> on the USB device."
+msgstr "إنني أدرك أن هذا سوف يقوم بـ <b> مسح جميع ملفاتي</b> من على جهاز USB."
+
+msgctxt "InstallingPageTitle"
+msgid "Endless OS"
+msgstr "نظام تشغيل Endless OS"
+
+msgctxt "InstallCancelButton"
+msgid "Cancel"
+msgstr "إلغاء"
+
+msgctxt "ThankYouPageTitle"
+msgid "Thank you"
+msgstr "شكراً لك"
+
+msgctxt "CloseAppButton"
+msgid "Close"
+msgstr "غلق"
+
+msgctxt "InstallerVersion"
+msgid "Version:"
+msgstr "الإصدار:"
+
+msgctxt "InstallerLanguage"
+msgid "Language:"
+msgstr "اللغة:"
+
+msgctxt "InstallerContent"
+msgid "Content:"
+msgstr "المحتوى:"
+
+msgctxt "ThankYouDualBootReminder"
+msgid "Restart your computer and select \"Endless OS\" from the menu."
+msgstr "قُم بإعادة تشغيل جهاز الكمبيوتر الخاص بك وحدد نظام تشغيل \"Endless OS\" من القائمة."
+
+msgctxt "ThankYouLiveReminder"
+msgid "To try Endless OS now, restart your computer."
+msgstr "لتجربة نظام تشغيل Endless OS الآن، قم بإعادة تشغيل جهاز الكمبيوتر الخاص بك."
+
+msgctxt "ThankYouReflasherReminder"
+msgid "Now you're ready to install Endless OS on more computers."
+msgstr "أنت الآن جاهز لتثبيت نظام تشغيل Endless OS على أكثر من جهاز كمبيوتر واحد."
+
+msgctxt "UsbBootHowToLink"
+msgid "How to start your computer from a USB stick."
+msgstr "كيف يمكنك بدء تشغيل جهاز الكمبيوتر الخاص بك من فلاشة USB."
+
+msgctxt "ErrorPageTitle"
+msgid "Error"
+msgstr "خطأ"
+
+msgctxt "CloseAppButton1"
+msgid "Finish"
+msgstr "إنهاء"
+
+msgctxt "ErrorMessage"
+msgid "Oops, something went wrong setting up Endless OS."
+msgstr "عذراً، لقد حدث خطأ ما أثناء تثبيت نظام تشغيل Endless OS."
+
+msgctxt "EndlessSupportContainer"
+msgid ""
+"If you keep having trouble, you can get help on the <a "
+"id='EndlessSupport'>Endless community forum</a>."
+msgstr "اذا كنت لا تزال تواجه مشكلةً، يمكنك الحصول على المساعدة على <a id='EndlessSupport'>منتدى مجتمع Endless</a>."
+
+msgctxt "DualBootPageTitle"
+msgid "Endless OS"
+msgstr "نظام تشغيل Endless OS"
+
+msgctxt "DualBootContentTitle"
+msgid "Download and Install Endless on this Computer"
+msgstr "تنزيل وتثبيت Endless على هذا الكمبيوتر"
+
+msgctxt "DualBootContentDescription"
+msgid ""
+"Each time you start your computer, you will be able to choose between "
+"Endless and Windows. Your apps and files on Windows will not be affected."
+msgstr "في كل مرةٍ تقوم فيها بتشغيل الكمبيوتر الخاص بك، سيكون بمقدورك الاختيار بين Endless وWindows. ولن تتأثر بذلك ملفات ولا تطبيقات Windows لديك."
+
+msgctxt "DualBootInstallButton"
+msgid "Install Endless"
+msgstr "تثبيت Endless"
+
+msgctxt "DualBootRecommendation"
+msgid "Recommended: At least 32 GB of free space on the system drive."
+msgstr "ينصح بـ: ألا تقل المساحة التخزينية المتاحة على محرك أقراص النظام عن 32 جيجا بايت."
+
+msgctxt "AdvancedOptionsText"
+msgid ""
+"For advanced install options using an <b>Endless USB Stick</b>, <a "
+"id='AdvancedOptionsLink'>click here</a>."
+msgstr "للحصول على خيارات التثبيت المتقدمة باستخدام <b>Endless USB Stick</b>، <a id='AdvancedOptionsLink'> انقر هنا </a>."
+
+msgctxt "PrivacyPolicyText"
+msgid ""
+"We collect anonymous data to improve this installer for everybody. <a "
+"id='PrivacyPolicyLink'>Click here</a> for more information, and to learn how"
+" to opt out."
+msgstr "نحن نقوم بجمع بيانات مجهولة الهوية لتحسين برنامج التثبيت هذا للجميع. <a id='PrivacyPolicyLink'>انقر هنا</a> لمزيد من المعلومات ولمعرفة كيفية عدم المشاركة."
+
+msgctxt "SelectStorageNextButton"
+msgid "Next"
+msgstr "التالي"
+
+msgctxt "SelectStoragePreviousButton"
+msgid "Previous"
+msgstr "السابق"
+
+msgctxt "SelectStoragePageTitle"
+msgid "Storage Space for Endless OS"
+msgstr "المساحة التخزينية التي يحتاج إليها نظام تشغيل Endless OS"
+
+msgctxt "StorageAgreementText"
+msgid ""
+"Note: We recommend backing up any important files before continuing. Should "
+"you experience any problems with your computer after installation, you can "
+"find help at <a id='StorageSupportLink'>Endless Support</a>."
+msgstr "ملاحظة: إننا ننصح بعمل نسخة احتياطية لأية ملفات مهمة قبل المتابعة. حيث أنك قد تواجه مشكلات مع جهاز الكمبيوتر الخاص بك بعد التثبيت وإذا واجهت أية مشكلة، يمكنك الحصول على المساعدة من <a id='StorageSupportLink'> فريق دعم Endless </a>."
+
+msgctxt "DualBootLanguageLabel"
+msgid "Select Language"
+msgstr "حدد اللغة"
+
+msgctxt "AdvancedInstallReminder"
+msgid ""
+"To create an Endless USB Stick you will need a USB device with at least 8 GB"
+" of storage space."
+msgstr "لإنشاء Endless USB Stick فإنك سوف تحتاج إلى جهاز USB لا تقل مساحته التخزينية عن 8 جيجا بايت."
+
+msgctxt "AdvancedOptionsSubtitle"
+msgid "With an <b>Endless USB Stick</b> you can:"
+msgstr "يمكنك من خلال <b>Endless USB Stick</b>:"
+
+msgctxt "CombinedUsbButton"
+msgid "Create Endless USB Stick"
+msgstr "إنشاء وحدة تخزين Endless USB Stick"
+
+msgctxt "USBLearnMore"
+msgid "Learn more about the Endless USB Stick"
+msgstr "تعلم المزيد عن Endless USB Stick"
+
+#. *Short* size names. These can be used as suffixes
+msgctxt "MSG_020"
+msgid "bytes"
+msgstr "بايت"
+
+msgctxt "MSG_021"
+msgid "KB"
+msgstr "كيلو بايت"
+
+msgctxt "MSG_022"
+msgid "MB"
+msgstr "ميجاباييت"
+
+msgctxt "MSG_023"
+msgid "GB"
+msgstr "جيجا بايت"
+
+msgctxt "MSG_024"
+msgid "TB"
+msgstr "تيرا بايت"
+
+msgctxt "MSG_025"
+msgid "PB"
+msgstr "PB"
+
+#, c-format
+msgctxt "MSG_045"
+msgid "USB Storage Device (Generic)"
+msgstr "جهاز تخزين USB (فلاش)"
+
+#. Used for USB drives that don't have a drive letter. Placeholders are:
+#. 1. a name for the disk (such as "SanDisk Ultra")
+#. 2. the disk number (normally a low number like 2 or 3)
+#. 3. the disk's size (such as "16 Gb")
+#, c-format
+msgctxt "MSG_046"
+msgid "%s (Disk %d) [%s]"
+msgstr "%s (القرص %d) [%s]"
+
+#. Used when a drive is detected that contains more than one partition
+#, c-format
+msgctxt "MSG_047"
+msgid "Multiple Partitions"
+msgstr "تقسيمات متعددة"
+
+#, c-format
+msgctxt "MSG_049"
+msgid "Endless - Cancellation"
+msgstr "إلغاء - Endless"
+
+#, c-format
+msgctxt "MSG_095"
+msgid "Endless Image"
+msgstr "صورة Endless"
+
+#, c-format
+msgctxt "MSG_105"
+msgid ""
+"Warning: Cancelling may cause the device to malfunction. If you are sure you"
+" want to cancel, click YES. Otherwise, click NO."
+msgstr "تحذير: قد يؤدي إلغاء التثبيت إلى تعطيل الجهاز. إذا كنت متأكداً من أنك تريد الإلغاء، انقر نعم. أما خلاف ذلك، فانقر لا."
+
+#, c-format
+msgctxt "MSG_107"
+msgid "All files"
+msgstr "كل الملفات"
+
+#, c-format
+msgctxt "MSG_201"
+msgid "Cancelling, please wait"
+msgstr "جاري الإلغاء، يُرجى الانتظار"
+
+#, c-format
+msgctxt "MSG_300"
+msgid "Error downloading file."
+msgstr "حدث خطأ أثناء تنزيل الملف."
+
+#. Download progress. Placeholders:
+#. 1. size downloaded (such as 1.2Gb)
+#. 2. total size (such as 11.6Gb)
+#. 3. download speed (such as 100Mb/s, except the "/s" is part of this string,
+#. not the placeholder)
+#, c-format
+msgctxt "MSG_302"
+msgid "%s of %s (%s/s)"
+msgstr "%s من %s (%s/s)"
+
+#, c-format
+msgctxt "MSG_304"
+msgid "Downloading"
+msgstr "جاري التنزيل"
+
+#. Displayed alongside MSG_306. Placeholders:
+#. 1. the step number (typically 1, 2 or 3)
+#, c-format
+msgctxt "MSG_305"
+msgid "Step %d"
+msgstr "الخطوة %d"
+
+#. Displayed alongside MSG_305. Placeholders:
+#. 1. the number of steps (typically 2 or 3)
+#, c-format
+msgctxt "MSG_306"
+msgid "of %d:"
+msgstr "من %d:"
+
+#, c-format
+msgctxt "MSG_307"
+msgid "No Label"
+msgstr "بدون علامة"
+
+#, c-format
+msgctxt "MSG_309"
+msgid "Installing"
+msgstr "جاري التثبيت"
+
+#, c-format
+msgctxt "MSG_310"
+msgid "Verifying"
+msgstr "جاري التحقق "
+
+#, c-format
+msgctxt "MSG_311"
+msgid "Writing"
+msgstr "جاري  الكتابة"
+
+#. Locale ID for https://support.endlessm.com/ URLs, in lower-case. Check
+#. https://support.zendesk.com/hc/en-us/articles/203761906 to find the right
+#. one for this language. For example, Simplified Chinese should use "zh-cn".
+#. (For historical reasons, the Brazilian Portuguese translation should use
+#. "pt", not "pt-br".) If your language is not listed there, use "en-us".
+#, c-format
+msgctxt "MSG_317"
+msgid "en-us"
+msgstr "ar"
+
+#, c-format
+msgctxt "MSG_315"
+msgid "%s/%s Download"
+msgstr "تنزيل %s/%s"
+
+#, c-format
+msgctxt "MSG_316"
+msgid "Full"
+msgstr "Full"
+
+#, c-format
+msgctxt "MSG_319"
+msgid "%s (%s)"
+msgstr "%s (%s)"
+
+#, c-format
+msgctxt "MSG_320"
+msgid "Great! Endless OS has been successfully installed."
+msgstr "رائع! لقد تم تثبيت نظام تشغيل Endless OS بنجاح."
+
+#, c-format
+msgctxt "MSG_343"
+msgid "Great! Your Endless OS Live USB has been created."
+msgstr "رائع! لقد تم إنشاء Endless OS Live USB الخاص بك."
+
+#, c-format
+msgctxt "MSG_344"
+msgid "Great! Your Endless OS Reformatter USB has been created."
+msgstr "رائع! لقد تم إنشاء USB المسئول عن إعادة تنسيق نظام تشغيل Endless OS الخاص بك."
+
+#, c-format
+msgctxt "MSG_321"
+msgid "Select Your Endless OS Version"
+msgstr "حدد إصدار Endless OS الخاص بك"
+
+#, c-format
+msgctxt "MSG_322"
+msgid "Is this the version you’d like to use? If not, select another."
+msgstr "هل هذا هو الإصدار الذي ترغب في استخدامه؟ إن لم يكن كذلك، حدد إصداراً آخراً."
+
+#. The string in quotes should match MSG_326
+#, c-format
+msgctxt "MSG_323"
+msgid ""
+"We couldn’t finish getting Endless OS. Check your internet connection and "
+"click \"Resume\" to carry on downloading."
+msgstr "لم نتمكن من الانتهاء من الحصول على نظام تشغيل Endless OS. تحقق من اتصالك بالإنترنت وانقر على \"استئناف\" للاستمرار في التنزيل."
+
+#. The string in quotes should match MSG_327
+#, c-format
+msgctxt "MSG_324"
+msgid ""
+"Something is wrong with your Endless OS file. Click \"Download Again\" to "
+"try downloading it again."
+msgstr "هناك خطأ ما في ملف نظام تشغيل Endless OS الخاص بك. انقر على \"التنزيل مرة أخرى\" لإعادة تنزيل الملف مرةً أخرى."
+
+#. The string in quotes should match MSG_328
+#, c-format
+msgctxt "MSG_325"
+msgid ""
+"Something went wrong writing Endless OS to your USB device. Find a different"
+" device and click \"Try Again\"."
+msgstr "لقد حدث خطأ ما أثناء كتابة نظام تشغيل Endless OS على جهاز USB الخاص بك. اعثر على جهازٍ مختلف وانقر على زر \"حاوِل مرةً أخرى\"."
+
+#, c-format
+msgctxt "MSG_358"
+msgid "Something went wrong installing Endless OS to your computer."
+msgstr "لقد حدث خطأ ما أثناء تثبيت نظام تشغيل Endless OS على جهاز الكمبيوتر الخاص بك."
+
+#. This should match the string in quotes in MSG_323
+#, c-format
+msgctxt "MSG_326"
+msgid "Resume"
+msgstr "استئناف"
+
+#. This should match the string in quotes in MSG_324
+#, c-format
+msgctxt "MSG_327"
+msgid "Download again"
+msgstr "تنزيل مرةً أخرى"
+
+#. This should match the string in quotes in MSG_325
+#, c-format
+msgctxt "MSG_328"
+msgid "Try again"
+msgstr "حاوِل مرةً أخرى"
+
+#, c-format
+msgctxt "MSG_330"
+msgid ""
+"You have selected a slow USB device (USB 1.0). Please use a USB 3.0 device "
+"for the best experience."
+msgstr "لقد قمت بتحديد جهاز USB بطيء (USB 1.0). يُرجى استخدام جهاز USB 3.0 من أجل الحصول على أفضل تجربة استخدام."
+
+#, c-format
+msgctxt "MSG_331"
+msgid ""
+"You have selected a slow USB device (USB 1.0). Please use a USB 2.0 device "
+"for a better experience."
+msgstr "لقد حددت جهاز USB بطيء (USB 1.0). يرجى استخدام جهاز USB 2.0 للحصول على تجربة استخدام أفضل."
+
+#, c-format
+msgctxt "MSG_332"
+msgid ""
+"You have selected a slower USB device (USB 2.0). Please use a USB 3.0 device"
+" for the best experience."
+msgstr "لقد قمت بتحديد جهاز USB أبطأ (USB 2.0). يُرجى استخدام جهاز USB 3.0 من أجل الحصول على أفضل تجربة استخدام."
+
+#, c-format
+msgctxt "MSG_333"
+msgid ""
+"Your USB 3.0 device is inserted into a USB 2.0 port. Please insert it into a"
+" USB 3.0 port (usually blue) for the best experience."
+msgstr "لقد تم إدخال جهاز USB 3.0 الخاص بك في منفذ USB 2.0. يرجى إدخاله في منفذ USB 3.0 (الذي يكون لونه عادةً أزرق) للحصول على أفضل تجربة استخدام."
+
+#. Placeholders are:
+#. 1. drive (such as "C:\")
+#. 2. amount of space needed (eg "4.7GB")
+#, c-format
+msgctxt "MSG_334"
+msgid ""
+"There isn’t enough disk space on %s for downloading Endless OS. Please free "
+"up %s and click “Resume” to start downloading."
+msgstr "لا توجد مساحة قرص كافية على %s لتنزيل Endless OS، فيُرجى توفير مساحة %s والنقر على \"استئناف\" لبدء التنزيل."
+
+#, c-format
+msgctxt "MSG_335"
+msgid ""
+"The selected version of Endless OS requires %s of free disk space, but only "
+"%s is available. Please free up some space on drive %s to continue."
+msgstr "يتطلب الإصدار المحدد من نظام تشغيل Endless OS مساحة خالية على القرص قدرها %s، ولكن المساحة المتاحة هي %s فقط. يُرجى تحرير بعض المساحة على القرص %s للمتابعة."
+
+#, c-format
+msgctxt "MSG_336"
+msgid "Delete the invalid file (%s)."
+msgstr "حذف الملف غير الصالح (%s)."
+
+#. Placeholders are:
+#. 1. Basic/English/Spanish/..., as translated elsewhere
+#. 2. an amount of space, such as "32 GB"
+#, c-format
+msgctxt "MSG_337"
+msgid ""
+"For Endless OS %s, we recommend selecting at least %s of storage space."
+msgstr "للحصول على Endless OS %s، فإننا ننصح باختيار مساحة تخزينية لا تقل عن %s."
+
+#, c-format
+msgctxt "MSG_338"
+msgid "%s (Minimum)"
+msgstr "%s (الحد الأدنى)"
+
+#, c-format
+msgctxt "MSG_339"
+msgid "%s (Recommended)"
+msgstr "%s (موصى به)"
+
+#, c-format
+msgctxt "MSG_340"
+msgid "%s (Maximum)"
+msgstr "%s (الحد الأقصى)"
+
+#. Placeholders are:
+#. 1. free space on system drive
+#. 2. total size of system drive
+#. 3. drive letter of system drive (usually "C:")
+#. eg: "You currently have 120GB free on your 400GB C: drive."
+#, c-format
+msgctxt "MSG_341"
+msgid "You currently have %s free on your %s %s drive."
+msgstr "لديك حالياً مساحة تخزينية متاحة قدرها %s على محرك الأقراص %s %s الخاص بك."
+
+#, c-format
+msgctxt "MSG_342"
+msgid "Select how much of your %s drive to dedicate to Endless OS."
+msgstr "حدد المساحة التخزينية التي يحتاج إليها محرك الأقراص %s الخاص بك لتثبيت نظام تشغيل Endless OS."
+
+#, c-format
+msgctxt "MSG_350"
+msgid "Unfortunately, there is not enough storage space."
+msgstr "للأسف، لا توجد مساحة تخزينية كافية."
+
+#, c-format
+msgctxt "MSG_351"
+msgid ""
+"To continue installing Endless OS, please free up at least %s by deleting "
+"videos, photos, or other large files on your %s drive."
+msgstr "لمتابعة تثبيت نظام تشغيل Endless OS، يرجى تحرير مساحة تخزينية لا تقل عن %s وذلك عن طريق حذف ملفات الفيديو والصور، أو غيرها من الملفات الكبيرة من محرك الأقراص %s الخاص بك."
+
+#, c-format
+msgctxt "MSG_352"
+msgid "Unfortunately, your %s drive uses an unsupported format."
+msgstr "للأسف، يستخدم محرك أقراص %s الخاص بك صيغةً غير مدعومة."
+
+#, c-format
+msgctxt "MSG_353"
+msgid "Endless OS can only be installed on an NTFS drive."
+msgstr "يمكن تثبيت نظام تشغيل Endless OS فقط على محرك أقراص من النوع NTFS."
+
+#, c-format
+msgctxt "MSG_354"
+msgid "Unfortunately, your computer is incompatible with Endless OS."
+msgstr "للأسف، جهاز الكمبيوتر الخاص بك غير متوافق مع نظام تشغيل Endless OS."
+
+#, c-format
+msgctxt "MSG_355"
+msgid "Endless OS only supports 64-bit computers."
+msgstr "يدعم نظام التشغيل Endless OS فقط أجهزة كمبيوتر 64-بت."
+
+#, c-format
+msgctxt "MSG_356"
+msgid "Unfortunately, your %s drive is encrypted."
+msgstr "للأسف، لقد تم تشفير محرك الأقراص %s الخاص بك."
+
+#, c-format
+msgctxt "MSG_357"
+msgid ""
+"Endless OS cannot be installed on drives which are protected with Device "
+"Encryption or BitLocker."
+msgstr "لا يمكن تنزيل Endless OS على محركات أقراص محمية بـ Device Encryption أو BitLocker."
+
+#, c-format
+msgctxt "MSG_359"
+msgid "Unfortunately, your computer has another OS installed already."
+msgstr "للأسف جهاز الكمبيوتر لديك عليه نظام تشغيل آخر مثبت."
+
+#, c-format
+msgctxt "MSG_360"
+msgid "Endless OS only supports dual-boot on Windows-only systems."
+msgstr "يدعم Endless OS التشغيل المزدوج على أنظمة Windows فقط."
+
+#, c-format
+msgctxt "MSG_361"
+msgid ""
+"Are you sure you want to uninstall Endless OS? This will erase all apps and "
+"documents stored within your Endless OS installation."
+msgstr "هل أنت متأكد من أنك تريد إزالة تثبيت Endless OS؟ سيؤدي هذا إلى محو جميع التطبيقات والمستندات المخزنة على نظام Endless OS المثبت لديك."
+
+#, c-format
+msgctxt "MSG_362"
+msgid "Endless OS has been uninstalled successfully"
+msgstr "تمت إزالة تثبيت Endless OS بنجاح"
+
+#, c-format
+msgctxt "MSG_363"
+msgid ""
+"There was a problem uninstalling Endless OS. Please contact us for "
+"assistance."
+msgstr "حدثت مشكلة أثناء إزالة تثبيت نظام Endless OS. يُرجى الاتصال بنا للحصول على المساعدة."
+
+#, c-format
+msgctxt "MSG_364"
+msgid "Uninstall Endless from this Computer"
+msgstr "إزالة تثبيت Endless من جهاز الكمبيوتر هذا"
+
+#, c-format
+msgctxt "MSG_365"
+msgid ""
+"If you uninstall Endless, Windows will run automatically when you start your"
+" computer. Any apps and files stored in Endless will be erased."
+msgstr "إذا قمت بعمل إزالة لتثبيت Endless، سيبدأ Windows في العمل تلقائياً عند بدء جهاز الكمبيوتر الخاص بك، وسيتم محو أية تطبيقات أو ملفات محفوظة في نظام Endless."
+
+#, c-format
+msgctxt "MSG_366"
+msgid "Uninstall Endless"
+msgstr "إزالة تثبيت Endless"
+
+#, c-format
+msgctxt "MSG_367"
+msgid ""
+"Make sure you back up any important documents from Endless before you "
+"uninstall."
+msgstr "تأكد من قيامك بعمل نسخة احتياطية لأي مستندات مهمة موجودة على Endless، قبل إزالة التثبيت."
+
+#, c-format
+msgctxt "MSG_368"
+msgid ""
+"Internet Explorer %d is not supported. Please click OK to download Internet "
+"Explorer %d, install it, then run the Endless Installer again."
+msgstr "Internet Explorer %d غير مدعوم. يُرجى النقر على موافق لتنزيل Internet Explorer %d، وتثبيته وبعد ذلك قم بتشغيل مثبت Endless مرة أخرى."
+
+#, c-format
+msgctxt "MSG_369"
+msgid "%s Download"
+msgstr "تنزيل %s"
+
+#, c-format
+msgctxt "MSG_370"
+msgid "Oops, something went wrong setting up Endless OS."
+msgstr "يا لهذا، وقع خطأ ما أثناء تجهيز Endless OS."
+
+#, c-format
+msgctxt "MSG_372"
+msgid ""
+"No USB device found. If you've inserted one, try a different USB port or a "
+"different USB device."
+msgstr "لم يتم العثور على أي أجهزة USB. إذا كنت قد قمت بتركيب أحدها، جرب توصيلها على منفذ USB آخرأو على جهاز مختلف به USB."
+
+#, c-format
+msgctxt "MSG_386"
+msgid "The Endless Installer requires Windows 7 or newer."
+msgstr "يتطلب برنامج تثبيت Endless ويندوز 7 أو أحدث."
+
+#, c-format
+msgctxt "MSG_400"
+msgid "Basic"
+msgstr "الإصدار الأساسي"
+
+#, c-format
+msgctxt "MSG_401"
+msgid "English"
+msgstr "الإنجليزية"
+
+#, c-format
+msgctxt "MSG_402"
+msgid "Spanish"
+msgstr "الأسبانية"
+
+#, c-format
+msgctxt "MSG_403"
+msgid "Portuguese (Brazilian)"
+msgstr "البرتغالية (البرازيلية)"
+
+#, c-format
+msgctxt "MSG_404"
+msgid "Arabic"
+msgstr "العربية"
+
+#, c-format
+msgctxt "MSG_405"
+msgid "French"
+msgstr "الفرنسية"
+
+#, c-format
+msgctxt "MSG_406"
+msgid "Chinese Simplified"
+msgstr "الصينية المبسطة"
+
+#, c-format
+msgctxt "MSG_407"
+msgid "Bengali"
+msgstr "البنغالية"
+
+#, c-format
+msgctxt "MSG_408"
+msgid "Spanish (Guatemala)"
+msgstr "الإسبانية (جواتيمالا)"
+
+#, c-format
+msgctxt "MSG_409"
+msgid "Spanish (Mexico)"
+msgstr "الإسبانية (المكسيك)"
+
+#, c-format
+msgctxt "MSG_410"
+msgid "Indonesian"
+msgstr "الأندونيسية"
+
+#, c-format
+msgctxt "MSG_411"
+msgid "Thai"
+msgstr "التايلاندية"
+
+#, c-format
+msgctxt "MSG_412"
+msgid "Vietnamese"
+msgstr "الفيتنامية"

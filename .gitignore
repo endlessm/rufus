@@ -6,7 +6,6 @@
 *.db-wal
 *.dep
 *.exe
-*.htm
 *.idb
 *.ipch
 *.la
