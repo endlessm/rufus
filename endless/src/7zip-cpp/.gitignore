@@ -1,0 +1,30 @@
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.sdf
+*.ipch
+*.obj
+*.pdb
+*.DS_Store
+*.pch
+*.idb
+*.opensdf
+
+# Visual Studio Files
+*.opendb
+*.suo
+*.lastbuildstate
+.vs/
+ipch/
+
+# Compilation Directories
+Lib/
+Exe/
+Intermediate/
+dll/
+**/x64/
+
+# Misc
+*.log
+*.tlog
