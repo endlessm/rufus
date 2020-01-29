@@ -1,0 +1,377 @@
+﻿<html>
+<head>
+<title>Endles USB Creator</title>
+<meta http-equiv="X-UA-Compatible" content="IE=10" />
+<meta charset="utf-8" />
+
+<link type="text/css" rel="stylesheet" href="res:/CUS/#105" />
+<link type="text/css" rel="stylesheet" href="res:/CUS/#104" />
+
+<script src="res:/CUS/#106" type=text/javascript></script>
+</head>
+
+<body id="CEndlessUsbToolDlg">
+    <div id="MainContainer">
+        <div id="DualBootInstallPage" class="WizardPage">
+            <div class="PageHeader">
+                <div class="Button ButtonRight ButtonClose" id="DualBootPageCloseButton"></div>
+                <div class="ModeNormal"><div id="DualBootPageTitle" class="PageHeaderTitle">Endless OS</div></div>
+                <div class="ModeCoding"><div id="DualBootPageTitleCoding" class="PageHeaderTitle">Endless Coding</div></div>
+            </div>
+
+            <div class="FullWidthContent PageContent">
+                <div class="ContentContainer" id="DualBootContainer">
+                    <div class="RoundedCornersContainer FullWidthContent">
+                        <div id="DualBootContentLogo"><div id="DualBootContentLogoImage"></div></div>
+                        <div id="DualBootContentTitle">Download and Install Endless on this PC</div>
+                        <div id="DualBootContentDescription">Each time you start your PC, you will be able to choose between Endless and Windows. Your apps and files on Windows will not be affected.</div>
+                        <div class="Button ButtonBlue" id="DualBootInstallButtonC"><div id="DualBootInstallButton">Install Endless</div></div>
+                        <div id="DualBootRecommendation">At least 32 GB free on the system drive is recommended.</div>
+                    </div>
+
+                    <div class="FullWidthContent" id="AdvancedOptionsText">
+                        For advanced install options using an <b>Endless USB Stick</b>, <a id='AdvancedOptionsLink'>click here</a>.
+                    </div>
+
+                    <div class="FullWidthContent" id="PrivacyPolicyText">
+                        We collect anonymous data to improve this installer for everybody. <a id='PrivacyPolicyLink'>Click here</a> for more information, and to learn how to opt out.
+                    </div>
+                </div>
+                <div class="FullWidthContent LanguageContainer">
+                    <select id="LanguageSelectDualBoot" class="LanguageSelect">
+                        <!-- These will be replaced at runtime by actual available languages in endless.loc -->
+                        <option value="en_us">English (United States)</option>
+                        <option value="ro_ro">Română (România)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="FullWidthContent PageIndicator">
+                <ul>
+                    <li><span class="PageSelected" /></li>
+                    <li><span></span></li>
+                    <li><span></span></li>
+                    <li><span></span></li>
+                </ul>
+
+                <div id="VersionContainer"><a id='VersionLink'>W.X.Y.Z</a></div>
+            </div>
+        </div>
+
+        <div id="AdvancedPage" class="WizardPage hidden">
+            <div class="PageHeader">
+                <div class="Button"><div id="AdvancedPagePreviousButton">Previous</div></div>
+                <div class="Button ButtonRight ButtonClose" id="AdvancedPageCloseButton"></div>
+                <div id="AdvancedPageTitle" class="PageHeaderTitle">Advanced Install Options</div>
+            </div>
+
+            <div class="FullWidthContent PageContent">
+                <div class="FullWidthContent PageSubtitle" id="AdvOptSubtitleContainer">
+                    <div id="AdvancedOptionsSubtitle">With an <b>Endless USB Stick</b> you can:</div>
+                </div>
+
+                <div class="ContentContainer">
+                    <div class="ContentPanel RoundedCornersContainer" id="LeftPanel">
+                        <div class="PanelText ModeNormal" id="LiveUsbText">Try Endless OS by running it from a USB stick.</div>
+                        <div class="PanelText ModeCoding" id="LiveUsbTextCoding">Try Endless Code by running it from a USB stick.</div>
+                        <div class="PanelImage" id="LeftPaneImage"> </div>
+                        <div class="Button ButtonBlue hidden" id="LiveUsbButtonC"><div id="LiveUsbButton">Create Live USB</div></div>
+                    </div>
+                    <div class="ContentPanel RoundedCornersContainer" id="RightPanel" >
+                        <div class="PanelText ModeNormal" id="ReformatterUsbText">Reformat any computer with Endless OS using a USB stick.</div>
+                        <div class="PanelText ModeCoding" id="ReformatterUsbTextCoding">Reformat any computer with Endless Code using a USB stick.</div>
+                        <div class="PanelImage" id="RightPaneImage"></div>
+                        <div class="Button ButtonBlue hidden" id="ReformatterUsbButtonC"><div id="ReformatterUsbButton">Create Reformatter USB</div></div>
+                    </div>
+                    <div class="FullWidthContent" id="AdvancedInstallReminder">
+                        To create an Endless USB Stick you will need a USB device with at least 8 GB of storage space.
+                    </div>
+                    <div class="FullWidthContent" id="AdvancedInstallLink">
+                        <a id="USBLearnMore">Learn more about the Endless USB Stick</a>
+                    </div>
+                    <div class="FullWidthContent">
+                        <div id="CombinedUsbButtonC" class="Button ButtonBlue"><div id="CombinedUsbButton">Create Endless USB Stick</div></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="FullWidthContent PageIndicator">
+                <ul>
+                    <li><span class="PageSelected"></span></li>
+                    <li><span></span></li>
+                    <li><span></span></li>
+                    <li><span></span></li>
+                </ul>
+            </div>
+        </div>
+
+        <div id="SelectFilePage" class="WizardPage hidden">
+            <div class="PageHeader">
+                <div class="Button"><div id="SelectFilePreviousButton">Previous</div></div>
+                <div class="Button ButtonBlue ButtonRight" id="SelectFileNextButtonC"><div id="SelectFileNextButton">Next</div></div>
+                <div class="ModeNormal"><div class="PageHeaderTitle" id="SelectFilePageTitle">Select Your Endless OS Version</div></div>
+                <div class="ModeCoding"><div class="PageHeaderTitle" id="SelectFilePageTitleCoding">Select Your Endless Code Version</div></div>
+            </div>
+
+            <div class="PageContent">
+                <div class="FullWidthContent PageSubtitle">
+                    <div id="SelectFileSubtitle">Select the Endless OS version you'd like to install.</div>
+                    <div id="NoInternetConnection" class="hidden">
+                        <div id="NoInternetConnectionTitle">Unfortunately, there was a problem connecting to the server.</div>
+                        <div id="NoInternetConnectionSubtitle">Make sure you're <a id='ConnectedLink'>connected to the internet</a>, and if the problem persists, visit our <a id='ConnectedSupportLink'>support</a>.</div>
+                    </div>
+                </div>
+                <div class="ContentContainer hidden" id="SelectFileLocalPresent">
+                    <div class="ContentTitle" id="ExistingImageFile">Operating system found:</div>
+                    <input style="clear:both" type="radio" name="OperatingSystemType" id="OperatingSystemTypeLocal" checked="true" />
+                    <select id="LocalImagesSelect" onclick="selectImageClicked('OperatingSystemTypeLocal');">
+                    </select>
+
+                    <div class="ContentTitle" id="DownloadNewImage">Download new file:</div>
+                    <input type="radio" name="OperatingSystemType" id="OperatingSystemTypeOnline" disabled="disabled"/>
+                    <select id="OnlineImagesSelect" onclick="selectImageClicked('OperatingSystemTypeOnline');" disabled="disabled">
+                    </select>
+                </div>
+
+                <div class="ContentContainer" id="SelectFileLocalNotPresent">
+                    <div class="Fieldset">
+                        <div class="FieldsetTitle ModeNormal"><span>Endless OS <b id="LightVersionText">BASIC</b></span></div>
+                        <div class="FieldsetTitle ModeCoding"><span>Endless Code <b id="LightVersionText">BASIC</b></span></div>
+                        <div class="FieldsetSubtitle" id="LightDownloadSubtitle">…</div>
+                        <div class="FieldsetDescription ModeNormal" id="LightDownloadDescription">Includes basic features of Endless OS and the option to download more apps and content later. This version is best for computers with reliable internet access.</div>
+                        <div class="FieldsetDescription ModeCoding" id="LightDownloadDescriptionCoding">Includes basic features of Endless Code and the option to download more apps and content later. This version is best for computers with reliable internet access.</div>
+                        <div id="DownloadLightButtonC" class="Button ButtonBlue ButtonDisabled">
+                            <div id="DownloadLightButton">Download Basic</div>
+                        </div>
+                    </div>
+
+                    <div class="Fieldset">
+                        <div class="FieldsetTitle ModeNormal"><span>Endless OS <b id="FullVersionText">Full</b></span></div>
+                        <div class="FieldsetTitle ModeCoding"><span>Endless Code <b id="FullVersionText">Full</b></span></div>
+                        <div class="FieldsetSubtitle" id="FullDownloadSubtitle">…</div>
+                        <div class="FieldsetDescription ModeNormal" id="FullDownloadDescription">Includes full Endless OS, preloaded with more than 100 apps and content. This version is ideal for computers without reliable internet access. Choose language for content and apps:</div>
+                        <div class="FieldsetDescription ModeCoding" id="FullDownloadDescriptionCoding">Includes full Endless Code, preloaded with more than 100 apps and content. This version is ideal for computers without reliable internet access. Choose language for content and apps:</div>
+                        <div class="FullWidthContent">
+                            <select id="DownloadLanguageSelect" disabled="disabled" onchange="remoteSelectionChanged();">
+                                <!-- These will be added at runtime -->
+                            </select>
+                        </div>
+                        <div id="DownloadFullButtonC" class="Button ButtonBlue ButtonDisabled">
+                            <div id="DownloadFullButton">Download Full</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="FullWidthContent PageIndicator">
+                <ul>
+                    <li><span></span></li>
+                    <li><span class="PageSelected" /></li>
+                    <li><span></span></li>
+                    <li><span></span></li>
+                </ul>
+            </div>
+        </div>
+
+        <div id="SelectUSBPage" class="WizardPage hidden">
+            <div class="PageHeader">
+                <div class="Button"><div id="SelectUSBPreviousButton">Previous</div></div>
+                <div id="SelectUSBNextButtonC" class="Button ButtonBlue ButtonRight ButtonDisabled"><div id="SelectUSBNextButton">Next</div></div>
+                <div id="SelectUSBPageTitle" class="PageHeaderTitle">Select USB Drive</div>
+            </div>
+
+            <div class="PageContent">
+                <div class="FullWidthContent PageSubtitle" id="SelectUSBSubtitle">Choose the USB device you would like to use.</div>
+                <div class="ContentContainer">
+                    <div class="ContentTitle" id="USBDisksFound">USB drive found:</div>
+                    <select id="USBDiskSelect" disabled="disabled">
+                        <!-- These will be added at runtime -->
+                    </select>
+                    <div id="NewDiskNameContainer">
+                        <div>
+                            <label for="NewDiskName" id="NewDiskNameLabel">USB's new name will appear as:</label>
+                            <span id="NewDiskName">EOS 2_7 English Light</span>
+                        </div>
+                        <div>
+                            <label for="NewDiskSize" id="NewDiskSizeLabel">Size:</label>
+                            <span id="NewDiskSize">2GB</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="ContentContainer AgreementContainer" id="AgreementContainer">
+                    <div id="UsbSpeedWarning">
+                        You have a USB 3.0 device but it is inserted into a USB 2.0 port. Please insert it into a USB 3.0 port (usually blue) for the best experience.
+                    </div>
+                    <input type="checkbox" id="AgreementCheckbox" />
+                    <label for="AgreementCheckbox" id="AgreementCheckboxText">I understand that this will <b>erase all my files</b> on the USB device.</label>
+                </div>
+            </div>
+
+            <div class="PageIndicator">
+                <ul>
+                    <li><span></span></li>
+                    <li><span></span></li>
+                    <li><span class="PageSelected" /></li>
+                    <li><span></span></li>
+                </ul>
+            </div>
+        </div>
+
+        <div id="SelectStoragePage" class="WizardPage hidden">
+            <div class="PageHeader">
+                <div class="Button"><div id="SelectStoragePreviousButton">Previous</div></div>
+                <div id="SelectStorageNextButtonC" class="Button ButtonBlue ButtonRight"><div id="SelectStorageNextButton">Next</div></div>
+                <div class="ModeNormal"><div class="PageHeaderTitle" id="SelectStoragePageTitle">Storage Space for Endless OS</div></div>
+                <div class="ModeCoding"><div class="PageHeaderTitle" id="SelectStoragePageTitleCoding">Storage Space for Endless Code</div></div>
+            </div>
+
+            <div class="PageContent">
+                <div class="FullWidthContent PageSubtitle">
+                    <div id="SelectStorageSubtitle">Select how much of your Z:\ drive to dedicate to Endless OS.</div>
+                    <div id="SelectStorageAvailableSpace">You currently have X GB free on your Y GB Z:\ drive.</div>
+                </div>
+                <div class="ContentContainer">
+                    <div class="ContentTitle" id="StorageSpaceDescription">For Endless OS (Basic / Full), we recommend selecting at least (16 GB / 32 GB) of storage space.</div>
+                    <select id="StorageSpaceSelect">
+                        <!-- These will be replaced at runtime -->
+                        <option value="0">16 GB</option>
+                        <option value="1" selected="selected">32 GB</option>
+                        <option value="2">64 GB</option>
+                    </select>
+                </div>
+                <div class="ContentContainer AgreementContainer" id="StorageFooter">
+                    <div id="StorageSpaceWarning" class="hidden">
+                        The selected version of Endless OS requires X GB of free disk space, but only Y GB is available. Please free up some space on drive Z:\ to continue.
+                    </div>
+                    <div id="StorageAgreementText">
+                        Note: We recommend backing up any important files before continuing. Should you experience any problems with your computer after installation, you can find help at <a id="StorageSupportLink">Endless Support</a>.
+                    </div>
+                </div>
+            </div>
+
+            <div class="PageIndicator">
+                <ul>
+                    <li><span></span></li>
+                    <li><span></span></li>
+                    <li><span class="PageSelected" /></li>
+                    <li><span></span></li>
+                </ul>
+            </div>
+        </div>
+
+        <div id="InstallingPage" class="WizardPage hidden">
+            <div class="PageHeader">
+                <div id="InstallCancelButtonC" class="Button ButtonRight"><div id="InstallCancelButton">Cancel</div></div>
+                <div class="ModeNormal"><div class="PageHeaderTitle" id="InstallingPageTitle">Installing</div></div>
+                <div class="ModeCoding"><div class="PageHeaderTitle" id="InstallingPageTitleCoding">Installing</div></div>
+            </div>
+
+            <div class="PageContent">
+                <div class="ContentContainer">
+                    <div class="ContentTitle">
+                        <span id="CurrentStepText">Step 1</span> <span id="TotalStepsText">of 5:</span> <span id="CurrentStepDescription">: Downloading</span>
+                    </div>
+                    <div id="HideCornersContainer">
+                        <div class="ProgressBarContainer" id="ProgressBarContainer">
+                            <div id="ProgressBar"></div>
+                        </div>
+                    </div>
+                    <div class="FullWidthContent">
+                        &nbsp;<span id="InstallStepStatus">512Mb of 2.12 Gb (500k / sec)</span>&nbsp;
+                    </div>
+
+                    <div id="MarketingContainer" class="RoundedCornersContainer">
+                        <div id="MarketingImage"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="PageIndicator">
+                <ul>
+                    <li><span></span></li>
+                    <li><span></span></li>
+                    <li><span></span></li>
+                    <li><span class="PageSelected" /></li>
+                </ul>
+            </div>
+        </div>
+
+        <div id="ThankYouPage" class="WizardPage hidden">
+            <div class="PageHeader">
+                <div class="Button ButtonBlue ButtonRight"><div id="CloseAppButton">Close</div></div>
+                <div id="ThankYouPageTitle" class="PageHeaderTitle">Thank you</div>
+            </div>
+
+            <div class="PageContent">
+                <div class="ContentContainer">
+                    <div id="InstallOkImage"></div>
+                    <div class="ContentTitle" id="ThankYouMessage">Great! Your EOS2_7 English Light Installer device is sucessfully created.</div>
+                    <div class="ImageDataRow">
+                        <label for="InstallerVersionValue" id="InstallerVersion">Version:</label>
+                        <span id="InstallerVersionValue">---</span>
+                    </div>
+                    <div id="InstallerLanguageRow" class="ImageDataRow">
+                        <label for="InstallerLanguageValue" id="InstallerLanguage">Language:</label>
+                        <span id="InstallerLanguageValue">---</span>
+                    </div>
+                    <div class="ImageDataRow">
+                        <label for="InstallerContentValue" id="InstallerContent">Content:</label>
+                        <span id="InstallerContentValue">---</span>
+                    </div>
+
+                    <div id="SecureBootReminder" class="RoundedCornersContainer">
+                        <div id="ReminderTextContainer">
+                            <div class="ReminderTitle" id="ThankYouDualBootReminder">Restart your computer and select "Endless OS" from the menu.</div>
+                            <div class="ReminderTitle ModeNormal" id="ThankYouLiveReminder">To try Endless OS now, restart your computer.</div>
+                            <div class="ReminderTitle ModeCoding" id="ThankYouLiveReminderCoding">To try Endless Code now, restart your computer.</div>
+                            <div class="ReminderTitle ModeNormal" id="ThankYouReflasherReminder">Now you're ready to install Endless OS on more computers.</div>
+                            <div class="ReminderTitle ModeCoding" id="ThankYouReflasherReminderCoding">Now you're ready to install Endless Code on more computers.</div>
+                            <a id="UsbBootHowToLink">How should I do it?</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="PageIndicator">
+                <ul>
+                    <li><span></span></li>
+                    <li><span></span></li>
+                    <li><span></span></li>
+                    <li><span class="PageSelected" /></li>
+                </ul>
+            </div>
+        </div>
+        <div id="ErrorPage" class="WizardPage hidden">
+            <div class="PageHeader">
+                <div class="Button ButtonRight"><div id="CloseAppButton1">Finish</div></div>
+                <div id="ErrorPageTitle" class="PageHeaderTitle">Thank you</div>
+            </div>
+
+            <div class="PageContent">
+                <div class="ContentContainer">
+                    <div id="ErrorImage"></div>
+                    <div class="ContentTitle ModeNormal" id="ErrorMessage">Oops, something went wrong setting up Endless OS.</div>
+                    <div class="ContentTitle ModeCoding" id="ErrorMessageCoding">Oops, something went wrong setting up Endless Code.</div>
+                    <div class="ImageDataRow" id="ErrorMessageSuggestion">Please try again or contact us so we can help you troubleshoot.</div>
+                    <div class="Button ButtonBlue hidden" id="ErrorContinueButtonC"><div id="ErrorContinueButton">Continue</div></div>
+                    <div class="ImageDataRow " id="DeleteFilesContainer">
+                        <input type="checkbox" id="DeleteFilesCheckbox"/>
+                        <label for="DeleteFilesCheckbox" id="DeleteFilesText">Delete the invalid files (XX GB)</label>
+                    </div>
+                    <div class="ImageDataRow" id="EndlessSupportContainer">If you keep having trouble, you can get help on the <a id="EndlessSupport">Endless community forum</a>.</div>
+                </div>
+            </div>
+
+            <div class="PageIndicator">
+                <ul>
+                    <li><span></span></li>
+                    <li><span></span></li>
+                    <li><span></span></li>
+                    <li><span class="PageSelected" /></li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>
