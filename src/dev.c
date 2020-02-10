@@ -798,7 +798,7 @@ BOOL GetDevices(DWORD devnum)
 #ifdef ENDLESSUSB_TOOL
 				if (usbDevicesCount < sizeof(usbDeviceSpeed) / sizeof(usbDeviceSpeed[0])) {
 					usbDeviceSpeed[usbDevicesCount] = props.speed;
-					usbDeviceSpeedIsLower[usbDevicesCount] = props.is_LowerSpeed;
+					usbDeviceSpeedIsLower[usbDevicesCount] = props.lower_speed;
 					usbDevicesCount++;
 				}
 #endif // ENDLESSUSB_TOOL
