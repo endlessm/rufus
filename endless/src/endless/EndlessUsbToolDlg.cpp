@@ -4874,7 +4874,7 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	IFFALSE_GOTOERROR(CopyFilesToESP(bootFilesPath, CString(espDriveLetter) + L"\\"), "Error when trying to copy files to ESP partition.");
 
 	// Unmount ESP (but continue if this fails)
-	IFFALSE_PRINTERROR(AltUnmountVolume(espDriveLetter), "Failed to unmount ESP");
+	IFFALSE_PRINTERROR(AltUnmountVolume(espDriveLetter, FALSE), "Failed to unmount ESP");
 	espDriveLetter = "";
 
 	UpdateProgress(OP_NEW_LIVE_CREATION, USB_PROGRESS_ESP_CREATION_DONE);
@@ -4898,7 +4898,7 @@ error:
 done:
 	// Unmount ESP
 	if (espDriveLetter.GetLength() > 0) {
-		IFFALSE_PRINTERROR(AltUnmountVolume(espDriveLetter), "Failed to unmount ESP");
+		IFFALSE_PRINTERROR(AltUnmountVolume(espDriveLetter, FALSE), "Failed to unmount ESP");
 	}
 
 	RemoveNonEmptyDirectory(bootFilesPath);
@@ -5027,7 +5027,7 @@ bool CEndlessUsbToolDlg::FormatFirstPartitionOnDrive(DWORD DriveIndex, const wch
 	Sleep(200); // Radu: check if this is needed, that's what rufus does; I hate sync using sleep
 	IFFALSE_PRINTERROR(WaitForLogical(DriveIndex, 0), "Warning: Logical drive was not found!"); // We try to continue even if this fails, just in case
 
-	name = GetLogicalName(DriveIndex, FALSE, TRUE);
+	name = GetLogicalName(DriveIndex, FALSE, TRUE, FALSE);
 	IFFALSE_GOTOERROR(name != NULL, "GetLogicalName failed");
 
 	IFFALSE_GOTOERROR(FormatPartitionWithRetry(name, kFSType, ulClusterSize, cancelEvent, kPartLabel), "Couldn't format partition");
@@ -5084,7 +5084,7 @@ bool CEndlessUsbToolDlg::MountFirstPartitionOnDrive(DWORD DriveIndex, CStringA &
 	char *guid_volume = NULL;
 	bool returnValue = false;
 
-	guid_volume = GetLogicalName(DriveIndex, TRUE, TRUE);
+	guid_volume = GetLogicalName(DriveIndex, TRUE, TRUE, FALSE);
 	IFFALSE_GOTOERROR(guid_volume != NULL, "Could not get GUID volume name\n");
 	uprintf("Found volume GUID %s\n", guid_volume);
 
@@ -5671,7 +5671,7 @@ bool CEndlessUsbToolDlg::SetupEndlessEFI(const CString &systemDriveLetter, const
 
 error:
 	safe_closehandle(hPhysical);
-	if (espMountLetter != NULL) AltUnmountVolume(espMountLetter);
+	if (espMountLetter != NULL) AltUnmountVolume(espMountLetter, FALSE);
 
 	return retResult;
 }
@@ -6045,7 +6045,7 @@ bool CEndlessUsbToolDlg::UninstallEndlessEFI(const CString & systemDriveLetter, 
     RemoveNonEmptyDirectory(windowsEspDriveLetter + L"\\" + ENDLESS_BOOT_SUBDIRECTORY);
 
     if (espMountLetter != NULL) {
-        AltUnmountVolume(espMountLetter);
+        AltUnmountVolume(espMountLetter, FALSE);
     }
 
     return true;
