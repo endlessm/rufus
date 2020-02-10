@@ -57,13 +57,13 @@
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\msapi_utf8.h">
+    <ClInclude Include="..\..\..\src\msapi_utf8.h">
       <Filter>Header Files\Rufus Headers</Filter>
     </ClInclude>
-    <ClInclude Include="..\localization.h">
+    <ClInclude Include="..\..\..\src\localization.h">
       <Filter>Header Files\Rufus Headers</Filter>
     </ClInclude>
-    <ClInclude Include="..\rufus.h">
+    <ClInclude Include="..\..\..\src\rufus.h">
       <Filter>Header Files\Rufus Headers</Filter>
     </ClInclude>
     <ClInclude Include="localization_data.h">
@@ -72,19 +72,19 @@
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\usb.h">
+    <ClInclude Include="..\..\..\src\dev.h">
       <Filter>Header Files\Rufus Headers</Filter>
     </ClInclude>
-    <ClInclude Include="..\drive.h">
+    <ClInclude Include="..\..\..\src\drive.h">
       <Filter>Header Files\Rufus Headers</Filter>
     </ClInclude>
-    <ClInclude Include="..\smart.h">
+    <ClInclude Include="..\..\..\src\smart.h">
       <Filter>Header Files\Rufus Headers</Filter>
     </ClInclude>
-    <ClInclude Include="..\dos.h">
+    <ClInclude Include="..\..\..\src\dos.h">
       <Filter>Header Files\Rufus Headers</Filter>
     </ClInclude>
-    <ClInclude Include="..\format.h">
+    <ClInclude Include="..\..\..\src\format.h">
       <Filter>Header Files\Rufus Headers</Filter>
     </ClInclude>
     <ClInclude Include="DownloadManager.h">
@@ -147,6 +147,9 @@
     <ClInclude Include="IOUtil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\rufus_process.h">
+      <Filter>Header Files\Rufus Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EndlessUsbTool.cpp">
@@ -157,54 +160,6 @@
     </ClCompile>
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\stdfn.c">
-      <Filter>Source Files\Rufus Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\localization.c">
-      <Filter>Source Files\Rufus Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\stdio.c">
-      <Filter>Source Files\Rufus Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\parser.c">
-      <Filter>Source Files\Rufus Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\usb.c">
-      <Filter>Source Files\Rufus Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\smart.c">
-      <Filter>Source Files\Rufus Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\drive.c">
-      <Filter>Source Files\Rufus Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\format.c">
-      <Filter>Source Files\Rufus Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\dos.c">
-      <Filter>Source Files\Rufus Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\dos_locale.c">
-      <Filter>Source Files\Rufus Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\iso.c">
-      <Filter>Source Files\Rufus Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\syslinux.c">
-      <Filter>Source Files\Rufus Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\icon.c">
-      <Filter>Source Files\Rufus Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\vhd.c">
-      <Filter>Source Files\Rufus Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\badblocks.c">
-      <Filter>Source Files\Rufus Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\stdlg.c">
-      <Filter>Source Files\Rufus Sources</Filter>
     </ClCompile>
     <ClCompile Include="DownloadManager.cpp">
       <Filter>Source Files</Filter>
@@ -247,6 +202,66 @@
     </ClCompile>
     <ClCompile Include="IOUtil.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\process.c">
+      <Filter>Source Files\Rufus Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\checksum.c">
+      <Filter>Source Files\Rufus Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\badblocks.c">
+      <Filter>Source Files\Rufus Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\dev.c">
+      <Filter>Source Files\Rufus Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\dos.c">
+      <Filter>Source Files\Rufus Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\dos_locale.c">
+      <Filter>Source Files\Rufus Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\drive.c">
+      <Filter>Source Files\Rufus Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\format.c">
+      <Filter>Source Files\Rufus Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\icon.c">
+      <Filter>Source Files\Rufus Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\iso.c">
+      <Filter>Source Files\Rufus Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\localization.c">
+      <Filter>Source Files\Rufus Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\parser.c">
+      <Filter>Source Files\Rufus Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\smart.c">
+      <Filter>Source Files\Rufus Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\stdfn.c">
+      <Filter>Source Files\Rufus Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\stdio.c">
+      <Filter>Source Files\Rufus Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\stdlg.c">
+      <Filter>Source Files\Rufus Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\syslinux.c">
+      <Filter>Source Files\Rufus Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\vhd.c">
+      <Filter>Source Files\Rufus Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\format_ext.c">
+      <Filter>Source Files\Rufus Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\format_fat32.c">
+      <Filter>Source Files\Rufus Sources</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
