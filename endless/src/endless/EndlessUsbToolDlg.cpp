@@ -42,7 +42,6 @@ extern "C" {
 OPENED_LIBRARIES_VARS;
 HWND hMainDialog = NULL, hLog = NULL;
 BOOL right_to_left_mode = FALSE;
-GetTickCount64_t pfGetTickCount64 = NULL;
 RUFUS_UPDATE update = { { 0,0,0 },{ 0,0 }, NULL, NULL };
 char *ini_file = NULL;
 BOOL usb_debug = FALSE;
@@ -741,9 +740,8 @@ void CEndlessUsbToolDlg::InitRufus()
     //    uprintf("Could not load RichEdit library - some dialogs may not display: %s\n", WindowsErrorString());
     //}
 
-    PF_INIT(GetTickCount64, kernel32);    
+    srand((unsigned int)GetTickCount64());
 
-    srand((unsigned int)_GetTickCount64());    
 }
 
 void CEndlessUsbToolDlg::ChangeDriveAutoRunAndMount(bool setEndlessValues)
@@ -1232,15 +1230,15 @@ LRESULT CEndlessUsbToolDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lPara
                 case DBT_DEVICEARRIVAL:
                 case DBT_DEVICEREMOVECOMPLETE:
                 case DBT_CUSTOMEVENT:	// Sent by our timer refresh function or for card reader media change
-                    m_lastDevicesRefresh = _GetTickCount64();
+                    m_lastDevicesRefresh = GetTickCount64();
                     KillTimer(TID_REFRESH_TIMER);
                     GetDevices((DWORD)ComboBox_GetItemData(hDeviceList, ComboBox_GetCurSel(hDeviceList)));
                     OnSelectedUSBDiskChanged(NULL);
                     return (INT_PTR)TRUE;
                 case DBT_DEVNODES_CHANGED:
                     // If it's been more than a second since last device refresh, arm a refresh timer
-                    if (_GetTickCount64() > m_lastDevicesRefresh + 1000) {
-                        m_lastDevicesRefresh = _GetTickCount64();
+                    if (GetTickCount64() > m_lastDevicesRefresh + 1000) {
+                        m_lastDevicesRefresh = GetTickCount64();
                         SetTimer(TID_REFRESH_TIMER, 1000, RefreshTimer);
                     }
                     break;
@@ -1395,7 +1393,7 @@ LRESULT CEndlessUsbToolDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lPara
 
                     // calculate speed
                     CStringA speed("---");
-                    ULONGLONG currentTickCount = _GetTickCount64();
+                    ULONGLONG currentTickCount = GetTickCount64();
                     if (startedTickCount != 0) {
                         ULONGLONG diffBytes = downloadStatus->progress.BytesTransferred - startedBytes;
                         ULONGLONG diffMillis = currentTickCount - startedTickCount;
