@@ -4135,7 +4135,7 @@ DWORD WINAPI CEndlessUsbToolDlg::FileCopyThread(void* param)
     memset(&SelectedDrive, 0, sizeof(SelectedDrive));
 
     // Query for disk and partition data
-    hPhysical = GetPhysicalHandle(DriveIndex, TRUE, TRUE);
+    hPhysical = GetPhysicalHandle(DriveIndex, TRUE, TRUE, FALSE);
     IFFALSE_GOTOERROR(hPhysical != INVALID_HANDLE_VALUE, "Error on acquiring disk handle.");
 
     result = DeviceIoControl(hPhysical, IOCTL_DISK_GET_DRIVE_GEOMETRY_EX, NULL, 0, geometry, sizeof(geometry), &size, NULL);
@@ -4781,7 +4781,7 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 
 	// get disk handle
 	errorCause = ErrorCauseGetPhysicalHandleFailed;
-	hPhysical = GetPhysicalHandle(DriveIndex, TRUE, TRUE);
+	hPhysical = GetPhysicalHandle(DriveIndex, TRUE, TRUE, FALSE);
 	IFFALSE_GOTOERROR(hPhysical != INVALID_HANDLE_VALUE, "Error on acquiring disk handle.");
 
 	// Remove drive letters for existing volumes
@@ -4791,7 +4791,7 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 
 	// Lock and disappear the logical volume, if any, as per FormatThread.
 	// TODO: what if there's more than one logical volume?
-	hLogicalVolume = GetLogicalHandle(DriveIndex, FALSE, TRUE);
+	hLogicalVolume = GetLogicalHandle(DriveIndex, 0, FALSE, TRUE, TRUE);
 	IFFALSE_GOTOERROR(hLogicalVolume != INVALID_HANDLE_VALUE, "Could not lock volume");
 	if (hLogicalVolume == NULL) {
 		// NULL is returned for cases where the drive is not yet partitioned
@@ -5690,7 +5690,7 @@ HANDLE CEndlessUsbToolDlg::GetPhysicalFromDriveLetter(const CString &driveLetter
 	safe_closehandle(hPhysical);
 
 	FormatStatus = 0;
-	hPhysical = GetPhysicalHandle(drive_number, writeAccess, FALSE);
+	hPhysical = GetPhysicalHandle(drive_number, writeAccess, FALSE, !writeAccess);
 	IFFALSE_GOTOERROR(hPhysical != INVALID_HANDLE_VALUE, "Error on acquiring disk handle.");
 
 error:
