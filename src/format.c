@@ -2383,7 +2383,7 @@ BOOL Endless_FormatPartition(const char *VolumeName, wchar_t *wFSType, wchar_t *
 	PF_INIT_OR_OUT(FormatEx, Fmifs);
 	setlocale(LC_ALL, locale);
 
-	pfFormatEx(wVolumeName, SelectedDrive.Geometry.MediaType, wFSType, partLabel,
+	pfFormatEx(wVolumeName, SelectedDrive.MediaType, wFSType, partLabel,
 		/* quick format */ TRUE, ulClusterSize, FormatExCallback);
 
 	if (!IS_ERROR(FormatStatus)) {
