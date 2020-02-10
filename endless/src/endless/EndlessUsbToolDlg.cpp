@@ -35,7 +35,7 @@ extern "C" {
 #include "file.h"
 #include "ms-sys/inc/br.h"
 
-#include "usb.h"
+#include "dev.h"
 #include "mbr_grub2.h"
 
 // RADU: try to remove the need for all of these
@@ -1234,7 +1234,7 @@ LRESULT CEndlessUsbToolDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lPara
                 case DBT_CUSTOMEVENT:	// Sent by our timer refresh function or for card reader media change
                     m_lastDevicesRefresh = _GetTickCount64();
                     KillTimer(TID_REFRESH_TIMER);
-                    GetUSBDevices((DWORD)ComboBox_GetItemData(hDeviceList, ComboBox_GetCurSel(hDeviceList)));
+                    GetDevices((DWORD)ComboBox_GetItemData(hDeviceList, ComboBox_GetCurSel(hDeviceList)));
                     OnSelectedUSBDiskChanged(NULL);
                     return (INT_PTR)TRUE;
                 case DBT_DEVNODES_CHANGED:
@@ -3096,7 +3096,7 @@ HRESULT CEndlessUsbToolDlg::OnSelectFileNextClicked(IHTMLElement* pElement)
 		m_usbDeleteAgreement = false;
 
 		// RADU: move this to another thread
-		GetUSBDevices(0);
+		GetDevices(0);
 		OnSelectedUSBDiskChanged(NULL);
 
 		PF_INIT(SHChangeNotifyRegister, shell32);
@@ -4665,7 +4665,7 @@ void CEndlessUsbToolDlg::CheckUSBHub(LPCTSTR devicePath)
                     uprintf("%d) USB 3.0(%d), 2.0(%d), 1.0(%d), OperatingAtSuperSpeedOrHigher (%d), SuperSpeedCapableOrHigher (%d)", index,
                         conn_info_v2.SupportedUsbProtocols.Usb300, conn_info_v2.SupportedUsbProtocols.Usb200, conn_info_v2.SupportedUsbProtocols.Usb110,
                         conn_info_v2.Flags.DeviceIsOperatingAtSuperSpeedOrHigher, conn_info_v2.Flags.DeviceIsSuperSpeedCapableOrHigher);
-                    m_maximumUSBVersion = max(m_maximumUSBVersion, conn_info_v2.SupportedUsbProtocols.Usb300 == 1 ? USB_SPEED_SUPER_OR_LATER : USB_SPEED_HIGH);
+                    m_maximumUSBVersion = max(m_maximumUSBVersion, conn_info_v2.SupportedUsbProtocols.Usb300 == 1 ? USB_SPEED_SUPER : USB_SPEED_HIGH);
                 }
             }
         }
@@ -4689,12 +4689,12 @@ void CEndlessUsbToolDlg::UpdateUSBSpeedMessage(int deviceIndex)
     DWORD msgId = 0;
 
     if (speed < USB_SPEED_HIGH) { // smaller than USB 2.0
-        if (m_maximumUSBVersion == USB_SPEED_SUPER_OR_LATER) { // we have USB 3.0 ports
+        if (m_maximumUSBVersion == USB_SPEED_SUPER) { // we have USB 3.0 ports
             msgId = MSG_330;
         } else { // we have USB 2.0 ports
             msgId = MSG_331;
         }
-    } else if (speed == USB_SPEED_HIGH && m_maximumUSBVersion == USB_SPEED_SUPER_OR_LATER) { // USB 2.0 device (or USB 3.0 device in USB 2.0 port) and we have USB 3.0 ports
+    } else if (speed == USB_SPEED_HIGH && m_maximumUSBVersion == USB_SPEED_SUPER) { // USB 2.0 device (or USB 3.0 device in USB 2.0 port) and we have USB 3.0 ports
         msgId = isLowerSpeed ? MSG_333 : MSG_332;
     }
 
