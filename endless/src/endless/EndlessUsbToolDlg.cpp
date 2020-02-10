@@ -4830,7 +4830,7 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	// Wait for the logical drive we just created to appear
 	uprintf("Waiting for logical drive to reappear...\n");
 	Sleep(200); // Radu: check if this is needed, that's what rufus does; I hate sync using sleep
-	IFFALSE_PRINTERROR(WaitForLogical(DriveIndex), "Warning: Logical drive was not found!"); // We try to continue even if this fails, just in case
+	IFFALSE_PRINTERROR(WaitForLogical(DriveIndex, 0), "Warning: Logical drive was not found!"); // We try to continue even if this fails, just in case
 
 	CHECK_IF_CANCELLED;
 
@@ -5025,7 +5025,7 @@ bool CEndlessUsbToolDlg::FormatFirstPartitionOnDrive(DWORD DriveIndex, const wch
 	// Wait for the logical drive we just created to appear
 	uprintf("Waiting for logical drive to reappear...\n");
 	Sleep(200); // Radu: check if this is needed, that's what rufus does; I hate sync using sleep
-	IFFALSE_PRINTERROR(WaitForLogical(DriveIndex), "Warning: Logical drive was not found!"); // We try to continue even if this fails, just in case
+	IFFALSE_PRINTERROR(WaitForLogical(DriveIndex, 0), "Warning: Logical drive was not found!"); // We try to continue even if this fails, just in case
 
 	name = GetLogicalName(DriveIndex, FALSE, TRUE);
 	IFFALSE_GOTOERROR(name != NULL, "GetLogicalName failed");
@@ -5033,7 +5033,7 @@ bool CEndlessUsbToolDlg::FormatFirstPartitionOnDrive(DWORD DriveIndex, const wch
 	IFFALSE_GOTOERROR(FormatPartitionWithRetry(name, kFSType, ulClusterSize, cancelEvent, kPartLabel), "Couldn't format partition");
 
 	Sleep(200); // Radu: check if this is needed, that's what rufus does; I hate sync using sleep
-	IFFALSE_PRINTERROR(WaitForLogical(DriveIndex), "Warning: Logical drive was not found after format!");
+	IFFALSE_PRINTERROR(WaitForLogical(DriveIndex, 0), "Warning: Logical drive was not found after format!");
 
 	returnValue = true;
 
