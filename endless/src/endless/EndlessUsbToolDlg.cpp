@@ -1658,12 +1658,6 @@ void CEndlessUsbToolDlg::ApplyRufusLocalization()
 				}
 			}
 			break;
-		case LC_MOVE:
-			luprint("LC_MOVE not implemented");
-			break;
-		case LC_SIZE:
-			luprint("LC_SIZE not implemented");
-			break;
 		}
 	}
 
