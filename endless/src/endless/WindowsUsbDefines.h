@@ -1,10 +1,5 @@
 #pragma once
 
-// This is the GUID for the USB device class
-const GUID GUID_DEVINTERFACE_USB_HUB = { 0xF18A0E88L, 0xC30C, 0x11D0,{ 0x88, 0x15, 0x00, 0xA0, 0xC9, 0x06, 0xBE, 0xD8 } };
-// {F18A0E88-C30C-11D0-8815-00A0C906BED8}
-
-
 #define USB_GET_HUB_CAPABILITIES                    271
 #define USB_GET_HUB_CAPABILITIES_EX                 276
 #define USB_GET_HUB_INFORMATION_EX                  277
