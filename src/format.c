@@ -1708,21 +1708,10 @@ DWORD WINAPI FormatThread(void* param)
 	char kolibri_dst[] = "?:\\MTLD_F32";
 	char grub4dos_dst[] = "?:\\grldr";
 
+	use_large_fat32 = (fs_type == FS_FAT32) && ((SelectedDrive.DiskSize > LARGE_FAT32_SIZE) || (force_large_fat32));
 #ifdef ENDLESSUSB_TOOL
-	/* In the first round of endless patches, rufus read these variables from
-	 * widgets here. Now they're updated elsewhere, but I'm hoping we can still
-	 * override them here successfully.
-	 */
-	fs_type = FS_FAT32;
-	boot_type = BT_IMAGE;
-	partition_type = PARTITION_STYLE_MBR;
-	target_type= TT_BIOS;
-	/* - */
-
-	use_large_fat32 = 0;
 	windows_to_go = 0;
 #else
-	use_large_fat32 = (fs_type == FS_FAT32) && ((SelectedDrive.DiskSize > LARGE_FAT32_SIZE) || (force_large_fat32));
 	windows_to_go = (image_options & IMOP_WINTOGO) && (boot_type == BT_IMAGE) && HAS_WINTOGO(img_report) &&
 		(ComboBox_GetCurSel(GetDlgItem(hMainDialog, IDC_IMAGE_OPTION)) == 1);
 #endif // ENDLESSUSB_TOOL
