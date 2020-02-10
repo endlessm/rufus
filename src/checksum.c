@@ -774,7 +774,7 @@ BOOL HashBuffer(const unsigned type, const unsigned char* buf, const size_t len,
 out:
 	return r;
 }
-
+#ifndef ENDLESSUSB_TOOL
 /*
  * Checksum dialog callback
  */
@@ -987,7 +987,7 @@ out:
 		MyDialogBox(hMainInstance, IDD_CHECKSUM, hMainDialog, ChecksumCallback);
 	ExitThread(r);
 }
-
+#endif /* !ENDLESSUSB_TOOL */
 /*
  * The following 2 calls are used to check whether a buffer/file is in our hash DB
  */

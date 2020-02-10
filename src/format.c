@@ -1199,6 +1199,8 @@ out:
 	return r;
 }
 
+#ifndef ENDLESSUSB_TOOL
+
 // Checks which versions of Windows are available in an install image
 // to set our extraction index. Asks the user to select one if needed.
 // Returns -2 on user cancel, -1 on other error, >=0 on success.
@@ -1315,6 +1317,7 @@ out:
 	UnMountISO();
 	return wintogo_index;
 }
+
 
 // http://technet.microsoft.com/en-ie/library/jj721578.aspx
 // As opposed to the technet guide above, we no longer set internal drives offline,
@@ -1449,6 +1452,8 @@ static BOOL SetupWinToGo(DWORD DriveIndex, const char* drive_name, BOOL use_esp)
 
 	return TRUE;
 }
+
+#endif /* !ENDLESSUSB_TOOL */
 
 static void update_progress(const uint64_t processed_bytes)
 {
@@ -2146,12 +2151,14 @@ DWORD WINAPI FormatThread(void* param)
 			UpdateProgress(OP_FILE_COPY, 0.0f);
 			drive_name[2] = 0;	// Ensure our drive is something like 'D:'
 			if (windows_to_go) {
+#ifndef ENDLESSUSB_TOOL
 				PrintInfoDebug(0, MSG_268);
 				if (!SetupWinToGo(DriveIndex, drive_name, (extra_partitions & XP_ESP))) {
 					if (!IS_ERROR(FormatStatus))
 						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_ISO_EXTRACT);
 					goto out;
 				}
+#endif /* !ENDLESSUSB_TOOL */
 			} else {
 				if (!ExtractISO(image_path, drive_name, FALSE)) {
 					if (!IS_ERROR(FormatStatus))
