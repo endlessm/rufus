@@ -4767,7 +4767,7 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	HANDLE hPhysical = INVALID_HANDLE_VALUE;
 	HANDLE hLogicalVolume = INVALID_HANDLE_VALUE;
 	CString bootFilesPath = CEndlessUsbToolApp::TempFilePath(CString(BOOT_COMPONENTS_FOLDER)) + L"\\";
-	DWORD BytesPerSector = SelectedDrive.Geometry.BytesPerSector;
+	DWORD BytesPerSector = SelectedDrive.SectorSize;
 	CStringA eosliveDriveLetter, espDriveLetter;
 	const char *cszEspDriveLetter;
 	ErrorCause errorCause = ErrorCause::ErrorCauseWriteFailed;
@@ -5288,7 +5288,7 @@ bool CEndlessUsbToolDlg::WriteMBRToUSB(HANDLE hPhysical, const CString &bootFile
 	countRead = ReadEntireFile(bootImgFilePath, endlessMBRData, sizeof(endlessMBRData));
 	IFFALSE_GOTOERROR(countRead == MAX_BOOT_IMG_FILE_SIZE, "Size of boot.img is not what is expected.");
 	fake_fd._handle = (char*)hPhysical;
-	set_bytes_per_sector(SelectedDrive.Geometry.BytesPerSector);
+	set_bytes_per_sector(SelectedDrive.SectorSize);
 	IFFALSE_GOTOERROR(write_data(fp, 0x0, endlessMBRData, MAX_BOOT_IMG_FILE_SIZE) != 0, "Error on write_data with boot.img contents.");
 
 	retResult = true;
@@ -5620,7 +5620,7 @@ bool CEndlessUsbToolDlg::IsWindowsMBR(FILE* fpDrive, const CString &TargetName)
 
 	int i;
 
-	set_bytes_per_sector(SelectedDrive.Geometry.BytesPerSector);
+	set_bytes_per_sector(SelectedDrive.SectorSize);
 
 	for (i=0; i < ARRAYSIZE(windows_mbr); i++) {
 		if (windows_mbr[i].fn(fpDrive)) {
@@ -6506,7 +6506,7 @@ bool CEndlessUsbToolDlg::RestoreOriginalBoottrack(const CString &endlessPath, HA
 	BOOL result = DeviceIoControl(hPhysical, IOCTL_DISK_GET_DRIVE_GEOMETRY_EX, NULL, 0, geometry, sizeof(geometry), &size, NULL);
 	IFFALSE_GOTOERROR(result != 0 && size > 0, "Error on querying disk geometry.");
 
-	set_bytes_per_sector(SelectedDrive.Geometry.BytesPerSector);
+	set_bytes_per_sector(SelectedDrive.SectorSize);
 
 	IFFALSE_GOTOERROR(0 == _wfopen_s(&boottrackImgFile, endlessPath + BACKUP_BOOTTRACK_IMG, L"rb"), "Error opening boottrack.img file");
 	IFFALSE_GOTOERROR(fread(boottrackData, 1, MBR_WINDOWS_NT_MAGIC, boottrackImgFile), "Error reading from boottrack.img");
