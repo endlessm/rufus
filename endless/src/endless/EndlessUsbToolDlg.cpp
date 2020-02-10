@@ -4873,7 +4873,7 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 
 	// Mount and format ESP. (Yes, you can assign a drive letter to an unformatted volume!)
 	errorCause = ErrorCauseMountESPFailed;
-	cszEspDriveLetter = AltMountVolume(eosliveDriveLetter.Left(2), 2);
+	cszEspDriveLetter = AltMountVolume(DriveIndex, partitionStart[1], FALSE);
 	IFFALSE_GOTOERROR(cszEspDriveLetter != NULL, "Error mounting ESP");
 	// The pointer returned by AltMountVolume() is to a static buffer...
 	espDriveLetter = cszEspDriveLetter;
@@ -6212,13 +6212,15 @@ BOOL CEndlessUsbToolDlg::MountESPFromDrive(HANDLE hPhysical, const char **espMou
 	PDRIVE_LAYOUT_INFORMATION_EX DriveLayout = (PDRIVE_LAYOUT_INFORMATION_EX)(void*)layout;
 	DWORD size;
 	BOOL result;
+	DWORD drive_number;
+	uint64_t esp_offset = 0;
+	char tmp_fs_name[32];
 
 	// get partition layout
 	result = DeviceIoControl(hPhysical, IOCTL_DISK_GET_DRIVE_LAYOUT_EX, NULL, 0, layout, sizeof(layout), &size, NULL);
 	IFFALSE_GOTOERROR(result != 0 && size > 0, "Error on querying disk layout.");
 	IFFALSE_GOTOERROR(DriveLayout->PartitionStyle == PARTITION_STYLE_GPT, "Unexpected partition type. Partition style is not GPT");
 
-	DWORD efiPartitionNumber = -1;
 	PARTITION_INFORMATION_EX *partition = NULL;
 	for (DWORD index = 0; index < DriveLayout->PartitionCount; index++) {
 		partition = &(DriveLayout->PartitionEntry[index]);
@@ -6226,16 +6228,22 @@ BOOL CEndlessUsbToolDlg::MountESPFromDrive(HANDLE hPhysical, const char **espMou
 		if (partition->Gpt.PartitionType == PARTITION_SYSTEM_GUID) {
 			uprintf("Found ESP\r\nPartition %d:\r\n  Type: %s\r\n  Name: '%ls'\r\n ID: %s",
 				index + 1, GuidToString(&partition->Gpt.PartitionType), partition->Gpt.Name, GuidToString(&partition->Gpt.PartitionId));
-			efiPartitionNumber = partition->PartitionNumber;
+			esp_offset = partition->StartingOffset.QuadPart;
 			break;
 		}
 	}
-	IFFALSE_GOTOERROR(efiPartitionNumber != -1, "ESP not found.");
-	// Fail if EFI partition number is bigger than we can fit in the
-	// uin8_t that AltMountVolume receives as parameter for partition number
-	IFFALSE_GOTOERROR(efiPartitionNumber <= 0xFF, "EFI partition number is bigger than 255.");
+	IFFALSE_GOTOERROR(esp_offset != 0, "ESP not found.");
 
-	*espMountLetter = AltMountVolume(ConvertUnicodeToUTF8(systemDriveLetter.Left(2)), (uint8_t)efiPartitionNumber);
+	/* The string passed to GetDriveNumber is purely for debug text, so
+	 * there isn't actually a need to have a real mount point. Which is
+	 * good for us, as we need the drive number to mount the drive.
+	 */
+	drive_number = GetDriveNumber(hPhysical, "$ESP");
+	drive_number += DRIVE_INDEX_MIN;
+	SelectedDrive.DeviceNumber = drive_number;
+	GetDrivePartitionData(SelectedDrive.DeviceNumber, tmp_fs_name, sizeof(tmp_fs_name), FALSE);
+
+	*espMountLetter = AltMountVolume(drive_number, esp_offset, FALSE);
 	IFFALSE_GOTOERROR(*espMountLetter != NULL, "Error assigning a letter to the ESP.");
 
 	retResult = TRUE;
