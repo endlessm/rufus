@@ -31,7 +31,7 @@
 #include <assert.h>
 
 #include "rufus.h"
-#include "process.h"
+#include "rufus_process.h"
 #include "missing.h"
 #include "msapi_utf8.h"
 
