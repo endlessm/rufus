@@ -4806,7 +4806,7 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	// erase any existing partition
 	errorCause = ErrorCauseErasePartitionsFailed;
 	IFFALSE_GOTOERROR(ClearMBRGPT(hPhysical, SelectedDrive.DiskSize, BytesPerSector, FALSE), "ClearMBRGPT failed");
-	IFFALSE_GOTOERROR(DeletePartitions(hPhysical), "ErasePartitions failed");
+	IFFALSE_GOTOERROR(DeletePartitions(DriveIndex), "ErasePartitions failed");
 
 	// write BIOS boot partition before partitioning the drive.
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/aa365747%28v=vs.85%29.aspx?f=255&MSPPError=-2147217396 says:
