@@ -146,7 +146,7 @@ IDR_IMG_ENDLESS_LOGO         IMG                "res/images/Endless_mark_orange_
 
 IDR_LC_ENDLESS_LOC      RCDATA                  "res/endless.loc"
 
-IDR_UEFI_NTFS           RCDATA                  "../../res/uefi/uefi-ntfs.img"
+IDR_UEFI_NTFS           RCDATA                  "../../../res/uefi/uefi-ntfs.img"
 
 
 /////////////////////////////////////////////////////////////////////////////
