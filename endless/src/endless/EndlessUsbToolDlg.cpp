@@ -4482,6 +4482,11 @@ DWORD WINAPI CEndlessUsbToolDlg::CheckInternetConnectionThread(void* param)
     DWORD flags;
     BOOL result = FALSE, connected = FALSE, firstTime = TRUE;
 
+    /* TODO InternetGetConnectedState is deprecated on any platform we still support,
+     * so we should probably stop using it eventually. */
+    PF_TYPE_DECL(WINAPI, BOOL, InternetGetConnectedState, (LPDWORD, DWORD));
+    PF_INIT(InternetGetConnectedState, WinInet);
+
     while (TRUE) {
         DWORD dwStatus = WaitForSingleObject(dlg->m_cancelOperationEvent, firstTime ? 0 : CHECK_INTERNET_CONNECTION_TIME);
         switch (dwStatus) {
@@ -4493,7 +4498,7 @@ DWORD WINAPI CEndlessUsbToolDlg::CheckInternetConnectionThread(void* param)
             case WAIT_TIMEOUT:
             {
                 flags = 0;
-                result = InternetGetConnectedState(&flags, 0);
+                result = pfInternetGetConnectedState(&flags, 0);
 
                 break;
             }
