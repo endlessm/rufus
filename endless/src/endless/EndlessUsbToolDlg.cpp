@@ -300,7 +300,7 @@ enum endless_action_type {
     OP_DOWNLOADING_FILES = OP_MAX,
     OP_VERIFYING_SIGNATURE,
     OP_FLASHING_DEVICE,
-    OP_FILE_COPY,
+    OP_ENDLESS_FILE_COPY,
 	OP_SETUP_DUALBOOT,
 	OP_NEW_LIVE_CREATION,
     OP_NO_OPERATION_IN_PROGRESS,
@@ -396,12 +396,12 @@ static LPCTSTR OperationToStr(int op)
     TOSTR(OP_FORMAT);
     TOSTR(OP_CREATE_FS);
     TOSTR(OP_FIX_MBR);
-    TOSTR(OP_DOS);
+    TOSTR(OP_FILE_COPY);
     TOSTR(OP_FINALIZE);
     TOSTR(OP_DOWNLOADING_FILES);  
     TOSTR(OP_VERIFYING_SIGNATURE);
     TOSTR(OP_FLASHING_DEVICE);
-    TOSTR(OP_FILE_COPY);
+    TOSTR(OP_ENDLESS_FILE_COPY);
 	TOSTR(OP_SETUP_DUALBOOT);
 	TOSTR(OP_NEW_LIVE_CREATION);
     TOSTR(OP_NO_OPERATION_IN_PROGRESS);
@@ -1285,12 +1285,12 @@ LRESULT CEndlessUsbToolDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lPara
             uprintf("Operation %ls(%d) with progress %d", OperationToStr(op), op, percent);
             
             // Ignore exFAT format progress.
-            if ((m_currentStep == OP_FILE_COPY || m_currentStep == OP_NEW_LIVE_CREATION) && (op == OP_FORMAT || op == OP_CREATE_FS)) break;
+            if ((m_currentStep == OP_ENDLESS_FILE_COPY || m_currentStep == OP_NEW_LIVE_CREATION) && (op == OP_FORMAT || op == OP_CREATE_FS)) break;
             
             // Radu: maybe divide the progress bar also based on the size of the image to be copied to disk after format is complete
             if (op == OP_FORMAT && m_selectedInstallMethod == InstallMethod_t::ReformatterUsb) {
                 percent = percent / 2;
-            } else if (op == OP_FILE_COPY) {
+            } else if (op == OP_ENDLESS_FILE_COPY) {
                 percent = 50 + percent / 2;
             }
 
@@ -1304,7 +1304,7 @@ LRESULT CEndlessUsbToolDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lPara
 				}
             }
 
-            if (op == OP_VERIFYING_SIGNATURE || op == OP_FORMAT || op == OP_FILE_COPY || op == OP_SETUP_DUALBOOT || op == OP_NEW_LIVE_CREATION) {
+            if (op == OP_VERIFYING_SIGNATURE || op == OP_FORMAT || op == OP_ENDLESS_FILE_COPY || op == OP_SETUP_DUALBOOT || op == OP_NEW_LIVE_CREATION) {
                 CString downloadString;
                 downloadString.Format(L"%d%%", percent);
                 SetElementText(_T(ELEMENT_INSTALL_STATUS), CComBSTR(downloadString));
@@ -1320,7 +1320,7 @@ LRESULT CEndlessUsbToolDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lPara
         {
             m_operationThread = INVALID_HANDLE_VALUE;
             if (!IS_ERROR(FormatStatus) && m_selectedInstallMethod == InstallMethod_t::ReformatterUsb) {
-                StartOperationThread(OP_FILE_COPY, CEndlessUsbToolDlg::FileCopyThread);
+                StartOperationThread(OP_ENDLESS_FILE_COPY, CEndlessUsbToolDlg::FileCopyThread);
             } else {
                 if (IS_ERROR(FormatStatus) && m_lastErrorCause == ErrorCause_t::ErrorCauseNone) {
                     m_lastErrorCause = ErrorCause_t::ErrorCauseWriteFailed;
@@ -3952,7 +3952,7 @@ void CEndlessUsbToolDlg::UpdateCurrentStep(int currentStep)
         nrCurrentStep = m_useLocalFile ? 1 : 2;
         break;
     case OP_FLASHING_DEVICE:
-    case OP_FILE_COPY:
+    case OP_ENDLESS_FILE_COPY:
     case OP_NEW_LIVE_CREATION:
         action = _T("WritingStarted");
         locMsgIdTitle = MSG_311;
@@ -4268,7 +4268,7 @@ DWORD CALLBACK CEndlessUsbToolDlg::CopyProgressRoutine(
 		CEndlessUsbToolDlg::ImageUnpackCallback(TotalBytesTransferred.QuadPart);
 	} else {
 		float current = (float)(TotalBytesTransferred.QuadPart * 100 / TotalFileSize.QuadPart);
-		UpdateProgress(OP_FILE_COPY, current);
+		UpdateProgress(OP_ENDLESS_FILE_COPY, current);
 	}
 
     return PROGRESS_CONTINUE;
