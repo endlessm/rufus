@@ -38,6 +38,8 @@ extern "C" {
 #include "dev.h"
 #include "mbr_grub2.h"
 
+BOOL its_a_me_mario = FALSE;
+
 // RADU: try to remove the need for all of these
 OPENED_LIBRARIES_VARS;
 HWND hMainDialog = NULL, hLog = NULL;
@@ -55,10 +57,17 @@ extern char** msg_table;
 HWND hDeviceList = NULL, hBootType = NULL, hPartitionScheme = NULL, hFileSystem = NULL, hClusterSize = NULL, hLabel = NULL;
 HWND hNBPasses = NULL, hDiskID = NULL, hInfo = NULL;
 HINSTANCE hMainInstance = NULL;
+int boot_type = BT_IMAGE, fs_type = FS_FAT32, partition_type = PARTITION_STYLE_MBR;
 
 BOOL detect_fakes = FALSE;
+BOOL use_vds = FALSE, write_as_image = TRUE, large_drive = FALSE, fast_zeroing = FALSE, target_type = TT_BIOS;
+BOOL enable_file_indexing = FALSE;
+HWND hProgress = NULL;
 
-char system_dir[MAX_PATH], sysnative_dir[MAX_PATH];
+StrArray DriveId, DriveHub, DriveName, BlockingProcess;
+uint32_t DrivePort[MAX_DRIVES];
+
+char system_dir[MAX_PATH], sysnative_dir[MAX_PATH], temp_dir[MAX_PATH];
 char* image_path = NULL;
 // Number of steps for each FS for FCC_STRUCTURE_PROGRESS
 const int nb_steps[FS_MAX] = { 5, 5, 12, 1, 10 };
@@ -70,7 +79,7 @@ uint16_t rufus_version[3], embedded_sl_version[2];
 char embedded_sl_version_str[2][12] = { "?.??", "?.??" };
 char embedded_sl_version_ext[2][32];
 uint32_t dur_mins, dur_secs;
-StrArray DriveID, DriveLabel;
+StrArray DriveLabel;
 BOOL enable_HDDs = TRUE, use_fake_units, enable_vmdk;
 int dialog_showing = 0;
 
@@ -742,6 +751,10 @@ void CEndlessUsbToolDlg::InitRufus()
 
     srand((unsigned int)GetTickCount64());
 
+    StrArrayCreate(&DriveId, MAX_DRIVES);
+    StrArrayCreate(&DriveHub, MAX_DRIVES);
+    StrArrayCreate(&DriveName, MAX_DRIVES);
+    StrArrayCreate(&BlockingProcess, 16);
 }
 
 void CEndlessUsbToolDlg::ChangeDriveAutoRunAndMount(bool setEndlessValues)
@@ -983,8 +996,11 @@ void CEndlessUsbToolDlg::Uninit()
     // unregister from notifications and delete drive list related memory
     LeavingDevicesPage();
 
-    StrArrayDestroy(&DriveID);
+    StrArrayDestroy(&DriveId);
+    StrArrayDestroy(&DriveHub);
+    StrArrayDestroy(&DriveName);
     StrArrayDestroy(&DriveLabel);
+    StrArrayDestroy(&BlockingProcess);
 
     // delete image file entries related memory
     CString currentPath;
@@ -6523,4 +6539,21 @@ CComBSTR CEndlessUsbToolDlg::GetDownloadString(const RemoteImageEntry &imageEntr
 	ULONGLONG fullSize = GetActualDownloadSize(imageEntry, true);
 	CStringA fullSizeT = SizeToHumanReadable(fullSize, FALSE, use_fake_units);
 	return UTF8ToBSTR(size == fullSize ? lmprintf(MSG_369, fullSizeT) : lmprintf(MSG_315, sizeT, fullSizeT));
+}
+
+void UpdateProgressWithInfo(int op, int msg, uint64_t processed, uint64_t total)
+{
+    float percent;
+    if (total < 0.0001) return;
+    percent = 100.0f * (float)processed / (float)total;
+    UpdateProgress(op, percent);
+}
+
+BOOL EndlessIsChecked(int box)
+{
+    /* Let's log this in case new ones pop up in the future,
+     * but for now we can return FALSE to all.
+     */
+    uprintf("Query checkbox %d", box);
+    return FALSE;
 }

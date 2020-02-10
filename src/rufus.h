@@ -119,7 +119,14 @@
 #ifndef STRINGIFY
 #define STRINGIFY(x)                #x
 #endif
+
+#ifndef ENDLESSUSB_TOOL
 #define IsChecked(CheckBox_ID)      (IsDlgButtonChecked(hMainDialog, CheckBox_ID) == BST_CHECKED)
+#else
+extern BOOL EndlessIsChecked(int box);
+#define IsChecked(CheckBox_ID)		EndlessIsChecked(CheckBox_ID)
+#endif // !ENDLESSUSB_TOOL
+
 #define MB_IS_RTL                   (right_to_left_mode?MB_RTLREADING|MB_RIGHT:0)
 #define CHECK_FOR_USER_CANCEL       if (IS_ERROR(FormatStatus) && (SCODE_CODE(FormatStatus) == ERROR_CANCELLED)) goto out
 // Bit masks used for the display of additional image options in the UI
