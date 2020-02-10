@@ -1944,6 +1944,8 @@ INT_PTR MyDialogBox(HINSTANCE hInstance, int Dialog_ID, HWND hWndParent, DLGPROC
 	return ret;
 }
 
+#endif /* !ENDLESS_USB_TOOL */
+
 /*
  * The following function calls are used to automatically detect and close the native
  * Windows format prompt "You must format the disk in drive X:" as well as the cookies
@@ -1990,7 +1992,9 @@ static void CALLBACK AlertPromptHook(HWINEVENTHOOK hWinEventHook, DWORD Event, H
 			} else if ((strcmp(str, title_str[2]) == 0) && (hWnd != hFidoDlg)) {
 				// A wild Fido dialog appeared! => Keep track of its handle and center it
 				hFidoDlg = hWnd;
+#ifndef ENDLESSUSB_TOOL
 				CenterDialog(hWnd, hMainDialog);
+#endif /* !ENDLESSUSB_TOOL */
 			}
 		}
 	}
@@ -2045,6 +2049,8 @@ void ClrAlertPromptHook(void) {
 	UnhookWinEvent(ap_weh);
 	ap_weh = NULL;
 }
+
+#ifndef ENDLESSUSB_TOOL
 
 void FlashTaskbar(HANDLE handle)
 {
