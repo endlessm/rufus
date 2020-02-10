@@ -102,7 +102,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>ENDLESSUSB_TOOL;_OFF_T_DEFINED;_off_t=__int64;off_t=_off_t;_CRTDBG_MAP_ALLOC;WIN32;_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>ENDLESSUSB_TOOL;_OFF_T_DEFINED;_off_t=__int64;off_t=_off_t;_CRTDBG_MAP_ALLOC;WIN32;_WINDOWS;_DEBUG;COBJMACROS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>..\endless;..\..\..\src\msvc-missing;..\..\..\src\ms-sys\inc;..\..\..\src\syslinux\libinstaller;..\..\..\src\syslinux\libfat;..\..\..\src\syslinux\win;..\..\..\src\libcdio;..\..\..\src\getopt;..\7zip-cpp;..\..\..\src;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>
@@ -186,7 +186,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>ENDLESSUSB_TOOL;_OFF_T_DEFINED;_off_t=__int64;off_t=_off_t;WIN32;_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>ENDLESSUSB_TOOL;_OFF_T_DEFINED;_off_t=__int64;off_t=_off_t;WIN32;_WINDOWS;NDEBUG;COBJMACROS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <ExceptionHandling>false</ExceptionHandling>
       <AdditionalIncludeDirectories>..\endless;..\..\..\src\msvc-missing;..\..\..\src\ms-sys\inc;..\..\..\src\syslinux\libinstaller;..\..\..\src\syslinux\libfat;..\..\..\src\syslinux\win;..\..\..\src\libcdio;..\..\..\src\getopt;..\7zip-cpp;..\..\..\src;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
