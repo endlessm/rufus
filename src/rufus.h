@@ -682,3 +682,4 @@ static __inline HMODULE GetLibraryHandle(char* szLibraryName) {
 
 BOOL Endless_FormatPartition(const char *VolumeName, wchar_t *wFSType, wchar_t *partLabel, ULONG ulClusterSize);
 BOOL ClearMBRGPT(HANDLE hPhysicalDrive, LONGLONG DiskSize, DWORD SectorSize, BOOL add1MB);
+BOOL FormatPartition(DWORD DriveIndex, uint64_t PartitionOffset, DWORD UnitAllocationSize, USHORT FSType, LPCSTR Label, DWORD Flags);
