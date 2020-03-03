@@ -4149,9 +4149,9 @@ DWORD WINAPI CEndlessUsbToolDlg::FileCopyThread(void* param)
     PDRIVE_LAYOUT_INFORMATION_EX DriveLayout = (PDRIVE_LAYOUT_INFORMATION_EX)(void*)layout;
     CString driveDestination, fileDestination, liveFileName;
     CStringA driveDestinationA, iniLanguage = INI_LOCALE_EN;
+    uint64_t new_offs;
 
-    // Radu: why do we do this?
-    memset(&SelectedDrive, 0, sizeof(SelectedDrive));
+    char tmp_fs_name[32];
 
     // Query for disk and partition data
     hPhysical = GetPhysicalHandle(DriveIndex, TRUE, TRUE, FALSE);
@@ -4181,8 +4181,9 @@ DWORD WINAPI CEndlessUsbToolDlg::FileCopyThread(void* param)
     PARTITION_INFORMATION_EX *lastPartition = &(DriveLayout->PartitionEntry[DriveLayout->PartitionCount]);
     PARTITION_INFORMATION_EX *newPartition = &(DriveLayout->PartitionEntry[0]);
     newPartition->PartitionStyle = PARTITION_STYLE_GPT;
-    newPartition->PartitionNumber = 1;;
-    newPartition->StartingOffset.QuadPart = lastPartition->StartingOffset.QuadPart + lastPartition->PartitionLength.QuadPart;    
+    newPartition->PartitionNumber = 1;
+    new_offs = lastPartition->StartingOffset.QuadPart + lastPartition->PartitionLength.QuadPart;
+    newPartition->StartingOffset.QuadPart = new_offs;
     newPartition->PartitionLength.QuadPart = DriveLayout->Gpt.UsableLength.QuadPart - newPartition->StartingOffset.QuadPart;
 
     newPartition->Gpt.PartitionType = PARTITION_BASIC_DATA_GUID;
@@ -4199,11 +4200,20 @@ DWORD WINAPI CEndlessUsbToolDlg::FileCopyThread(void* param)
     // Check if user cancelled
     IFFALSE_GOTOERROR(WaitForSingleObject(dlg->m_cancelOperationEvent, 0) == WAIT_TIMEOUT, "User cancel.");
     // Format the partition
-    IFFALSE_GOTOERROR(FormatFirstPartitionOnDrive(DriveIndex, L"exFAT", EXFAT_CLUSTER_SIZE, dlg->m_cancelOperationEvent, EXFAT_PARTITION_NAME_IMAGES), "Error on FormatFirstPartitionOnDrive");
-    // Mount it
-    IFFALSE_GOTOERROR(MountFirstPartitionOnDrive(DriveIndex, driveDestinationA), "Error on MountFirstPartitionOnDrive");
-    driveDestination = driveDestinationA;
+    Sleep(200);
+    IFFALSE_PRINTERROR(WaitForLogical(DriveIndex, 0), "Warning: Logical drive was not found!"); // We try to continue even if this fails, just in case
+    IFFALSE_GOTOERROR(FormatPartition(DriveIndex, new_offs, EXFAT_CLUSTER_SIZE, FS_EXFAT, EXFAT_PARTITION_NAME_IMAGES, FP_QUICK), "Error formatting eoslive");
 
+    GetDrivePartitionData(SelectedDrive.DeviceNumber, tmp_fs_name, sizeof(tmp_fs_name), FALSE);
+    // Mount it
+    char drive_name[] = "?:\\";
+    char *volume_name;
+
+    volume_name = GetLogicalName(DriveIndex, new_offs, TRUE, TRUE);
+    IFFALSE_GOTOERROR(volume_name, "Error mounting eoslive");
+    drive_name[0] = GetUnusedDriveLetter();
+    IFFALSE_GOTOERROR(MountVolume(drive_name, volume_name), "Error mounting eoslive");
+    driveDestination = drive_name;
     // Copy Files
     liveFileName = CSTRING_GET_LAST(dlg->m_localFile, L'\\');
     if (liveFileName == ENDLESS_IMG_FILE_NAME) {
@@ -4867,28 +4877,25 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 
 	// Format and mount exFAT
 	errorCause = ErrorCauseFormatExfatFailed;
-	IFFALSE_GOTOERROR(FormatFirstPartitionOnDrive(DriveIndex, L"exFAT", EXFAT_CLUSTER_SIZE, dlg->m_cancelOperationEvent, EXFAT_PARTITION_NAME_LIVE), "Error formatting eoslive");
-
+	IFFALSE_GOTOERROR(FormatPartition(DriveIndex, 0, EXFAT_CLUSTER_SIZE, FS_EXFAT, EXFAT_PARTITION_NAME_LIVE, FP_QUICK), "Error formatting eoslive");
 	CHECK_IF_CANCELLED;
 	errorCause = ErrorCauseMountExfatFailed;
-	IFFALSE_GOTOERROR(MountFirstPartitionOnDrive(DriveIndex, eosliveDriveLetter), "Error mounting eoslive");
-
+	IFFALSE_GOTOERROR(eosliveDriveLetter = AltMountVolume(DriveIndex, 0, FALSE), "Error mounting eoslive");
 	UpdateProgress(OP_NEW_LIVE_CREATION, USB_PROGRESS_EXFAT_PREPARED);
 	CHECK_IF_CANCELLED;
 
-	// Mount and format ESP. (Yes, you can assign a drive letter to an unformatted volume!)
+	errorCause = ErrorCauseFormatESPFailed;
+
+	IFFALSE_GOTOERROR(FormatPartition(DriveIndex, partitionStart[1], ESP_CLUSTER_SIZE, FS_FAT32, "", FP_QUICK), "Error formatting ESP");
+	UpdateProgress(OP_NEW_LIVE_CREATION, USB_PROGRESS_ESP_PREPARED);
+	CHECK_IF_CANCELLED;
+
 	errorCause = ErrorCauseMountESPFailed;
 	cszEspDriveLetter = AltMountVolume(DriveIndex, partitionStart[1], FALSE);
 	IFFALSE_GOTOERROR(cszEspDriveLetter != NULL, "Error mounting ESP");
 	// The pointer returned by AltMountVolume() is to a static buffer...
 	espDriveLetter = cszEspDriveLetter;
 
-	CHECK_IF_CANCELLED;
-
-	errorCause = ErrorCauseFormatESPFailed;
-	IFFALSE_GOTOERROR(FormatPartitionWithRetry(espDriveLetter, L"FAT32", ESP_CLUSTER_SIZE, dlg->m_cancelOperationEvent, L""), "Error formatting ESP");
-
-	UpdateProgress(OP_NEW_LIVE_CREATION, USB_PROGRESS_ESP_PREPARED);
 	CHECK_IF_CANCELLED;
 
 	// Copy files to the ESP partition
@@ -4905,6 +4912,8 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	// Copy files to the exFAT partition
 	errorCause = ErrorCausePopulateExfatFailed;
 	IFFALSE_GOTOERROR(CopyFilesToexFAT(dlg, bootFilesPath, UTF8ToCString(eosliveDriveLetter)), "Error on CopyFilesToexFAT");
+	/* We mounted this ourselves, probably a second time, try to remove our mount. */
+	IFFALSE_PRINTERROR(AltUnmountVolume(eosliveDriveLetter, FALSE), "Failed to unmount live partition");
 
 	UpdateProgress(OP_NEW_LIVE_CREATION, USB_PROGRESS_ALL_DONE);
 	CHECK_IF_CANCELLED;
