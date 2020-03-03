@@ -38,6 +38,8 @@ extern "C" {
 #include "dev.h"
 #include "mbr_grub2.h"
 
+LONGLONG CEndlessUsbToolDlg::partitionStart[EXPECTED_NUMBER_OF_PARTITIONS];
+
 BOOL its_a_me_mario = FALSE;
 
 // RADU: try to remove the need for all of these
@@ -4120,9 +4122,10 @@ const GUID PARTITION_BIOS_BOOT_GUID =
 { 0x21686148L, 0x6449, 0x6e6f, { 0x74, 0x4e, 0x65, 0x65, 0x64, 0x45, 0x46, 0x49 } };
 #endif
 
-#define EXPECTED_NUMBER_OF_PARTITIONS	3
-#define EXFAT_PARTITION_NAME_IMAGES		L"eosimages"
-#define EXFAT_PARTITION_NAME_LIVE		L"eoslive"
+#define EXFAT_PARTITION_NAME_IMAGES		"eosimages"
+#define EXFAT_PARTITION_NAME_IMAGES_L   L"eosimages"
+#define EXFAT_PARTITION_NAME_LIVE		"eoslive"
+#define EXFAT_PARTITION_NAME_LIVE_L		L"eoslive"
 
 #define EXFAT_CLUSTER_SIZE              0x8000
 #define ESP_CLUSTER_SIZE                0x200
@@ -4184,7 +4187,7 @@ DWORD WINAPI CEndlessUsbToolDlg::FileCopyThread(void* param)
 
     newPartition->Gpt.PartitionType = PARTITION_BASIC_DATA_GUID;
     IGNORE_RETVAL(CoCreateGuid(&newPartition->Gpt.PartitionId));
-    wcscpy(newPartition->Gpt.Name, EXFAT_PARTITION_NAME_IMAGES);
+    wcscpy(newPartition->Gpt.Name, EXFAT_PARTITION_NAME_IMAGES_L);
 
     DriveLayout->PartitionCount += 1;
 
@@ -4985,11 +4988,10 @@ bool CEndlessUsbToolDlg::CreateUSBPartitionLayout(HANDLE hPhysical, DWORD &Bytes
 	DriveLayout->PartitionCount = EXPECTED_NUMBER_OF_PARTITIONS;
 	IGNORE_RETVAL(CoCreateGuid(&DriveLayout->Gpt.DiskId));
 
-	LONGLONG partitionStart[EXPECTED_NUMBER_OF_PARTITIONS] = {
-		EXFAT_PART_STARTING_SECTOR * BytesPerSector,
-		ESP_PART_STARTING_SECTOR * BytesPerSector,
-		BIOS_BOOT_PART_STARTING_SECTOR * BytesPerSector
-	};
+	partitionStart[0] = EXFAT_PART_STARTING_SECTOR * BytesPerSector;
+	partitionStart[1] = ESP_PART_STARTING_SECTOR * BytesPerSector;
+	partitionStart[2] = BIOS_BOOT_PART_STARTING_SECTOR * BytesPerSector;
+
 	LONGLONG partitionSize[EXPECTED_NUMBER_OF_PARTITIONS] = {
 		// there is a 2nd copy of the GPT at the end of the disk so we
 		// subtract the length here to avoid the operation failing
@@ -5003,7 +5005,7 @@ bool CEndlessUsbToolDlg::CreateUSBPartitionLayout(HANDLE hPhysical, DWORD &Bytes
 		PARTITION_BIOS_BOOT_GUID
 	};
 	wchar_t *partitionName[EXPECTED_NUMBER_OF_PARTITIONS] = {
-		EXFAT_PARTITION_NAME_LIVE,
+		EXFAT_PARTITION_NAME_LIVE_L,
 		L"",
 		L""
 	};
