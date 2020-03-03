@@ -4821,10 +4821,15 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	CHECK_IF_CANCELLED;
 
 	// erase any existing partition
+	safe_unlockclose(hPhysical);
+	IFFALSE_GOTOERROR(DeletePartitions(DriveIndex), "ErasePartitions failed");
+	hPhysical = GetPhysicalHandle(DriveIndex, TRUE, TRUE, FALSE);
+	IFFALSE_GOTOERROR(hPhysical != INVALID_HANDLE_VALUE, "Error on acquiring disk handle.");
+	RefreshDriveLayout(hPhysical);
+
 	errorCause = ErrorCauseErasePartitionsFailed;
 	IFFALSE_GOTOERROR(ClearMBRGPT(hPhysical, SelectedDrive.DiskSize, BytesPerSector, FALSE), "ClearMBRGPT failed");
-	IFFALSE_GOTOERROR(DeletePartitions(DriveIndex), "ErasePartitions failed");
-
+	IFFALSE_GOTOERROR(InitializeDisk(hPhysical), "InitializeDisk failed");
 	// write BIOS boot partition before partitioning the drive.
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/aa365747%28v=vs.85%29.aspx?f=255&MSPPError=-2147217396 says:
 	// A write on a disk handle will succeed if one of the following conditions is true:
