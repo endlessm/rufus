@@ -4206,7 +4206,7 @@ DWORD WINAPI CEndlessUsbToolDlg::FileCopyThread(void* param)
     if (liveFileName == ENDLESS_IMG_FILE_NAME) {
         fileDestination = driveDestination + CSTRING_GET_PATH(CSTRING_GET_LAST(dlg->m_localFileSig, L'\\'), L'.');
     } else {
-        fileDestination = driveDestination + liveFileName;
+        fileDestination = driveDestination + L'\\' + liveFileName;
     }
     result = CopyFileEx(dlg->m_localFile, fileDestination, CEndlessUsbToolDlg::CopyProgressRoutine, dlg, NULL, 0);
     IFFALSE_GOTOERROR(result, "Copying live image failed/cancelled.");
@@ -5226,7 +5226,7 @@ bool CEndlessUsbToolDlg::CopyFilesToexFAT(CEndlessUsbToolDlg *dlg, const CString
 
 	bool retResult = false;
 
-	CString usbFilesPath = driveLetter + PATH_ENDLESS_SUBDIRECTORY;
+	CString usbFilesPath = driveLetter + "\\" + PATH_ENDLESS_SUBDIRECTORY;
 	CString exePath = GetExePath();
 	CStringA originalImgFilename = ConvertUnicodeToUTF8(CSTRING_GET_PATH(CSTRING_GET_LAST(dlg->m_unpackedImageSig, '\\'), '.'));
 
