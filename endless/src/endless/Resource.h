@@ -36,7 +36,7 @@
 #define IDR_LC_ENDLESS_LOC              500
 #define IDR_UEFI_NTFS                   502
 
-#define IDC_QUICK_FORMAT                1009
+#define IDC_QUICK_FORMAT                1008
 #define IDC_BOOT                        1010
 
 #define HTML_ELEM_AdvancedPageTitle     2000
