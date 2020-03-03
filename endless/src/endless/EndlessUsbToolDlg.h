@@ -11,6 +11,8 @@
 #include "EndlessISO.h"
 #include "Eosldr.h"
 
+#define EXPECTED_NUMBER_OF_PARTITIONS	3
+
 typedef struct FileImageEntry {
     // Full, real path on disk
     CString filePath;
@@ -312,6 +314,8 @@ private:
 	InstallMethod_t m_selectedInstallMethod;
 
 	std::unique_ptr<EosldrInstaller> m_eosldrInstaller;
+
+	static LONGLONG partitionStart[EXPECTED_NUMBER_OF_PARTITIONS];
 
 	void TrackEvent(const CString &action, const CString &label = CString(), LONGLONG value = -1L);
 	void TrackEvent(const CString &action, LONGLONG value);
