@@ -415,9 +415,6 @@ private:
 	static DWORD WINAPI CreateUSBStick(LPVOID param);
 	static bool DeleteMountpointsForDrive(DWORD DriveIndex);
 	static bool CreateUSBPartitionLayout(HANDLE hPhysical, DWORD &BytesPerSector);
-	static bool FormatFirstPartitionOnDrive(DWORD DriveIndex, const wchar_t *kFSType, ULONG ulClusterSize, HANDLE cancelEvent, const wchar_t *kPartLabel);
-	static bool FormatPartitionWithRetry(const char *partition, const wchar_t *kFSType, ULONG ulClusterSize, HANDLE cancelEvent, const wchar_t *kPartLabel);
-	static bool MountFirstPartitionOnDrive(DWORD DriveIndex, CStringA &driveLetter);
 
 	static bool UnpackZip(const CComBSTR source, const CComBSTR dest);
 	static void RemoveNonEmptyDirectory(const CString directoryPath);

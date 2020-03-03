@@ -400,4 +400,3 @@ int CycleDevice(int index);
 BOOL RefreshLayout(DWORD DriveIndex);
 BOOL GetOpticalMedia(IMG_SAVE* img_save);
 
-BOOL Endless_EnsureVolumeMounted(char* drive_name, char *drive_guid);
