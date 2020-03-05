@@ -179,7 +179,7 @@ uint64_t get_eos_archive_disk_image_size(const char *filepath, int compression_t
             uprintf("Error opening %s: %d", filepath, err);
         }
     } else {
-        bled_init(_uprintf, NULL, NULL);
+        bled_init(_uprintf, NULL, NULL, NULL, NULL);
         bytes_read = bled_uncompress_to_buffer(filepath, (char*)&pt, size, compression_type);
         bled_exit();
     }
