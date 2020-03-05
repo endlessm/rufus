@@ -2692,7 +2692,7 @@ bool CEndlessUsbToolDlg::UnpackFile(const CString &archive, const CString &desti
     // RADU: provide a progress function and move this from UI thread
     // For initial release this is ok as the operation should be very fast for the JSON
     // Unpack the file
-    result = bled_init(_uprintf, (progress_t)progress_function, cancel_request);
+    result = bled_init(_uprintf, NULL, NULL, (progress_t)progress_function, cancel_request);
     result = bled_uncompress(ConvertUnicodeToUTF8(archive), ConvertUnicodeToUTF8(destination), compressionType);
     bled_exit();
 
