@@ -6559,3 +6559,8 @@ BOOL EndlessIsChecked(int box)
     uprintf("Query checkbox %d", box);
     return FALSE;
 }
+
+DWORD CheckDriveAccess(DWORD dwTimeOut, BOOL bPrompt)
+{
+    return dwTimeOut;
+}
