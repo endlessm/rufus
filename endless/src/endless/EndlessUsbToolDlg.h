@@ -422,6 +422,7 @@ private:
 	static void ImageUnpackCallback(const uint64_t read_bytes);
 	static void UpdateUnpackProgress(const uint64_t current_bytes, const uint64_t total_bytes);
 	static bool CopyFilesToexFAT(CEndlessUsbToolDlg *dlg, const CString &fromFolder, const CString &driveLetter);
+	static bool CreatePersistentStorageFileOnexFAT(const CString& drive);
 	static bool WriteMBRToUSB(HANDLE hPhysical, const CString &bootFilesPath);
 	static bool WriteBIOSBootPartitionToUSB(HANDLE hPhysical, const CString &bootFilesPath, DWORD bytesPerSector);
 

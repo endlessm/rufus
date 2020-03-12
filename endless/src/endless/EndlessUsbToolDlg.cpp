@@ -4929,6 +4929,9 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	// Copy files to the exFAT partition
 	errorCause = ErrorCausePopulateExfatFailed;
 	IFFALSE_GOTOERROR(CopyFilesToexFAT(dlg, bootFilesPath, UTF8ToCString(eosliveDriveLetter)), "Error on CopyFilesToexFAT");
+
+	IFFALSE_PRINTERROR(CreatePersistentStorageFileOnexFAT(UTF8ToCString(eosliveDriveLetter)), "Error setting up liveUSB Persistent Storage space");
+
 	/* We mounted this ourselves, probably a second time, try to remove our mount. */
 	IFFALSE_PRINTERROR(AltUnmountVolume(eosliveDriveLetter, FALSE), "Failed to unmount live partition");
 
@@ -5129,6 +5132,41 @@ bool CEndlessUsbToolDlg::CopyFilesToESP(const CString &fromFolder, const CString
 
 error:
 	return retResult;
+}
+
+bool CEndlessUsbToolDlg::CreatePersistentStorageFileOnexFAT(const CString& drive)
+{
+    HANDLE tmpfile;
+    CString storage = drive + L"\\endless\\persistent.img";
+    char marker[] = "endless_live_storage_marker";
+    uint64_t bytes;
+    ULARGE_INTEGER free_bytes;
+    DWORD written;
+    BOOL ret;
+
+    if (!GetDiskFreeSpaceEx(drive, &free_bytes, NULL, NULL))
+        return false;
+
+    bytes = free_bytes.QuadPart;
+    if (bytes < 1073741824) {
+        uprintf("Less than a gigabyte of free space, not provisioning persistent storage.");
+        return false;
+    }
+
+    tmpfile = CreateFile(storage, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (tmpfile == INVALID_HANDLE_VALUE)
+        return false;
+
+    ret = WriteFile(tmpfile, marker, strlen(marker), &written, NULL);
+
+    safe_closehandle(tmpfile);
+
+    if (!ret) {
+        DeleteFile(storage);
+        uprintf("Failed to write marker to persistent storage file. gle=%d", GetLastError());
+        return false;
+    }
+    return ExtendImageFile(storage, free_bytes.QuadPart);
 }
 
 void CEndlessUsbToolDlg::ImageUnpackCallback(const uint64_t read_bytes)
