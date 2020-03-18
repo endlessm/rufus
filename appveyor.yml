@@ -1,96 +1,49 @@
-skip_commits:
-  # Don't run AppVeyor for commits that only modify resource or non-code files
-  files:
-  - .gitignore
-  - .gitattributes
-  - .github/
-  - res/
-  - '**/*.cmd'
-  - '**/*.md'
-  - '**/*.rc'
-  - '**/*.sh'
-  - '**/*.txt'
-  - '**/*.xml'
+version: "{build}-{branch}"
+image: Visual Studio 2017
 
-environment:
-  COVERITY_SCAN_PROJECT_NAME:       "pbatard/rufus"
-  COVERITY_SCAN_NOTIFICATION_EMAIL: "pete@akeo.ie"
-  COVERITY_SCAN_TOKEN:
-    secure: XZADvwlRFo57sBA54pBH2oVT/eR/OytZYY/sCKq61io=
-  global:
-    BITS: 32
-  matrix:
-  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-    CONFIGURATION: Debug
-    COMPILER: MSVC
-    PLATFORM: x86
-  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-    CONFIGURATION: Debug
-    COMPILER: MSVC
-    PLATFORM: x64
-  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-    CONFIGURATION: Release
-    COMPILER: MSVC
-    PLATFORM: x86
-  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-    CONFIGURATION: Release
-    COMPILER: MSVC
-    PLATFORM: x64
-  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-    CONFIGURATION: Release
-    COMPILER: MinGW
-    PLATFORM: i686
-  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-    CONFIGURATION: Release
-    COMPILER: MinGW
-    PLATFORM: x86_64
-  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-    CONFIGURATION: Release
-    COMPILER: Coverity
-    PLATFORM: x86
-
-init:
-# Set the AppVeyor build version number to our tag or, if untagged, to the commit hash
-# See https://github.com/appveyor/ci/issues/691
-# Also include the build number, to distinguish between rebuilds of the same commit
-- ps: |
-    if ($env:APPVEYOR_REPO_TAG -eq "true") {
-      Update-AppveyorBuild -Version "$($env:APPVEYOR_REPO_TAG_NAME)_#$env:APPVEYOR_BUILD_NUMBER";
-    } else {
-      Update-AppveyorBuild -Version "dev-$($env:APPVEYOR_REPO_COMMIT.Substring(0,8))_#$env:APPVEYOR_BUILD_NUMBER";
-    }
+matrix:
+  fast_finish: true
 
 build:
-  project: rufus.sln
-  parallel: true
-  verbosity: detailed
+  project: endless.sln
+
+platform:
+  - x86_32
+
+configuration:
+  - Debug
+  - Release
 
 install:
-  ps: |
-    if ($env:PLATFORM -eq "x86_64") {
-      $env:BITS = 64
-    }
+  - if not exist upx.exe (
+        appveyor DownloadFile https://github.com/upx/upx/releases/download/v3.94/upx394w.zip -FileName upx.zip &&
+        7z e upx.zip *.exe -r
+    )
 
-build_script:
-  ps: |
-    $APPVEYOR_LOGGER = "C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll";
-    switch ($env:COMPILER) {
-      MSVC {
-        msbuild rufus.sln /m /p:Configuration=$env:CONFIGURATION,Platform=$env:PLATFORM /l:$APPVEYOR_LOGGER;
-      }
-      MinGW {
-        C:\msys64\usr\bin\bash -lc "export PATH=/mingw$env:BITS/bin:`$PATH; cd /c/projects/rufus; mkdir -p m4; ./configure --build=$env:PLATFORM-w64-mingw32 --host=$env:PLATFORM-w64-mingw32 --disable-debug; make -j4";
-      }
-      Coverity {
-        $PUBLISHCOVERITY = "$env:APPVEYOR_BUILD_FOLDER\PublishCoverity\tools\PublishCoverity.exe";
-        if (!"$env:COVERITY_SCAN_TOKEN") {
-          Write-Output "Not running Coverity due to missing credential.";
-          return;
-        }
-        & nuget install PublishCoverity -o "$env:APPVEYOR_BUILD_FOLDER" -excludeversion;
-        & cov-build.exe --dir cov-int msbuild rufus.sln /m /p:Configuration=$env:CONFIGURATION,Platform=$env:PLATFORM /l:$APPVEYOR_LOGGER;
-        & $PUBLISHCOVERITY compress --nologo -i "$env:APPVEYOR_BUILD_FOLDER\cov-int" -o "$env:APPVEYOR_BUILD_FOLDER\coverity.zip" --overwrite;
-        & $PUBLISHCOVERITY publish --nologo -t $env:COVERITY_SCAN_TOKEN -e $env:COVERITY_SCAN_NOTIFICATION_EMAIL -r $env:COVERITY_SCAN_PROJECT_NAME -z "$env:APPVEYOR_BUILD_FOLDER\coverity.zip" -d "Appveyor build." --codeVersion $env:APPVEYOR_BUILD_VERSION;
-        Get-ChildItem -Path ./ -Recurse | Remove-Item -Force -Recurse;
-      }
-    }
+cache:
+  - C:\projects\rufus\upx.exe -> appveyor.yml
+
+# We assume tags are of the form VERSION_foo, and we assume that foo matches
+# the version number embedded in the executable.
+#
+# Non-tags get executables named for the Git commit ID.
+before_build:
+  - set EI_VERSION=%APPVEYOR_REPO_COMMIT:~0,7%
+  - if "%APPVEYOR_REPO_TAG%"=="true" set EI_VERSION=v%APPVEYOR_REPO_TAG_NAME:~8%
+  - if not "%APPVEYOR_REPO_BRANCH%"=="master" set EI_VERSION=%EI_VERSION%-%APPVEYOR_REPO_BRANCH%
+  - if not "%APPVEYOR_PULL_REQUEST_NUMBER%"=="" set EI_VERSION=%EI_VERSION%-pr%APPVEYOR_PULL_REQUEST_NUMBER%
+  - if not "%CONFIGURATION%"=="Release" set EI_VERSION=%EI_VERSION%-%CONFIGURATION%
+  - echo EI_VERSION=%EI_VERSION%
+
+after_build:
+  - 7z a endless-installer-%EI_VERSION%.zip %PLATFORM%\%CONFIGURATION%\EndlessUsbTool.exe
+  - 7z a endless-installer-%EI_VERSION%.zip %PLATFORM%\%CONFIGURATION%\EndlessUsbTool.pdb
+  - upx.exe -9 -o endless-installer-%EI_VERSION%.exe %PLATFORM%\%CONFIGURATION%\EndlessUsbTool.exe
+  - appveyor PushArtifact %APPVEYOR_BUILD_FOLDER%\endless-installer-%EI_VERSION%.exe
+  - 7z a endless-installer-%EI_VERSION%.zip %APPVEYOR_BUILD_FOLDER%\endless-installer-%EI_VERSION%.exe
+  - appveyor PushArtifact endless-installer-%EI_VERSION%.zip
+
+test_script:
+  - echo "Checking rufus.pot is up-to-date"
+  - C:\Python35-x64\python.exe %APPVEYOR_BUILD_FOLDER%\po\loc2pot
+  - git diff --exit-code -- %APPVEYOR_BUILD_FOLDER%\po\rufus.pot
