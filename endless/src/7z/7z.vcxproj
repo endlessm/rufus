@@ -59,28 +59,34 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <NMakeBuildCommandLine>$(ProjectDir)EndlessBuild.bat MY_DEBUG=1</NMakeBuildCommandLine>
+    <NMakeBuildCommandLine>$(ProjectDir)EndlessBuild.bat MY_DEBUG=1 PLATFORM=$(Platform) O=$(SolutionDir)x86\$(Configuration)\7z</NMakeBuildCommandLine>
     <NMakePreprocessorDefinitions>WIN32;_DEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
-    <NMakeCleanCommandLine>$(ProjectDir)EndlessBuild.bat clean</NMakeCleanCommandLine>
-    <NMakeOutput>$(ProjectDir)CPP\7zip\Bundles\Format7zF\O\7z.lib</NMakeOutput>
+    <NMakeCleanCommandLine>$(ProjectDir)EndlessBuild.bat clean PLATFORM=$(Platform) O=$(SolutionDir)x86\$(Configuration)\7z</NMakeCleanCommandLine>
+    <NMakeOutput>$(SolutionDir)x86\$(Configuration)\7z\7z.lib</NMakeOutput>
+    <OutDir>$(SolutionDir)x86\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)x86\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <NMakeBuildCommandLine>$(ProjectDir)EndlessBuild.bat</NMakeBuildCommandLine>
+    <NMakeBuildCommandLine>$(ProjectDir)EndlessBuild.bat PLATFORM=$(Platform) O=$(SolutionDir)x86\$(Configuration)\7z</NMakeBuildCommandLine>
     <NMakePreprocessorDefinitions>WIN32;NDEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
-    <NMakeCleanCommandLine>$(ProjectDir)EndlessBuild.bat clean</NMakeCleanCommandLine>
-    <NMakeOutput>$(ProjectDir)CPP\7zip\Bundles\Format7zF\O\7z.lib</NMakeOutput>
+    <NMakeCleanCommandLine>$(ProjectDir)EndlessBuild.bat clean PLATFORM=$(Platform) O=$(Outdir)7z</NMakeCleanCommandLine>
+    <NMakeOutput>$(SolutionDir)x86\$(Configuration)\7z\7z.lib</NMakeOutput>
+    <OutDir>$(SolutionDir)x86\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)x86\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <NMakeBuildCommandLine>$(ProjectDir)EndlessBuild.bat MY_DEBUG=1</NMakeBuildCommandLine>
-    <NMakeCleanCommandLine>$(ProjectDir)EndlessBuild.bat clean</NMakeCleanCommandLine>
+    <NMakeBuildCommandLine>$(ProjectDir)EndlessBuild.bat MY_DEBUG=1 PLATFORM=$(Platform) O=$(SolutionDir)x64\$(Configuration)\7z</NMakeBuildCommandLine>
+    <NMakeCleanCommandLine>$(ProjectDir)EndlessBuild.bat clean PLATFORM=$(Platform) O=$(Outdir)7z</NMakeCleanCommandLine>
     <NMakePreprocessorDefinitions>_DEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
-    <NMakeOutput>$(ProjectDir)CPP\7zip\Bundles\Format7zF\O\7z.lib</NMakeOutput>
+    <NMakeOutput>$(SolutionDir)x64\$(Configuration)\7z\7z.lib</NMakeOutput>
+    <IntDir>$(SolutionDir)$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <NMakeBuildCommandLine>$(ProjectDir)EndlessBuild.bat</NMakeBuildCommandLine>
-    <NMakeCleanCommandLine>$(ProjectDir)EndlessBuild.bat clean</NMakeCleanCommandLine>
+    <NMakeBuildCommandLine>$(ProjectDir)EndlessBuild.bat PLATFORM=$(Platform) O=$(SolutionDir)x64\$(Configuration)\7z</NMakeBuildCommandLine>
+    <NMakeCleanCommandLine>$(ProjectDir)EndlessBuild.bat clean PLATFORM=$(Platform) O=$(Outdir)7z</NMakeCleanCommandLine>
     <NMakePreprocessorDefinitions>NDEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
-    <NMakeOutput>$(ProjectDir)CPP\7zip\Bundles\Format7zF\O\7z.lib</NMakeOutput>
+    <NMakeOutput>$(SolutionDir)x64\$(Configuration)\7z\7z.lib</NMakeOutput>
+    <IntDir>$(SolutionDir)$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup>
   </ItemDefinitionGroup>

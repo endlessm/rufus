@@ -65,6 +65,3 @@ ipch/
 
 # Generated code
 endless/src/endless/Version.h
-
-# 7z objects
-/src/7z/**/O
