@@ -118,51 +118,51 @@
     <_ProjectFileVersion>12.0.30501.0</_ProjectFileVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MBCS Debug|Win32'">
-    <OutDir>$(SolutionDir)x86_32\$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)x86\$(Configuration)\</OutDir>
     <IntDir>$(OutDir)$(ProjectName)\</IntDir>
     <TargetExt>.lib</TargetExt>
     <TargetName>7zpp_ud</TargetName>
     <IncludePath>./7zip;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MBCS Debug|x64'">
-    <OutDir>$(SolutionDir)x86_64\$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)x64\$(Configuration)\</OutDir>
     <IntDir>$(OutDir)$(ProjectName)\</IntDir>
     <TargetName>7zpp_ud</TargetName>
     <IncludePath>./7zip;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MBCS Release|Win32'">
-    <OutDir>$(SolutionDir)x86_32\$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)x86\$(Configuration)\</OutDir>
     <IntDir>$(OutDir)$(ProjectName)\</IntDir>
     <TargetExt>.lib</TargetExt>
     <TargetName>$(ProjectName)_u</TargetName>
     <IncludePath>./7zip;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MBCS Release|x64'">
-    <OutDir>$(SolutionDir)x86_64\$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)x64\$(Configuration)\</OutDir>
     <IntDir>$(OutDir)$(ProjectName)\</IntDir>
     <IncludePath>./7zip;$(IncludePath)</IncludePath>
     <TargetName>$(ProjectName)_u</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>$(SolutionDir)x86_32\$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)x86\$(Configuration)\</OutDir>
     <IntDir>$(OutDir)$(ProjectName)\</IntDir>
     <TargetName>7zpp_ud</TargetName>
     <IncludePath>./7zip;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>$(SolutionDir)x86_64\$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)x64\$(Configuration)\</OutDir>
     <IntDir>$(OutDir)$(ProjectName)\</IntDir>
     <TargetName>7zpp_ud</TargetName>
     <IncludePath>./7zip;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>$(SolutionDir)x86_32\$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)x86\$(Configuration)\</OutDir>
     <IntDir>$(OutDir)$(ProjectName)\</IntDir>
     <TargetName>7zpp_u</TargetName>
     <IncludePath>./7zip;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>$(SolutionDir)x86_64\$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)x64\$(Configuration)\</OutDir>
     <IntDir>$(OutDir)$(ProjectName)\</IntDir>
     <TargetName>7zpp_u</TargetName>
     <IncludePath>./7zip;$(IncludePath)</IncludePath>
