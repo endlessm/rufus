@@ -680,6 +680,5 @@ static __inline HMODULE GetLibraryHandle(char* szLibraryName) {
 #define ERROR_BAD_SIGNATURE            0x120D
 #define ERROR_CANT_DOWNLOAD            0x120E
 
-BOOL Endless_FormatPartition(const char *VolumeName, wchar_t *wFSType, wchar_t *partLabel, ULONG ulClusterSize);
 BOOL ClearMBRGPT(HANDLE hPhysicalDrive, LONGLONG DiskSize, DWORD SectorSize, BOOL add1MB);
 BOOL FormatPartition(DWORD DriveIndex, uint64_t PartitionOffset, DWORD UnitAllocationSize, USHORT FSType, LPCSTR Label, DWORD Flags);
