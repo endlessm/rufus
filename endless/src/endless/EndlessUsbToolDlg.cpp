@@ -4815,6 +4815,7 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	CStringA eosliveDriveLetter, espDriveLetter;
 	const char *cszEspDriveLetter;
 	ErrorCause errorCause = ErrorCause::ErrorCauseWriteFailed;
+	char tmp_fs_name[32];
 
 	UpdateProgress(OP_NEW_LIVE_CREATION, 0);
 
@@ -4882,6 +4883,14 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	IFFALSE_PRINTERROR(WaitForLogical(DriveIndex, 0), "Warning: Logical drive was not found!"); // We try to continue even if this fails, just in case
 
 	CHECK_IF_CANCELLED;
+
+	/* We changed the partition table, so we need to get rufus to update its internal state so
+	 * stuff like FormatPartition and AltMountVolume can figure out volume names.
+	 * GetDrivePartitionData gets the physical lock itself, so we have to drop that first. */
+	safe_unlockclose(hPhysical);
+	GetDrivePartitionData(SelectedDrive.DeviceNumber, tmp_fs_name, sizeof(tmp_fs_name), FALSE);
+	hPhysical = GetPhysicalHandle(DriveIndex, TRUE, TRUE, FALSE);
+	IFFALSE_GOTOERROR(hPhysical != INVALID_HANDLE_VALUE, "Error on reacquiring disk handle.");
 
 	// Write MBR to disk
 	errorCause = ErrorCauseWriteMBRFailed;
