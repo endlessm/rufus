@@ -5012,6 +5012,8 @@ bool CEndlessUsbToolDlg::CreateUSBPartitionLayout(HANDLE hPhysical, DWORD &Bytes
 	PDISK_GEOMETRY_EX DiskGeometry = (PDISK_GEOMETRY_EX)(void*)geometry;
 	PARTITION_INFORMATION_EX *currentPartition;
 	DWORD result, size;
+	unsigned char *zeroes;
+	int64_t written;
 
 	// get disk geometry information
 	result = DeviceIoControl(hPhysical, IOCTL_DISK_GET_DRIVE_GEOMETRY_EX, NULL, 0, geometry, sizeof(geometry), &size, NULL);
@@ -5065,6 +5067,17 @@ bool CEndlessUsbToolDlg::CreateUSBPartitionLayout(HANDLE hPhysical, DWORD &Bytes
 		IGNORE_RETVAL(CoCreateGuid(&currentPartition->Gpt.PartitionId));
 		wcscpy(currentPartition->Gpt.Name, partitionName[partIndex]);
 	}
+	// Clear the first 24 sectors of both FAT based partitions. The theory is this will stop windows
+	// from trying to mount whatever brokenness might be in those sectors when we finish the
+	// repartitioning.  Why 24? That's enough to clear both the primary and backup boot blocks
+	// on an exFAT partition - and it's way more than enough for FAT12/16/32.
+	// We leave the BIOS boot partition alone because we've already filled it in before calling
+	// this function.
+	// We try to keep going if this fails because it's not strictly necessary that it succeed.
+	zeroes = (unsigned char *) calloc(BytesPerSector, 24);
+	IFFALSE_PRINTERROR(BytesPerSector * 24 == write_sectors(hPhysical, BytesPerSector, partitionStart[0], 24, zeroes), "Unable to clear the start of eoslive.");
+	IFFALSE_PRINTERROR(BytesPerSector * 24 == write_sectors(hPhysical, BytesPerSector, partitionStart[1], 24, zeroes), "Unable to clear the start of the ESP.");
+	free(zeroes);
 
 	// push partition information to drive
 	size = sizeof(DRIVE_LAYOUT_INFORMATION_EX) + DriveLayout->PartitionCount * sizeof(PARTITION_INFORMATION_EX);
