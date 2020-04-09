@@ -4584,7 +4584,8 @@ void CEndlessUsbToolDlg::CancelRunningOperation(bool userCancel)
 	m_cancelImageUnpack = 1;
 
     FormatStatus = FORMAT_STATUS_CANCEL;
-    if (m_currentStep != OP_FLASHING_DEVICE) {
+    if (m_currentStep != OP_FLASHING_DEVICE &&
+        m_currentStep != OP_NEW_LIVE_CREATION) {
         m_downloadManager.ClearExtraDownloadJobs(userCancel);
         PostMessage(WM_FINISHED_ALL_OPERATIONS, (WPARAM)FALSE, 0);
     }
