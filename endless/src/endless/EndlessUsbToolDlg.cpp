@@ -5008,6 +5008,7 @@ bool CEndlessUsbToolDlg::CreateUSBPartitionLayout(HANDLE hPhysical, DWORD &Bytes
 {
 	FUNCTION_ENTER;
 
+	CREATE_DISK CreateDisk = { PARTITION_STYLE_RAW, {{0}} };
 	BYTE layout[4096] = { 0 }, geometry[256] = { 0 };
 	PDRIVE_LAYOUT_INFORMATION_EX DriveLayout = (PDRIVE_LAYOUT_INFORMATION_EX)(void*)layout;
 	PDISK_GEOMETRY_EX DiskGeometry = (PDISK_GEOMETRY_EX)(void*)geometry;
@@ -5079,6 +5080,19 @@ bool CEndlessUsbToolDlg::CreateUSBPartitionLayout(HANDLE hPhysical, DWORD &Bytes
 	IFFALSE_PRINTERROR(BytesPerSector * 24 == write_sectors(hPhysical, BytesPerSector, partitionStart[0], 24, zeroes), "Unable to clear the start of eoslive.");
 	IFFALSE_PRINTERROR(BytesPerSector * 24 == write_sectors(hPhysical, BytesPerSector, partitionStart[1], 24, zeroes), "Unable to clear the start of the ESP.");
 	free(zeroes);
+
+	// We've actually already called IOCTL_DISK_CREATE_DISK through rufus' InitializeDisk(), however that call
+	// doesn't set DiskId or MaxPartitionCount. There's a note somewhere in rufus that "If you don't call
+	// IOCTL_DISK_CREATE_DISK, the IOCTL_DISK_SET_DRIVE_LAYOUT_EX call will fail". It turns out that on windows 8.1
+	// and windows 7, in my testing, this is true. Windows 10 succeeds. The failure claims the disk is corrupt,
+	// GetLastError() code 1393. Perhaps this is because there is no GPT Disk Id set?
+	// In any event, if we do this again here, and fill in DiskId and MaxPartitionCount, as rufus does, we
+	// succeed under windows 7 and 8.1.
+	size = sizeof(CreateDisk);
+	CreateDisk.PartitionStyle = PARTITION_STYLE_GPT;
+	IGNORE_RETVAL(CoCreateGuid(&CreateDisk.Gpt.DiskId));
+	CreateDisk.Gpt.MaxPartitionCount = MAX_PARTITIONS;
+	result = DeviceIoControl(hPhysical, IOCTL_DISK_CREATE_DISK, (BYTE*)&CreateDisk, size, NULL, 0, &size, NULL);
 
 	// push partition information to drive
 	size = sizeof(DRIVE_LAYOUT_INFORMATION_EX) + DriveLayout->PartitionCount * sizeof(PARTITION_INFORMATION_EX);
