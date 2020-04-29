@@ -4865,6 +4865,11 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	errorCause = ErrorCauseErasePartitionsFailed;
 	IFFALSE_GOTOERROR(ClearMBRGPT(hPhysical, SelectedDrive.DiskSize, BytesPerSector, FALSE), "ClearMBRGPT failed");
 	IFFALSE_GOTOERROR(InitializeDisk(hPhysical), "InitializeDisk failed");
+
+	// Do some preliminary setup, like calculating partition offsets, zeroing the starts of partitions
+	// so windows won't cleverly try to auto mount anything, running a more thorough GPT disk initialization
+	IFFALSE_GOTOERROR(SetupComboDisk(hPhysical), "Disk setup failed");
+
 	// write BIOS boot partition before partitioning the drive.
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/aa365747%28v=vs.85%29.aspx?f=255&MSPPError=-2147217396 says:
 	// A write on a disk handle will succeed if one of the following conditions is true:
@@ -5006,19 +5011,56 @@ bool CEndlessUsbToolDlg::DeleteMountpointsForDrive(DWORD DriveIndex)
 	return true;
 }
 
+bool CEndlessUsbToolDlg::SetupComboDisk(HANDLE hPhysical)
+{
+    FUNCTION_ENTER;
 
+    CREATE_DISK CreateDisk = { PARTITION_STYLE_GPT, {{0}} };
+    DWORD BytesPerSector = SelectedDrive.SectorSize;
+    DWORD size;
+    bool result = false;
+    unsigned char* zeroes;
+
+    partitionStart[EXFAT_PART_NUMBER] = EXFAT_PART_STARTING_SECTOR * BytesPerSector;
+    partitionStart[ESP_PART_NUMBER] = ESP_PART_STARTING_SECTOR * BytesPerSector;
+    partitionStart[BIOS_BOOT_PART_NUMBER] = BIOS_BOOT_PART_STARTING_SECTOR * BytesPerSector;
+
+    // We've actually already called IOCTL_DISK_CREATE_DISK through rufus' InitializeDisk(), however that call
+    // doesn't set DiskId or MaxPartitionCount. There's a note somewhere in rufus that "If you don't call
+    // IOCTL_DISK_CREATE_DISK, the IOCTL_DISK_SET_DRIVE_LAYOUT_EX call will fail". It turns out that on windows 8.1
+    // and windows 7, in my testing, this is true. Windows 10 succeeds. The failure claims the disk is corrupt,
+    // GetLastError() code 1393. Perhaps this is because there is no GPT Disk Id set?
+    // In any event, if we do this again here, and fill in DiskId and MaxPartitionCount, as rufus does, we
+    // succeed under windows 7 and 8.1.
+    size = sizeof(CreateDisk);
+    IGNORE_RETVAL(CoCreateGuid(&CreateDisk.Gpt.DiskId));
+    CreateDisk.Gpt.MaxPartitionCount = MAX_PARTITIONS;
+    IFFALSE_GOTOERROR(DeviceIoControl(hPhysical, IOCTL_DISK_CREATE_DISK, (BYTE*)&CreateDisk, size, NULL, 0, &size, NULL), "Unable to initialize GPT disk structures");
+
+    // Clear the first 24 sectors of both FAT based partitions. The theory is this will stop windows
+    // from trying to mount whatever brokenness might be in those sectors when we finish the
+    // repartitioning.  Why 24? That's enough to clear both the primary and backup boot blocks
+    // on an exFAT partition - and it's way more than enough for FAT12/16/32.
+    // We leave the BIOS boot partition alone because windows doesn't appear to care about it anyway.
+    // We try to keep going if this fails because it's not strictly necessary that it succeed.
+    zeroes = (unsigned char*)calloc(BytesPerSector, 24);
+    IFFALSE_PRINTERROR(BytesPerSector * 24 == write_sectors(hPhysical, BytesPerSector, partitionStart[EXFAT_PART_NUMBER], 24, zeroes), "Unable to clear the start of eoslive.");
+    IFFALSE_PRINTERROR(BytesPerSector * 24 == write_sectors(hPhysical, BytesPerSector, partitionStart[ESP_PART_NUMBER], 24, zeroes), "Unable to clear the start of the ESP.");
+    free(zeroes);
+    RefreshDriveLayout(hPhysical);
+    result = true;
+error:
+    return result;
+}
 bool CEndlessUsbToolDlg::CreateUSBPartitionLayout(HANDLE hPhysical)
 {
 	FUNCTION_ENTER;
 
-	CREATE_DISK CreateDisk = { PARTITION_STYLE_RAW, {{0}} };
 	BYTE layout[4096] = { 0 };
 	PDRIVE_LAYOUT_INFORMATION_EX DriveLayout = (PDRIVE_LAYOUT_INFORMATION_EX)(void*)layout;
 	PARTITION_INFORMATION_EX *currentPartition;
 	DWORD result, size;
 	DWORD BytesPerSector = SelectedDrive.SectorSize;
-	unsigned char *zeroes;
-	int64_t written;
 
 	// the EFI spec says the GPT will take the first and last two sectors of
 	// the disk, plus however much is allocated for partition entries. there
@@ -5033,10 +5075,6 @@ bool CEndlessUsbToolDlg::CreateUSBPartitionLayout(HANDLE hPhysical)
 	DriveLayout->PartitionStyle = PARTITION_STYLE_GPT;
 	DriveLayout->PartitionCount = EXPECTED_NUMBER_OF_PARTITIONS;
 	IGNORE_RETVAL(CoCreateGuid(&DriveLayout->Gpt.DiskId));
-
-	partitionStart[EXFAT_PART_NUMBER] = EXFAT_PART_STARTING_SECTOR * BytesPerSector;
-	partitionStart[ESP_PART_NUMBER] = ESP_PART_STARTING_SECTOR * BytesPerSector;
-	partitionStart[BIOS_BOOT_PART_NUMBER] = BIOS_BOOT_PART_STARTING_SECTOR * BytesPerSector;
 
 	LONGLONG partitionSize[EXPECTED_NUMBER_OF_PARTITIONS] = {
 		// there is a 2nd copy of the GPT at the end of the disk so we
@@ -5067,30 +5105,6 @@ bool CEndlessUsbToolDlg::CreateUSBPartitionLayout(HANDLE hPhysical)
 		IGNORE_RETVAL(CoCreateGuid(&currentPartition->Gpt.PartitionId));
 		wcscpy(currentPartition->Gpt.Name, partitionName[partIndex]);
 	}
-	// Clear the first 24 sectors of both FAT based partitions. The theory is this will stop windows
-	// from trying to mount whatever brokenness might be in those sectors when we finish the
-	// repartitioning.  Why 24? That's enough to clear both the primary and backup boot blocks
-	// on an exFAT partition - and it's way more than enough for FAT12/16/32.
-	// We leave the BIOS boot partition alone because we've already filled it in before calling
-	// this function.
-	// We try to keep going if this fails because it's not strictly necessary that it succeed.
-	zeroes = (unsigned char *) calloc(BytesPerSector, 24);
-	IFFALSE_PRINTERROR(BytesPerSector * 24 == write_sectors(hPhysical, BytesPerSector, partitionStart[EXFAT_PART_NUMBER], 24, zeroes), "Unable to clear the start of eoslive.");
-	IFFALSE_PRINTERROR(BytesPerSector * 24 == write_sectors(hPhysical, BytesPerSector, partitionStart[ESP_PART_NUMBER], 24, zeroes), "Unable to clear the start of the ESP.");
-	free(zeroes);
-
-	// We've actually already called IOCTL_DISK_CREATE_DISK through rufus' InitializeDisk(), however that call
-	// doesn't set DiskId or MaxPartitionCount. There's a note somewhere in rufus that "If you don't call
-	// IOCTL_DISK_CREATE_DISK, the IOCTL_DISK_SET_DRIVE_LAYOUT_EX call will fail". It turns out that on windows 8.1
-	// and windows 7, in my testing, this is true. Windows 10 succeeds. The failure claims the disk is corrupt,
-	// GetLastError() code 1393. Perhaps this is because there is no GPT Disk Id set?
-	// In any event, if we do this again here, and fill in DiskId and MaxPartitionCount, as rufus does, we
-	// succeed under windows 7 and 8.1.
-	size = sizeof(CreateDisk);
-	CreateDisk.PartitionStyle = PARTITION_STYLE_GPT;
-	IGNORE_RETVAL(CoCreateGuid(&CreateDisk.Gpt.DiskId));
-	CreateDisk.Gpt.MaxPartitionCount = MAX_PARTITIONS;
-	result = DeviceIoControl(hPhysical, IOCTL_DISK_CREATE_DISK, (BYTE*)&CreateDisk, size, NULL, 0, &size, NULL);
 
 	// push partition information to drive
 	size = sizeof(DRIVE_LAYOUT_INFORMATION_EX) + DriveLayout->PartitionCount * sizeof(PARTITION_INFORMATION_EX);

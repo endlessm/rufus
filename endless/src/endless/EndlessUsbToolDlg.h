@@ -414,6 +414,7 @@ private:
 
 	static DWORD WINAPI CreateUSBStick(LPVOID param);
 	static bool DeleteMountpointsForDrive(DWORD DriveIndex);
+	static bool SetupComboDisk(HANDLE hPhysical);
 	static bool CreateUSBPartitionLayout(HANDLE hPhysical);
 
 	static bool UnpackZip(const CComBSTR source, const CComBSTR dest);
