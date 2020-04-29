@@ -4765,10 +4765,13 @@ void CEndlessUsbToolDlg::SetJSONDownloadState(JSONDownloadState state)
 }
 
 #define GPT_MAX_PARTITION_COUNT		128
+#define ESP_PART_NUMBER             1
 #define ESP_PART_STARTING_SECTOR	2048
 #define ESP_PART_LENGTH_BYTES		65011712
+#define BIOS_BOOT_PART_NUMBER       2
 #define BIOS_BOOT_PART_STARTING_SECTOR 129024
 #define BIOS_BOOT_PART_LENGTH_BYTES    1048576
+#define EXFAT_PART_NUMBER           0
 #define EXFAT_PART_STARTING_SECTOR	131072
 
 #define EFI_BOOT_SUBDIRECTORY			L"EFI\\BOOT"
@@ -4916,12 +4919,12 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 
 	errorCause = ErrorCauseFormatESPFailed;
 
-	IFFALSE_GOTOERROR(FormatPartition(DriveIndex, partitionStart[1], ESP_CLUSTER_SIZE, FS_FAT32, "", FP_QUICK), "Error formatting ESP");
+	IFFALSE_GOTOERROR(FormatPartition(DriveIndex, partitionStart[ESP_PART_NUMBER], ESP_CLUSTER_SIZE, FS_FAT32, "", FP_QUICK), "Error formatting ESP");
 	UpdateProgress(OP_NEW_LIVE_CREATION, USB_PROGRESS_ESP_PREPARED);
 	CHECK_IF_CANCELLED;
 
 	errorCause = ErrorCauseMountESPFailed;
-	cszEspDriveLetter = AltMountVolume(DriveIndex, partitionStart[1], FALSE);
+	cszEspDriveLetter = AltMountVolume(DriveIndex, partitionStart[ESP_PART_NUMBER], FALSE);
 	IFFALSE_GOTOERROR(cszEspDriveLetter != NULL, "Error mounting ESP");
 	// The pointer returned by AltMountVolume() is to a static buffer...
 	espDriveLetter = cszEspDriveLetter;
@@ -5036,14 +5039,14 @@ bool CEndlessUsbToolDlg::CreateUSBPartitionLayout(HANDLE hPhysical, DWORD &Bytes
 	DriveLayout->PartitionCount = EXPECTED_NUMBER_OF_PARTITIONS;
 	IGNORE_RETVAL(CoCreateGuid(&DriveLayout->Gpt.DiskId));
 
-	partitionStart[0] = EXFAT_PART_STARTING_SECTOR * BytesPerSector;
-	partitionStart[1] = ESP_PART_STARTING_SECTOR * BytesPerSector;
-	partitionStart[2] = BIOS_BOOT_PART_STARTING_SECTOR * BytesPerSector;
+	partitionStart[EXFAT_PART_NUMBER] = EXFAT_PART_STARTING_SECTOR * BytesPerSector;
+	partitionStart[ESP_PART_NUMBER] = ESP_PART_STARTING_SECTOR * BytesPerSector;
+	partitionStart[BIOS_BOOT_PART_NUMBER] = BIOS_BOOT_PART_STARTING_SECTOR * BytesPerSector;
 
 	LONGLONG partitionSize[EXPECTED_NUMBER_OF_PARTITIONS] = {
 		// there is a 2nd copy of the GPT at the end of the disk so we
 		// subtract the length here to avoid the operation failing
-		DiskGeometry->DiskSize.QuadPart - gptLength - partitionStart[0],
+		DiskGeometry->DiskSize.QuadPart - gptLength - partitionStart[EXFAT_PART_NUMBER],
 		ESP_PART_LENGTH_BYTES,
 		BIOS_BOOT_PART_LENGTH_BYTES
 	};
@@ -5077,8 +5080,8 @@ bool CEndlessUsbToolDlg::CreateUSBPartitionLayout(HANDLE hPhysical, DWORD &Bytes
 	// this function.
 	// We try to keep going if this fails because it's not strictly necessary that it succeed.
 	zeroes = (unsigned char *) calloc(BytesPerSector, 24);
-	IFFALSE_PRINTERROR(BytesPerSector * 24 == write_sectors(hPhysical, BytesPerSector, partitionStart[0], 24, zeroes), "Unable to clear the start of eoslive.");
-	IFFALSE_PRINTERROR(BytesPerSector * 24 == write_sectors(hPhysical, BytesPerSector, partitionStart[1], 24, zeroes), "Unable to clear the start of the ESP.");
+	IFFALSE_PRINTERROR(BytesPerSector * 24 == write_sectors(hPhysical, BytesPerSector, partitionStart[EXFAT_PART_NUMBER], 24, zeroes), "Unable to clear the start of eoslive.");
+	IFFALSE_PRINTERROR(BytesPerSector * 24 == write_sectors(hPhysical, BytesPerSector, partitionStart[ESP_PART_NUMBER], 24, zeroes), "Unable to clear the start of the ESP.");
 	free(zeroes);
 
 	// We've actually already called IOCTL_DISK_CREATE_DISK through rufus' InitializeDisk(), however that call
