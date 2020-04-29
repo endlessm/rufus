@@ -414,7 +414,7 @@ private:
 
 	static DWORD WINAPI CreateUSBStick(LPVOID param);
 	static bool DeleteMountpointsForDrive(DWORD DriveIndex);
-	static bool CreateUSBPartitionLayout(HANDLE hPhysical, DWORD &BytesPerSector);
+	static bool CreateUSBPartitionLayout(HANDLE hPhysical);
 
 	static bool UnpackZip(const CComBSTR source, const CComBSTR dest);
 	static void RemoveNonEmptyDirectory(const CString directoryPath);
@@ -424,7 +424,7 @@ private:
 	static bool CopyFilesToexFAT(CEndlessUsbToolDlg *dlg, const CString &fromFolder, const CString &driveLetter);
 	static bool CreatePersistentStorageFileOnexFAT(const CString& drive);
 	static bool WriteMBRToUSB(HANDLE hPhysical, const CString &bootFilesPath);
-	static bool WriteBIOSBootPartitionToUSB(HANDLE hPhysical, const CString &bootFilesPath, DWORD bytesPerSector);
+	static bool WriteBIOSBootPartitionToUSB(HANDLE hPhysical, const CString &bootFilesPath);
 
 	static DWORD WINAPI SetupDualBoot(LPVOID param);
 	static bool SetupDualBootFiles(CEndlessUsbToolDlg *dlg, const CString &systemDriveLetter, const CString &bootFilesPath, ErrorCause &errorCause);

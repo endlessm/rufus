@@ -4872,11 +4872,11 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	// * [some other conditions]
 	// Having zeroed the partition table, this first condition is surely true.
 	errorCause = ErrorCauseWriteBiosBootFailed;
-	IFFALSE_GOTOERROR(WriteBIOSBootPartitionToUSB(hPhysical, bootFilesPath, BytesPerSector), "Error on WriteBIOSBootPartitionToUSB");
+	IFFALSE_GOTOERROR(WriteBIOSBootPartitionToUSB(hPhysical, bootFilesPath), "Error on WriteBIOSBootPartitionToUSB");
 
 	// create partitions.
 	errorCause = ErrorCauseCreatePartitionsFailed;
-	IFFALSE_GOTOERROR(CreateUSBPartitionLayout(hPhysical, BytesPerSector), "Error on CreateUSBPartitionLayout");
+	IFFALSE_GOTOERROR(CreateUSBPartitionLayout(hPhysical), "Error on CreateUSBPartitionLayout");
 
 	if (hLogicalVolume != NULL && hLogicalVolume != INVALID_HANDLE_VALUE) {
 		uprintf("Closing old volume");
@@ -5007,23 +5007,18 @@ bool CEndlessUsbToolDlg::DeleteMountpointsForDrive(DWORD DriveIndex)
 }
 
 
-bool CEndlessUsbToolDlg::CreateUSBPartitionLayout(HANDLE hPhysical, DWORD &BytesPerSector)
+bool CEndlessUsbToolDlg::CreateUSBPartitionLayout(HANDLE hPhysical)
 {
 	FUNCTION_ENTER;
 
 	CREATE_DISK CreateDisk = { PARTITION_STYLE_RAW, {{0}} };
-	BYTE layout[4096] = { 0 }, geometry[256] = { 0 };
+	BYTE layout[4096] = { 0 };
 	PDRIVE_LAYOUT_INFORMATION_EX DriveLayout = (PDRIVE_LAYOUT_INFORMATION_EX)(void*)layout;
-	PDISK_GEOMETRY_EX DiskGeometry = (PDISK_GEOMETRY_EX)(void*)geometry;
 	PARTITION_INFORMATION_EX *currentPartition;
 	DWORD result, size;
+	DWORD BytesPerSector = SelectedDrive.SectorSize;
 	unsigned char *zeroes;
 	int64_t written;
-
-	// get disk geometry information
-	result = DeviceIoControl(hPhysical, IOCTL_DISK_GET_DRIVE_GEOMETRY_EX, NULL, 0, geometry, sizeof(geometry), &size, NULL);
-	IFFALSE_GOTOERROR(result != 0 && size > 0, "Error on querying disk geometry.");
-	BytesPerSector = DiskGeometry->Geometry.BytesPerSector;
 
 	// the EFI spec says the GPT will take the first and last two sectors of
 	// the disk, plus however much is allocated for partition entries. there
@@ -5046,7 +5041,7 @@ bool CEndlessUsbToolDlg::CreateUSBPartitionLayout(HANDLE hPhysical, DWORD &Bytes
 	LONGLONG partitionSize[EXPECTED_NUMBER_OF_PARTITIONS] = {
 		// there is a 2nd copy of the GPT at the end of the disk so we
 		// subtract the length here to avoid the operation failing
-		DiskGeometry->DiskSize.QuadPart - gptLength - partitionStart[EXFAT_PART_NUMBER],
+		SelectedDrive.DiskSize - gptLength - partitionStart[EXFAT_PART_NUMBER],
 		ESP_PART_LENGTH_BYTES,
 		BIOS_BOOT_PART_LENGTH_BYTES
 	};
@@ -5345,7 +5340,7 @@ error:
 	return retResult;
 }
 
-bool CEndlessUsbToolDlg::WriteBIOSBootPartitionToUSB(HANDLE hPhysical, const CString &bootFilesPath, DWORD bytesPerSector)
+bool CEndlessUsbToolDlg::WriteBIOSBootPartitionToUSB(HANDLE hPhysical, const CString &bootFilesPath)
 {
 	FUNCTION_ENTER;
 
@@ -5356,7 +5351,7 @@ bool CEndlessUsbToolDlg::WriteBIOSBootPartitionToUSB(HANDLE hPhysical, const CSt
 	DWORD coreImgBytesWritten = 0;
 	LARGE_INTEGER lMbrPartitionStart;
 
-	lMbrPartitionStart.QuadPart = bytesPerSector * BIOS_BOOT_PART_STARTING_SECTOR;
+	lMbrPartitionStart.QuadPart = SelectedDrive.SectorSize * BIOS_BOOT_PART_STARTING_SECTOR;
 
 	// Read core.img data and write it to USB drive
 	coreImgSize = ReadEntireFile(coreImgFilePath, coreImg, BIOS_BOOT_PART_LENGTH_BYTES);
