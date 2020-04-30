@@ -39,6 +39,7 @@ extern "C" {
 #include "mbr_grub2.h"
 
 LONGLONG CEndlessUsbToolDlg::partitionStart[EXPECTED_NUMBER_OF_PARTITIONS];
+GUID CEndlessUsbToolDlg::DiskGUID;
 
 BOOL its_a_me_mario = FALSE;
 
@@ -5033,7 +5034,8 @@ bool CEndlessUsbToolDlg::SetupComboDisk(HANDLE hPhysical)
     // In any event, if we do this again here, and fill in DiskId and MaxPartitionCount, as rufus does, we
     // succeed under windows 7 and 8.1.
     size = sizeof(CreateDisk);
-    IGNORE_RETVAL(CoCreateGuid(&CreateDisk.Gpt.DiskId));
+    IGNORE_RETVAL(CoCreateGuid(&DiskGUID));
+    CreateDisk.Gpt.DiskId = DiskGUID;
     CreateDisk.Gpt.MaxPartitionCount = MAX_PARTITIONS;
     IFFALSE_GOTOERROR(DeviceIoControl(hPhysical, IOCTL_DISK_CREATE_DISK, (BYTE*)&CreateDisk, size, NULL, 0, &size, NULL), "Unable to initialize GPT disk structures");
 
@@ -5074,7 +5076,8 @@ bool CEndlessUsbToolDlg::CreateUSBPartitionLayout(HANDLE hPhysical)
 
 	DriveLayout->PartitionStyle = PARTITION_STYLE_GPT;
 	DriveLayout->PartitionCount = EXPECTED_NUMBER_OF_PARTITIONS;
-	IGNORE_RETVAL(CoCreateGuid(&DriveLayout->Gpt.DiskId));
+	// DiskGUID is set up in SetupComboDisk
+	DriveLayout->Gpt.DiskId = DiskGUID;
 
 	LONGLONG partitionSize[EXPECTED_NUMBER_OF_PARTITIONS] = {
 		// there is a 2nd copy of the GPT at the end of the disk so we

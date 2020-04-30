@@ -315,6 +315,7 @@ private:
 
 	std::unique_ptr<EosldrInstaller> m_eosldrInstaller;
 
+	static GUID DiskGUID;
 	static LONGLONG partitionStart[EXPECTED_NUMBER_OF_PARTITIONS];
 
 	void TrackEvent(const CString &action, const CString &label = CString(), LONGLONG value = -1L);
