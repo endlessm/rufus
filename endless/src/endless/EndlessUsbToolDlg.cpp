@@ -4796,12 +4796,12 @@ void CEndlessUsbToolDlg::SetJSONDownloadState(JSONDownloadState state)
 #define BACKUP_MBR_IMG					L"mbr.img"
 
 // Below defines need to be in this order
-#define USB_PROGRESS_UNPACK_BOOT_ZIP		2
+#define USB_PROGRESS_UNPACK_BOOT_ZIP			2
 #define USB_PROGRESS_MBR_SBR_DONE			4
-#define USB_PROGRESS_EXFAT_PREPARED			6
-#define USB_PROGRESS_ESP_PREPARED			8
-#define USB_PROGRESS_ESP_CREATION_DONE		10
-#define USB_PROGRESS_IMG_COPY_STARTED		10
+#define USB_PROGRESS_ESP_PREPARED			6
+#define USB_PROGRESS_ESP_CREATION_DONE			8
+#define USB_PROGRESS_EXFAT_PREPARED			10
+#define USB_PROGRESS_IMG_COPY_STARTED			10
 #define USB_PROGRESS_IMG_COPY_DONE			98
 #define USB_PROGRESS_ALL_DONE				100
 
@@ -4914,15 +4914,6 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	UpdateProgress(OP_NEW_LIVE_CREATION, USB_PROGRESS_MBR_SBR_DONE);
 	CHECK_IF_CANCELLED;
 
-	// Format and mount exFAT
-	errorCause = ErrorCauseFormatExfatFailed;
-	IFFALSE_GOTOERROR(FormatPartition(DriveIndex, 0, EXFAT_CLUSTER_SIZE, FS_EXFAT, EXFAT_PARTITION_NAME_LIVE, FP_QUICK), "Error formatting eoslive");
-	CHECK_IF_CANCELLED;
-	errorCause = ErrorCauseMountExfatFailed;
-	IFFALSE_GOTOERROR(eosliveDriveLetter = AltMountVolume(DriveIndex, 0, FALSE), "Error mounting eoslive");
-	UpdateProgress(OP_NEW_LIVE_CREATION, USB_PROGRESS_EXFAT_PREPARED);
-	CHECK_IF_CANCELLED;
-
 	errorCause = ErrorCauseFormatESPFailed;
 
 	IFFALSE_GOTOERROR(FormatPartition(DriveIndex, partitionStart[ESP_PART_NUMBER], ESP_CLUSTER_SIZE, FS_FAT32, "", FP_QUICK), "Error formatting ESP");
@@ -4946,6 +4937,15 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	espDriveLetter = "";
 
 	UpdateProgress(OP_NEW_LIVE_CREATION, USB_PROGRESS_ESP_CREATION_DONE);
+	CHECK_IF_CANCELLED;
+
+	// Format and mount exFAT
+	errorCause = ErrorCauseFormatExfatFailed;
+	IFFALSE_GOTOERROR(FormatPartition(DriveIndex, 0, EXFAT_CLUSTER_SIZE, FS_EXFAT, EXFAT_PARTITION_NAME_LIVE, FP_QUICK), "Error formatting eoslive");
+	CHECK_IF_CANCELLED;
+	errorCause = ErrorCauseMountExfatFailed;
+	IFFALSE_GOTOERROR(eosliveDriveLetter = AltMountVolume(DriveIndex, 0, FALSE), "Error mounting eoslive");
+	UpdateProgress(OP_NEW_LIVE_CREATION, USB_PROGRESS_EXFAT_PREPARED);
 	CHECK_IF_CANCELLED;
 
 	// Copy files to the exFAT partition
