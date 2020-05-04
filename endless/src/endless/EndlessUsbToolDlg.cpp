@@ -4853,19 +4853,8 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	}
 	CHECK_IF_CANCELLED;
 
-	// erase any existing partition - careful here. It may be that there aren't any
-	// partitions on the device. Theoretically we know this when GetLogicalHandle fails
-	// above, but since rufus still tries DeletePartitions in its own format code, but
-	// treats the error as non-fatal, we'll follow.
-	safe_unlockclose(hPhysical);
-	IFFALSE_PRINTERROR(DeletePartitions(DriveIndex), "DeletePartitions failed");
-	hPhysical = GetPhysicalHandle(DriveIndex, TRUE, TRUE, FALSE);
-	IFFALSE_GOTOERROR(hPhysical != INVALID_HANDLE_VALUE, "Error on acquiring disk handle.");
-	RefreshDriveLayout(hPhysical);
-
 	errorCause = ErrorCauseErasePartitionsFailed;
 	IFFALSE_GOTOERROR(ClearMBRGPT(hPhysical, SelectedDrive.DiskSize, BytesPerSector, FALSE), "ClearMBRGPT failed");
-	IFFALSE_GOTOERROR(InitializeDisk(hPhysical), "InitializeDisk failed");
 
 	// Do some preliminary setup, like calculating partition offsets, zeroing the starts of partitions
 	// so windows won't cleverly try to auto mount anything, running a more thorough GPT disk initialization
