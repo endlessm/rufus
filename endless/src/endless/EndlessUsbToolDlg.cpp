@@ -4952,8 +4952,10 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	// Copy files to the exFAT partition
 	errorCause = ErrorCausePopulateExfatFailed;
 	IFFALSE_GOTOERROR(CopyFilesToexFAT(dlg, bootFilesPath, UTF8ToCString(eosliveDriveLetter)), "Error on CopyFilesToexFAT");
-
-	IFFALSE_PRINTERROR(CreatePersistentStorageFileOnexFAT(UTF8ToCString(eosliveDriveLetter)), "Error setting up liveUSB Persistent Storage space");
+    
+    CHECK_IF_CANCELLED;
+	
+    IFFALSE_PRINTERROR(CreatePersistentStorageFileOnexFAT(UTF8ToCString(eosliveDriveLetter)), "Error setting up liveUSB Persistent Storage space");
 
 	/* We mounted this ourselves, probably a second time, try to remove our mount. */
 	IFFALSE_PRINTERROR(AltUnmountVolume(eosliveDriveLetter, FALSE), "Failed to unmount live partition");
