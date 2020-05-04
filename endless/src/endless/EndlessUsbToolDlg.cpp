@@ -5035,8 +5035,8 @@ bool CEndlessUsbToolDlg::SetupComboDisk(HANDLE hPhysical)
     // We leave the BIOS boot partition alone because windows doesn't appear to care about it anyway.
     // We try to keep going if this fails because it's not strictly necessary that it succeed.
     zeroes = (unsigned char*)calloc(BytesPerSector, 24);
-    IFFALSE_PRINTERROR(BytesPerSector * 24 == write_sectors(hPhysical, BytesPerSector, partitionStart[EXFAT_PART_NUMBER], 24, zeroes), "Unable to clear the start of eoslive.");
-    IFFALSE_PRINTERROR(BytesPerSector * 24 == write_sectors(hPhysical, BytesPerSector, partitionStart[ESP_PART_NUMBER], 24, zeroes), "Unable to clear the start of the ESP.");
+    IFFALSE_PRINTERROR(BytesPerSector * 24 == write_sectors(hPhysical, BytesPerSector, EXFAT_PART_STARTING_SECTOR, 24, zeroes), "Unable to clear the start of eoslive.");
+    IFFALSE_PRINTERROR(BytesPerSector * 24 == write_sectors(hPhysical, BytesPerSector, ESP_PART_STARTING_SECTOR, 24, zeroes), "Unable to clear the start of the ESP.");
     free(zeroes);
     RefreshDriveLayout(hPhysical);
     result = true;
