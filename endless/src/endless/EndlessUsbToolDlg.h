@@ -114,6 +114,11 @@ enum CompressionType {
     CompressionTypeSquash,
 };
 
+enum CreatePartitionMode {
+    JUST_ESP,
+    ALL_PARTITIONS
+};
+
 struct SignedFile_t {
     SignedFile_t(const CString &filePath_, ULONGLONG fileSize_, const CString &sigPath_)
         :
@@ -416,7 +421,7 @@ private:
 	static DWORD WINAPI CreateUSBStick(LPVOID param);
 	static bool DeleteMountpointsForDrive(DWORD DriveIndex);
 	static bool SetupComboDisk(HANDLE hPhysical);
-	static bool CreateUSBPartitionLayout(HANDLE hPhysical);
+	static bool CreateUSBPartitionLayout(HANDLE hPhysical, enum CreatePartitionMode mode);
 
 	static bool UnpackZip(const CComBSTR source, const CComBSTR dest);
 	static void RemoveNonEmptyDirectory(const CString directoryPath);

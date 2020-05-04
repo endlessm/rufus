@@ -4869,9 +4869,9 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	errorCause = ErrorCauseWriteBiosBootFailed;
 	IFFALSE_GOTOERROR(WriteBIOSBootPartitionToUSB(hPhysical, bootFilesPath), "Error on WriteBIOSBootPartitionToUSB");
 
-	// create partitions.
+	// create just the ESP partition.
 	errorCause = ErrorCauseCreatePartitionsFailed;
-	IFFALSE_GOTOERROR(CreateUSBPartitionLayout(hPhysical), "Error on CreateUSBPartitionLayout");
+	IFFALSE_GOTOERROR(CreateUSBPartitionLayout(hPhysical, JUST_ESP), "Error on CreateUSBPartitionLayout");
 
 	if (hLogicalVolume != NULL && hLogicalVolume != INVALID_HANDLE_VALUE) {
 		uprintf("Closing old volume");
@@ -4879,26 +4879,26 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 		hLogicalVolume = INVALID_HANDLE_VALUE;
 	}
 
-	// Wait for the logical drive we just created to appear
-	uprintf("Waiting for logical drive to reappear...\n");
-	Sleep(200); // Radu: check if this is needed, that's what rufus does; I hate sync using sleep
-	IFFALSE_PRINTERROR(WaitForLogical(DriveIndex, 0), "Warning: Logical drive was not found!"); // We try to continue even if this fails, just in case
-
-	CHECK_IF_CANCELLED;
-
 	/* We changed the partition table, so we need to get rufus to update its internal state so
 	 * stuff like FormatPartition and AltMountVolume can figure out volume names.
 	 * GetDrivePartitionData gets the physical lock itself, so we have to drop that first. */
 	safe_unlockclose(hPhysical);
+
+	// Waiting for offset zero just waits until any partition from the drive is present, so it
+	// can safely be called without getting partition data first. We do so to make sure the
+	// GetDrivePartitionData() call will see something.
+	uprintf("Waiting for logical drive to reappear...\n");
+	Sleep(200); // Radu: check if this is needed, that's what rufus does; I hate sync using sleep
+	IFFALSE_PRINTERROR(WaitForLogical(DriveIndex, 0), "Warning: Logical drive was not found!"); // We try to continue even if this fails, just in case
+
 	GetDrivePartitionData(SelectedDrive.DeviceNumber, tmp_fs_name, sizeof(tmp_fs_name), FALSE);
+
 	hPhysical = GetPhysicalHandle(DriveIndex, TRUE, TRUE, FALSE);
 	IFFALSE_GOTOERROR(hPhysical != INVALID_HANDLE_VALUE, "Error on reacquiring disk handle.");
 
 	// Write MBR to disk
 	errorCause = ErrorCauseWriteMBRFailed;
 	IFFALSE_GOTOERROR(WriteMBRToUSB(hPhysical, bootFilesPath), "Error on WriteMBRToUSB");
-
-	safe_closehandle(hPhysical);
 
 	UpdateProgress(OP_NEW_LIVE_CREATION, USB_PROGRESS_MBR_SBR_DONE);
 	CHECK_IF_CANCELLED;
@@ -4927,6 +4927,16 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 
 	UpdateProgress(OP_NEW_LIVE_CREATION, USB_PROGRESS_ESP_CREATION_DONE);
 	CHECK_IF_CANCELLED;
+
+	IFFALSE_GOTOERROR(CreateUSBPartitionLayout(hPhysical, ALL_PARTITIONS), "Error updating partitions via CreateUSBPartitionLayout");
+
+	safe_closehandle(hPhysical);
+
+	// Wait for the logical drive we just created to appear
+	uprintf("Waiting for logical drive to reappear...\n");
+	Sleep(200); // Radu: check if this is needed, that's what rufus does; I hate sync using sleep
+	IFFALSE_PRINTERROR(WaitForLogical(DriveIndex, 0), "Warning: Logical drive was not found!"); // We try to continue even if this fails, just in case
+	GetDrivePartitionData(SelectedDrive.DeviceNumber, tmp_fs_name, sizeof(tmp_fs_name), FALSE);
 
 	// Format and mount exFAT
 	errorCause = ErrorCauseFormatExfatFailed;
@@ -5043,7 +5053,8 @@ bool CEndlessUsbToolDlg::SetupComboDisk(HANDLE hPhysical)
 error:
     return result;
 }
-bool CEndlessUsbToolDlg::CreateUSBPartitionLayout(HANDLE hPhysical)
+
+bool CEndlessUsbToolDlg::CreateUSBPartitionLayout(HANDLE hPhysical, enum CreatePartitionMode mode)
 {
 	FUNCTION_ENTER;
 
@@ -5052,6 +5063,8 @@ bool CEndlessUsbToolDlg::CreateUSBPartitionLayout(HANDLE hPhysical)
 	PARTITION_INFORMATION_EX *currentPartition;
 	DWORD result, size;
 	DWORD BytesPerSector = SelectedDrive.SectorSize;
+	bool just_esp = mode == JUST_ESP;
+	int offset = just_esp ? 1 : 0;
 
 	// the EFI spec says the GPT will take the first and last two sectors of
 	// the disk, plus however much is allocated for partition entries. there
@@ -5064,7 +5077,7 @@ bool CEndlessUsbToolDlg::CreateUSBPartitionLayout(HANDLE hPhysical)
 	bool returnValue = false;
 
 	DriveLayout->PartitionStyle = PARTITION_STYLE_GPT;
-	DriveLayout->PartitionCount = EXPECTED_NUMBER_OF_PARTITIONS;
+	DriveLayout->PartitionCount = just_esp ? 1 : EXPECTED_NUMBER_OF_PARTITIONS;
 	// DiskGUID is set up in SetupComboDisk
 	DriveLayout->Gpt.DiskId = DiskGUID;
 
@@ -5086,16 +5099,22 @@ bool CEndlessUsbToolDlg::CreateUSBPartitionLayout(HANDLE hPhysical)
 		L""
 	};
 
-	for (int partIndex = 0; partIndex < EXPECTED_NUMBER_OF_PARTITIONS; partIndex++) {
+	for (int partIndex = 0; partIndex < DriveLayout->PartitionCount; partIndex++) {
 		currentPartition = &(DriveLayout->PartitionEntry[partIndex]);
 		currentPartition->PartitionStyle = PARTITION_STYLE_GPT;
-		currentPartition->StartingOffset.QuadPart = partitionStart[partIndex];
-		currentPartition->PartitionLength.QuadPart = partitionSize[partIndex];
+		currentPartition->StartingOffset.QuadPart = partitionStart[partIndex + offset];
+		currentPartition->PartitionLength.QuadPart = partitionSize[partIndex + offset];
 		currentPartition->PartitionNumber = partIndex + 1; // partition numbers start from 1
 		currentPartition->RewritePartition = TRUE;
-		currentPartition->Gpt.PartitionType = partitionType[partIndex];
+		// Since windows doesn't like mounting ESPs, we make our life easier by making this as
+		// basic data when we need to mount it, then turn it into the ESP later.
+		if (just_esp)
+			currentPartition->Gpt.PartitionType = PARTITION_BASIC_DATA_GUID;
+		else
+			currentPartition->Gpt.PartitionType = partitionType[partIndex + offset];
+		// On the second pass this will create new GUIDs, but that's just fine
 		IGNORE_RETVAL(CoCreateGuid(&currentPartition->Gpt.PartitionId));
-		wcscpy(currentPartition->Gpt.Name, partitionName[partIndex]);
+		wcscpy(currentPartition->Gpt.Name, partitionName[partIndex + offset]);
 	}
 
 	// push partition information to drive
