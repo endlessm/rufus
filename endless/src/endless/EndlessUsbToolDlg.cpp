@@ -4812,15 +4812,15 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	FUNCTION_ENTER;
 
 	CEndlessUsbToolDlg *dlg = (CEndlessUsbToolDlg*)param;
+	char drive[] = "?:\\";
 	DWORD DriveIndex = SelectedDrive.DeviceNumber;
 	HANDLE hPhysical = INVALID_HANDLE_VALUE;
 	HANDLE hLogicalVolume = INVALID_HANDLE_VALUE;
 	CString bootFilesPath = CEndlessUsbToolApp::TempFilePath(CString(BOOT_COMPONENTS_FOLDER)) + L"\\";
 	DWORD BytesPerSector = SelectedDrive.SectorSize;
 	CStringA eosliveDriveLetter, espDriveLetter;
-	const char *cszEspDriveLetter;
 	ErrorCause errorCause = ErrorCause::ErrorCauseWriteFailed;
-	char tmp_fs_name[32];
+	char tmp_fs_name[32], *volume;
 
 	UpdateProgress(OP_NEW_LIVE_CREATION, 0);
 
@@ -4910,19 +4910,21 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	CHECK_IF_CANCELLED;
 
 	errorCause = ErrorCauseMountESPFailed;
-	cszEspDriveLetter = AltMountVolume(DriveIndex, partitionStart[ESP_PART_NUMBER], FALSE);
-	IFFALSE_GOTOERROR(cszEspDriveLetter != NULL, "Error mounting ESP");
-	// The pointer returned by AltMountVolume() is to a static buffer...
-	espDriveLetter = cszEspDriveLetter;
+	volume = GetLogicalName(DriveIndex, partitionStart[ESP_PART_NUMBER], TRUE, TRUE);
+	drive[0] = GetUnusedDriveLetter();
+	IFFALSE_GOTOERROR(drive[0], "Could not assign a drive letter");
+	IFFALSE_GOTOERROR(MountVolume(drive, volume), "Error mounting ESP");
+
+	espDriveLetter = drive;
 
 	CHECK_IF_CANCELLED;
 
 	// Copy files to the ESP partition
 	errorCause = ErrorCausePopulateESPFailed;
-	IFFALSE_GOTOERROR(CopyFilesToESP(bootFilesPath, CString(espDriveLetter) + L"\\"), "Error when trying to copy files to ESP partition.");
+	IFFALSE_GOTOERROR(CopyFilesToESP(bootFilesPath, CString(espDriveLetter)), "Error when trying to copy files to ESP partition.");
 
-	// Unmount ESP (but continue if this fails)
-	IFFALSE_PRINTERROR(AltUnmountVolume(espDriveLetter, FALSE), "Failed to unmount ESP");
+	// Unmount ESP (but continue if this fails) - though we'd probably fail when we try to repartition anyway...
+	IFFALSE_PRINTERROR(DeleteVolumeMountPointA(espDriveLetter), "Failed to unmount ESP");
 	espDriveLetter = "";
 
 	UpdateProgress(OP_NEW_LIVE_CREATION, USB_PROGRESS_ESP_CREATION_DONE);
