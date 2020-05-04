@@ -4930,10 +4930,10 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 
 	// Format and mount exFAT
 	errorCause = ErrorCauseFormatExfatFailed;
-	IFFALSE_GOTOERROR(FormatPartition(DriveIndex, 0, EXFAT_CLUSTER_SIZE, FS_EXFAT, EXFAT_PARTITION_NAME_LIVE, FP_QUICK), "Error formatting eoslive");
+	IFFALSE_GOTOERROR(FormatPartition(DriveIndex, partitionStart[EXFAT_PART_NUMBER], EXFAT_CLUSTER_SIZE, FS_EXFAT, EXFAT_PARTITION_NAME_LIVE, FP_QUICK), "Error formatting eoslive");
 	CHECK_IF_CANCELLED;
 	errorCause = ErrorCauseMountExfatFailed;
-	IFFALSE_GOTOERROR(eosliveDriveLetter = AltMountVolume(DriveIndex, 0, FALSE), "Error mounting eoslive");
+	IFFALSE_GOTOERROR(eosliveDriveLetter = AltMountVolume(DriveIndex, partitionStart[EXFAT_PART_NUMBER], FALSE), "Error mounting eoslive");
 	UpdateProgress(OP_NEW_LIVE_CREATION, USB_PROGRESS_EXFAT_PREPARED);
 	CHECK_IF_CANCELLED;
 
