@@ -5220,6 +5220,9 @@ bool CEndlessUsbToolDlg::CreatePersistentStorageFileOnexFAT(const CString& drive
         return false;
     }
 
+    // We need to keep some space free for log files, in case the user runs the installer from this device
+    bytes -= 16 * MB;
+
     tmpfile = CreateFile(storage, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
     if (tmpfile == INVALID_HANDLE_VALUE)
         return false;
@@ -5233,7 +5236,7 @@ bool CEndlessUsbToolDlg::CreatePersistentStorageFileOnexFAT(const CString& drive
         uprintf("Failed to write marker to persistent storage file. gle=%d", GetLastError());
         return false;
     }
-    return ExtendImageFile(storage, free_bytes.QuadPart);
+    return ExtendImageFile(storage, bytes);
 }
 
 void CEndlessUsbToolDlg::ImageUnpackCallback(const uint64_t read_bytes)
