@@ -824,9 +824,10 @@ select:disabled {
     margin: 65px auto 0px;
 }
 
+#VMSuggest,
 #ErrorMessageSuggestion {
-    margin-bottom: 25px;
-    max-width: 275px;
+    margin-bottom: 20px;
+    max-width: 475px;
 }
 
 #ErrorPage .PageContent .Button {

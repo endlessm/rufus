@@ -214,6 +214,8 @@ DWORD usbDevicesCount;
 #define ELEMENT_ERROR_BUTTON            "ErrorContinueButton"
 #define ELEMENT_ERROR_DELETE_CHECKBOX   "DeleteFilesCheckbox"
 #define ELEMENT_ERROR_DELETE_TEXT       "DeleteFilesText"
+#define ELEMENT_ERROR_VM_SUGGEST        "VMSuggest"
+#define ELEMENT_VM_DOWNLOAD             "VMDownload"
 
 #define ELEMENT_PRIVACY_POLICY_LINK     "PrivacyPolicyLink"
 #define ELEMENT_VERSION_LINK            "VersionLink"
@@ -365,6 +367,8 @@ const wchar_t* mainWindowTitle = L"Endless Installer";
 #define FORMAT_STATUS_CANCEL (ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_CANCELLED)
 
 #define COMMUNITY_URL "https://community.endlessos.com/"
+
+#define VM_DOWNLOAD_URL              "https://endlessos.com/download"
 
 #define SUPPORT_URL_BASE             "https://support.endlessm.com/hc/"
 #define SUPPORT_URL_BASE_WITH_LOCALE "https://support.endlessm.com/hc/en-us"
@@ -546,6 +550,7 @@ BEGIN_DHTML_EVENT_MAP(CEndlessUsbToolDlg)
     // Error Page handlers
     DHTML_EVENT_ONCLICK(_T(ELEMENT_ERROR_CLOSE_BUTTON), OnCloseAppClicked)
     DHTML_EVENT_ONCLICK(_T(ELEMENT_ENDLESS_SUPPORT), OnLinkClicked)
+    DHTML_EVENT_ONCLICK(_T(ELEMENT_VM_DOWNLOAD), OnLinkClicked)
     DHTML_EVENT_ONCLICK(_T(ELEMENT_ERROR_BUTTON), OnRecoverErrorButtonClicked)
     DHTML_EVENT_ONCHANGE(_T(ELEMENT_ERROR_DELETE_CHECKBOX), OnDeleteCheckboxChanged)
 
@@ -601,6 +606,7 @@ CEndlessUsbToolDlg::CEndlessUsbToolDlg(UINT globalMessage, CWnd* pParent /*=NULL
     m_localFilesScanned(false),
     m_jsonDownloadState(JSONDownloadState::Pending),
     m_selectedInstallMethod(InstallMethod_t::None),
+    m_vmCapable(false),
     m_eosldrInstaller(
         EosldrInstaller::GetInstance(nWindowsVersion, ENDLESS_OS_NAME, REGKEY_UNINSTALLENDLESS))
 {
@@ -916,9 +922,9 @@ BOOL CEndlessUsbToolDlg::OnInitDialog()
         if (WMI::IsHyperVEnabled())
             Analytics::instance()->setVirtualization(L"HyperV");
         else {
-            auto vmCapable = IsProcessorFeaturePresent(PF_VIRT_FIRMWARE_ENABLED);
+            m_vmCapable = IsProcessorFeaturePresent(PF_VIRT_FIRMWARE_ENABLED);
 
-            if (vmCapable)
+            if (m_vmCapable)
                 Analytics::instance()->setVirtualization(L"Capable");
             else
                 Analytics::instance()->setVirtualization(L"None");
@@ -1923,7 +1929,8 @@ void CEndlessUsbToolDlg::ErrorOccured(ErrorCause_t errorCause)
 		m_taskbarProgress->SetProgressState(m_hWnd, TBPF_ERROR);
 		m_taskbarProgress->SetProgressValue(m_hWnd, 100, 100);
 	}
-
+    /* If we have VM capabilities, suggest the user try those... */
+    CallJavascript(_T(JS_SHOW_ELEMENT), CComVariant(_T(ELEMENT_ERROR_VM_SUGGEST)), CComVariant(m_vmCapable & m_isConnected));
     ChangePage(_T(ELEMENT_ERROR_PAGE));
 
 	if (errorCause == ErrorCause_t::ErrorCauseCancelled)
@@ -2293,6 +2300,8 @@ HRESULT CEndlessUsbToolDlg::OnLinkClicked(IHTMLElement* pElement)
         support_url_en_us = CONNECTED_SUPPORT_URL;
     } else if (id == _T(ELEMENT_ENDLESS_SUPPORT) || id == _T(ELEMENT_STORAGE_SUPPORT_LINK)) {
         url = COMMUNITY_URL;
+    } else if (id == _T(ELEMENT_VM_DOWNLOAD)) {
+        url = VM_DOWNLOAD_URL;
     } else if (id == _T(ELEMENT_CONNECTED_LINK)) {
         WinExec("c:\\windows\\system32\\control.exe ncpa.cpl", SW_NORMAL);
     } else if (id == _T(ELEMENT_USBBOOT_HOWTO)) {

@@ -315,6 +315,8 @@ private:
 
 	std::unique_ptr<EosldrInstaller> m_eosldrInstaller;
 
+	bool m_vmCapable;
+
 	static LONGLONG partitionStart[EXPECTED_NUMBER_OF_PARTITIONS];
 
 	void TrackEvent(const CString &action, const CString &label = CString(), LONGLONG value = -1L);
