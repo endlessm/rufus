@@ -39,6 +39,7 @@ extern "C" {
 #include "mbr_grub2.h"
 
 LONGLONG CEndlessUsbToolDlg::partitionStart[EXPECTED_NUMBER_OF_PARTITIONS];
+GUID CEndlessUsbToolDlg::DiskGUID;
 
 BOOL its_a_me_mario = FALSE;
 
@@ -4765,10 +4766,13 @@ void CEndlessUsbToolDlg::SetJSONDownloadState(JSONDownloadState state)
 }
 
 #define GPT_MAX_PARTITION_COUNT		128
+#define ESP_PART_NUMBER             1
 #define ESP_PART_STARTING_SECTOR	2048
 #define ESP_PART_LENGTH_BYTES		65011712
+#define BIOS_BOOT_PART_NUMBER       2
 #define BIOS_BOOT_PART_STARTING_SECTOR 129024
 #define BIOS_BOOT_PART_LENGTH_BYTES    1048576
+#define EXFAT_PART_NUMBER           0
 #define EXFAT_PART_STARTING_SECTOR	131072
 
 #define EFI_BOOT_SUBDIRECTORY			L"EFI\\BOOT"
@@ -4792,12 +4796,12 @@ void CEndlessUsbToolDlg::SetJSONDownloadState(JSONDownloadState state)
 #define BACKUP_MBR_IMG					L"mbr.img"
 
 // Below defines need to be in this order
-#define USB_PROGRESS_UNPACK_BOOT_ZIP		2
+#define USB_PROGRESS_UNPACK_BOOT_ZIP			2
 #define USB_PROGRESS_MBR_SBR_DONE			4
-#define USB_PROGRESS_EXFAT_PREPARED			6
-#define USB_PROGRESS_ESP_PREPARED			8
-#define USB_PROGRESS_ESP_CREATION_DONE		10
-#define USB_PROGRESS_IMG_COPY_STARTED		10
+#define USB_PROGRESS_ESP_PREPARED			6
+#define USB_PROGRESS_ESP_CREATION_DONE			8
+#define USB_PROGRESS_EXFAT_PREPARED			10
+#define USB_PROGRESS_IMG_COPY_STARTED			10
 #define USB_PROGRESS_IMG_COPY_DONE			98
 #define USB_PROGRESS_ALL_DONE				100
 
@@ -4808,15 +4812,15 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	FUNCTION_ENTER;
 
 	CEndlessUsbToolDlg *dlg = (CEndlessUsbToolDlg*)param;
+	char drive[] = "?:\\";
 	DWORD DriveIndex = SelectedDrive.DeviceNumber;
 	HANDLE hPhysical = INVALID_HANDLE_VALUE;
 	HANDLE hLogicalVolume = INVALID_HANDLE_VALUE;
 	CString bootFilesPath = CEndlessUsbToolApp::TempFilePath(CString(BOOT_COMPONENTS_FOLDER)) + L"\\";
 	DWORD BytesPerSector = SelectedDrive.SectorSize;
 	CStringA eosliveDriveLetter, espDriveLetter;
-	const char *cszEspDriveLetter;
 	ErrorCause errorCause = ErrorCause::ErrorCauseWriteFailed;
-	char tmp_fs_name[32];
+	char tmp_fs_name[32], *volume;
 
 	UpdateProgress(OP_NEW_LIVE_CREATION, 0);
 
@@ -4849,19 +4853,13 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	}
 	CHECK_IF_CANCELLED;
 
-	// erase any existing partition - careful here. It may be that there aren't any
-	// partitions on the device. Theoretically we know this when GetLogicalHandle fails
-	// above, but since rufus still tries DeletePartitions in its own format code, but
-	// treats the error as non-fatal, we'll follow.
-	safe_unlockclose(hPhysical);
-	IFFALSE_PRINTERROR(DeletePartitions(DriveIndex), "DeletePartitions failed");
-	hPhysical = GetPhysicalHandle(DriveIndex, TRUE, TRUE, FALSE);
-	IFFALSE_GOTOERROR(hPhysical != INVALID_HANDLE_VALUE, "Error on acquiring disk handle.");
-	RefreshDriveLayout(hPhysical);
-
 	errorCause = ErrorCauseErasePartitionsFailed;
 	IFFALSE_GOTOERROR(ClearMBRGPT(hPhysical, SelectedDrive.DiskSize, BytesPerSector, FALSE), "ClearMBRGPT failed");
-	IFFALSE_GOTOERROR(InitializeDisk(hPhysical), "InitializeDisk failed");
+
+	// Do some preliminary setup, like calculating partition offsets, zeroing the starts of partitions
+	// so windows won't cleverly try to auto mount anything, running a more thorough GPT disk initialization
+	IFFALSE_GOTOERROR(SetupComboDisk(hPhysical), "Disk setup failed");
+
 	// write BIOS boot partition before partitioning the drive.
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/aa365747%28v=vs.85%29.aspx?f=255&MSPPError=-2147217396 says:
 	// A write on a disk handle will succeed if one of the following conditions is true:
@@ -4869,11 +4867,11 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	// * [some other conditions]
 	// Having zeroed the partition table, this first condition is surely true.
 	errorCause = ErrorCauseWriteBiosBootFailed;
-	IFFALSE_GOTOERROR(WriteBIOSBootPartitionToUSB(hPhysical, bootFilesPath, BytesPerSector), "Error on WriteBIOSBootPartitionToUSB");
+	IFFALSE_GOTOERROR(WriteBIOSBootPartitionToUSB(hPhysical, bootFilesPath), "Error on WriteBIOSBootPartitionToUSB");
 
-	// create partitions.
+	// create just the ESP partition.
 	errorCause = ErrorCauseCreatePartitionsFailed;
-	IFFALSE_GOTOERROR(CreateUSBPartitionLayout(hPhysical, BytesPerSector), "Error on CreateUSBPartitionLayout");
+	IFFALSE_GOTOERROR(CreateUSBPartitionLayout(hPhysical, JUST_ESP), "Error on CreateUSBPartitionLayout");
 
 	if (hLogicalVolume != NULL && hLogicalVolume != INVALID_HANDLE_VALUE) {
 		uprintf("Closing old volume");
@@ -4881,18 +4879,20 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 		hLogicalVolume = INVALID_HANDLE_VALUE;
 	}
 
-	// Wait for the logical drive we just created to appear
-	uprintf("Waiting for logical drive to reappear...\n");
-	Sleep(200); // Radu: check if this is needed, that's what rufus does; I hate sync using sleep
-	IFFALSE_PRINTERROR(WaitForLogical(DriveIndex, 0), "Warning: Logical drive was not found!"); // We try to continue even if this fails, just in case
-
-	CHECK_IF_CANCELLED;
-
 	/* We changed the partition table, so we need to get rufus to update its internal state so
 	 * stuff like FormatPartition and AltMountVolume can figure out volume names.
 	 * GetDrivePartitionData gets the physical lock itself, so we have to drop that first. */
 	safe_unlockclose(hPhysical);
+
+	// Waiting for offset zero just waits until any partition from the drive is present, so it
+	// can safely be called without getting partition data first. We do so to make sure the
+	// GetDrivePartitionData() call will see something.
+	uprintf("Waiting for logical drive to reappear...\n");
+	Sleep(200); // Radu: check if this is needed, that's what rufus does; I hate sync using sleep
+	IFFALSE_PRINTERROR(WaitForLogical(DriveIndex, 0), "Warning: Logical drive was not found!"); // We try to continue even if this fails, just in case
+
 	GetDrivePartitionData(SelectedDrive.DeviceNumber, tmp_fs_name, sizeof(tmp_fs_name), FALSE);
+
 	hPhysical = GetPhysicalHandle(DriveIndex, TRUE, TRUE, FALSE);
 	IFFALSE_GOTOERROR(hPhysical != INVALID_HANDLE_VALUE, "Error on reacquiring disk handle.");
 
@@ -4900,50 +4900,62 @@ DWORD WINAPI CEndlessUsbToolDlg::CreateUSBStick(LPVOID param)
 	errorCause = ErrorCauseWriteMBRFailed;
 	IFFALSE_GOTOERROR(WriteMBRToUSB(hPhysical, bootFilesPath), "Error on WriteMBRToUSB");
 
-	safe_closehandle(hPhysical);
-
 	UpdateProgress(OP_NEW_LIVE_CREATION, USB_PROGRESS_MBR_SBR_DONE);
-	CHECK_IF_CANCELLED;
-
-	// Format and mount exFAT
-	errorCause = ErrorCauseFormatExfatFailed;
-	IFFALSE_GOTOERROR(FormatPartition(DriveIndex, 0, EXFAT_CLUSTER_SIZE, FS_EXFAT, EXFAT_PARTITION_NAME_LIVE, FP_QUICK), "Error formatting eoslive");
-	CHECK_IF_CANCELLED;
-	errorCause = ErrorCauseMountExfatFailed;
-	IFFALSE_GOTOERROR(eosliveDriveLetter = AltMountVolume(DriveIndex, 0, FALSE), "Error mounting eoslive");
-	UpdateProgress(OP_NEW_LIVE_CREATION, USB_PROGRESS_EXFAT_PREPARED);
 	CHECK_IF_CANCELLED;
 
 	errorCause = ErrorCauseFormatESPFailed;
 
-	IFFALSE_GOTOERROR(FormatPartition(DriveIndex, partitionStart[1], ESP_CLUSTER_SIZE, FS_FAT32, "", FP_QUICK), "Error formatting ESP");
+	IFFALSE_GOTOERROR(FormatPartition(DriveIndex, partitionStart[ESP_PART_NUMBER], ESP_CLUSTER_SIZE, FS_FAT32, "", FP_QUICK), "Error formatting ESP");
 	UpdateProgress(OP_NEW_LIVE_CREATION, USB_PROGRESS_ESP_PREPARED);
 	CHECK_IF_CANCELLED;
 
 	errorCause = ErrorCauseMountESPFailed;
-	cszEspDriveLetter = AltMountVolume(DriveIndex, partitionStart[1], FALSE);
-	IFFALSE_GOTOERROR(cszEspDriveLetter != NULL, "Error mounting ESP");
-	// The pointer returned by AltMountVolume() is to a static buffer...
-	espDriveLetter = cszEspDriveLetter;
+	volume = GetLogicalName(DriveIndex, partitionStart[ESP_PART_NUMBER], TRUE, TRUE);
+	drive[0] = GetUnusedDriveLetter();
+	IFFALSE_GOTOERROR(drive[0], "Could not assign a drive letter");
+	IFFALSE_GOTOERROR(MountVolume(drive, volume), "Error mounting ESP");
+
+	espDriveLetter = drive;
 
 	CHECK_IF_CANCELLED;
 
 	// Copy files to the ESP partition
 	errorCause = ErrorCausePopulateESPFailed;
-	IFFALSE_GOTOERROR(CopyFilesToESP(bootFilesPath, CString(espDriveLetter) + L"\\"), "Error when trying to copy files to ESP partition.");
+	IFFALSE_GOTOERROR(CopyFilesToESP(bootFilesPath, CString(espDriveLetter)), "Error when trying to copy files to ESP partition.");
 
-	// Unmount ESP (but continue if this fails)
-	IFFALSE_PRINTERROR(AltUnmountVolume(espDriveLetter, FALSE), "Failed to unmount ESP");
+	// Unmount ESP (but continue if this fails) - though we'd probably fail when we try to repartition anyway...
+	IFFALSE_PRINTERROR(DeleteVolumeMountPointA(espDriveLetter), "Failed to unmount ESP");
 	espDriveLetter = "";
 
 	UpdateProgress(OP_NEW_LIVE_CREATION, USB_PROGRESS_ESP_CREATION_DONE);
 	CHECK_IF_CANCELLED;
 
+	IFFALSE_GOTOERROR(CreateUSBPartitionLayout(hPhysical, ALL_PARTITIONS), "Error updating partitions via CreateUSBPartitionLayout");
+
+	safe_closehandle(hPhysical);
+
+	// Wait for the logical drive we just created to appear
+	uprintf("Waiting for logical drive to reappear...\n");
+	Sleep(200); // Radu: check if this is needed, that's what rufus does; I hate sync using sleep
+	IFFALSE_PRINTERROR(WaitForLogical(DriveIndex, 0), "Warning: Logical drive was not found!"); // We try to continue even if this fails, just in case
+	GetDrivePartitionData(SelectedDrive.DeviceNumber, tmp_fs_name, sizeof(tmp_fs_name), FALSE);
+
+	// Format and mount exFAT
+	errorCause = ErrorCauseFormatExfatFailed;
+	IFFALSE_GOTOERROR(FormatPartition(DriveIndex, partitionStart[EXFAT_PART_NUMBER], EXFAT_CLUSTER_SIZE, FS_EXFAT, EXFAT_PARTITION_NAME_LIVE, FP_QUICK), "Error formatting eoslive");
+	CHECK_IF_CANCELLED;
+	errorCause = ErrorCauseMountExfatFailed;
+	IFFALSE_GOTOERROR(eosliveDriveLetter = AltMountVolume(DriveIndex, partitionStart[EXFAT_PART_NUMBER], FALSE), "Error mounting eoslive");
+	UpdateProgress(OP_NEW_LIVE_CREATION, USB_PROGRESS_EXFAT_PREPARED);
+	CHECK_IF_CANCELLED;
+
 	// Copy files to the exFAT partition
 	errorCause = ErrorCausePopulateExfatFailed;
 	IFFALSE_GOTOERROR(CopyFilesToexFAT(dlg, bootFilesPath, UTF8ToCString(eosliveDriveLetter)), "Error on CopyFilesToexFAT");
-
-	IFFALSE_PRINTERROR(CreatePersistentStorageFileOnexFAT(UTF8ToCString(eosliveDriveLetter)), "Error setting up liveUSB Persistent Storage space");
+    
+    CHECK_IF_CANCELLED;
+	
+    IFFALSE_PRINTERROR(CreatePersistentStorageFileOnexFAT(UTF8ToCString(eosliveDriveLetter)), "Error setting up liveUSB Persistent Storage space");
 
 	/* We mounted this ourselves, probably a second time, try to remove our mount. */
 	IFFALSE_PRINTERROR(AltUnmountVolume(eosliveDriveLetter, FALSE), "Failed to unmount live partition");
@@ -5003,24 +5015,60 @@ bool CEndlessUsbToolDlg::DeleteMountpointsForDrive(DWORD DriveIndex)
 	return true;
 }
 
+bool CEndlessUsbToolDlg::SetupComboDisk(HANDLE hPhysical)
+{
+    FUNCTION_ENTER;
 
-bool CEndlessUsbToolDlg::CreateUSBPartitionLayout(HANDLE hPhysical, DWORD &BytesPerSector)
+    CREATE_DISK CreateDisk = { PARTITION_STYLE_GPT, {{0}} };
+    DWORD BytesPerSector = SelectedDrive.SectorSize;
+    DWORD size;
+    bool result = false;
+    unsigned char* zeroes;
+
+    partitionStart[EXFAT_PART_NUMBER] = EXFAT_PART_STARTING_SECTOR * BytesPerSector;
+    partitionStart[ESP_PART_NUMBER] = ESP_PART_STARTING_SECTOR * BytesPerSector;
+    partitionStart[BIOS_BOOT_PART_NUMBER] = BIOS_BOOT_PART_STARTING_SECTOR * BytesPerSector;
+
+    // We've actually already called IOCTL_DISK_CREATE_DISK through rufus' InitializeDisk(), however that call
+    // doesn't set DiskId or MaxPartitionCount. There's a note somewhere in rufus that "If you don't call
+    // IOCTL_DISK_CREATE_DISK, the IOCTL_DISK_SET_DRIVE_LAYOUT_EX call will fail". It turns out that on windows 8.1
+    // and windows 7, in my testing, this is true. Windows 10 succeeds. The failure claims the disk is corrupt,
+    // GetLastError() code 1393. Perhaps this is because there is no GPT Disk Id set?
+    // In any event, if we do this again here, and fill in DiskId and MaxPartitionCount, as rufus does, we
+    // succeed under windows 7 and 8.1.
+    size = sizeof(CreateDisk);
+    IGNORE_RETVAL(CoCreateGuid(&DiskGUID));
+    CreateDisk.Gpt.DiskId = DiskGUID;
+    CreateDisk.Gpt.MaxPartitionCount = MAX_PARTITIONS;
+    IFFALSE_GOTOERROR(DeviceIoControl(hPhysical, IOCTL_DISK_CREATE_DISK, (BYTE*)&CreateDisk, size, NULL, 0, &size, NULL), "Unable to initialize GPT disk structures");
+
+    // Clear the first 24 sectors of both FAT based partitions. The theory is this will stop windows
+    // from trying to mount whatever brokenness might be in those sectors when we finish the
+    // repartitioning.  Why 24? That's enough to clear both the primary and backup boot blocks
+    // on an exFAT partition - and it's way more than enough for FAT12/16/32.
+    // We leave the BIOS boot partition alone because windows doesn't appear to care about it anyway.
+    // We try to keep going if this fails because it's not strictly necessary that it succeed.
+    zeroes = (unsigned char*)calloc(BytesPerSector, 24);
+    IFFALSE_PRINTERROR(BytesPerSector * 24 == write_sectors(hPhysical, BytesPerSector, EXFAT_PART_STARTING_SECTOR, 24, zeroes), "Unable to clear the start of eoslive.");
+    IFFALSE_PRINTERROR(BytesPerSector * 24 == write_sectors(hPhysical, BytesPerSector, ESP_PART_STARTING_SECTOR, 24, zeroes), "Unable to clear the start of the ESP.");
+    free(zeroes);
+    RefreshDriveLayout(hPhysical);
+    result = true;
+error:
+    return result;
+}
+
+bool CEndlessUsbToolDlg::CreateUSBPartitionLayout(HANDLE hPhysical, enum CreatePartitionMode mode)
 {
 	FUNCTION_ENTER;
 
-	CREATE_DISK CreateDisk = { PARTITION_STYLE_RAW, {{0}} };
-	BYTE layout[4096] = { 0 }, geometry[256] = { 0 };
+	BYTE layout[4096] = { 0 };
 	PDRIVE_LAYOUT_INFORMATION_EX DriveLayout = (PDRIVE_LAYOUT_INFORMATION_EX)(void*)layout;
-	PDISK_GEOMETRY_EX DiskGeometry = (PDISK_GEOMETRY_EX)(void*)geometry;
 	PARTITION_INFORMATION_EX *currentPartition;
 	DWORD result, size;
-	unsigned char *zeroes;
-	int64_t written;
-
-	// get disk geometry information
-	result = DeviceIoControl(hPhysical, IOCTL_DISK_GET_DRIVE_GEOMETRY_EX, NULL, 0, geometry, sizeof(geometry), &size, NULL);
-	IFFALSE_GOTOERROR(result != 0 && size > 0, "Error on querying disk geometry.");
-	BytesPerSector = DiskGeometry->Geometry.BytesPerSector;
+	DWORD BytesPerSector = SelectedDrive.SectorSize;
+	bool just_esp = mode == JUST_ESP;
+	int offset = just_esp ? 1 : 0;
 
 	// the EFI spec says the GPT will take the first and last two sectors of
 	// the disk, plus however much is allocated for partition entries. there
@@ -5033,17 +5081,14 @@ bool CEndlessUsbToolDlg::CreateUSBPartitionLayout(HANDLE hPhysical, DWORD &Bytes
 	bool returnValue = false;
 
 	DriveLayout->PartitionStyle = PARTITION_STYLE_GPT;
-	DriveLayout->PartitionCount = EXPECTED_NUMBER_OF_PARTITIONS;
-	IGNORE_RETVAL(CoCreateGuid(&DriveLayout->Gpt.DiskId));
-
-	partitionStart[0] = EXFAT_PART_STARTING_SECTOR * BytesPerSector;
-	partitionStart[1] = ESP_PART_STARTING_SECTOR * BytesPerSector;
-	partitionStart[2] = BIOS_BOOT_PART_STARTING_SECTOR * BytesPerSector;
+	DriveLayout->PartitionCount = just_esp ? 1 : EXPECTED_NUMBER_OF_PARTITIONS;
+	// DiskGUID is set up in SetupComboDisk
+	DriveLayout->Gpt.DiskId = DiskGUID;
 
 	LONGLONG partitionSize[EXPECTED_NUMBER_OF_PARTITIONS] = {
 		// there is a 2nd copy of the GPT at the end of the disk so we
 		// subtract the length here to avoid the operation failing
-		DiskGeometry->DiskSize.QuadPart - gptLength - partitionStart[0],
+		SelectedDrive.DiskSize - gptLength - partitionStart[EXFAT_PART_NUMBER],
 		ESP_PART_LENGTH_BYTES,
 		BIOS_BOOT_PART_LENGTH_BYTES
 	};
@@ -5058,41 +5103,23 @@ bool CEndlessUsbToolDlg::CreateUSBPartitionLayout(HANDLE hPhysical, DWORD &Bytes
 		L""
 	};
 
-	for (int partIndex = 0; partIndex < EXPECTED_NUMBER_OF_PARTITIONS; partIndex++) {
+	for (int partIndex = 0; partIndex < DriveLayout->PartitionCount; partIndex++) {
 		currentPartition = &(DriveLayout->PartitionEntry[partIndex]);
 		currentPartition->PartitionStyle = PARTITION_STYLE_GPT;
-		currentPartition->StartingOffset.QuadPart = partitionStart[partIndex];
-		currentPartition->PartitionLength.QuadPart = partitionSize[partIndex];
+		currentPartition->StartingOffset.QuadPart = partitionStart[partIndex + offset];
+		currentPartition->PartitionLength.QuadPart = partitionSize[partIndex + offset];
 		currentPartition->PartitionNumber = partIndex + 1; // partition numbers start from 1
 		currentPartition->RewritePartition = TRUE;
-		currentPartition->Gpt.PartitionType = partitionType[partIndex];
+		// Since windows doesn't like mounting ESPs, we make our life easier by making this as
+		// basic data when we need to mount it, then turn it into the ESP later.
+		if (just_esp)
+			currentPartition->Gpt.PartitionType = PARTITION_BASIC_DATA_GUID;
+		else
+			currentPartition->Gpt.PartitionType = partitionType[partIndex + offset];
+		// On the second pass this will create new GUIDs, but that's just fine
 		IGNORE_RETVAL(CoCreateGuid(&currentPartition->Gpt.PartitionId));
-		wcscpy(currentPartition->Gpt.Name, partitionName[partIndex]);
+		wcscpy(currentPartition->Gpt.Name, partitionName[partIndex + offset]);
 	}
-	// Clear the first 24 sectors of both FAT based partitions. The theory is this will stop windows
-	// from trying to mount whatever brokenness might be in those sectors when we finish the
-	// repartitioning.  Why 24? That's enough to clear both the primary and backup boot blocks
-	// on an exFAT partition - and it's way more than enough for FAT12/16/32.
-	// We leave the BIOS boot partition alone because we've already filled it in before calling
-	// this function.
-	// We try to keep going if this fails because it's not strictly necessary that it succeed.
-	zeroes = (unsigned char *) calloc(BytesPerSector, 24);
-	IFFALSE_PRINTERROR(BytesPerSector * 24 == write_sectors(hPhysical, BytesPerSector, partitionStart[0], 24, zeroes), "Unable to clear the start of eoslive.");
-	IFFALSE_PRINTERROR(BytesPerSector * 24 == write_sectors(hPhysical, BytesPerSector, partitionStart[1], 24, zeroes), "Unable to clear the start of the ESP.");
-	free(zeroes);
-
-	// We've actually already called IOCTL_DISK_CREATE_DISK through rufus' InitializeDisk(), however that call
-	// doesn't set DiskId or MaxPartitionCount. There's a note somewhere in rufus that "If you don't call
-	// IOCTL_DISK_CREATE_DISK, the IOCTL_DISK_SET_DRIVE_LAYOUT_EX call will fail". It turns out that on windows 8.1
-	// and windows 7, in my testing, this is true. Windows 10 succeeds. The failure claims the disk is corrupt,
-	// GetLastError() code 1393. Perhaps this is because there is no GPT Disk Id set?
-	// In any event, if we do this again here, and fill in DiskId and MaxPartitionCount, as rufus does, we
-	// succeed under windows 7 and 8.1.
-	size = sizeof(CreateDisk);
-	CreateDisk.PartitionStyle = PARTITION_STYLE_GPT;
-	IGNORE_RETVAL(CoCreateGuid(&CreateDisk.Gpt.DiskId));
-	CreateDisk.Gpt.MaxPartitionCount = MAX_PARTITIONS;
-	result = DeviceIoControl(hPhysical, IOCTL_DISK_CREATE_DISK, (BYTE*)&CreateDisk, size, NULL, 0, &size, NULL);
 
 	// push partition information to drive
 	size = sizeof(DRIVE_LAYOUT_INFORMATION_EX) + DriveLayout->PartitionCount * sizeof(PARTITION_INFORMATION_EX);
@@ -5193,6 +5220,9 @@ bool CEndlessUsbToolDlg::CreatePersistentStorageFileOnexFAT(const CString& drive
         return false;
     }
 
+    // We need to keep some space free for log files, in case the user runs the installer from this device
+    bytes -= 16 * MB;
+
     tmpfile = CreateFile(storage, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
     if (tmpfile == INVALID_HANDLE_VALUE)
         return false;
@@ -5206,7 +5236,7 @@ bool CEndlessUsbToolDlg::CreatePersistentStorageFileOnexFAT(const CString& drive
         uprintf("Failed to write marker to persistent storage file. gle=%d", GetLastError());
         return false;
     }
-    return ExtendImageFile(storage, free_bytes.QuadPart);
+    return ExtendImageFile(storage, bytes);
 }
 
 void CEndlessUsbToolDlg::ImageUnpackCallback(const uint64_t read_bytes)
@@ -5342,7 +5372,7 @@ error:
 	return retResult;
 }
 
-bool CEndlessUsbToolDlg::WriteBIOSBootPartitionToUSB(HANDLE hPhysical, const CString &bootFilesPath, DWORD bytesPerSector)
+bool CEndlessUsbToolDlg::WriteBIOSBootPartitionToUSB(HANDLE hPhysical, const CString &bootFilesPath)
 {
 	FUNCTION_ENTER;
 
@@ -5353,7 +5383,7 @@ bool CEndlessUsbToolDlg::WriteBIOSBootPartitionToUSB(HANDLE hPhysical, const CSt
 	DWORD coreImgBytesWritten = 0;
 	LARGE_INTEGER lMbrPartitionStart;
 
-	lMbrPartitionStart.QuadPart = bytesPerSector * BIOS_BOOT_PART_STARTING_SECTOR;
+	lMbrPartitionStart.QuadPart = SelectedDrive.SectorSize * BIOS_BOOT_PART_STARTING_SECTOR;
 
 	// Read core.img data and write it to USB drive
 	coreImgSize = ReadEntireFile(coreImgFilePath, coreImg, BIOS_BOOT_PART_LENGTH_BYTES);
