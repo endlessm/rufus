@@ -393,7 +393,7 @@ const wchar_t* mainWindowTitle = L"Endless Installer";
 
 #define REGKEY_DISPLAYNAME_TEXT	ENDLESS_OS_NAME
 #define REGKEY_HELP_LINK_TEXT	_T(COMMUNITY_URL)
-#define REGKEY_PUBLISHER_TEXT	L"Endless Mobile, Inc."
+#define REGKEY_PUBLISHER_TEXT	L"Endless OS Foundation LLC"
 #pragma endregion Uninstall_registry_stuff
 
 static LPCTSTR OperationToStr(int op)

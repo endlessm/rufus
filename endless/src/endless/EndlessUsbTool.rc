@@ -186,11 +186,11 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "CompanyName", "Endless Mobile"
+            VALUE "CompanyName", "Endless OS Foundation LLC"
             VALUE "FileDescription", "Endless Installer"
             VALUE "FileVersion", RELEASE_VER_STR "\0"
             VALUE "InternalName", "endless-installer.exe"
-            VALUE "LegalCopyright", "Endless Mobile, Inc."
+            VALUE "LegalCopyright", "Endless OS Foundation LLC"
             VALUE "OriginalFilename", "endless-installer.exe"
             VALUE "ProductName", "Endless Installer"
             VALUE "ProductVersion", RELEASE_VER_STR "\0"
